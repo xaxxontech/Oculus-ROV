@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 	 creationComplete="init()" width="320" height="240">
+	
+	<mx:Script>
+	<![CDATA[
+	import mx.controls.Alert;
+	import flash.net.NetStream;
+	
+	private var nc:NetConnection;	
+	private var ns1:NetStream;
+	//private var ns2:NetStream;
+	private var video:Video;
+	private var sound:Video;
+	private var connected:Boolean = false;
+	
+	private function init():void	{
+		//connect();
+		ExternalInterface.addCallback("flashplay", play); // called from Javascript
+		ExternalInterface.addCallback("flashCallServer", callServer); //called from Javascript
+		ExternalInterface.addCallback("connect", connect);
+		ExternalInterface.call("flashloaded");
+	}	
+	
+	private function connect(passcode:String):void {		
+		//Alert.show(user + " " + pass);
+		nc = new NetConnection();
+		var urlarray:Array = ExternalInterface.call("window.location.href.toString").split("/");
+		var a:String = "rtmp://"+ExternalInterface.call("window.location.hostname.toString")+"/"+urlarray[3]; 
+  	nc.connect(a, passcode);
+  	//nc.connect("rtmp://darkcycles.com/eeedroidRed5");
+    nc.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+    nc.client = this;
+		nc.addEventListener("play",play);
+		nc.addEventListener("message",message);
+		nc.addEventListener("playerfunction",playerfunction);
+		nc.call("playersignin",null); // try putting this one down	
+	}
+
+	private function netStatusHandler(e:NetStatusEvent):void  {    
+		var code:String = e.info.code;    
+		if(code == "NetConnection.Connect.Success"){ 
+			connected = true;
+			//play(1);
+			ns1 = new NetStream(nc); // trying this out here, instead of below
+			video = new Video(); // this too
+		}
+		if(code == "NetConnection.Connect.Closed") {
+			message("connection closed","blue", "connection", "closed");
+		}
+	}
+	
+	public function play(nostreams:int):void {
+		if (connected) {
+		  if (ns1) { ns1.close(); }
+		  //if (ns2)  { ns2.close(); }
+		  if (video) { video.clear(); }
+			if (nostreams==0) {
+    	  message("playing 0 streams","blue", null, null);
+			}
+			else {
+		 	  // ns1 = new NetStream(nc);  
+		 	  // video = new Video(); 
+				video.attachNetStream(ns1);
+				video.width = 320;
+				video.height = 240;
+				videoDisplay.addChild(video);
+				ns1.play("mp4:stream1");
+				/*
+				if (nostreams==2) { 
+					ns2 = new NetStream(nc);
+					sound = new Video();
+					sound.attachNetStream(ns2);
+					soundDisplay.addChild(sound);
+					ns2.play("stream2");
+				}
+				*/
+				// message("playing "+String(nostreams)+" streams","blue", null, null);
+				message("playing stream","blue", null, null);
+			}
+		}
+	}
+	
+	private function callServer(fn:String, str:String):void {
+		if (connected) {
+			nc.call("playerCallServer", null, fn, str); 
+		}
+		//Alert.show("playerCallServer "+fn+" "+str);
+	}
+	
+	public function message(str:String, colour:String, status:String, value:String):void {
+		ExternalInterface.call("message",str,colour,status,value);
+	}
+	
+	public function playerfunction(fn:String, params:String):void {
+		ExternalInterface.call(fn,params);
+	}
+	
+	]]>
+	</mx:Script>	
+<mx:VideoDisplay id="videoDisplay" x="0" y="0" autoPlay="true" width="320" height="240"  live="true" />
+	
+</mx:Application>
+
+
+
+
+-----------------BASIC NO AUTH-----------------
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 	 creationComplete="init()" width="320" height="240">
+	
+	<mx:Script>
+	<![CDATA[
+	import mx.controls.Alert;
+	import flash.net.NetStream;
+	
+	private var nc:NetConnection;	
+	private var ns1:NetStream;
+	//private var ns2:NetStream;
+	private var video:Video;
+	private var sound:Video;
+	private var connected:Boolean = false;
+	
+	private function init():void	{
+		connect();
+	}	
+	
+	private function connect():void {		
+		//Alert.show(user + " " + pass);
+		nc = new NetConnection();
+  	nc.connect("rtmp://darkcycles.com/eeedroidRed5");
+    nc.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+	}
+
+	private function netStatusHandler(e:NetStatusEvent):void  {    
+		var code:String = e.info.code;    
+		if(code == "NetConnection.Connect.Success"){ 
+			connected = true;
+
+			ns1 = new NetStream(nc); // trying this out here, instead of below
+			video = new Video(); // this too
+			play(1);
+		}
+		if(code == "NetConnection.Connect.Closed") {
+			//message("connection closed","blue", "connection", "closed");
+		}
+	}
+	
+	public function play(nostreams:int):void {
+		if (connected) {
+		  if (ns1) { ns1.close(); }
+		  //if (ns2)  { ns2.close(); }
+		  if (video) { video.clear(); }
+			if (nostreams==0) {
+    	  //message("playing 0 streams","blue", null, null);
+			}
+			else {
+		 	  // ns1 = new NetStream(nc);  
+		 	  // video = new Video(); 
+				video.attachNetStream(ns1);
+				video.width = 320;
+				video.height = 240;
+				videoDisplay.addChild(video);
+				ns1.play("mp4:stream1");
+				/*
+				if (nostreams==2) { 
+					ns2 = new NetStream(nc);
+					sound = new Video();
+					sound.attachNetStream(ns2);
+					soundDisplay.addChild(sound);
+					ns2.play("stream2");
+				}
+				*/
+				// message("playing "+String(nostreams)+" streams","blue", null, null);
+				//message("playing stream","blue", null, null);
+			}
+		}
+	}
+
+	
+	]]>
+	</mx:Script>	
+<mx:VideoDisplay id="videoDisplay" x="0" y="0" autoPlay="true" width="320" height="240"  live="true" />
+	
+</mx:Application>
+
+

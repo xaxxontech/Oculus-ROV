@@ -1,0 +1,717 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--  9/30/2010 11:08pm -->
+<html>
+<head>
+<title>Oculus ROV</title>
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" Content="no-cache">
+<meta http-equiv="Expires" content="-1">
+<style type="text/css">
+html, body {height: 100%;}
+body { background-color: #262626; } /* background-image: url(images/bg_gradient.gif);  
+	background-repeat: repeat-y; background-position: center; } */
+body, p, ol, ul, td, tr {
+font-family: verdana, arial, helvetica, sans-serif;
+font-size:   13px;
+line-height: 18px; 
+color: #cccccc;
+padding: 0px; margin: 0px;}
+TABLE {   border: 0px; border-collapse: collapse; padding: 0px }
+TR { border: 0px; }
+TD  { border: 0px; }
+a { color: #4c56fe; background-color: transparent; text-decoration: none; }
+a:link { color: #4c56fe; background-color: transparent; text-decoration: none; }
+a:visited { color: #4c56fe; background-color: transparent; text-decoration: none; }
+a:hover { color: #ffffff; background-color: transparent; text-decoration: none; } /* #0711AF */
+.keycmds { color: #777777; font-size: 11px; }
+.status { font-size: 11px; line-height: 15px; text-transform: uppercase}
+.status_title { font-size: 13px; line-height: 18px;}
+.status_unknown { font-size: 11px; line-height: 15px; color: #666666; text-transform: lowercase;}
+.crosshair { border: 2px solid #61f383; 	filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
+.videocursor { border: 1px solid #45F239; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
+.docklineleft { border-left: 1px dotted yellow; filter:alpha(opacity=40); opacity: 0.40; -moz-opacity:0.40; }
+.docklinectr { border-left: 1px dotted yellow;
+	filter:alpha(opacity=60); opacity: 0.60; -moz-opacity:0.60; width: 1px }
+.docklineright { border-left: 1px dotted yellow; filter:alpha(opacity=40); opacity: 0.40; -moz-opacity:0.40; }
+.overlay { background-color: #000000; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; }
+.steering_button { width: 38px; height: 40px; }
+.blackbg { color: #4c56fe; background-color: transparent; text-decoration: none; }
+.blackbg:link { color: #4c56fe; background-color: transparent; text-decoration: none; }
+.blackbg:visited { color: #4c56fe; background-color: transparent; text-decoration: none; }
+.blackbg:hover { color: #ffffff; background-color: transparent; text-decoration: none; } /* #0711AF */
+.boxcolor { background-color: #1b1b1b; }
+.boxbg { color: #4c56fe; background-color: transparent; text-decoration: none; }
+.boxbg:link { color: #4c56fe; background-color: transparent; text-decoration: none; }
+.boxbg:visited { color: #4c56fe; background-color: transparent; text-decoration: none; }
+.boxbg:hover { color: #ffffff; background-color: transparent; text-decoration: none; } /* #0711AF */
+.inputbox { background-color: #262626; color: #ffffff; border: 1px solid #666666;}
+.cancelbox { border: 1px solid #4c56fe; padding-left: 3px; padding-right: 3px }
+.messagebox {  font-size: 13px; line-height: 16px; }
+.menu { color: #999999; }
+.cambutton { color: #4c56fe; cursor: pointer; background-repeat: no-repeat; background-position: center}
+.facebox { border: 1px solid #4c56fe; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
+</style>
+<script src="javascript/client.js" type="text/javascript"></script>
+<script src="flash/AC_OETags.js" type="text/javascript"></script>
+<script type="text/javascript">
+<!--
+// -----------------------------------------------------------------------------
+// Globals
+// Major version of Flash required
+var requiredMajorVersion = 10;
+// Minor version of Flash required
+var requiredMinorVersion = 0;
+// Minor version of Flash required
+var requiredRevision = 0;
+// -----------------------------------------------------------------------------
+// -->
+</script>
+</head>
+<body id="thebody" onkeydown= "keyBoardPressed(event);" onload="loaded();" 
+onunload="playerexit();" onresize="resized();">
+<div style="height: 100%; background-image: url(images/oculus.gif); background-repeat: no-repeat;
+background-position: right bottom"><!-- visible page div -->
+<table align="center" ><tr><td style="padding-left: 5px;">
+<table><tr><td style="height: 7px"></td></tr></table>
+<table><tr valign="bottom"><td style="text-align: right">
+<div id="video" style="position: relative; z-index: -1">
+<script language="JavaScript" type="text/javascript">
+
+// Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
+var hasProductInstall = DetectFlashVer(6, 0, 65);
+
+// Version check based upon the values defined in globals
+var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
+
+if ( hasProductInstall && !hasRequestedVersion ) {
+	// DO NOT MODIFY THE FOLLOWING FOUR LINES
+	// Location visited after installation is complete if installation is required
+	var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
+	var MMredirectURL = window.location;
+    document.title = document.title.slice(0, 47) + " - Flash Player Installation";
+    var MMdoctitle = document.title;
+
+	AC_FL_RunContent(
+		"src", "playerProductInstall",
+		"FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
+		"width", "640",
+		"height", "480",
+		"align", "left",
+		"wmode","transparent",
+		"id", "eeedroid_player",
+		"quality", "high",
+		"bgcolor", "#869ca7",
+		"name", "eeedroid_player",
+		"allowScriptAccess","sameDomain",
+		"type", "application/x-shockwave-flash",
+		"pluginspage", "http://www.adobe.com/go/getflashplayer"
+	);
+} else if (hasRequestedVersion) {
+	// if we've detected an acceptable version
+	// embed the Flash Content SWF when all tests are passed
+	AC_FL_RunContent(
+			"src", "flash/eeedroid_player",
+			"width", "640",
+			"height", "480",
+			"wmode","transparent",
+			"id", "eeedroid_player",
+			"quality", "high",
+			"bgcolor", "#869ca7",
+			"name", "eeedroid_player",
+			"allowScriptAccess","sameDomain",
+			"type", "application/x-shockwave-flash",
+			"pluginspage", "http://www.adobe.com/go/getflashplayer"
+	);
+  } else {  // flash is too old or we can't detect the plugin
+    var alternateContent = 'Alternate HTML content should be placed here. '
+  	+ 'This content requires the Adobe Flash Player. '
+   	+ '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+    document.write(alternateContent);  // insert non-flash content
+  }
+// -->
+</script>
+<noscript>
+  	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+			id="eeedroid_player" width="100%" height="100%" 
+			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+			<param name="movie" value="flash/eeedroid_player.swf" >
+			<param name="quality" value="high" >
+			<param name="bgcolor" value="#869ca7" >
+			<param name="allowScriptAccess" value="sameDomain" >
+			<param name="wmode" value="transparent" >
+			<embed src="flash/eeedroid_player.swf" quality="high" bgcolor="#869ca7"
+				width="100%" height="100%" name="eeedroid_player" align="middle"
+				play="true"
+				loop="false"
+				quality="high"
+				wmode="transparent"
+				allowScriptAccess="sameDomain"
+				type="application/x-shockwave-flash"
+				pluginspage="http://www.adobe.com/go/getflashplayer">
+			</embed>
+	</object>
+</noscript>
+</div>
+</td>
+
+<td style="padding-left: 0px">
+<div style="line-height: 15px; padding-left: 7px">
+<span class="status_title" id="connection_title">connection:
+<span class="status" id="connection_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="motion_title">motion:
+<span class="status" id="motion_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="stream_title">stream:
+<span class="status" id="stream_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="speed_title">speed:
+<span class="status" id="speed_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="cameratilt_title">camera tilt:
+<span class="status" id="cameratilt_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="battery_title">battery:
+<span class="status" id="battery_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="dock_title">dock:
+<span class="status" id="dock_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="keyboard_title">keyboard input:
+<span class="status" id="keyboard_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">enabled</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="lag_title">ping:
+<span class="status" id="lag_status" style="color: #45F239; background-color: #262626;
+text-transform: none;">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="user_title">user:
+<span class="status" id="user_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+<table><tr><td style="height: 20px"></td></tr></table>
+</div>
+<div style="padding-left: 7px">
+<a id="admincommands" href="javascript: advancedmenu();" >
+MENU <img src="images/wrench.gif" border=0 style="vertical-align: middle;"></a><br>
+</div>
+<table><tr><td style="height: 20px"></td></tr></table>
+
+<div style="padding-left: 3px; width: 195px">
+<table class="boxcolor" style="background-image: url('images/steering_icons.gif'); background-repeat: no-repeat;
+background-position: top; width: 190px; height: 200px; background-color: #262626">
+
+<tr>
+<td class="steering_button" id="camera up" onmouseover="steeringmouseover(this.id, 'R')" 
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button" > </td>
+<td class="steering_button" id="camera horizontal" onmouseover="steeringmouseover(this.id, 'F')" 
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button" > </td>
+<td class="steering_button" id="camera down" onmouseover="steeringmouseover(this.id, 'V')" 
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+</tr><tr>
+<td class="steering_button"> </td>
+<td class="steering_button"> </td>
+<td class="steering_button" id="forward" onmouseover="steeringmouseover(this.id, 'UP&uarr; arrow or W'); "
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);">  </td>
+<td class="steering_button" id="nudge forward" onmouseover="steeringmouseover(this.id)" 
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button"> </td>
+</tr><tr>
+<td class="steering_button" id="nudge left" onmouseover="steeringmouseover(this.id, 'A')"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button" id="rotate left" onmouseover="steeringmouseover(this.id,'LEFT&larr; arrow or Q')"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button" id="stop" onmouseover="steeringmouseover(this.id,'SPACE bar or S')"  
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button" id="rotate right" onmouseover="steeringmouseover(this.id, 'RIGHT&rarr; arrow or E')"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button" id="nudge right" onmouseover="steeringmouseover(this.id,'D')"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+</tr><tr>
+<td class="steering_button" id="slide left" onmouseover="steeringmouseover(this.id)"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button"> </td>
+<td class="steering_button" id="backward" onmouseover="steeringmouseover(this.id,'DOWN&darr; arrow or X')"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button" id="nudge backward" onmouseover="steeringmouseover(this.id)"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button" id="slide right" onmouseover="steeringmouseover(this.id)"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+</tr><tr>
+<td class="steering_button" id="speed slow" onmouseover="steeringmouseover(this.id,'1')"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button"> </td>
+<td class="steering_button" id="speed medium" onmouseover="steeringmouseover(this.id,'2')"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+<td class="steering_button"> </td>
+<td class="steering_button" id="speed fast" onmouseover="steeringmouseover(this.id,'3')"
+onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);" 
+onmouseup="steeringmouseup(this.id);"> </td>
+</tr>
+<tr><td colspan="5" style="text-align: center; height: 12px; line-height: 12px; 
+font-size: 11px; background-color: #262626;"
+id="steering_textbox"></td></tr>
+<tr><td colspan="5" class="keycmds" style="text-align: center; height: 18px;
+background-color: #262626;"
+id="steeringkeytextbox"></td></tr>
+</table>
+</div>
+
+</td></tr></table>
+
+<table><tr><td style="height: 7px"></td></tr></table>
+<table><tr valign="top">
+<td  style="padding-right: 10px">
+<div class="boxcolor" id="messageboxcontainer" style="height: 90px; width: 300px; 
+overflow: hidden; padding-left: 5px;"
+onmouseover = "this.style.overflow = 'auto';" 
+onmouseout="this.style.overflow = 'hidden';">
+<div id="messagebox" class="messagebox" style="width: 100%;"
+onmouseover = "document.getElementById('messageboxcontainer').style.overflow = 'auto';" 
+onmouseout="document.getElementById('messageboxcontainer').style.overflow = 'hidden';"> </div>
+<a class="boxbg" id="messagemorelink" href='javascript: hiddenmessageboxShow();' style="display: none">
+...show more</a>
+</div>
+</td>
+<td>
+<td style="padding-right: 8px; text-align: center">
+<div class="cambutton" onmouseover="camiconbutton('over','camandmic');"
+onmouseout="camiconbutton('out','camandmic');"
+onclick="camiconbutton('click','camandmic');"
+style="background-image: url(images/cammic.gif);"> &nbsp;
+</div>
+<div class="cambutton" onmouseover="camiconbutton('over','camonly');"
+onmouseout="camiconbutton('out','camonly');"
+onclick="camiconbutton('click','camonly');"
+style="background-image: url(images/cam_icon.gif);"> &nbsp;
+</div>
+<div class="cambutton" onmouseover="camiconbutton('over','miconly');"
+onmouseout="camiconbutton('out','miconly');"
+onclick="camiconbutton('click','miconly');"
+style="background-image: url(images/mic_icon.gif);"> &nbsp;
+</div>
+<div class="cambutton" onmouseover="camiconbutton('over','pubstop');"
+onmouseout="camiconbutton('out','pubstop');"
+onclick="camiconbutton('click','pubstop');"
+style="background-image: url(images/cammicoff.gif);"> &nbsp;
+</div>
+<div class="cambutton" onmouseover="camiconbutton('over','broadcast');"
+onmouseout="camiconbutton('out','broadcast');"
+onclick="camiconbutton('click','broadcast');"
+style="background-image: url(images/tvface.gif); width: 37px;"> &nbsp;
+</div>
+</td><td style="padding-right: 20px">
+<div class="cambutton" id="camandmic" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+cam/mic ON</div>
+<div class="cambutton" id="camonly" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+cam ON</div>
+<div class="cambutton" id="miconly" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+mic ON</div>
+<div class="cambutton" id="pubstop" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+cam/mic OFF</div>
+<div class="cambutton" id="broadcast" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+self cam on/off</div>
+</td>
+<td style="width: 250px;">
+<a href="javascript: autodock('start');"><img src="images/charge.gif" border=0" style="vertical-align: bottom"> auto-dock</a><br>
+<a href="javascript: dock('undock');"><img src="images/chargeoff.gif" border=0" style="vertical-align: bottom"> un-dock</a><br>
+<div id="manualdockstart">
+<a href="javascript: docklinetoggle('on');"><img src="images/dockline.gif" border=0" style="vertical-align: bottom"> manual dock</a><br>
+</div>
+<div id="manualdockgocancel" style="display: none; line-height: 20px;">
+<img src="images/dockline.gif" border=0" style="vertical-align: bottom"> 
+&nbsp; <a href="javascript: dock('dock');"><span class="cancelbox">&radic;</span> GO</a>
+&nbsp; <a href="javascript: docklinetoggle('off'); move('stop');"><span class="cancelbox">X</span> CANCEL</a>
+</div>
+<div>
+<div id="speakchatlinks"><img src="images/bubble.gif" border=0" style="vertical-align: bottom"> <a href="javascript: speakchat('show','chatbox');">text</a>
+<span style="font-size: 11px; color: #4c56fe">/</span>
+<a href="javascript: speakchat('show','speechbox');">speak</a></div>
+<div id="speechbox" style="display: none;">
+<span style="font-size: 11px">speak</span>
+<input id="speechbox_input" onblur="javascript: speakchat('hide','speechbox');" type="text"  
+onKeyPress="if (keypress(event)==13) { speech(); }" 
+class="inputbox" style="width: 150px; background-color: #000000;">
+<a class="cancelbox" href="">X</a>
+<a class="cancelbox" href="" onmousedown="speech();">&radic;</a>
+</div>
+<div id="chatbox" style="display: none;">
+<span style="font-size: 11px">text</span>
+<input id="chatbox_input" onblur="javascript: speakchat('hide','chatbox');" type="text"  
+onKeyPress="if (keypress(event)==13) { chat(); }" 
+class="inputbox" style="width: 150px; background-color: #000000;">
+<a class="cancelbox" href="">X</a>
+<a class="cancelbox" href="" onmousedown="chat();">&radic;</a>
+</div>
+</div>
+
+<a href="javascript: logout();"><img src="images/x.gif" border=0" style="vertical-align: bottom"> logout</a><br>
+</td>
+</tr></table>
+</td></tr></table>
+</div><!-- ** end of visible page div ** -->
+
+
+
+
+<div id="dockline" class="docklinectr" style="position: absolute; display: none; "></div>
+<div id="docklineleft" class="docklineleft" style="position: absolute; display: none; "></div>
+<div id="docklineright" class="docklineright" style="position: absolute; display: none; "></div>
+
+<div id="crosshair_top" class="crosshair" style="position: absolute; display: none; 
+border-top: none; border-left: none; border-bottom: none; height: 30px; width:1px"></div>
+<div id="crosshair_right" class="crosshair" style="position: absolute; display: none; 
+border-top: none; border-right: none; border-left: none; height: 1px; width:30px"></div>
+<div id="crosshair_bottom" class="crosshair"  style="position: absolute; display: none; 
+border-top: none; border-left: none; border-bottom: none; height: 30px; width:1px"></div>
+<div id="crosshair_left" class="crosshair" style="position: absolute; display: none; 
+border-top: none; border-right: none; border-left: none height: 1px; width:30px"></div>
+
+<div id="videocursor_top" class="videocursor" style="position: absolute; display: none; 
+border-top: none; border-left: none; border-bottom: none; width:1px"></div>
+<div id="videocursor_bottom" class="videocursor" style="position: absolute; display: none; 
+border-top: none; border-left: none; border-bottom: none; width:1px"></div>
+<div id="videocursor_left" class="videocursor" style="position: absolute; display: none; 
+border-top: none; border-right: none; border-left: none; height: 1px;"></div>
+<div id="videocursor_right" class="videocursor" style="position: absolute; display: none; 
+border-top: none; border-right: none; border-left: none; height: 1px;"></div>
+<canvas id="videocursor_ctr" width="50" height="50" style="display:none; position: absolute"></canvas> 
+<div id="videocursor_ctr_html4" class="videocursor" style="width: 48px; height: 48px; display: none;
+position: absolute"> </div>
+<div id="facebox" class="facebox" style="display: none; position: absolute;"> </div>
+
+<div id="videooverlay" style="position: absolute; background-color: #000000; z-index: 4;
+filter:alpha(opacity=0); opacity: 0.0; -moz-opacity:0.0; line-height: 0px"></div>
+
+<img id="videologo" src="images/eye.gif" width="640" height="480" 
+style="position: absolute; display: none; z-index: 4" alt="">
+
+<div id="docklinecalibrateoverlay" class="overlay" style="position: absolute; display: none;
+width: 200px; z-index: 5"> </div>
+<div id="docklinecalibratebox" style="position: absolute; display: none;
+width: 180px; z-index: 5;">
+Dockline Calibration:
+<table><tr><td style="height: 7px"></td></tr></table>
+place Oculus square and centered in charging dock, then click screen to align dockline
+with dock spire.
+<table><tr><td style="height: 7px"></td></tr></table>
+<a href="javascript: docklinecalibrate('save');"><span class="cancelbox">&radic;</span> save</a>
+&nbsp; &nbsp;
+<a href="javascript: docklinecalibrate('cancel');">
+<span class="cancelbox">X</span> CANCEL</a><br>
+</div>
+
+<div id="overlay" class="overlay" 
+style="position: fixed; display: none; z-index: 7; left: 0px; top: 0px; width: 100%; height: 100%"> </div>
+<!-- <div id="overlay" class="overlay" 
+style="position: absolute; display: none; z-index: 7; left: 0px; top: 0px; width: 100%;"> </div> --> 
+<div id="overlaycontents" 
+style="position: absolute; display: none; z-index: 8;left: 0px; top: 0px; width: 100%;">
+<table align="center" style="height: 100%"><tr valign="top">
+<td>
+<div id="overlaydefault" style="padding-top: 150px;">communicating with OCULUS...</div>
+<div id="login" style="display: none; line-height: 25px; padding-top: 150px;">
+Login:<br>
+<table><tr>
+<td>username: </td>
+<td><input id="user" type="text" size="10" onKeyPress="if (keypress(event)==13) { loginsend(); }"
+class="inputbox" onfocus="this.style.backgroundColor='#000000';" onblur="this.style.backgroundColor='#262626';"></td>
+<tr><td colspan="2" style="height: 3px"></td></tr>
+<tr>
+<td>password:</td>
+<td><input id="pass" type="password" name="password"size="10" onKeyPress="if (keypress(event)==13) { loginsend(); }"
+class="inputbox" onfocus="this.style.backgroundColor='#000000';" onblur="this.style.backgroundColor='#262626';"></td>
+</tr></table> 
+
+<input type="checkbox" id="user_remember" name="user_remember" value="remember" checked="checked"> remember me<br>
+<a class="blackbg" href="javascript: loginsend();">LOGIN</a>
+</div>
+<div id="someonealreadydrivingbox" style="display: none; padding-top: 150px">
+<span id="usernamealreadydrivingbox"></span>&nbsp;is at the controls of OCULUS<br>
+Choose action:<br>
+<a class="blackbg" href="javascript: beapassenger();">be a passenger</a><br>
+<a class="blackbg" href="javascript: assumecontrol();">assume control</a><br>
+<a class="blackbg" href="javascript: logout();">logout</a>
+</div>
+
+<div id="hiddenmessageboxcontainer" style="display: none; padding-top: 20px">
+<a class="blackbg" href= "javascript: overlay('off');">
+<span class="cancelbox">X</span> CLOSE</a>
+<div id="hiddenmessagebox" style="width: 500px; padding-top: 10px;"> </div>
+<br>
+</div>
+
+<div id="extrastuffcontainer" style="display: none; padding-top: 20px;">
+<a class="blackbg" href= "javascript: overlay('off');">
+<span class="cancelbox">X</span> CLOSE</a>
+<div id="extrastuffbox" style="padding-top: 10px;"> </div>
+<br>
+</div>
+
+<div id="advancedmenubox" style="display: none; width: 650px; padding-top: 20px;">
+<a class="blackbg" href= "javascript: overlay('off');">
+<span class="cancelbox">X</span> CLOSE</a>
+<table><tr><td style="height: 10px"></td></tr></table>
+<table ><tr valign="top"><td style="padding-left: 10px;">
+<div class="menu" id = "regular_menu">
+video quality:<br>
+<div class="menu" id="regular_vidmenu" style="padding-left: 10px"></div>
+<table><tr><td style="height: 7px"></td></tr></table>
+additional commands:<br>
+<div class="menu" style="padding-left: 10px">
+<a class="blackbg" href="javascript: battStats();">battery status refresh</a><br>
+<a class="blackbg" href="javascript: clicksteer('');">click steer on/off</a><br>
+<a class="blackbg" href="javascript: hiddenmessageboxShow();">command log full</a><br>
+<a class="blackbg" href="javascript: motionenabletoggle();">motion enable/disable</a><br>
+monitor <a class="blackbg" href ="javascript: monitor('on');">on</a> /
+<a class="blackbg" href ="javascript: javascript: monitor('off');">off</a><br>
+<a class="blackbg" href="javascript: account('change_password');">change password</a><br>
+<a class="blackbg" href="javascript: logout();">logout</a><br/>
+</div>
+</div> <!--  end regular menu -->
+<div class="menu" id="admin_menu" style="display: none;">
+video quality:<br>
+<div class="menu" id="admin_vidmenu" style="padding-left: 10px"></div>
+<table><tr><td style="height: 7px"></td></tr></table>
+additional commands:<br>
+<div class="menu" style="padding-left: 10px">
+<a class="blackbg" href="javascript: battStats();">battery status refresh</a><br>
+<a class="blackbg" href="javascript: clicksteer('');">click steer on/off</a><br>
+<a class="blackbg" href="javascript: hiddenmessageboxShow();">command log full</a><br>
+<a class="blackbg" href="javascript: serverlog();">server log</a><br>
+<a class="blackbg" href="javascript: motionenabletoggle();">motion enable/disable</a><br>
+monitor <a class="blackbg" href ="javascript: monitor('on');">on</a> /
+<a class="blackbg" href ="javascript: javascript: monitor('off');">off</a><br>
+<a class="blackbg" href="javascript: disconnectOtherConnections();">eliminate any passengers</a><br>
+<a class="blackbg" href="javascript: facegrab();">face find mode on/off</a><br>
+<a class="blackbg" href="javascript: callServer('framegrab',''); overlay('off');">frame grab</a><br>
+</div>
+<table><tr><td style="height: 7px"></td></tr></table>
+settings:<br>
+<div class="menu" style="padding-left: 10px">
+<a class="blackbg" href="javascript: drivingsettings('on');">driving settings</a><br>
+<a class="blackbg" href="javascript: tiltcontrols('on');">camera tilt settings</a><br>
+<a class="blackbg" href="javascript: docklinecalibrate('start');">calibrate dock line</a><br>
+<a class="blackbg" href="javascript: autodock('calibrate');">calibrate auto-dock</a><br>
+</div>
+<table><tr><td style="height: 7px"></td></tr></table>
+system commands:<br>
+<div class="menu" style="padding-left: 10px">
+<a class="blackbg" href="javascript: systemcall('shutdown -s -f -t 01','y');">shutdown</a><br>
+<a class="blackbg" href="javascript: systemcall('shutdown -r -f -t 01','y')">reboot</a><br>
+<a class="blackbg" href="javascript: relaunchgrabber();">relaunch cam/mic grabber</a><br>
+<!-- 
+<a class="blackbg" href="javascript: systemcall('','');">execute:</a>
+<input id="usersyscommand" class="inputbox" type="text" size="10" 
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"
+onKeyPress="if (keypress(event)==13) { systemcall('',''); }"><br/>  -->
+</div>
+<table><tr><td style="height: 7px"></td></tr></table>
+account settings:<br>
+<div class="menu" style="padding-left: 10px">
+<a class="blackbg" href="javascript: account('change_username');">change username</a><br>
+<a class="blackbg" href="javascript: account('change_password');">change password</a><br>
+<a class="blackbg" href="javascript: account('add_user');">add extra user</a><br>
+<a class="blackbg" href="javascript: account('change_extra_pass');">change extra user password</a><br>
+<a class="blackbg" href="javascript: account('delete_user');">delete extra user</a><br>
+<a class="blackbg" href="javascript: logout();">logout</a><br/>
+</div>
+</div> <!-- end of admin menu -->
+
+</td><td style="padding-left: 10px">
+<div class="menu" id="extendedsettingsbox" style="display: none; line-height: 22px"></div>
+
+<div id="drivingsettings" style="display: none;">
+driving settings:<br>
+speed offsets: slow <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="slowoffset" type="text" size="4" >
+med <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="medoffset" type="text" size="4" ><br>
+turn speed <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="turnspeed" type="text" size="4" >
+&nbsp; nudge delay ms <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="nudgedelay" type="text" size="4" ><br>
+max clicksteer ms <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="maxclicknudgedelay" type="text" size="4" ><br>
+<!-- 
+bear turn speed <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="bearturnspeed" type="text" size="4" ><br>
+-->
+<a class="blackbg" href="javascript: drivingsettingssend();">
+<span class="cancelbox">&radic;</span> send values</a> &nbsp;
+<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
+<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a>
+</div>
+
+<div id="tiltcontrols" style="display: none;">
+camera tilt settings:<br>
+horiz position <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="camhoriz" type="text" size="4" >
+max angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="cammax" type="text" size="4" ><br>
+min angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="cammin" type="text" size="4" >
+speed delay <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="camdelay" type="text" size="4" ><br>
+max clicksteer angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="maxclickcam" type="text" size="4" >
+<br>Test at position: <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="tilttestposition" type="text" size="4" >
+<a class="blackbg" href="javascript: tilttest();">go</a>
+<br><a class="blackbg" href="javascript: tiltsettingssend();">
+<span class="cancelbox">&radic;</span> send values</a> &nbsp;
+<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
+<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a>
+</div>
+
+<div id="customstreamsettings" style="display: none; ">
+width <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="vwidth" type="text" size="4" >
+height <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="vheight" type="text" size="4" ><br>
+fps <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="vfps" type="text" size="4" >
+quality <span style="font-size: 11px; color: #777777">(1-100)</span> 
+<input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="vquality" type="text" size="4" >
+<div><a class="blackbg" href="javascript: streamset('customupdate');">
+<span class="cancelbox">&radic;</span> send values</a> &nbsp;
+<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
+<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a></div>
+</div>
+
+<div id="changepassword" style="display: none;">
+username: <span id="user_name" style="color: #45F239; text-transform: uppercase;"></span><br>
+new password: <input id="userpass" class="inputbox" type="password" name="password"size="10" 
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"><br>
+re-enter new password: <input id="userpass_again" class="inputbox" type="password" name="password" size="10"
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"><br>
+<a class="blackbg" href="javascript: account('password_update');">
+<span class="cancelbox">&radic;</span> update</a> &nbsp;
+<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
+<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a>
+</div>
+
+<div id="adduser" style="display: none;">
+add new user<br/>
+username: <input id="newusername" class="inputbox" type="text" size="10" 
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"><br>
+new password: <input id="newuserpass" class="inputbox" type="password" name="password"size="10" 
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"><br>
+re-enter new password: <input id="newuserpass_again" class="inputbox" type="password" name="password" size="10"
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"><br>
+<a class="blackbg" href="javascript: account('newuser_add');">
+<span class="cancelbox">&radic;</span> update</a> &nbsp;
+<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
+<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a>
+</div>
+
+<div id="deleteuser" style="display: none;">
+delete user:<br>
+<div id="deluserlist"></div>
+<br>
+<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
+<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a>
+</div>
+
+<div id="changeextrapassword" style="display: none;">
+select user to change password:<br>
+<div id="changepassuserlist"></div>
+<br>
+<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
+<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a>
+</div>
+
+<div id="changeusername" style="display: none;">
+username: <span id="user_name2" style="color: #45F239; text-transform: uppercase;"></span><br/>
+new name: <input id="usernamechanged" class="inputbox" type="text" size="10" 
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"><br/>
+current password: <input id="usernamechangedpass" class="inputbox" type="password" name="password" size="10" 
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"><br/>
+<a class="blackbg" href="javascript: account('username_update');">
+<span class="cancelbox">&radic;</span> update</a> &nbsp;
+<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
+<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a>
+</div>
+
+<div id="videosettingsmenu" style="display: none;">
+<span id="low_bull" style="visibility: hidden; color: #ffffff"> &bull; </span>
+<a class="blackbg" href="javascript: streamset('low');">low</a>
+<span id="low_specs" style="font-size: 11px; color: #666666;"></span><br/>
+
+<span id="med_bull" style="visibility: hidden; color: #ffffff"> &bull; </span>
+<a class="blackbg" href="javascript: streamset('med');">medium</a>
+<span id="med_specs" style="font-size: 11px; color: #666666;"></span><br/>
+
+<span id="high_bull" style="visibility: hidden; color: #ffffff"> &bull; </span>
+<a class="blackbg" href="javascript: streamset('high');">high</a>
+<span id="high_specs" style="font-size: 11px; color: #666666;"></span><br/>
+
+<span id="full_bull" style="visibility: hidden; color: #ffffff"> &bull; </span>
+<a class="blackbg" href="javascript: streamset('full');">full</a>
+<span id="full_specs" style="font-size: 11px; color: #666666;"></span><br/>
+
+<span id="custom_bull" style="visibility: hidden; color: #ffffff"> &bull; </span>
+<a class="blackbg" href="javascript: streamset('custom');">custom</a>
+<span id="custom_specs" style="font-size: 11px; color: #666666;"></span>&nbsp;<a 
+class="blackbg" href="javascript: streamset('setcustom');">change</a>
+<br/>
+</div>
+
+</td>
+</tr></table>
+</div> <!--  end of admin commands box -->
+
+</td></tr></table>
+</div> <!--  end of overlaycontents -->
+
+</body>
+</html>

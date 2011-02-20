@@ -1,7 +1,7 @@
 arduinoattached no
 batterypresent no
-skipsetup yes
-comport 0
+skipsetup no
+comport nil
 leftzero 92
 rightzero 95
 speedslow 75

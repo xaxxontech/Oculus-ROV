@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration> 
-    <contextName>eeedroidRed5</contextName>
-    <jmxConfigurator contextName="eeedroidRed5" />    
+    <contextName>oculus</contextName>
+    <jmxConfigurator contextName="oculus" />    
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <File>log/eeedroidRed5.log</File>
+        <File>log/oculus.log</File>
         <Append>false</Append>
         <BufferedIO>false</BufferedIO>
         <ImmediateFlush>true</ImmediateFlush>

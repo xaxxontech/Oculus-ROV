@@ -4,7 +4,9 @@ import java.io.*;
 
 public class Settings {
 	
-	String filename = System.getenv("RED5_HOME")+"\\webapps\\oculus\\settings.txt";
+	// String filename = System.getenv("RED5_HOME")+"\\webapps\\oculus\\settings.txt";
+	String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
+	
 
 	public String readSetting(String str) {
 		// read through whole file line by line, extract result

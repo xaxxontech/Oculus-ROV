@@ -152,6 +152,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			grabber_launch();
 		}
 		else { initialize_launch(); }
+		log.info("initialize");
 	}
 	
 	public void initialize_launch() {

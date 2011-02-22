@@ -76,7 +76,7 @@ function getFlashMovie(movieName) {
 }
 
 function callServer(fn, str) {
-	getFlashMovie("eeedroid_grabber").flashCallServer(fn,str);
+	getFlashMovie("oculus_grabber").flashCallServer(fn,str);
 } 
 
 function saveandlaunch() {
@@ -139,7 +139,7 @@ function saveandlaunch() {
 
 function init() {
 	if (initialize) {
-		getFlashMovie("eeedroid_grabber").playlocal();
+		getFlashMovie("oculus_grabber").playlocal();
 		callServer("populatesettings","");
 	}
 	else { callServer("autodock","getdocktarget"); };

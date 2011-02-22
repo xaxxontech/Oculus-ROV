@@ -123,7 +123,7 @@ function callServer(fn, str) {
 			clearTimeout(pingcountdown);
 			countdowntostatuscheck();
 		}
-		getFlashMovie("eeedroid_player").flashCallServer(fn,str);
+		getFlashMovie("oculus_player").flashCallServer(fn,str);
 	}
 }
 
@@ -131,7 +131,7 @@ function play(str) { // called by javascript only?
 	streammode = str;
 	var num = 1;
 	if (streammode == "stop") { num =0 ; } 
-	getFlashMovie("eeedroid_player").flashplay(num);
+	getFlashMovie("oculus_player").flashplay(num);
 }
 
 function getFlashMovie(movieName) {
@@ -1039,7 +1039,7 @@ function eraseCookie(name) {
 function loginfromcookie() {
 	var str = ""; 
 	str = readCookie("auth");
-	getFlashMovie("eeedroid_player").connect(str);
+	getFlashMovie("oculus_player").connect(str);
 	logintimer = setTimeout("eraseCookie('auth'); window.location.reload()", logintimeout);
 }
 
@@ -1057,7 +1057,7 @@ function loginsend() {
 	var str3= document.getElementById("user_remember").checked;
 	if (str3 == true) { str3="remember"; }
 	else { eraseCookie("auth"); }
-	getFlashMovie("eeedroid_player").connect(str1+" "+str2+" "+str3+" ");
+	getFlashMovie("oculus_player").connect(str1+" "+str2+" "+str3+" ");
 	logintimer = setTimeout("window.location.reload()", logintimeout);
 }
 

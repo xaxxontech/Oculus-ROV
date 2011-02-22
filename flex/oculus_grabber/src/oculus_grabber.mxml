@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application 
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:media="flash.media.*"
+	 layout="absolute"
+	 creationComplete="init()" width="400" height="300" verticalAlign="middle">
+ 	<mx:VideoDisplay id="videoDisplay" autoPlay="true" width="400" height="300"/>
+	<mx:Script>
+	<![CDATA[
+
+	import mx.controls.Alert;
+	
+	import jp.maaash.ObjectDetection.ObjectDetector;
+	import jp.maaash.ObjectDetection.ObjectDetectorOptions;
+	import jp.maaash.ObjectDetection.ObjectDetectorEvent;
+	import mx.graphics.codec.PNGEncoder;
+	import oculus.OculusImage;
+
+	private var nc:NetConnection;	
+	private var ns1:NetStream;
+	private var camera:Camera = Camera.getCamera();
+	private var mic:Microphone = Microphone.getMicrophone();
+	private var connected:Boolean = false; 
+	private var ns2:NetStream;
+	private var video:Video = new Video();
+	
+	private var videoFramegrab:Video;
+	private var detector:ObjectDetector;
+	private var camattachtimer:Number;
+	private var ocls:OculusImage = new OculusImage();
+	
+	private function init():void
+	{
+    //Alert.show("ready!");
+    initDetector(); // needs to be above SPEEX or 1009 error ????? ... WTF ADOBE !!!! >:(  AARRGGHH!!!
+		connect();
+    if (!camera) {
+    	Alert.show("Camera not found");
+    }
+    ExternalInterface.call("flashloaded");
+    ExternalInterface.addCallback("flashCallServer", callServer); // called from Javascript
+    ExternalInterface.addCallback("playlocal",playlocal); // called from Javascript
+    if (mic) { 
+    	mic.codec = SoundCodec.SPEEX;
+		}
+    else { Alert.show("Microphone not found"); }
+
+	}	
+		
+	private function connect():void
+	{		
+		nc = new NetConnection();
+		var urlarray:Array = ExternalInterface.call("window.location.href.toString").split("/");
+		var address:String = "rtmp://"+ExternalInterface.call("window.location.hostname.toString")+"/"+urlarray[3];
+  	nc.connect(address,"");
+  	//Alert.show(address);
+    nc.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+    nc.client = this;
+    nc.addEventListener("publish",publish);
+    nc.addEventListener("play",play);
+    nc.addEventListener("message",message);
+    nc.addEventListener("framegrab",framegrab);
+    nc.addEventListener("facegrab",facegrab);
+    nc.addEventListener("dockgrab",dockgrab);
+    nc.call("grabbersignin",null);
+		// ns1 = new NetStream(nc); // doesn't work here... too soon or something?
+	}
+
+	private function netStatusHandler(e:NetStatusEvent):void  {    
+		var code:String = e.info.code;    
+		if(code == "NetConnection.Connect.Success") {  
+	    connected = true;
+	    video = new Video(); 
+	    ns2 = new NetStream(nc);
+	 	}    
+		if(code == "NetConnection.Connect.Closed") {
+			message("shutdown","");
+		}
+	} 
+
+	public function publish(mode:String,width:int, height:int, fps:int, quality:int):void 
+	{
+		if (connected) {
+			try
+			{
+    	  if (ns1) { 
+    	  	ns1.attachCamera(null); // newly added, not sure if helps
+    	  	ns1.attachAudio(null); // newly added, not sure if helps
+    	  	ns1.close(); 
+    	  	videoFramegrab.attachCamera(null);
+    	  	videoFramegrab.clear();
+    	  }
+      	if (mode != "stop") {
+  	    	camera.setMode(width,height,fps);
+    			camera.setQuality(0,quality);
+ 					ns1 = new NetStream(nc);  
+		    	//var n:int = 1;
+			    if (mode == "camonly" || mode == "camandmic") { ns1.attachCamera(camera); }
+					if (mode == "miconly" || mode == "camandmic") { ns1.attachAudio(mic); }
+					ns1.publish("mp4:stream1", 'live');	    	
+					//playdelaytimer = setInterval(play,2000,n);
+					videoFramegrab = new Video(width, height);
+					camattachtimer = setInterval(camAttach,200);
+					// videoFramegrab.attachCamera(camera);
+				}
+				callServer("streammode",mode);
+			} 
+			catch(err:Error)
+			{ 
+				Alert.show( err.toString() ); 
+			}
+		}
+	}
+	
+	private function camAttach():void {
+		clearInterval(camattachtimer);
+		videoFramegrab.attachCamera(camera);
+	}
+	
+
+	public function play(nostreams:int):void {
+		if (connected) {
+		  if (ns2)  { ns2.close(); }
+		  if (video) { video.clear(); }
+			if (nostreams==0) {
+    	  message("player stream stopped",null);
+			}
+			else {
+				video.attachNetStream(ns2);
+				video.width = 400;
+				video.height = 300;
+				videoDisplay.addChild(video);
+				ns2.play("mp4:stream2");
+				message("playing player stream",null);
+			}
+		}
+	}
+	
+	public function playlocal():void { // called via init.html only 
+		camera.setMode(320,240,15);
+		camera.setQuality(0,95);
+		ns1 = new NetStream(nc);  
+		ns1.attachCamera(camera);
+		ns1.publish("mp4:stream1", 'live');	    	
+		
+		video.attachNetStream(ns2);
+		video.width = 400;
+		video.height = 300;
+		videoDisplay.addChild(video);
+		ns2.play("mp4:stream1");
+		message("showing streaming video",null);
+	}
+	
+	private function callServer(fn:String, str:String):void {
+		nc.call("grabberCallServer", null, fn, str);
+	}
+	
+	public function message(str:String, value:String):void {
+		if (str == "docksettings") {
+			str = ""; 
+			ocls.dockSettings(value); 
+		}
+		else {
+			ExternalInterface.call("message",str,value); 
+		}
+	}
+	
+	public function dockgrab(x:int,y:int,mode:String):void {
+		//get cam image 
+		var snapshot:BitmapData = new BitmapData( videoFramegrab.width, videoFramegrab.height, false );
+		var rect:Rectangle = new Rectangle(0,0,videoFramegrab.width, videoFramegrab.height);
+		var results:Array;
+		var filter:BlurFilter = new BlurFilter(2,2);
+		var pt:Point = new Point(0, 0);
+		snapshot.draw(videoFramegrab);
+		snapshot.applyFilter(snapshot, rect, pt, filter);
+		if (mode=="calibrate") { // calibrate
+			ocls = new OculusImage();
+			results = ocls.findBlobStart(x,y,videoFramegrab.width, videoFramegrab.height, snapshot.getPixels(rect));
+			callServer("dockgrabbed","calibrate "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5)+" "+
+				+results[5].toPrecision(5)+" "+results[6].toPrecision(5)+" "+results[7].toPrecision(5)+" "+results[8].toPrecision(5));
+				// x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
+		}
+		if (mode=="findfromxy") {
+			results = ocls.getThreshholdxy(x,y,videoFramegrab.width, videoFramegrab.height, snapshot.getPixels(rect));
+			callServer("dockgrabbed","findfromxy "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5));
+			 //x,y,width,height,slope
+		}
+		if (mode=="find") { // calibrate 
+			results = ocls.findBlobs(snapshot.getPixels(rect),videoFramegrab.width, videoFramegrab.height);
+			callServer("dockgrabbed","find "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5)); //x,y,width,height,slope
+		}
+	}
+	
+	public function framegrab():void {
+		try {
+			var snapshot:BitmapData = new BitmapData(videoFramegrab.width, videoFramegrab.height, false);
+			snapshot.draw(videoFramegrab);
+			var pngEncoder:PNGEncoder = new PNGEncoder();
+			var pngBytes:ByteArray = pngEncoder.encode(snapshot);
+			nc.call("frameGrabbed", null, pngBytes);
+		} catch (err:Error) { Alert.show( err.toString() ); }
+	}
+	
+	public function facegrab():void {
+		 var bmp:BitmapData = new BitmapData(videoFramegrab.width, videoFramegrab.height, false);
+		bmp.draw(videoFramegrab);
+		try {
+			detector.detect( bmp );
+			bmp.dispose();
+		} catch (err:Error) { Alert.show( err.toString() ); }
+	}
+	
+	private function initDetector():void { // face detector
+		detector = new ObjectDetector();
+		var options:ObjectDetectorOptions = new ObjectDetectorOptions();
+		options.min_size  = 30; // was 30
+		detector.options = options;
+		detector.addEventListener(ObjectDetectorEvent.DETECTION_COMPLETE, detectionHandler );
+	}
+		
+	private function detectionHandler( e :ObjectDetectorEvent ):void {
+		if( e.rects ){ // rectangle
+			var str:String = String(e.rects[0].left) +" "+ String(e.rects[0].top) +" "+ String(e.rects[0].width) +" "+ String(e.rects[0].height);
+			callServer("facerect",str); 
+		}
+	}
+
+	]]>
+	</mx:Script>
+</mx:Application>

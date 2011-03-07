@@ -9,7 +9,7 @@ package oculus
 		private var width:int;
 		private var height:int;
 		private var lastThreshhold:int = 0;
-		private var threshholdMult:Number = 0.65;
+		private var threshholdMult:Number;  //  = 0.65;
 		private var lastBlobRatio:Number;
 		private var lastTopRatio:Number;
 		private var lastBottomRatio:Number;
@@ -33,11 +33,15 @@ package oculus
 			var p:int;
 			parr = [];
 			var n:int = 0;
+			var runningttl:int = 0;			
 			for (var i:int=0; i < pixelRGB.length; i+=4) {
 				p = pixelRGB[i+1]*0.3 + pixelRGB[i+2]*0.59 + pixelRGB[i+3]*0.11 ;
 				parr[n]=p;
 				n++;
+				runningttl += p;
 			}
+			var imgaverage:int = runningttl/n;
+			threshholdMult = 0.65 - 0.2 + (0.40*( imgaverage/255));
 		}
 		
 		private function floodFill(ablob:Array, start:int):Array {  
@@ -74,7 +78,7 @@ package oculus
 			return r;
 		}
 		
-		public function findBlobStartSub(x:int, y:int, w:int, h:int, bar:ByteArray):Array { // calibrate only...
+		public function findBlobStartSub(x:int, y:int, w:int, h:int, bar:ByteArray):Array { 
 			width = w;
 			height = h;
 			convertToGrey(bar);
@@ -130,7 +134,8 @@ package oculus
 			convertToGrey(bar);
 			var start:int = x + y*width; 
 			var result:Array;
-			var threshhold:int = parr[start]*threshholdMult;
+			var startavg:int = (parr[start-1]+parr[start]+parr[start+1])/3; //includes 2 adjacent pixels in contract threshhold to counteract grainyness a bit
+			var threshhold:int = startavg*threshholdMult;
 			lastThreshhold = threshhold;
 			var i:int;
 			for (i=0;i<parr.length;i++){
@@ -159,7 +164,7 @@ package oculus
 			//var imgaverageOld:int = imgaverage;
 			convertToGrey(bar);
 			parrorig = parr.slice();
-			var threshhold:int = lastThreshhold;//*imgaverage/imgaverageOld; //could make this better by averaging the previous blob
+			var threshhold:int = lastThreshhold;
 			var i:int;
 			for (i=0; i<parr.length; i++){
 				if (parr[i]>threshhold) { 

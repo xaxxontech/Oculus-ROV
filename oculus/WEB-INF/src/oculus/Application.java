@@ -1518,7 +1518,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				autodockcompdir += x + (dockx - 160);
 				//System.out.println("comp: "+autodockcompdir);
 				if (Math.abs(autodockcompdir-160) > 10 || Math.abs(y-120) > 30) { // steer and go
-					comport.clickSteer((autodockcompdir-160)*rescomp+" "+(y-120)*rescomp); // was -dockx instead of -x
+					comport.clickSteer((autodockcompdir-160)*rescomp+" "+119*rescomp); // (y-120)*rescomp); 
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);  // was 1500 w/ dockgrab following
 						comport.speedset("fast");
@@ -1545,7 +1545,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			else { // !autodockingcamctr
 				autodockingcamctr = true;
 				if (Math.abs(x-dockx) > 10 || Math.abs(y-120) > 30) {
-					comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
+					comport.clickSteer((x-dockx)*rescomp+" "+119*rescomp); // (y-120)*rescomp);
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -1559,9 +1559,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		if (w*h >= s2) {
-			if ((Math.abs(x-dockx) > 5) && autodockctrattempts <= 12) { // ((Math.abs(x-dockx) > 5 || Math.abs(y-120) > 50) && autodockctrattempts <= 12) {
+			if ((Math.abs(x-dockx) > 5) && autodockctrattempts <= 15) {
 				autodockctrattempts ++;
-				comport.clickSteer((x-dockx)*rescomp+" "+119*rescomp); //(y-120)*rescomp);
+				comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 				new Thread(new Runnable() { public void run() { try {
 					Thread.sleep(1500);
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -1569,13 +1569,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else {
-				if (Math.abs(slopedeg-dockslopedeg) > 1.6 || autodockctrattempts >12) { // backup and try again
-					System.out.println("backup "+dockslopedeg+" "+slopedeg);
+				if (Math.abs(slopedeg-dockslopedeg) > 1.6 || autodockctrattempts >15) { // backup and try again
+					System.out.println("backup "+dockslopedeg+" "+slopedeg+" ctrattempts:"+autodockctrattempts);
 					autodockctrattempts = 0; 
 					int comp = 80;
 					if (slope < dockslope) { comp = -80; }
 					x += comp;
-					comport.clickSteer((x-dockx)*rescomp+" "+119*rescomp); // (y-120)*rescomp);
+					comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);
 						comport.speedset("fast");

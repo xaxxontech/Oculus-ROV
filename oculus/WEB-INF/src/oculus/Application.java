@@ -1492,7 +1492,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					comport.goForward();
 					Thread.sleep(1500);
 					comport.stopGoing();
-					Thread.sleep(250); // let deaccelerate
+					Thread.sleep(500); // let deaccelerate
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
@@ -1503,7 +1503,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					comport.goForward();
 					Thread.sleep(1500);
 					comport.stopGoing();
-					Thread.sleep(250); // let deaccelerate
+					Thread.sleep(500); // let deaccelerate
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
@@ -1527,7 +1527,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						comport.goForward();
 						Thread.sleep(450);
 						comport.stopGoing();
-						Thread.sleep(250); // let deaccelerate
+						Thread.sleep(500); // let deaccelerate
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
@@ -1538,7 +1538,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						comport.goForward();
 						Thread.sleep(500);
 						comport.stopGoing();
-						Thread.sleep(250); // let deaccelerate
+						Thread.sleep(500); // let deaccelerate
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
@@ -1584,6 +1584,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						comport.goBackward();
 						Thread.sleep(1500); 
 						comport.stopGoing();
+						Thread.sleep(500); // let deaccelerate
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 					} catch (Exception e) { e.printStackTrace(); } } }).start();

@@ -18,6 +18,7 @@ public class ArduinoCommDC {
 	protected int nudgedelay = Integer.parseInt(settings.readSetting("nudgedelay"));
 	protected int maxclicknudgedelay = Integer.parseInt(settings.readSetting("maxclicknudgedelay"));
 	protected int maxclickcam = Integer.parseInt(settings.readSetting("maxclickcam"));
+	protected double clicknudgemomentummult  = Double.parseDouble(settings.readSetting("clicknudgemomentummult"));
 	
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
@@ -377,7 +378,16 @@ public class ArduinoCommDC {
 	public void clickNudge(Integer x) {
 		if (x>0) { direction = "right"; }
 		else { direction = "left"; }
-		clicknudgedelay = maxclicknudgedelay*(Math.abs(x))/320;
+		clicknudgedelay = maxclicknudgedelay*(Math.abs(x))/320;  
+		/*
+		 * multiply clicknudgedelay by multiplier
+		 * multiplier increases to CONST(eg 2) as x approaches 0, 1 as approaches 320
+		 *  ((320-Math.abs(x))/320)*1+1 
+		 */
+		double mult = Math.pow(((320.0-(Math.abs(x)))/320.0),3)*clicknudgemomentummult+1.0;
+		//System.out.println("clicknudgedelay-before: "+clicknudgedelay);
+		clicknudgedelay = (int) (clicknudgedelay * mult);
+		//System.out.println("n: "+clicknudgemomentummult+" mult: "+mult+" clicknudgedelay-after: "+clicknudgedelay);
 		new Thread(new Runnable() {
 			public void run() {
 				try {

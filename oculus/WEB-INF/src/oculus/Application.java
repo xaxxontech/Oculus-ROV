@@ -509,7 +509,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void getDrivingSettings() {
 		if (admin) {
 			String str = comport.speedslow + " " + comport.speedmed + " " + comport.turnspeed + " "
-					+ comport.nudgedelay + " " + comport.maxclicknudgedelay; 
+					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " + comport.clicknudgemomentummult; 
 			sendplayerfunction("drivingsettingsdisplay", str);
 		}
 	}
@@ -527,8 +527,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("nudgedelay", Integer.toString(comport.nudgedelay));
 			comport.maxclicknudgedelay = Integer.parseInt(comps[4]);
 			settings.writeSettings("maxclicknudgedelay", Integer.toString(comport.maxclicknudgedelay));
+			comport.clicknudgemomentummult = Double.parseDouble(comps[5]);
+			settings.writeSettings("clicknudgemomentummult", Double.toString(comport.clicknudgemomentummult));
 			String s = comport.speedslow + " " + comport.speedmed + " " + comport.turnspeed + " "
-					+ comport.nudgedelay + " " + comport.maxclicknudgedelay; 
+					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " + comport.clicknudgemomentummult; 
 			messageplayer("driving settings set to: " + s, null, null);
 		}
 	}
@@ -1518,9 +1520,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 				autodockcompdir += x + (dockx - 160);
 				//System.out.println("comp: "+autodockcompdir);
 				if (Math.abs(autodockcompdir-160) > 10 || Math.abs(y-120) > 30) { // steer and go
-					comport.clickSteer((autodockcompdir-160)*rescomp+" "+119*rescomp); // (y-120)*rescomp); 
+					comport.clickSteer((autodockcompdir-160)*rescomp+" "+(y-120)*rescomp); 
 					new Thread(new Runnable() { public void run() { try {
-						Thread.sleep(1500);  // was 1500 w/ dockgrab following
+						Thread.sleep(1500); 
 						comport.speedset("fast");
 						comport.goForward();
 						Thread.sleep(450);
@@ -1545,7 +1547,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			else { // !autodockingcamctr
 				autodockingcamctr = true;
 				if (Math.abs(x-dockx) > 10 || Math.abs(y-120) > 30) {
-					comport.clickSteer((x-dockx)*rescomp+" "+119*rescomp); // (y-120)*rescomp);
+					comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -1559,7 +1561,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		if (w*h >= s2) {
-			if ((Math.abs(x-dockx) > 5) && autodockctrattempts <= 15) {
+			if ((Math.abs(x-dockx) > 5) && autodockctrattempts <= 10) {
 				autodockctrattempts ++;
 				comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 				new Thread(new Runnable() { public void run() { try {
@@ -1569,7 +1571,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else {
-				if (Math.abs(slopedeg-dockslopedeg) > 1.6 || autodockctrattempts >15) { // backup and try again
+				if (Math.abs(slopedeg-dockslopedeg) > 1.6 || autodockctrattempts >10) { // backup and try again
 					System.out.println("backup "+dockslopedeg+" "+slopedeg+" ctrattempts:"+autodockctrattempts);
 					autodockctrattempts = 0; 
 					int comp = 80;

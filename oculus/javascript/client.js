@@ -509,6 +509,7 @@ function drivingsettingsdisplay(str) { // called by server via flashplayer
 	document.getElementById('turnspeed').value = splitstr[2];
 	document.getElementById('nudgedelay').value = splitstr[3];
 	document.getElementById('maxclicknudgedelay').value = splitstr[4];
+	document.getElementById('clicknudgemomentummult').value = splitstr[5];
 }
 
 function drivingsettingssend() {
@@ -516,8 +517,8 @@ function drivingsettingssend() {
 			+ document.getElementById('medoffset').value + " "
 			+ document.getElementById('turnspeed').value + " "
 			+ document.getElementById('nudgedelay').value + " "
-			+ document.getElementById('maxclicknudgedelay').value; // + " "
-			//+ document.getElementById('bearturnspeed').value;
+			+ document.getElementById('maxclicknudgedelay').value + " "
+			+ document.getElementById('clicknudgemomentummult').value;
 	callServer("drivingsettingsupdate", str);
 	message("sending driving settings values: " + str, sentcmdcolor);
 	lagtimer = new Date().getTime(); // has to be *after* message()

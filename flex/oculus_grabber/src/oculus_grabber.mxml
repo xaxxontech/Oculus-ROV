@@ -40,8 +40,15 @@
     ExternalInterface.call("flashloaded");
     ExternalInterface.addCallback("flashCallServer", callServer); // called from Javascript
     ExternalInterface.addCallback("playlocal",playlocal); // called from Javascript
-    if (mic) { 
-    	mic.codec = SoundCodec.SPEEX;
+    if (mic) {
+    	try
+    	{ 
+    		mic.codec = SoundCodec.SPEEX;
+    	}
+			catch(err:Error)
+			{ 
+				Alert.show( err.toString() ); 
+			}
 		}
     else { Alert.show("Microphone not found"); }
 

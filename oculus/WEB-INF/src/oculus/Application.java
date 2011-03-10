@@ -1448,7 +1448,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				settings.writeSettings("docktarget",docktarget); 
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 				//messageplayer("dock"+cmd[1]+": "+s,"autodocklock",s);
-				messageplayer(null,"autodocklock",s);
+				messageplayer("auto-dock calibrated","autodocklock",s);
 			}
 		}
 		if (cmd[0].equals("calibrate")) {

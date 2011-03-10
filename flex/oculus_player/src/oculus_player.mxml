@@ -29,6 +29,7 @@
     	// mic.rate = 8;
     	//mic.setSilenceLevel(0,0);
     	mic.codec = SoundCodec.SPEEX; // had to put last because nothing after this compiles???? wtf ?
+    	mic.encodeQuality = 4;
 		}
 	}	
 	

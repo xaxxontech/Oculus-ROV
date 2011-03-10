@@ -166,11 +166,16 @@ package oculus
 			parrorig = parr.slice();
 			var threshhold:int = lastThreshhold;
 			var i:int;
+			var parrinv:Array = []; // inverse, used to check for inner black blob
 			for (i=0; i<parr.length; i++){
 				if (parr[i]>threshhold) { 
 					parr[i]=true;
+					parrinv[i]=false;
 				}
-				else { parr[i]=false; }
+				else { 
+					parr[i]=false;
+					parrinv[i]=true; 
+				}
 			}
 			//var allBlobsPixels:Array = parr.slice();  //devel only, normally use parr instead of allBlobsPixels
 			var blobnum:int = 0;
@@ -195,51 +200,71 @@ package oculus
 			var r:Array;
 			var pixel:int;
 			var blobs:Array = []
-			var rn:Number;
 			var blobBox:int;
-			for (pixel=0; pixel<=width*height; pixel++) {
-				if (parr[pixel]) { // finds a white one
+			var blobstarts:Array = [];
+			for (pixel=0; pixel<=width*height; pixel++) { // zero to end, find all blobs
+			if (parr[pixel]) { // finds a white one >> production uses parr[pixel]
 					blobs[blobnum] = floodFill(parr, pixel);
-					r = getRect(blobs[blobnum],pixel); 
-					blobSize = r[4];
-					if (blobSize > 150) { // discard tiny blobs
-						minx = r[0];
-						maxx = r[1];
-						miny = r[2];
-						maxy = r[3];  
-						blobBox = (maxx-minx)*(maxy-miny);
-						/*
-						topRatio = getPixelEqTrueCount(blobs[blobnum], minx, maxx, miny, miny+(maxy-miny)*0.333) / blobBox;
-						bottomRatio = getPixelEqTrueCount(blobs[blobnum], minx, maxx, miny+(maxy-miny)*0.666, maxy) / blobBox;
-						midRatio = getPixelEqTrueCount(blobs[blobnum],minx,maxx,miny+(maxy-miny)*0.333, miny+(maxy-miny)*0.666) / blobBox;
-						*/
-						topRatio = getPixelEqTrueCount(blobs[blobnum], minx, minx+(maxx-minx)*0.333, miny, maxy) / blobBox; // left
-						midRatio = getPixelEqTrueCount(blobs[blobnum],minx+(maxx-minx)*0.333,minx+(maxx-minx)*0.666, miny, maxy) / blobBox;
-						bottomRatio = getPixelEqTrueCount(blobs[blobnum], minx+(maxx-minx)*0.666, maxx, miny, maxy) / blobBox; // left
-
-						blobRatio = (maxx-minx)/(maxy-miny);
-						diff = Math.abs(topRatio - lastTopRatio) + Math.abs(bottomRatio- lastBottomRatio) + Math.abs(midRatio- lastMidRatio);
-						if (diff < maxdiff && diff < 1.1 && blobRatio < lastBlobRatio * 1.2 && blobRatio > lastBlobRatio * 0.5) {
-							winner=blobnum;
-							// winnerBlobSize = r[4];
-							maxdiff = diff;
-							winRect = r.slice();
-							winnerTopRatio = topRatio;
-							winnerBottomRatio = bottomRatio;
-							winnerMidRatio = midRatio;
-							winnerBlobRatio = blobRatio;
-						}
-					} 
+					blobstarts[blobnum]=pixel;
 					blobnum++;
+				}
+			}
+			
+			var rejectedBlobs:Array = [];
+			while (rejectedBlobs.length < blobs.length) {
+				for (blobnum=0; blobnum<blobs.length; blobnum++) { // go thru and eval each blob
+					if (rejectedBlobs.indexOf(blobnum) == -1) {
+						r = getRect(blobs[blobnum],blobstarts[blobnum]); 
+						blobSize = r[4];
+						if (blobSize > 150) { // discard tiny blobs
+							minx = r[0];
+							maxx = r[1];
+							miny = r[2];
+							maxy = r[3];  
+							blobBox = (maxx-minx)*(maxy-miny);
+							topRatio = getPixelEqTrueCount(blobs[blobnum], minx, minx+(maxx-minx)*0.333, miny, maxy) / blobBox; // left
+              midRatio = getPixelEqTrueCount(blobs[blobnum],minx+(maxx-minx)*0.333,minx+(maxx-minx)*0.666, miny, maxy) / blobBox;
+              bottomRatio = getPixelEqTrueCount(blobs[blobnum], minx+(maxx-minx)*0.666, maxx, miny, maxy) / blobBox; // left
+							blobRatio = (maxx-minx)/(maxy-miny);
+							diff = Math.abs(topRatio - lastTopRatio) + Math.abs(bottomRatio- lastBottomRatio) + Math.abs(midRatio- lastMidRatio);
+							if (diff < maxdiff) { // && diff < 1.1 && blobRatio < lastBlobRatio * 1.2 && blobRatio > lastBlobRatio * 0.5) {
+							//if (diff < maxdiff && blobRatio < lastBlobRatio * 1.1) {
+								winner=blobnum;
+								// winnerBlobSize = r[4];
+								maxdiff = diff;
+								winRect = r.slice();
+								winnerTopRatio = topRatio;
+								winnerBottomRatio = bottomRatio;
+								winnerMidRatio = midRatio;
+								winnerBlobRatio = blobRatio;
+							}
+						} //size condition end bracket
+					}
+				}
+				if (winner == -1) { break; }
+				else { // best looking blob chosen, now check if it has ctr blob
+					minx = winRect[0];
+					maxx = winRect[1];
+					miny = winRect[2];
+					maxy = winRect[3];
+					var x:int = minx+((maxx-minx)/2);
+					var y:int = miny+((maxy-miny)/2);
+					i = x + y*width;  // dead center of winner blob
+					var ctrblob:Array = floodFill(parrinv,i);
+					r = getRect(ctrblob,i);
+					if (minx<r[0] && maxx>r[1] && miny<r[2] && maxy>r[3] && ctrblob.length > 1) { // && parrinv[i]==true) { // ctrblob completely within blob 
+						break;
+					}
+					else {
+						trace("rejected: "+winner);
+						rejectedBlobs.push(winner);
+						winner = -1;
+					}
 				}
 			}
 			
 			if (winner != -1) {
 				//Lower 3rd, left
-				minx = winRect[0];
-				maxx = winRect[1];
-				miny = winRect[2];
-				maxy = winRect[3];
 				blobSize = winRect[4];
 				/*
 				lastTopRatio = winnerTopRatio; 

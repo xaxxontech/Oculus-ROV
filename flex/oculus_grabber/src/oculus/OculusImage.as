@@ -85,7 +85,11 @@ package oculus
 			parrorig = parr.slice(); // save original image for re-threshholding after
 			var start:int = x + y*width; 
 			var result:Array = [0,0,0,0,0];
-			var threshhold:int = parr[start]*threshholdMult;
+			
+			var startavg:int = (parr[start-1]+parr[start]+parr[start+1])/3; //includes 2 adjacent pixels in contract threshhold to counteract grainyness a bit
+			var threshhold:int = startavg*threshholdMult;
+			// var threshhold:int = parr[start]*threshholdMult;
+			
 			if (lastThreshhold !=0) {
 				threshhold = lastThreshhold;
 			}
@@ -208,8 +212,7 @@ package oculus
 					blobstarts[blobnum]=pixel;
 					blobnum++;
 				}
-			}
-			
+			}		
 			var rejectedBlobs:Array = [];
 			while (rejectedBlobs.length < blobs.length) {
 				for (blobnum=0; blobnum<blobs.length; blobnum++) { // go thru and eval each blob
@@ -274,6 +277,7 @@ package oculus
 				*/  
 				var slope:Number =  getBottomSlope(blobs[winner],minx,maxx,miny,maxy);
 				result = [minx,miny,maxx-minx,maxy-miny,slope]; //x,y,width,height,slope
+				
 				var runningttl:int = 0;
 				for (pixel=0; pixel<=width*height; pixel++) { // zero to end
 					if (blobs[winner][pixel]) {

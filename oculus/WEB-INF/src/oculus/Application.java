@@ -628,7 +628,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 											Thread.sleep(1500);
 											comport.speedset("fast");
 											comport.goBackward();
-											Thread.sleep(2200);
+											Thread.sleep(2000);
 											comport.stopGoing();
 											IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 											sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
@@ -657,7 +657,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						Thread.sleep(2000);
 						comport.speedset("fast");
 						comport.goBackward();
-						Thread.sleep(1500);
+						Thread.sleep(750);
 						comport.stopGoing();
 						messageplayer("disengaged from dock", "motion", "stopped");
 						log.info(userconnected + " un-docked");

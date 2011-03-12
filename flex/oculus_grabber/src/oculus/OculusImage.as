@@ -161,6 +161,46 @@ package oculus
 		}
 		
 		public function findBlobs(bar:ByteArray, w:int, h:int):Array {
+			var attemptnum:int = 0;
+			var dir:int = -1;
+			var inc:int = 10;
+			var n:int = inc;
+			var deleteddir:int = 0;
+			var result:Array;
+			while (attemptnum < 25) {
+				result = findBlobsSub(bar, w, h);
+				if (result[2]==0) {
+					if (deleteddir != 0) {
+						n = inc;
+						if (deleteddir == -1) {
+							dir = 1;
+						}
+						else { dir =-1; }
+					}
+					else {
+						dir = dir*(-1);						
+					}
+					lastThreshhold = lastThreshhold + (n*dir);
+					if (lastThreshhold < 0) {
+						dir = 1;
+						deleteddir = -1;
+						lastThreshhold = n;
+					}
+					if (lastThreshhold > 255) {
+						dir = -1;
+						deleteddir = 1;
+						lastThreshhold = 255-n;
+					}
+					n += inc;
+				}
+				else { break; }
+				//trace ("attempt: "+attemptnum+" lastThreshhold: "+lastThreshhold);
+				attemptnum ++;
+			}
+			return result;
+		}
+		
+		public function findBlobsSub(bar:ByteArray, w:int, h:int):Array {
 			width = w;
 			height = h;
 			blobs = [];
@@ -255,11 +295,11 @@ package oculus
 					i = x + y*width;  // dead center of winner blob
 					var ctrblob:Array = floodFill(parrinv,i);
 					r = getRect(ctrblob,i);
-					if (minx<r[0] && maxx>r[1] && miny<r[2] && maxy>r[3] && ctrblob.length > 1) { // && parrinv[i]==true) { // ctrblob completely within blob 
+					if (minx<r[0] && maxx>r[1] && miny<r[2] && maxy>r[3] && ctrblob.length > 1 && r[4]<winRect[4]*0.5) { // && parrinv[i]==true) { // ctrblob completely within blob 
 						break;
 					}
 					else {
-						trace("rejected: "+winner);
+						//trace("rejected: "+winner);
 						rejectedBlobs.push(winner);
 						winner = -1;
 					}
@@ -268,7 +308,6 @@ package oculus
 			
 			if (winner != -1) {
 				//Lower 3rd, left
-				blobSize = winRect[4];
 				/*
 				lastTopRatio = winnerTopRatio; 
 				lastBottomRatio = winnerBottomRatio;
@@ -277,7 +316,8 @@ package oculus
 				*/  
 				var slope:Number =  getBottomSlope(blobs[winner],minx,maxx,miny,maxy);
 				result = [minx,miny,maxx-minx,maxy-miny,slope]; //x,y,width,height,slope
-				
+
+				blobSize = winRect[4];		
 				var runningttl:int = 0;
 				for (pixel=0; pixel<=width*height; pixel++) { // zero to end
 					if (blobs[winner][pixel]) {

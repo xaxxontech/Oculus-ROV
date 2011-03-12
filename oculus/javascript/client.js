@@ -435,9 +435,9 @@ function docklineposition(n) {
 	d.style.left = (ctr+i+(docklinewidth/2))+"px";
 	a.style.top = top + "px";
 	a.style.height = height + "px";
-	c.style.top = (top + height/2) + "px";
+	c.style.top = (top + 60) + "px";
 	c.style.height = (height/2-40) + "px";
-	d.style.top = (top + height/2) + "px";
+	d.style.top = (top + 60) + "px";
 	d.style.height = (height/2-40) + "px";
 }
 

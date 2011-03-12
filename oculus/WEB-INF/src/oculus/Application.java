@@ -1424,7 +1424,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && autodocking) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 				if (cmd[4].equals("0")) { // width==0, failed to find target
-					if (autodockgrabattempts <= 3) {
+					if (autodockgrabattempts <= 1) { // TODO: removethis condition & variable
 						autodockgrabattempts ++;
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused

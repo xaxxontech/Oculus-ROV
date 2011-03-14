@@ -952,6 +952,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		log.info(str); messageGrabber(str,null);
 		initialstatuscalled = false;
 		pendingplayerisnull = true;
+		if (userconnected.equals(settings.readSetting("user0"))) {
+			admin = true;
+		}
+		else { admin = false; }
 	}
 	
 	private void beAPassenger(String user) {

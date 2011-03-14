@@ -117,7 +117,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-					}
+					} 
 				}
 			}).start();
 		}
@@ -416,7 +416,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void frameGrabbed(ByteArray _RAWBitmapImage) {
-		messageplayer("frame grabbed", null, null);
+		String str= "frame grabbed <a href='images/framegrab.png' target='_blank'>view</a>";
+		messageplayer(str, null, null);
 		// Use functionality in org.red5.io.amf3.ByteArray to get parameters of the ByteArray
 		int BCurrentlyAvailable = _RAWBitmapImage.bytesAvailable();
 		int BWholeSize = _RAWBitmapImage.length(); // Put the Red5 ByteArray into a standard Java array of bytes
@@ -432,7 +433,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		BufferedImage JavaImage = ImageIO.read(db);
 		// Now lets try and write the buffered image out to a file
 		if(JavaImage != null) { // If you sent a jpeg to the server, just change PNG to JPEG and Red5ScreenShot.png to .jpeg
-		ImageIO.write(JavaImage, "PNG", new File("framegrab.png"));
+		ImageIO.write(JavaImage, "PNG", new File(System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png"));
 		}
 
 		} catch(IOException e) {log.info("Save_ScreenShot: Writing of screenshot failed " + e); System.out.println("IO Error " + e);}
@@ -1404,6 +1405,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			autodocking = false;
 			messageplayer("auto-dock ended","multiple","cameratilt "+camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
+			//IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+			//sc.invoke("dockgrab", new Object[] {0,0,"cancel"});
 		}
 		if (cmd[0].equals("go")) {
 			if (motionenabled == true) {
@@ -1424,7 +1427,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && autodocking) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 				if (cmd[4].equals("0")) { // width==0, failed to find target
-					if (autodockgrabattempts <= 1) { // TODO: removethis condition & variable
+					if (autodockgrabattempts < 0) { // TODO: remove this condition if unused
 						autodockgrabattempts ++;
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused

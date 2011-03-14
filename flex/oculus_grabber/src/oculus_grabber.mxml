@@ -177,29 +177,36 @@
 			playdelaytimer = setInterval(dockgrab,3000,x,y,mode);
 		}
 		else {
-			//get cam image 
-			var snapshot:BitmapData = new BitmapData( videoFramegrab.width, videoFramegrab.height, false );
-			var rect:Rectangle = new Rectangle(0,0,videoFramegrab.width, videoFramegrab.height);
-			var results:Array;
-			var filter:BlurFilter = new BlurFilter(2,2);
-			var pt:Point = new Point(0, 0);
-			snapshot.draw(videoFramegrab);
-			snapshot.applyFilter(snapshot, rect, pt, filter);
-			if (mode=="calibrate") { // calibrate
-				ocls = new OculusImage();
-				results = ocls.findBlobStart(x,y,videoFramegrab.width, videoFramegrab.height, snapshot.getPixels(rect));
-				callServer("dockgrabbed","calibrate "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5)+" "+
-					+results[5].toPrecision(5)+" "+results[6].toPrecision(5)+" "+results[7].toPrecision(5)+" "+results[8].toPrecision(5));
-					// x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
+			if (mode=="cancel") { // TODO: remove condition
+				// ocls.findBlobsContinue = false; // this didn't work because single thread
 			}
-			if (mode=="findfromxy") {
-				results = ocls.getThreshholdxy(x,y,videoFramegrab.width, videoFramegrab.height, snapshot.getPixels(rect));
-				callServer("dockgrabbed","findfromxy "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5));
-				 //x,y,width,height,slope
-			}
-			if (mode=="find") { // calibrate 
-				results = ocls.findBlobs(snapshot.getPixels(rect),videoFramegrab.width, videoFramegrab.height);
-				callServer("dockgrabbed","find "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5)); //x,y,width,height,slope
+			else {
+				//get cam image 
+				var snapshot:BitmapData = new BitmapData( videoFramegrab.width, videoFramegrab.height, false );
+				var rect:Rectangle = new Rectangle(0,0,videoFramegrab.width, videoFramegrab.height);
+				var results:Array;
+				var filter:BlurFilter = new BlurFilter(2,2);
+				var pt:Point = new Point(0, 0);
+				snapshot.draw(videoFramegrab);
+				snapshot.applyFilter(snapshot, rect, pt, filter);
+				if (mode=="calibrate") { // calibrate
+					ocls = new OculusImage();
+					results = ocls.findBlobStart(x,y,videoFramegrab.width, videoFramegrab.height, snapshot.getPixels(rect));
+					callServer("dockgrabbed","calibrate "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5)+" "+
+						+results[5].toPrecision(5)+" "+results[6].toPrecision(5)+" "+results[7].toPrecision(5)+" "+results[8].toPrecision(5));
+						// x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
+				}
+				if (mode=="findfromxy") {
+					results = ocls.getThreshholdxy(x,y,videoFramegrab.width, videoFramegrab.height, snapshot.getPixels(rect));
+					//ocls.lastThreshhold = 70;
+					//results = ocls.findBlobs(snapshot.getPixels(rect),videoFramegrab.width, videoFramegrab.height);
+					callServer("dockgrabbed","findfromxy "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5));
+					 //x,y,width,height,slope
+				}
+				if (mode=="find") { // calibrate 
+					results = ocls.findBlobs(snapshot.getPixels(rect),videoFramegrab.width, videoFramegrab.height);
+					callServer("dockgrabbed","find "+results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4].toPrecision(5)); //x,y,width,height,slope
+				}
 			}
 		}
 	}

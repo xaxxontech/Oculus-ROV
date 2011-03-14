@@ -8,7 +8,7 @@ package oculus
 		private var parr:Array = []; // working pixels, whole image, 8-bit greyscale 
 		private var width:int;
 		private var height:int;
-		private var lastThreshhold:int = 0;
+		public var lastThreshhold:int;
 		private var threshholdMult:Number;  //  = 0.65;
 		private var lastBlobRatio:Number;
 		private var lastTopRatio:Number;
@@ -137,15 +137,22 @@ package oculus
 			height = h;
 			convertToGrey(bar);
 			var start:int = x + y*width; 
-			var result:Array;
+			var result:Array = [0,0,0,0,0];
 			var startavg:int = (parr[start-1]+parr[start]+parr[start+1])/3; //includes 2 adjacent pixels in contract threshhold to counteract grainyness a bit
 			var threshhold:int = startavg*threshholdMult;
 			lastThreshhold = threshhold;
 			var i:int;
-			for (i=0;i<parr.length;i++){
-				if (parr[i]>threshhold) { parr[i]=true; }
-				else { parr[i]=false; }
-			}
+			var parrinv:Array = []; // inverse, used to check for inner black blob
+			for (i=0; i<parr.length; i++){
+				if (parr[i]>threshhold) { 
+					parr[i]=true;
+					parrinv[i]=false;
+				}
+				else { 
+					parr[i]=false;
+					parrinv[i]=true; 
+				}
+			}			
 			var blob:Array = floodFill(parr, start);
 			var r:Array = getRect(blob,start);
 			var minx:int = r[0];
@@ -153,10 +160,17 @@ package oculus
 			var miny:int = r[2];
 			var maxy:int = r[3];
 			var blobSize:int = r[4];
-  
-			var slope:Number =  getBottomSlope(blob,minx,maxx,miny,maxy);
-			//result = x,y,width,height,slope
-			result = [minx,miny,maxx-minx,maxy-miny,slope]; 
+
+			var xx:int = minx+((maxx-minx)/2);
+			var yy:int = miny+((maxy-miny)/2);
+			i = xx + yy*width;  // dead center of winner blob
+			var ctrblob:Array = floodFill(parrinv,i);
+			var rctr:Array = getRect(ctrblob,i);
+			if (minx<rctr[0] && maxx>rctr[1] && miny<rctr[2] && maxy>rctr[3] && ctrblob.length > 1 && rctr[4]<r[4]*0.5) { // && parrinv[i]==true) { // ctrblob completely within blob 
+				var slope:Number =  getBottomSlope(blob,minx,maxx,miny,maxy);
+				//result = x,y,width,height,slope
+				result = [minx,miny,maxx-minx,maxy-miny,slope]; 			
+			}
 			return result;
 		}
 		
@@ -167,7 +181,7 @@ package oculus
 			var n:int = inc;
 			var deleteddir:int = 0;
 			var result:Array;
-			while (attemptnum < 25) {
+			while (attemptnum < 20) {
 				result = findBlobsSub(bar, w, h);
 				if (result[2]==0) {
 					if (deleteddir != 0) {

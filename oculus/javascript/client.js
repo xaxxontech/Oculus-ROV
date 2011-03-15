@@ -653,8 +653,10 @@ function autodockclick(ev) {
 		var x = ev.clientX + document.body.scrollLeft - document.body.clientLeft;
 		var y = ev.clientY + document.body.scrollTop - document.body.clientTop;
 	}
-	x -= video.offsetLeft;
-	y -= video.offsetTop;
+	var v = document.getElementById("video");
+	x -= v.offsetLeft;
+	y -= v.offsetTop;
+	//alert(v.offsetLeft);
 	
 	var b = document.getElementById("docklinecalibratebox")
     var str = "Auto Dock: <table><tr><td style='height: 7px'></td></tr></table>";
@@ -697,6 +699,7 @@ function autodockcalibrate(ev) {
 		var x = ev.clientX + document.body.scrollLeft - document.body.clientLeft;
 		var y = ev.clientY + document.body.scrollTop - document.body.clientTop;
 	}
+	var video = document.getElementById("video");
 	x -= video.offsetLeft;
 	y -= video.offsetTop;
 	callServer("autodockcalibrate", x+" "+y);

@@ -3,7 +3,11 @@ package oculus;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Vector;
+
+import sun.security.x509.AVA;
 
 import gnu.io.*;
 
@@ -29,6 +33,31 @@ public class FindPort {
 
 	/* list of all free ports */
 	private Vector<String> ports = new Vector<String>();
+
+	/** */
+	public void getAvailableSerialPorts() {
+
+		@SuppressWarnings("rawtypes")
+		Enumeration thePorts = CommPortIdentifier.getPortIdentifiers();
+		while (thePorts.hasMoreElements()) {
+			CommPortIdentifier com = (CommPortIdentifier) thePorts
+					.nextElement();
+			switch (com.getPortType()) {
+			case CommPortIdentifier.PORT_SERIAL:
+				try {
+					CommPort thePort = com.open("CommUtil", 50);
+					thePort.close();
+					ports.add(com.getName());
+				} catch (PortInUseException e) {
+					System.out.println("Port, " + com.getName()
+							+ ", is in use by: " + com.getCurrentOwner());
+				} catch (Exception e) {
+					System.err.println("Failed to open port " + com.getName());
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	/** get list of ports available on this particular computer */
 	private void initPorts() {
@@ -58,7 +87,8 @@ public class FindPort {
 	/* constructor tests each port */
 	public FindPort() {
 
-		initPorts();
+		// initPorts();
+		getAvailableSerialPorts();
 
 		// for (int i = ports.size()-1 ; i >= 0; i--)
 		// System.out.println("port : " + ports.get(i));
@@ -102,7 +132,6 @@ public class FindPort {
 
 		// connected
 		System.out.println("connected to: " + address);
-
 		return true;
 	}
 
@@ -176,7 +205,7 @@ public class FindPort {
 
 		// outputStream.write(13);
 
-		Thread.sleep(1000);
+		Thread.sleep(300);
 
 		System.out.println("avail : " + inputStream.available());
 
@@ -193,10 +222,10 @@ public class FindPort {
 
 	public String getVersion(String port) throws Exception {
 
-		byte[] buffer = new byte[32];
+		// yte[] buffer = new byte[32];
 		String version = "";
 
-		Thread.sleep(300);
+		// Thread.sleep(300);
 
 		// ascii 'y' = 121
 		outputStream.write('y');
@@ -227,7 +256,7 @@ public class FindPort {
 
 		FindPort port = new FindPort();
 
-		System.out.println("found oculus on: " + port.search(OCULUS));
+		// System.out.println("found oculus on: " + port.search(OCULUS));
 
 		// System.out.println("version : " +
 		// port.getVersion(port.search(OCULUS)));
@@ -237,6 +266,7 @@ public class FindPort {
 		// System.out.println("version : " +
 		// port.getVersion(port.search(LIGHTS)));
 
-		System.out.println("... done");
+		port.close();
+		// System.out.println("... done");
 	}
 }

@@ -52,6 +52,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	int autodockgrabattempts;
 	int autodockctrattempts;
 	String docktarget;
+	FindPort port = new FindPort();
+	protected String portstr = null;
 	
 	public Application() { 
 		super();
@@ -147,6 +149,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void initialize() {
+		try {
+			portstr = port.search("oculusDC");
+			if (portstr != null) {
+				comport.connect(portstr);
+			}
+			else  { comport.isconnected = false; }
+			initializeAfterDelay();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		httpPort = settings.readRed5Setting("http.port");
 		if (settings.readSetting("skipsetup").equals("yes")) {
 			grabber_launch();
@@ -169,18 +181,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void grabber_launch() {
-		if (((settings.readSetting("arduinoattached")).toUpperCase()).equals("YES")) {
-			if (comport.isconnected == false) {
-				try {
-					comport.connect("COM"+settings.readSetting("comport"));
-					initializeAfterDelay();
-				} 
-				catch (Exception e) { 
-					e.printStackTrace(); 
-					comport.isconnected = false;
-				}
-			}
-		}
 		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
 			batterypresent = true; 
 		} else { 
@@ -398,12 +398,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void publish(String str) {
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-			/*
-			int height = Integer.parseInt(settings.readSetting("vheight"));
-			int fps = Integer.parseInt(settings.readSetting("vfps"));
-			int width = Integer.parseInt(settings.readSetting("vwidth"));
-			int quality = Integer.parseInt(settings.readSetting("vquality"));
-			*/
 			String current = settings.readSetting("vset");
 			String vals[] = (settings.readSetting(current)).split("_");
 			int width = Integer.parseInt(vals[0]);
@@ -1230,7 +1224,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String user = null;
 		String password = null;
 		String battery = null;
-		String com_port = null;
 		String httpport = null;
 		String rtmpport = null;
 		String skipsetup = null;		
@@ -1239,7 +1232,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (s[n].equals("user")) { user = s[n+1]; }
 			if (s[n].equals("password")) { password = s[n+1]; }
 			if (s[n].equals("battery")) { battery = s[n+1]; }
-			if (s[n].equals("comport")) { com_port = s[n+1]; }
+			//if (s[n].equals("comport")) { com_port = s[n+1]; }
 			if (s[n].equals("httpport")) { httpport = s[n+1]; }
 			if (s[n].equals("rtmpport")) { rtmpport = s[n+1]; }
 			if (s[n].equals("skipsetup")) { skipsetup = s[n+1]; }
@@ -1293,31 +1286,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}	
 			settings.writeSettings("batterypresent", battery); 
 		}
-		// comport
-		if (com_port != null) {
-			if(com_port.equals("nil")) {
-				settings.writeSettings("comport", com_port); 
-				settings.writeSettings("arduinoattached","no"); 
-			}
-			else { 
-				if (!comport.isconnected) {
-					try {
-						comport.connect("COM"+com_port);
-					} 
-					catch (Exception e) { 
-						e.printStackTrace();
-						message += "Error: COM port failed ";
-						oktoadd = false;
-						comport.isconnected = false;
-					}
-				}
-				if (comport.isconnected) { 
-					initializeAfterDelay();
-					settings.writeSettings("arduinoattached", "yes"); 
-					settings.writeSettings("comport", com_port); 
-				}
-			}
-		}
 		// httpport
 		if (httpport != null) { settings.writeRed5Setting("http.port", httpport); }
 		// rtmpport
@@ -1338,7 +1306,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String str = settings.readSetting("user0");
 		if (str != null) { result += "username " + str +" "; }
 		// comport
-		result += "comport " + settings.readSetting("comport") + " ";
+		if (portstr == null) { portstr = "nil"; }
+		result += "comport " + portstr + " ";
 		// battery
 		result += "battery " + settings.readSetting("batterypresent") + " ";
 		// http port

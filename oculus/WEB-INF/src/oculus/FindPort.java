@@ -137,28 +137,24 @@ public class FindPort {
 
 	/** Close the serial port profile's streams */
 	public void close() {
-
 		// System.out.println("closing ...");
-
 		try {
-
-			if (inputStream != null)
-				inputStream.close();
-
+			if (inputStream != null) {
+				inputStream.close(); }
 		} catch (Exception e) {
 			System.out.println("close() :" + e.getMessage());
 		}
 
 		try {
-
 			if (outputStream != null)
 				outputStream.close();
-
 		} catch (Exception e) {
 			System.out.println("close() :" + e.getMessage());
 		}
-
-		serialPort.close();
+		
+		if (serialPort != null) {
+			serialPort.close();
+		}
 	}
 
 	/**
@@ -179,17 +175,17 @@ public class FindPort {
 			System.out.println("search: " + ports.get(i));
 
 			if (connect(ports.get(i))) {
+				Thread.sleep(2000);
 
 				String id = getProduct();
 				if (id.equalsIgnoreCase(target)) {
 					portNumber = ports.get(i);
+					close();
 					break;
 				}
-
 				close();
 			}
 		}
-
 		return portNumber;
 	}
 
@@ -197,24 +193,21 @@ public class FindPort {
 
 		byte[] buffer = new byte[32];
 		String device = "";
-
-		Thread.sleep(300);
-
 		// ascii 'x'
 		outputStream.write('x');
 
 		// outputStream.write(13);
 
-		Thread.sleep(300);
+		Thread.sleep(100);
 
 		System.out.println("avail : " + inputStream.available());
 
-		/*
-		 * int read = inputStream.read(buffer); System.out.println("read: " +
-		 * read); for(int j = 0 ; j > read ; j++){
-		 * System.out.println(buffer[j]); device += buffer[j]; }
-		 */
-
+		int read = inputStream.read(buffer); 
+		System.out.println("read: " + read); 
+		for(int j = 0 ; j < read	 ; j++){
+			device += (char) buffer[j];
+		}
+		device = device.replaceAll("\\s+$", "");
 		Thread.sleep(300);
 
 		return device;
@@ -261,7 +254,8 @@ public class FindPort {
 		// System.out.println("version : " +
 		// port.getVersion(port.search(OCULUS)));
 
-		System.out.println("found lights on: " + port.search(LIGHTS));
+		//System.out.println("found lights on: " + port.search(LIGHTS));
+		System.out.println("found oculus on: " + port.search(OCULUS));
 
 		// System.out.println("version : " +
 		// port.getVersion(port.search(LIGHTS)));

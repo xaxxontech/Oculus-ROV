@@ -104,14 +104,15 @@ function saveandlaunch() {
 		str += "user " + user + " password " + pass + " ";  
 	}
 	//battery
-	if (document.getElementById("battery").checked) {str += "battery yes "; }
+	if (document.getElementById("battery").checked) { str += "battery yes "; }
 	else { str += "battery no "; }
-	//comport
+	/* //comport
 	s = document.getElementById("comport").value;
 	if (s=="") { 
 		s="nil"
 	}
-	str += "comport "+s+" "; 
+	str += "comport "+s+" ";
+	*/ 
 	//httpport
 	s = document.getElementById("httpport").value;
 	if (s=="") { 
@@ -159,9 +160,10 @@ function populatevalues(values) {
 			if (splitstr[n+1]=="yes") { a.checked=true; }
 		}
 		if (splitstr[n]=="comport") {
+			a = document.getElementById("comport");
 			var str = splitstr[n+1];
-			if (str == "nil") { str = ""; }
-			document.getElementById("comport").value = str; 
+			if (str == "nil") { a.innerHTML="not found"; }
+			else { a.innerHTML = "found on "+str; }
 		}
 		if (splitstr[n]=="httpport") { document.getElementById("httpport").value = splitstr[n+1]; }
 		if (splitstr[n]=="rtmpport") { document.getElementById("rtmpport").value = splitstr[n+1]; }

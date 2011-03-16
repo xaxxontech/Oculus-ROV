@@ -34,7 +34,6 @@ const int camservopin = 6;  // pins 9,10,11 make weird things happen on start...
 Servo camservo; // tilt
 boolean waitingForCommand = true; // false=waiting for follow up to previous command 
 int lastcommand = 0;
-//int lastcommandtime;
 
 void setup() {
   pinMode(motorA1Pin, OUTPUT); 
@@ -56,27 +55,21 @@ void setup() {
 
 void sendID(){
  Serial.println("oculusDC");
- Serial.write(13);
+ //Serial.write(13);  // not required since println vs print?
 }
 
 void sendVersion(){
  Serial.println("v0.1");
- Serial.write(13);
+ //Serial.write(13);
 }
 
 void loop() { 
   if (Serial.available() > 0 ) {
     int i = Serial.read();
-
-    // echo Serial.write(i);
-
-    //int time = millis();
-    //if ((time - lastcommandtime) > 10) { waitingForCommand = true; }
     if (waitingForCommand == true) {
       if (i==forward || i==backward || i==right || i==left || i==camtilt) {
         lastcommand = i;
         waitingForCommand = false;
-        //lastcommandtime = millis();
       }
       else if (i==stop) {
         //digitalWrite(enablePinA, LOW); 

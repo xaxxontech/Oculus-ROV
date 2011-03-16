@@ -150,7 +150,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	public void initialize() {
 		try {
-			portstr = port.search("oculusDC");
+			portstr = port.search(FindPort.OCULUS_DC);
 			if (portstr != null) {
 				comport.connect(portstr);
 			}

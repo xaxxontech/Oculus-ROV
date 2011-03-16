@@ -5,29 +5,27 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import sun.security.x509.AVA;
-
 import gnu.io.*;
 
 public class FindPort {
 
 	/* serial port configuration parameters */
-	private static final int BAUD_RATE = 19200;
-	private static final int TIMEOUT = 2000;
-	private static final int DATABITS = SerialPort.DATABITS_8;
-	private static final int STOPBITS = SerialPort.STOPBITS_1;
-	private static final int PARITY = SerialPort.PARITY_NONE;
-	private static final int FLOWCONTROL = SerialPort.FLOWCONTROL_NONE;
+	public static final int BAUD_RATE = 19200;
+	public static final int TIMEOUT = 2000;
+	public static final int DATABITS = SerialPort.DATABITS_8;
+	public static final int STOPBITS = SerialPort.STOPBITS_1;
+	public static final int PARITY = SerialPort.PARITY_NONE;
+	public static final int FLOWCONTROL = SerialPort.FLOWCONTROL_NONE;
 
 	/* add known devices here, strings returned from the firmware */
-	public static final String OCULUS = "oculusDC";
+	public static final String OCULUS_SERVO = "oculusServo";
+	public static final String OCULUS_DC = "oculusDC";
 	public static final String LIGHTS = "lights";
-
-	protected InputStream inputStream = null;
-	protected OutputStream outputStream = null;
 
 	/* reference to the underlying serial port */
 	private SerialPort serialPort = null;
+	private InputStream inputStream = null;
+	private OutputStream outputStream = null;
 
 	/* list of all free ports */
 	private Vector<String> ports = new Vector<String>();
@@ -136,10 +134,10 @@ public class FindPort {
 		String portNumber = null;
 		for (int i = ports.size() - 1; i >= 0; i--) {
 
-			System.out.println("search: " + ports.get(i));
+			// System.out.println("search: " + ports.get(i));
 
 			if (connect(ports.get(i))) {
-				Thread.sleep(2000);
+				Thread.sleep(TIMEOUT);
 
 				String id = getProduct();
 				if (id.equalsIgnoreCase(target)) {
@@ -157,49 +155,45 @@ public class FindPort {
 
 		byte[] buffer = new byte[32];
 		String device = "";
-		// ascii 'x'
+		
+		// send command to arduino 
 		outputStream.write('x');
-
-		// outputStream.write(13);
-
 		Thread.sleep(100);
 
-		System.out.println("avail : " + inputStream.available());
+		// System.out.println("avail : " + inputStream.available());
 
 		int read = inputStream.read(buffer); 
-		System.out.println("read: " + read); 
-		for(int j = 0 ; j < read	 ; j++){
+		for(int j = 0 ; j < read ; j++)
 			device += (char) buffer[j];
-		}
+		
 		device = device.replaceAll("\\s+$", "");
-		Thread.sleep(300);
-
 		return device;
 	}
 
 	public String getVersion(String port) throws Exception {
-
-		// yte[] buffer = new byte[32];
+		
 		String version = "";
-
+		byte[] buffer = new byte[32];
+		
+		//close();
+		if(connect(port)){
+			Thread.sleep(TIMEOUT);
+			
+			// send command to arduino 
+			outputStream.write('y');
+			Thread.sleep(100);
+			
+			// System.out.println("avail : " + inputStream.available());
+			
+			int read = inputStream.read(buffer); 
+			for(int j = 0 ; j < read ; j++)
+				version += (char) buffer[j];
+			
+			close();
+		}
+		
 		// Thread.sleep(300);
-
-		// ascii 'y' = 121
-		outputStream.write('y');
-
-		// outputStream.write(13);
-
-		Thread.sleep(1000);
-
-		System.out.println("avail : " + inputStream.available());
-
-		/*
-		 * int read = inputStream.read(buffer); System.out.println("read: " +
-		 * read); for(int j = 0 ; j > read ; j++){
-		 * System.out.println(buffer[j]); device += buffer[j]; }
-		 */
-
-		return version;
+		return version.trim();
 	}
 
 	/**
@@ -209,22 +203,27 @@ public class FindPort {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		System.out.println("port test ...");
+		// System.out.println("port test ...");
 
 		FindPort port = new FindPort();
 
-		// System.out.println("found oculus on: " + port.search(OCULUS));
-
-		// System.out.println("version : " +
-		// port.getVersion(port.search(OCULUS)));
-
-		//System.out.println("found lights on: " + port.search(LIGHTS));
-		System.out.println("found oculus on: " + port.search(OCULUS));
-
-		// System.out.println("version : " +
-		// port.getVersion(port.search(LIGHTS)));
-
+		String oculus = port.search(OCULUS_DC);
+		if(oculus != null){
+			System.out.println("found oculus on: " + oculus);
+			String version = port.getVersion(oculus);
+			if(version != null)
+				System.out.println("version: " + version);	
+		} else System.out.println("oculus NOT found");
+		
+		String lights = port.search(LIGHTS);
+		if(lights != null){
+			System.out.println("found lights on: " + oculus);
+			String version = port.getVersion(oculus);
+			if(version != null)
+				System.out.println("version: " + version);	
+		} else System.out.println("ligths NOT found");
+		
 		port.close();
-		System.out.println("... done");
+		// System.out.println("... done");
 	}
 }

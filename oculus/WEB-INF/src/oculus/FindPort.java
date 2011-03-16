@@ -3,8 +3,6 @@ package oculus;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Vector;
 
 import sun.security.x509.AVA;
@@ -40,17 +38,15 @@ public class FindPort {
 		@SuppressWarnings("rawtypes")
 		Enumeration thePorts = CommPortIdentifier.getPortIdentifiers();
 		while (thePorts.hasMoreElements()) {
-			CommPortIdentifier com = (CommPortIdentifier) thePorts
-					.nextElement();
+			CommPortIdentifier com = (CommPortIdentifier) thePorts.nextElement();
 			switch (com.getPortType()) {
 			case CommPortIdentifier.PORT_SERIAL:
 				try {
-					CommPort thePort = com.open("CommUtil", 50);
+					CommPort thePort = com.open("FindPort", TIMEOUT);
 					thePort.close();
 					ports.add(com.getName());
 				} catch (PortInUseException e) {
-					System.out.println("Port, " + com.getName()
-							+ ", is in use by: " + com.getCurrentOwner());
+					System.out.println(com.getName() + ", is in use by: " + com.getCurrentOwner());
 				} catch (Exception e) {
 					System.err.println("Failed to open port " + com.getName());
 					e.printStackTrace();
@@ -59,39 +55,9 @@ public class FindPort {
 		}
 	}
 
-	/** get list of ports available on this particular computer */
-	private void initPorts() {
-
-		ports.clear();
-
-		@SuppressWarnings("rawtypes")
-		Enumeration pList = CommPortIdentifier.getPortIdentifiers();
-		while (pList.hasMoreElements()) {
-			CommPortIdentifier cpi = (CommPortIdentifier) pList.nextElement();
-			if (cpi.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-				if (cpi.isCurrentlyOwned()) {
-
-					System.out.println("taken : " + cpi.getName());
-
-				} else {
-
-					// System.out.println(cpi.getName());
-
-					ports.add(cpi.getName());
-
-				}
-			}
-		}
-	}
-
-	/* constructor tests each port */
+	/* constructor makes a list of available ports */
 	public FindPort() {
-
-		// initPorts();
 		getAvailableSerialPorts();
-
-		// for (int i = ports.size()-1 ; i >= 0; i--)
-		// System.out.println("port : " + ports.get(i));
 	}
 
 	/** connects on start up, return true is currently connected */
@@ -110,8 +76,7 @@ public class FindPort {
 		try {
 
 			/* configure the serial port */
-			serialPort.setSerialPortParams(BAUD_RATE, DATABITS, STOPBITS,
-					PARITY);
+			serialPort.setSerialPortParams(BAUD_RATE, DATABITS, STOPBITS, PARITY);
 			serialPort.setFlowControlMode(FLOWCONTROL);
 
 			/* extract the input and output streams from the serial port */
@@ -135,21 +100,21 @@ public class FindPort {
 		return true;
 	}
 
-	/** Close the serial port profile's streams */
+	/** Close the serial port streams */
 	public void close() {
 		// System.out.println("closing ...");
 		try {
 			if (inputStream != null) {
 				inputStream.close(); }
 		} catch (Exception e) {
-			System.out.println("close() :" + e.getMessage());
+			System.err.println("close() :" + e.getMessage());
 		}
 
 		try {
 			if (outputStream != null)
 				outputStream.close();
 		} catch (Exception e) {
-			System.out.println("close() :" + e.getMessage());
+			System.err.println("close() :" + e.getMessage());
 		}
 		
 		if (serialPort != null) {
@@ -158,18 +123,17 @@ public class FindPort {
 	}
 
 	/**
-	 * Loop through all available serail ports and ask for product id's
+	 * Loop through all available serial ports and ask for product id's
 	 * 
 	 * @param target
 	 *            is the device we are looking for on this host's serial ports
-	 *            (ie: oculus}lights)
+	 *            (ie: oculus|lights)
 	 * @return the COMXX value of the given device
 	 * @throws Exception
 	 */
 	public String search(String target) throws Exception {
 
 		String portNumber = null;
-
 		for (int i = ports.size() - 1; i >= 0; i--) {
 
 			System.out.println("search: " + ports.get(i));
@@ -261,6 +225,6 @@ public class FindPort {
 		// port.getVersion(port.search(LIGHTS)));
 
 		port.close();
-		// System.out.println("... done");
+		System.out.println("... done");
 	}
 }

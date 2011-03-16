@@ -94,13 +94,12 @@ public class FindPort {
 			return false;
 
 		// connected
-		System.out.println("connected to: " + address);
+		// System.out.println("connected to: " + address);
 		return true;
 	}
 
 	/** Close the serial port streams */
 	public void close() {
-		// System.out.println("closing ...");
 		try {
 			if (inputStream != null) {
 				inputStream.close(); }
@@ -130,25 +129,20 @@ public class FindPort {
 	 * @throws Exception
 	 */
 	public String search(String target) throws Exception {
-
-		String portNumber = null;
 		for (int i = ports.size() - 1; i >= 0; i--) {
-
-			// System.out.println("search: " + ports.get(i));
-
 			if (connect(ports.get(i))) {
 				Thread.sleep(TIMEOUT);
-
 				String id = getProduct();
 				if (id.equalsIgnoreCase(target)) {
-					portNumber = ports.get(i);
 					close();
-					break;
-				}
-				close();
+					return ports.get(i);
+				}	
 			}
+			close();
 		}
-		return portNumber;
+		
+		// error state 
+		return null;
 	}
 
 	private String getProduct() throws Exception {
@@ -159,8 +153,6 @@ public class FindPort {
 		// send command to arduino 
 		outputStream.write('x');
 		Thread.sleep(100);
-
-		// System.out.println("avail : " + inputStream.available());
 
 		int read = inputStream.read(buffer); 
 		for(int j = 0 ; j < read ; j++)
@@ -175,15 +167,12 @@ public class FindPort {
 		String version = "";
 		byte[] buffer = new byte[32];
 		
-		//close();
 		if(connect(port)){
 			Thread.sleep(TIMEOUT);
 			
 			// send command to arduino 
 			outputStream.write('y');
 			Thread.sleep(100);
-			
-			// System.out.println("avail : " + inputStream.available());
 			
 			int read = inputStream.read(buffer); 
 			for(int j = 0 ; j < read ; j++)
@@ -202,8 +191,6 @@ public class FindPort {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-
-		// System.out.println("port test ...");
 
 		FindPort port = new FindPort();
 
@@ -224,6 +211,5 @@ public class FindPort {
 		} else System.out.println("ligths NOT found");
 		
 		port.close();
-		// System.out.println("... done");
 	}
 }

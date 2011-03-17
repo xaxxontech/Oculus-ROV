@@ -30,6 +30,11 @@ public class FindPort {
 	/* list of all free ports */
 	private Vector<String> ports = new Vector<String>();
 
+	/* constructor makes a list of available ports */
+	public FindPort() {
+		getAvailableSerialPorts();
+	}
+	
 	/** */
 	public void getAvailableSerialPorts() {
 
@@ -37,44 +42,23 @@ public class FindPort {
 		Enumeration thePorts = CommPortIdentifier.getPortIdentifiers();
 		while (thePorts.hasMoreElements()) {
 			CommPortIdentifier com = (CommPortIdentifier) thePorts.nextElement();
-			switch (com.getPortType()) {
-			case CommPortIdentifier.PORT_SERIAL:
-				try {
-					CommPort thePort = com.open("FindPort", TIMEOUT);
-					thePort.close();
-					ports.add(com.getName());
-				} catch (PortInUseException e) {
-					System.out.println(com.getName() + ", is in use by: " + com.getCurrentOwner());
-				} catch (Exception e) {
-					System.err.println("Failed to open port " + com.getName());
-					e.printStackTrace();
-				}
-			}
+			if (com.getPortType() == CommPortIdentifier.PORT_SERIAL)
+				ports.add(com.getName());
 		}
-	}
-
-	/* constructor makes a list of available ports */
-	public FindPort() {
-		getAvailableSerialPorts();
 	}
 
 	/** connects on start up, return true is currently connected */
 	private boolean connect(String address) {
-
+		
+		// System.out.println("connecting to: " + address);
+	
 		try {
-
+			
 			/* construct the serial port */
-			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
-					address).open(this.getClass().getName(), TIMEOUT);
-
-		} catch (Exception e) {
-			System.out.println("error ininitalizing port: " + address);
-		}
-
-		try {
+			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(address).open("FindPort", TIMEOUT);
 
 			/* configure the serial port */
-			serialPort.setSerialPortParams(BAUD_RATE, DATABITS, STOPBITS, PARITY);
+			serialPort.setSerialPortParams(BAUD_RATE, DATABITS, STOPBITS,PARITY);
 			serialPort.setFlowControlMode(FLOWCONTROL);
 
 			/* extract the input and output streams from the serial port */
@@ -82,7 +66,9 @@ public class FindPort {
 			outputStream = serialPort.getOutputStream();
 
 		} catch (Exception e) {
-			System.out.println("error connecting to: " + address);
+			
+			// System.out.println("error connecting to: " + address);
+			
 			close();
 			return false;
 		}
@@ -93,7 +79,6 @@ public class FindPort {
 		if (outputStream == null)
 			return false;
 
-		// connected
 		// System.out.println("connected to: " + address);
 		return true;
 	}
@@ -102,20 +87,22 @@ public class FindPort {
 	public void close() {
 		try {
 			if (inputStream != null) {
-				inputStream.close(); }
+				inputStream.close();
+			}
 		} catch (Exception e) {
-			System.err.println("close() :" + e.getMessage());
+			System.err.println("close():" + e.getMessage());
 		}
 
 		try {
 			if (outputStream != null)
 				outputStream.close();
 		} catch (Exception e) {
-			System.err.println("close() :" + e.getMessage());
+			System.err.println("close():" + e.getMessage());
 		}
-		
+
 		if (serialPort != null) {
 			serialPort.close();
+			serialPort = null;
 		}
 	}
 
@@ -136,12 +123,12 @@ public class FindPort {
 				if (id.equalsIgnoreCase(target)) {
 					close();
 					return ports.get(i);
-				}	
+				}
 			}
 			close();
 		}
-		
-		// error state 
+
+		// error state
 		return null;
 	}
 
@@ -149,38 +136,38 @@ public class FindPort {
 
 		byte[] buffer = new byte[32];
 		String device = "";
-		
-		// send command to arduino 
+
+		// send command to arduino
 		outputStream.write('x');
 		Thread.sleep(100);
 
-		int read = inputStream.read(buffer); 
-		for(int j = 0 ; j < read ; j++)
+		int read = inputStream.read(buffer);
+		for (int j = 0; j < read; j++)
 			device += (char) buffer[j];
-		
+
 		device = device.replaceAll("\\s+$", "");
 		return device;
 	}
 
 	public String getVersion(String port) throws Exception {
-		
-		String version = "";
+
 		byte[] buffer = new byte[32];
-		
-		if(connect(port)){
+		String version = "";
+
+		if (connect(port)) {
 			Thread.sleep(TIMEOUT);
-			
-			// send command to arduino 
+
+			// send command to arduino
 			outputStream.write('y');
 			Thread.sleep(100);
-			
-			int read = inputStream.read(buffer); 
-			for(int j = 0 ; j < read ; j++)
+
+			int read = inputStream.read(buffer);
+			for (int j = 0; j < read; j++)
 				version += (char) buffer[j];
-			
+
 			close();
 		}
-		
+
 		// Thread.sleep(300);
 		return version.trim();
 	}
@@ -195,21 +182,23 @@ public class FindPort {
 		FindPort port = new FindPort();
 
 		String oculus = port.search(OCULUS_DC);
-		if(oculus != null){
+		if (oculus != null) {
 			System.out.println("found oculus on: " + oculus);
 			String version = port.getVersion(oculus);
-			if(version != null)
-				System.out.println("version: " + version);	
-		} else System.out.println("oculus NOT found");
-		
+			if (version != null)
+				System.out.println("version: " + version);
+		} else
+			System.out.println("oculus NOT found");
+
 		String lights = port.search(LIGHTS);
-		if(lights != null){
+		if (lights != null) {
 			System.out.println("found lights on: " + oculus);
 			String version = port.getVersion(oculus);
-			if(version != null)
-				System.out.println("version: " + version);	
-		} else System.out.println("ligths NOT found");
-		
+			if (version != null)
+				System.out.println("version: " + version);
+		} else
+			System.out.println("ligths NOT found");
+
 		port.close();
 	}
 }

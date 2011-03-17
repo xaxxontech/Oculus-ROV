@@ -168,7 +168,6 @@ public class FindPort {
 			close();
 		}
 
-		// Thread.sleep(300);
 		return version.trim();
 	}
 
@@ -178,21 +177,23 @@ public class FindPort {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
+		
+		long start = System.currentTimeMillis();
 
 		FindPort port = new FindPort();
 
 		String oculus = port.search(OCULUS_DC);
 		if (oculus != null) {
-			System.out.println("found oculus on: " + oculus);
+			System.out.print("found oculus on: " + oculus);
 			String version = port.getVersion(oculus);
 			if (version != null)
-				System.out.println("version: " + version);
+				System.out.println(" version: " + version);
 		} else
 			System.out.println("oculus NOT found");
 
 		String lights = port.search(LIGHTS);
 		if (lights != null) {
-			System.out.println("found lights on: " + oculus);
+			System.out.print("found lights on: " + oculus);
 			String version = port.getVersion(oculus);
 			if (version != null)
 				System.out.println("version: " + version);
@@ -200,5 +201,7 @@ public class FindPort {
 			System.out.println("ligths NOT found");
 
 		port.close();
+		
+		System.out.println("scan took: " + (System.currentTimeMillis() - start) + " ms");
 	}
 }

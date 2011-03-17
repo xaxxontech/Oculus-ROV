@@ -52,7 +52,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	int autodockgrabattempts;
 	int autodockctrattempts;
 	String docktarget;
-	FindPort port = new FindPort();
 	protected String portstr = null;
 	
 	public Application() { 
@@ -149,6 +148,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void initialize() {
+		FindPort port = new FindPort();
 		try {
 			portstr = port.search(FindPort.OCULUS_DC);
 			if (portstr != null) {

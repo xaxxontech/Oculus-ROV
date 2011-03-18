@@ -49,6 +49,8 @@ var faceboxtimer;
 var facegrabon = false;
 var tempdivtext;
 var autodocking = false;
+var sendcommandtimelast = 0;
+var lastcommandsent;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -123,7 +125,17 @@ function callServer(fn, str) {
 			clearTimeout(pingcountdown);
 			countdowntostatuscheck();
 		}
-		getFlashMovie("oculus_player").flashCallServer(fn,str);
+		//var sendcommandtimelast = 0;
+		//var lastcommandsent;
+
+		
+		var nowtime = new Date().getTime();
+		if (!(lastcommandsent == fn+str && nowtime - sendcommandtimelast < 200)) {
+			getFlashMovie("oculus_player").flashCallServer(fn,str);
+		}
+		else message("rapid succession command dropped",sentcmdcolor);
+		sendcommandtimelast = nowtime;
+		lastcommandsent = fn+str;
 	}
 }
 
@@ -333,39 +345,34 @@ function extrastuffboxShow() {
 
 function keyBoardPressed(event) {
 	if (enablekeyboard) {
-		if (event.keyCode == 32 || event.keyCode == 83) { // space bar or S
+		var keycode = event.keyCode;
+		if (keycode == 32 || keycode == 83) { // space bar or S
 			move("stop");
 		}
-		if (event.keyCode == 38 || event.keyCode == 87) { // up arrow or W
+		if (keycode == 38 || keycode == 87) { // up arrow or W
 			move("forward");
 		}
-		if (event.keyCode == 40 || event.keyCode == 88) { // down arrow or X
+		if (keycode == 40 || keycode == 88) { // down arrow or X
 			move("backward");
 		}
-		if (event.keyCode == 37 || event.keyCode == 81) { // left arrow
+		if (keycode == 37 || keycode == 81) { // left arrow
 			move("left");
 		}
-		if (event.keyCode == 39 || event.keyCode == 69) { // right arrow
+		if (keycode == 39 || keycode == 69) { // right arrow
 			move("right");
 		}
-		if (event.keyCode == 65) { // A
+		if (keycode == 65) { // A
 			nudge("left");
 		}
-		if (event.keyCode == 68) { // D
+		if (keycode == 68) { // D
 			nudge("right");
 		}
-		/*
-		if (event.keyCode == 67) { move('bear_right_bwd'); } // C
-		if (event.keyCode == 90) { move('bear_left_bwd'); } // Z
-		if (event.keyCode == 69) { move('bear_right'); } // E
-		if (event.keyCode == 81) { move('bear_left'); } // C
-		*/
-		if (event.keyCode == 49) { speedset('slow'); } // 1
-		if (event.keyCode == 50) { speedset('med'); } // 2
-		if (event.keyCode == 51) { speedset('fast'); } // 3
-		if (event.keyCode == 82) { camera('upabit'); } // R
-		if (event.keyCode == 70) { camera('horiz'); } // F
-		if (event.keyCode == 86) { camera('downabit'); } // V
+		if (keycode == 49) { speedset('slow'); } // 1
+		if (keycode == 50) { speedset('med'); } // 2
+		if (keycode == 51) { speedset('fast'); } // 3
+		if (keycode == 82) { camera('upabit'); } // R
+		if (keycode == 70) { camera('horiz'); } // F
+		if (keycode == 86) { camera('downabit'); } // V
 		if (steeringmode == "forward") { document.getElementById("forward").style.backgroundImage = "none"; }
 	}
 }
@@ -597,7 +604,7 @@ function autodock(str) {
 	    a.onclick = autodockclick;
 	    var b = document.getElementById("docklinecalibratebox")
 	    tempdivtext = b.innerHTML;
-	    var str = "Auto Dock: <table><tr><td style='height: 7px'></td></tr></table>";
+	    var str = "Dock with charger: <table><tr><td style='height: 7px'></td></tr></table>";
 	    str+="With the dock in view, click on the white target"
     	str+="<table><tr><td style='height: 11px'></td></tr></table>";
 	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>"

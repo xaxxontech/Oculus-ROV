@@ -19,6 +19,7 @@ public class ArduinoCommDC {
 	protected int maxclicknudgedelay = Integer.parseInt(settings.readSetting("maxclicknudgedelay"));
 	protected int maxclickcam = Integer.parseInt(settings.readSetting("maxclickcam"));
 	protected double clicknudgemomentummult  = Double.parseDouble(settings.readSetting("clicknudgemomentummult"));
+	protected int steeringcomp = Integer.parseInt(settings.readSetting("steeringcomp")); 
 	
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
@@ -443,5 +444,8 @@ public class ArduinoCommDC {
 			}
 		}).start();
 	}
-
+	
+	public void updateSteeringComp() {
+		sendcommand(9,steeringcomp);
+	}
 }

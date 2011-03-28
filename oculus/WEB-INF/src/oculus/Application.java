@@ -504,7 +504,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void getDrivingSettings() {
 		if (admin) {
 			String str = comport.speedslow + " " + comport.speedmed + " " + comport.turnspeed + " "
-					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " + comport.clicknudgemomentummult; 
+					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " 
+					+ comport.clicknudgemomentummult + " " + comport.steeringcomp; 
 			sendplayerfunction("drivingsettingsdisplay", str);
 		}
 	}
@@ -524,8 +525,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("maxclicknudgedelay", Integer.toString(comport.maxclicknudgedelay));
 			comport.clicknudgemomentummult = Double.parseDouble(comps[5]);
 			settings.writeSettings("clicknudgemomentummult", Double.toString(comport.clicknudgemomentummult));
+			int n = Integer.parseInt(comps[6]);
+			if (n > 255) { n=255; }
+			if (n < 0) { n=0; }
+			comport.steeringcomp = n;
+			settings.writeSettings("steeringcomp", Integer.toString(comport.steeringcomp));
+			comport.updateSteeringComp();
 			String s = comport.speedslow + " " + comport.speedmed + " " + comport.turnspeed + " "
-					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " + comport.clicknudgemomentummult; 
+					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " 
+					+ comport.clicknudgemomentummult + " " + (comport.steeringcomp -128);
 			messageplayer("driving settings set to: " + s, null, null);
 		}
 	}
@@ -690,6 +698,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				try {
 					Thread.sleep(3000);
 					comport.camHoriz();
+					comport.updateSteeringComp();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

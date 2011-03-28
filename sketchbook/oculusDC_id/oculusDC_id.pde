@@ -1,39 +1,31 @@
-/*
-COMMANDS: 
- 1 = forward both wheels, ready for next command (speed) 
- 2 = backward both wheels, ready for next command (speed)
- 3 = stop, disable wheels
- 4 = attach camservo, ready for next command (cam tilt degrees)
- 5 = turn right (right wheel reverse, left wheel forward), ready for next command (speed)
- 6 = turn left (right wheel forward, left wheel reverse), ready for next command (speed)
- 8 = release camservo
- 120 ('x' ascii)  = send back product id number 
- 121 ('y' asccii) = send back version number 
- NOTE: fwd/bkwd combined commands like above don't allow for drift comp
- */
-
 #include <Servo.h> 
 
-const int forward = 1;
-const int backward = 2;
-// stop a reserved word?
-const int stop = 3;
-const int camtilt = 4;
-const int right = 5;
-const int left = 6;
-const int releasecam = 8;
+// commands
+const int forward = 1;  // forward both wheels, ready for next command (speed) 
+const int backward = 2;  // backward both wheels, ready for next command (speed) 
+const int stop = 3;  // stop, disable wheels
+const int camtilt = 4;  // attach camservo, ready for next command (cam tilt degrees)
+const int right = 5;  // turn right (right wheel reverse, left wheel forward), ready for next command (speed)
+const int left = 6;  // turn left (right wheel forward, left wheel reverse), ready for next command (speed)
+const int releasecam = 8;  // release camservo
+const int setComp = 9;
+const int sendID = 120;  // ('x' ascii)  = send back product id number
+const int sendVersion = 121;  // ('y' asccii) = send back version number
 
+// pins
 const int motorA1Pin = 4;    // H-bridge pin 2    LEFT motor
 const int motorA2Pin = 2;    // H-bridge pin 7     LEFT motor
 const int motorB1Pin = 7;    // H-bridge pin 10    RIGHT motor
 const int motorB2Pin = 8;    // H-bridge pin 15     RIGHT motor
 const int enablePinA = 3;    // H-bridge enable pin 9  LEFT motor
 const int enablePinB = 11;    // H-bridge enable pin 1  RIGHT motor
-const int camservopin = 6;  // pins 9,10,11 make weird things happen on start...
+const int camservopin = 6;  
 
 Servo camservo; // tilt
-boolean waitingForCommand = true; // false=waiting for follow up to previous command 
+boolean waitingForCommand = true; // false = waiting for follow up to previous command 
 int lastcommand = 0;
+int acomp = 0;
+int bcomp = 0;
 
 void setup() {
   pinMode(motorA1Pin, OUTPUT); 
@@ -50,47 +42,29 @@ void setup() {
   OCR2A = 0;
   OCR2B = 0;
   Serial.begin(19200);
-  //lastcommandtime == millis();
 }    
-
-void sendID(){
- Serial.println("oculusDC");
- //Serial.write(13);  // not required since println vs print?
-}
-
-void sendVersion(){
- Serial.println("v0.1");
- //Serial.write(13);
-}
 
 void loop() { 
   if (Serial.available() > 0 ) {
     int i = Serial.read();
     if (waitingForCommand == true) {
-      if (i==forward || i==backward || i==right || i==left || i==camtilt) {
+      if (i==forward || i==backward || i==right || i==left || i==camtilt || i==setComp) {
         lastcommand = i;
         waitingForCommand = false;
       }
       else if (i==stop) {
-        //digitalWrite(enablePinA, LOW); 
-        //digitalWrite(enablePinB, LOW);
         OCR2A = 0;
         OCR2B = 0;
-        //analogWrite(enablePinA, 0);
-        //analogWrite(enablePinB, 0);
       }
       else if (i==releasecam) {
         camservo.detach();
       }
-
-      // ascii 'x'
-      else if(i == 120){
-        sendID();
+      else if(i == sendID){
+				Serial.println("oculusDC");
       }
 
-      // ascii 'y'
-      else if(i == 121){
-        sendVersion();
+      else if(i == sendVersion){
+				Serial.println("v0.2");
       }
     }
     else {
@@ -120,31 +94,35 @@ void loop() {
         digitalWrite(motorB2Pin, LOW);
       }
       if (lastcommand == forward || lastcommand == backward || lastcommand == right || lastcommand == left) {
-        /*
-				if (i==255) {
-         					digitalWrite(enablePinA, HIGH);
-         					digitalWrite(enablePinB, HIGH);
-         				}
-         				else {
-         					analogWrite(enablePinA, i); 
-         					analogWrite(enablePinB, i);
-         				}
-         				*/
-        OCR2A = i;
-        OCR2B = i;
+				if (i == 255) { // comp only applies to full speed
+					OCR2A = i - acomp;
+					OCR2B = i - bcomp;
+				}
+				else {
+					OCR2A = i;
+					OCR2B = i;
+				}
       }
       if (lastcommand == camtilt) {
-        // why attach here? save power by turning it off later? 
         camservo.attach(camservopin);
         camservo.write(i);	
       }
+			if (lastcommand == setComp) {
+				// 128 = 0, > 128 = acomp, < 128 = bcomp
+				if (i == 128) {
+					acomp = 0;
+					bcomp = 0;
+				}
+				if (i > 128) {
+					bcomp = 0;
+					acomp = (i-128)*2;
+				}
+				if (i < 128) {
+					acomp = 0;
+					bcomp = (128-i)*2;
+				}
+			}
     }
   }
 }
-
-
-
-
-
-
 

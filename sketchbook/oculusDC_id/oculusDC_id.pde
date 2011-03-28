@@ -94,14 +94,8 @@ void loop() {
         digitalWrite(motorB2Pin, LOW);
       }
       if (lastcommand == forward || lastcommand == backward || lastcommand == right || lastcommand == left) {
-				if (i == 255) { // comp only applies to full speed
-					OCR2A = i - acomp;
-					OCR2B = i - bcomp;
-				}
-				else {
-					OCR2A = i;
-					OCR2B = i;
-				}
+		OCR2A =  i - acomp*( (float) i / 254.0);
+		OCR2B =  i - bcomp*( (float) i / 254.0);
       }
       if (lastcommand == camtilt) {
         camservo.attach(camservopin);

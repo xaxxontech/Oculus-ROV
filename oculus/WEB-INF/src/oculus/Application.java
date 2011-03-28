@@ -1504,8 +1504,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (slope > dockslope) { autodockcompdir *= -1; } // approaching from left
 				autodockcompdir += x + (dockx - 160);
 				//System.out.println("comp: "+autodockcompdir);
-				if (Math.abs(autodockcompdir-160) > 10 || Math.abs(y-120) > 30) { // steer and go
-					comport.clickSteer((autodockcompdir-160)*rescomp+" "+(y-120)*rescomp); 
+				if (Math.abs(autodockcompdir-dockx) > 10 || Math.abs(y-120) > 30) { // steer and go
+					comport.clickSteer((autodockcompdir-dockx)*rescomp+" "+(y-120)*rescomp); 
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500); 
 						comport.speedset("fast");

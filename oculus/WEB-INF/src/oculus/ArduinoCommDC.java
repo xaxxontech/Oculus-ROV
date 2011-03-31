@@ -446,6 +446,15 @@ public class ArduinoCommDC {
 	}
 	
 	public void updateSteeringComp() {
-		sendcommand(9,steeringcomp);
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					sendcommand(9,steeringcomp);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
 }

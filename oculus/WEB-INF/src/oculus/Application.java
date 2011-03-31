@@ -697,8 +697,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			public void run() {
 				try {
 					Thread.sleep(3000);
-					comport.camHoriz();
 					comport.updateSteeringComp();
+					comport.camHoriz();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

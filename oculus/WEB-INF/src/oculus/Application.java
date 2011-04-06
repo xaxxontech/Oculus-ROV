@@ -345,6 +345,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("autodockgo")) { autoDock("go "+str); }
 			if (fn.equals("autodock")) { autoDock(str); }
 			if (fn.equals("autodockcalibrate")) { autoDock("calibrate "+str); } // eliminate, combine into 'autodock'
+			if (fn.equals("restart")) { restart(); }
 		}
 		if (fn.equals("assumecontrol")) { assumeControl(str); }
 		if (fn.equals("beapassenger")) { beAPassenger(str); }
@@ -367,6 +368,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (fn.equals("facerect")) { messageplayer(null, "facefound", str); }
 		if (fn.equals("dockgrabbed")) { autoDock("dockgrabbed "+str); }
 		if (fn.equals("autodock")) { autoDock(str); }
+		if (fn.equals("restart")) { restart(); }
 	}
 	
 	private void grabberSetStream(String str) {
@@ -813,6 +815,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str = str.trim();
 			try {
 				Runtime.getRuntime().exec(str);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void restart() {
+		File f;
+		f=new File(System.getenv("RED5_HOME")+"\\restart");
+		if(!f.exists()){
+			try {
+				f.createNewFile();
+				Runtime.getRuntime().exec("red5-shutdown.bat");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

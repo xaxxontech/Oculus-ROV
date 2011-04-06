@@ -194,11 +194,13 @@ function quit() {
 	callServer('systemcall','red5-shutdown.bat');
 }
 
+function restart() {
+	message("shutdown",null);
+	callServer('restart','')
+}
+
 function shutdownwindow() {
-	// document.title="closed";
-	// setTimeout("document.body.innerHTML='shutdown complete';", 1000); 
-	// message("closing window");
-	window.open('blank.html','_self');	
+	window.open('about:blank','_self');
 }
 
 function chat() {

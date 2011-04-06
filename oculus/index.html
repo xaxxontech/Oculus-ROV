@@ -540,12 +540,17 @@ system commands:<br>
 <a class="blackbg" href="javascript: systemcall('shutdown -s -f -t 01','y');">shutdown</a><br>
 <a class="blackbg" href="javascript: systemcall('shutdown -r -f -t 01','y')">reboot</a><br>
 <a class="blackbg" href="javascript: relaunchgrabber();">relaunch cam/mic grabber</a><br>
-<!-- 
-<a class="blackbg" href="javascript: systemcall('','');">execute:</a>
-<input id="usersyscommand" class="inputbox" type="text" size="10" 
+<a class="blackbg" href="javascript: document.getElementById('usersyscommanddiv').style.display='';
+document.getElementById('usersyscommand').value='';
+document.getElementById('usersyscommand').focus();">system command</a><span 
+id="usersyscommanddiv" style="display: none">:
+<input id="usersyscommand" class="inputbox" type="text" size="30" 
 onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';"
-onKeyPress="if (keypress(event)==13) { systemcall('',''); }"><br/>  -->
+onKeyPress="if (keypress(event)==13) { systemcall('',''); }">
+<a class="cancelbox" href="javascript: document.getElementById('usersyscommanddiv').style.display='none';">X</a>
+<a class="cancelbox" href="javascript: systemcall('','');" onmousedown="speech();">&radic;</a>
+</span><br/>  
 </div>
 <table><tr><td style="height: 7px"></td></tr></table>
 account settings:<br>

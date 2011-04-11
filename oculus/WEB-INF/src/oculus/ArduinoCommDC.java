@@ -10,11 +10,9 @@ public class ArduinoCommDC {
 
 	protected int speedslow = Integer.parseInt(settings.readSetting("speedslow"));
 	protected int speedmed = Integer.parseInt(settings.readSetting("speedmed"));
-	protected int turnspeed = Integer.parseInt(settings.readSetting("turnspeed"));
 	protected int camservohoriz = Integer.parseInt(settings.readSetting("camservohoriz"));
 	protected int camposmax = Integer.parseInt(settings.readSetting("camposmax"));
 	protected int camposmin = Integer.parseInt(settings.readSetting("camposmin"));
-	protected int camdelay = Integer.parseInt(settings.readSetting("camdelay"));
 	protected int nudgedelay = Integer.parseInt(settings.readSetting("nudgedelay"));
 	protected int maxclicknudgedelay = Integer.parseInt(settings.readSetting("maxclicknudgedelay"));
 	protected int maxclickcam = Integer.parseInt(settings.readSetting("maxclickcam"));
@@ -24,7 +22,9 @@ public class ArduinoCommDC {
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
 	protected int camwait= 400;
+	protected int camdelay = 50;
 	protected int speedfast = 255;
+	protected int turnspeed = 255;
 	protected int speed = speedfast; // set default to max
 	protected int arduinodelay = 4;
 	protected String direction = null;

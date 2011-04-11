@@ -542,6 +542,7 @@ system commands:<br>
 <a class="blackbg" href="javascript: relaunchgrabber();">relaunch cam/mic grabber</a><br>
 <a class="blackbg" href="javascript: callServer('restart','');">relaunch server</a><br>
 <a class="blackbg" href="javascript: document.getElementById('usersyscommanddiv').style.display='';
+document.getElementById('extendedsettingsbox').style.display='none';
 document.getElementById('usersyscommand').value='';
 document.getElementById('usersyscommand').focus();">system command</a><span 
 id="usersyscommanddiv" style="display: none">:
@@ -574,9 +575,7 @@ speed offsets: slow <input class="inputbox" onfocus="keyboard('disable'); this.s
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="slowoffset" type="text" size="4" >
 med <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="medoffset" type="text" size="4" ><br>
-turn speed <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
-onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="turnspeed" type="text" size="4" >
-&nbsp; nudge delay ms <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+nudge delay ms <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="nudgedelay" type="text" size="4" ><br>
 max clicksteer ms <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="maxclicknudgedelay" type="text" size="4" >
@@ -595,12 +594,11 @@ onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="steeringc
 camera tilt settings:<br>
 horiz position <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="camhoriz" type="text" size="4" >
-max angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
-onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="cammax" type="text" size="4" ><br>
+<span style="white-space: nowrap">max angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="cammax" type="text" size="4" ></span><br>
 min angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="cammin" type="text" size="4" >
-speed delay <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
-onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="camdelay" type="text" size="4" ><br>
+<br>
 max clicksteer angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="maxclickcam" type="text" size="4" >
 <br>Test at position: <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 

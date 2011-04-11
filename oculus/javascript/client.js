@@ -513,17 +513,15 @@ function drivingsettingsdisplay(str) { // called by server via flashplayer
 	splitstr = str.split(" ");
 	document.getElementById('slowoffset').value = splitstr[0];
 	document.getElementById('medoffset').value = splitstr[1];
-	document.getElementById('turnspeed').value = splitstr[2];
-	document.getElementById('nudgedelay').value = splitstr[3];
-	document.getElementById('maxclicknudgedelay').value = splitstr[4];
-	document.getElementById('clicknudgemomentummult').value = splitstr[5];
-	document.getElementById('steeringcomp').value = parseInt(splitstr[6]) - 128;
+	document.getElementById('nudgedelay').value = splitstr[2];
+	document.getElementById('maxclicknudgedelay').value = splitstr[3];
+	document.getElementById('clicknudgemomentummult').value = splitstr[4];
+	document.getElementById('steeringcomp').value = parseInt(splitstr[5]) - 128;
 }
 
 function drivingsettingssend() {
 	str =  document.getElementById('slowoffset').value + " "
 			+ document.getElementById('medoffset').value + " "
-			+ document.getElementById('turnspeed').value + " "
 			+ document.getElementById('nudgedelay').value + " "
 			+ document.getElementById('maxclicknudgedelay').value + " "
 			+ document.getElementById('clicknudgemomentummult').value + " "
@@ -559,7 +557,6 @@ function tiltsettingssend() {
 	str = document.getElementById('camhoriz').value + " "
 			+ document.getElementById('cammax').value + " "
 			+ document.getElementById('cammin').value + " "
-			+ document.getElementById('camdelay').value + " "
 			+ document.getElementById('maxclickcam').value;
 	callServer("tiltsettingsupdate", str);
 	message("sending tilt settings values: " + str, sentcmdcolor);
@@ -572,8 +569,7 @@ function tiltsettingsdisplay(str) {
 	document.getElementById('camhoriz').value = splitstr[0];
 	document.getElementById('cammax').value = splitstr[1];
 	document.getElementById('cammin').value = splitstr[2];
-	document.getElementById('camdelay').value = splitstr[3];
-	document.getElementById('maxclickcam').value = splitstr[4];
+	document.getElementById('maxclickcam').value = splitstr[3];
 }
 
 function tilttest() {

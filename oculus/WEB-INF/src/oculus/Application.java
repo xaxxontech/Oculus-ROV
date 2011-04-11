@@ -509,7 +509,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	private void getDrivingSettings() {
 		if (admin) {
-			String str = comport.speedslow + " " + comport.speedmed + " " + comport.turnspeed + " "
+			String str = comport.speedslow + " " + comport.speedmed + " " 
 					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " 
 					+ comport.clicknudgemomentummult + " " + comport.steeringcomp; 
 			sendplayerfunction("drivingsettingsdisplay", str);
@@ -523,8 +523,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("speedslow", Integer.toString(comport.speedslow));
 			comport.speedmed = Integer.parseInt(comps[1]);
 			settings.writeSettings("speedmed", Integer.toString(comport.speedmed));
-			comport.turnspeed = Integer.parseInt(comps[2]);
-			settings.writeSettings("turnspeed", Integer.toString(comport.turnspeed));
 			comport.nudgedelay = Integer.parseInt(comps[3]);
 			settings.writeSettings("nudgedelay", Integer.toString(comport.nudgedelay));
 			comport.maxclicknudgedelay = Integer.parseInt(comps[4]);
@@ -537,7 +535,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			comport.steeringcomp = n;
 			settings.writeSettings("steeringcomp", Integer.toString(comport.steeringcomp));
 			comport.updateSteeringComp();
-			String s = comport.speedslow + " " + comport.speedmed + " " + comport.turnspeed + " "
+			String s = comport.speedslow + " " + comport.speedmed + " "
 					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " 
 					+ comport.clicknudgemomentummult + " " + (comport.steeringcomp -128);
 			messageplayer("driving settings set to: " + s, null, null);
@@ -547,7 +545,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void getTiltSettings() {
 		if (admin) {
 			String str = comport.camservohoriz + " " + comport.camposmax + " "
-					+ comport.camposmin + " " + comport.camdelay + " " + comport.maxclickcam;
+					+ comport.camposmin + " " + comport.maxclickcam;
 			sendplayerfunction("tiltsettingsdisplay", str);
 		}
 	}
@@ -561,12 +559,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("camposmax", Integer.toString(comport.camposmax));
 			comport.camposmin = Integer.parseInt(comps[2]);
 			settings.writeSettings("camposmin", Integer.toString(comport.camposmin));
-			comport.camdelay = Integer.parseInt(comps[3]);
-			settings.writeSettings("camdelay", Integer.toString(comport.camdelay));
-			comport.maxclickcam = Integer.parseInt(comps[4]);
+			comport.maxclickcam = Integer.parseInt(comps[3]);
 			settings.writeSettings("maxclickcam", Integer.toString(comport.maxclickcam));
 			String s = comport.camservohoriz + " " + comport.camposmax + " "
-					+ comport.camposmin + " " + comport.camdelay + " " + comport.maxclickcam;
+					+ comport.camposmin + " " + comport.maxclickcam;
 			messageplayer("cam tilt set to: " + s, null, null);
 		}
 	}

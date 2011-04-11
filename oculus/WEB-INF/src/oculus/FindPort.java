@@ -142,7 +142,7 @@ public class FindPort {
 		for (int j = 0; j < read; j++)
 			device += (char) buffer[j];
 
-		device.trim(); //  = device.replaceAll("\\s+$", "");
+		device = device.trim(); //  = device.replaceAll("\\s+$", "");
 		return device;
 	}
 

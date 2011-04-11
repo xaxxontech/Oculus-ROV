@@ -523,13 +523,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("speedslow", Integer.toString(comport.speedslow));
 			comport.speedmed = Integer.parseInt(comps[1]);
 			settings.writeSettings("speedmed", Integer.toString(comport.speedmed));
-			comport.nudgedelay = Integer.parseInt(comps[3]);
+			comport.nudgedelay = Integer.parseInt(comps[2]);
 			settings.writeSettings("nudgedelay", Integer.toString(comport.nudgedelay));
-			comport.maxclicknudgedelay = Integer.parseInt(comps[4]);
+			comport.maxclicknudgedelay = Integer.parseInt(comps[3]);
 			settings.writeSettings("maxclicknudgedelay", Integer.toString(comport.maxclicknudgedelay));
-			comport.clicknudgemomentummult = Double.parseDouble(comps[5]);
+			comport.clicknudgemomentummult = Double.parseDouble(comps[4]);
 			settings.writeSettings("clicknudgemomentummult", Double.toString(comport.clicknudgemomentummult));
-			int n = Integer.parseInt(comps[6]);
+			int n = Integer.parseInt(comps[5]);
 			if (n > 255) { n=255; }
 			if (n < 0) { n=0; }
 			comport.steeringcomp = n;

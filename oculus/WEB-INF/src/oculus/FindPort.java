@@ -85,6 +85,9 @@ public class FindPort {
 
 	/** Close the serial port streams */
 	public void close() {
+		if (serialPort != null) {
+			serialPort.close();
+		}
 		try {
 			if (inputStream != null) {
 				inputStream.close();
@@ -92,17 +95,11 @@ public class FindPort {
 		} catch (Exception e) {
 			System.err.println("close():" + e.getMessage());
 		}
-
 		try {
 			if (outputStream != null)
 				outputStream.close();
 		} catch (Exception e) {
 			System.err.println("close():" + e.getMessage());
-		}
-
-		if (serialPort != null) {
-			serialPort.close();
-			serialPort = null;
 		}
 	}
 
@@ -145,7 +142,7 @@ public class FindPort {
 		for (int j = 0; j < read; j++)
 			device += (char) buffer[j];
 
-		device = device.replaceAll("\\s+$", "");
+		device.trim(); //  = device.replaceAll("\\s+$", "");
 		return device;
 	}
 
@@ -200,8 +197,6 @@ public class FindPort {
 		} else
 			System.out.println("ligths NOT found");
 
-		port.close();
-		
 		System.out.println("scan took: " + (System.currentTimeMillis() - start) + " ms");
 	}
 }

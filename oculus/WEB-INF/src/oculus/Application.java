@@ -164,6 +164,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			grabber_launch();
 		}
 		else { initialize_launch(); }
+		
+		// watch for low battery, start on config flag??
+		new EmailAlerts().start();
+		
 		log.info("initialize");
 	}
 	
@@ -1599,5 +1603,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		}
+	}
+	
+	
+	/**
+	 * test driver
+	 * 
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		
+		long start = System.currentTimeMillis();
+
+		new Application();
+		
+		
+		// System.out.println("scan took: " + (System.currentTimeMillis() - start) + " ms");
 	}
 }

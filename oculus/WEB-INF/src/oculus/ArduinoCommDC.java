@@ -457,4 +457,22 @@ public class ArduinoCommDC {
 			}
 		}).start();
 	}
+	
+	
+
+	/** test driver */
+	public static void main(String[] args) throws Exception {
+		
+		long start = System.currentTimeMillis();
+
+		ArduinoCommDC comm = new ArduinoCommDC();
+		
+		comm.goForward();
+		
+		Thread.sleep(5000);
+		
+		comm.goBackward();
+		
+		System.out.println("test took: " + (System.currentTimeMillis() - start) + " ms");
+	}
 }

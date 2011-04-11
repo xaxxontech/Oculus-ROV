@@ -84,7 +84,7 @@ public class FindPort {
 	}
 
 	/** Close the serial port streams */
-	public void close() {
+	private void close() {
 		if (serialPort != null) {
 			serialPort.close();
 		}
@@ -129,7 +129,7 @@ public class FindPort {
 		return null;
 	}
 
-	private String getProduct() throws Exception {
+	public String getProduct() throws Exception {
 
 		byte[] buffer = new byte[32];
 		String device = "";

@@ -5,13 +5,13 @@ import org.slf4j.Logger;
 
 public class EmailAlerts extends Thread {
 
-	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class, "oculus");
 
 	// how low of battery to warm user with email
 	public static final int WARN_LEVEL = 30;
 
 	// how often to check
-	public static final int DELAY = 60000;
+	public static final int DELAY = 120000;
 
 	@Override
 	public void run() {

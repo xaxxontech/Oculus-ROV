@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 
 public class Downloader {
 	
-	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class, "oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(Downloader.class, "oculus");
 
 	/**
 	 * 

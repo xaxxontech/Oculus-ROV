@@ -168,6 +168,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// watch for low battery, start on config flag??
 		// new EmailAlerts().start();
 		
+		// test 
+		Downloader.main(null);
+		
 		log.info("initialize");
 	}
 	

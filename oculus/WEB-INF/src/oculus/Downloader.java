@@ -12,7 +12,7 @@ public class Downloader {
 
 	/**
 	 * 
-	 * Down load a given URL to the local disk. Will delete existing file first, and create directory if required. 
+	 * Download a given URL to the local disk. Will delete existing file first, and create directory if required. 
 	 *
 	 * @param fileAddress is the full http://url of the remote file
 	 * @param localFileName the file name to use on the host
@@ -57,7 +57,7 @@ public class Downloader {
 				ByteWritten += ByteRead;
 			}
 
-			// System.out.println("local file: " + path + " bytes: " + ByteWritten);
+			log.info("saved to local file: " + path + " bytes: " + ByteWritten);
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
@@ -79,10 +79,10 @@ public class Downloader {
 	/** test driver */
 	public static void main(String[] args) {
 
-		boolean result = FileDownload(
-				"http://oculus.googlecode.com/svn/trunk/sketchbook/oculusDC_id/oculusDC_id.pde",
-				"oculusDC.pde", "foo/bar/test");
-
+		// can we update ourselves? 
+		boolean result = FileDownload("http://oculus.googlecode.com/svn/trunk/oculus/WEB-INF/src/oculus/Downloader.java",
+				"Downloader.java", "src/oculus");
+		
 		if (!result)
 			System.out.println("fail");
 

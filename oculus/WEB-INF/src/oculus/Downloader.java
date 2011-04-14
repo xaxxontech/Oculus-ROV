@@ -133,7 +133,7 @@ public class Downloader {
 		}
 	}
 	
-	public static boolean deleteDir(File dir) {
+	public boolean deleteDir(File dir) {
 	    if (dir.isDirectory()) {
 	        String[] children = dir.list();
 	        for (int i=0; i<children.length; i++) {
@@ -147,21 +147,5 @@ public class Downloader {
 	    // The directory is now empty so delete it
 	    return dir.delete();
 	}
-	
 
-	/** test driver */
-	public static void main(String[] args) {
-
-			// can we update ourselves? 
-			//boolean result = FileDownload("http://oculus.googlecode.com/svn/trunk/oculus/WEB-INF/src/oculus/Downloader.java",
-			//		"Downloader.java", "src/oculus");
-			
-			//if (!result) System.out.println("fail");
-		String s = System.getProperty("file.separator");
-		String path = "/Users/colin/stuff/java/red5backup";
-		path = path.replaceAll("/", s);
-		System.out.println(path);
-		deleteDir(new File(path));
-
-	}
 }

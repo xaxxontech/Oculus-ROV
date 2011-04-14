@@ -5,12 +5,18 @@ import java.net.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
+
 public class Updater {
+	
+	private static Logger log = Red5LoggerFactory.getLogger(Downloader.class, "oculus");
 	
 	/**
 	* @return number of current version, or -1 if unknown
 	* */
 	public int getCurrentVersion() {
+		log.info("reading current version");
 		int currentVersion = -1;
 
 		// get current version info from txt file in root folder
@@ -27,9 +33,11 @@ public class Updater {
 		    		break;
 		    	}
 		    }
+			filein.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		log.info("read current version: "+currentVersion);
 		return currentVersion;	
 	}
 	
@@ -109,7 +117,6 @@ public class Updater {
 		System.out.println(filename);
 		System.out.println(updater.versionNum(filename));
 		// System.out.println(updater.getCurrentVersion());
-
 	}
 
 }

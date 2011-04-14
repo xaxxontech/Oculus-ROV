@@ -868,9 +868,14 @@ function softwareupdate(command,value) {
 	if (command=="downloadcomplete") {
 		var str = "Software update download complete.\n";
 		str += "Update will take effect on next server restart.\n\n";
-		str += "Do you want to restart server now?\n";
-		str += "(connection will be lost, reload in a few seconds)\n"
+		str += "Do you want to restart server now?";
 		if (confirm(str)) { restart(); }
+	}
+	if (command =="version") {
+		message("sending software version request",sentcmdcolor);
+		lagtimer = new Date().getTime(); // has to be *after* message()
+		callServer("softwareupdate","versiononly");
+		overlay("off");
 	}
 }
 

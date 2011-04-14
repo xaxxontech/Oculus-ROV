@@ -301,6 +301,10 @@ function setstatus(status, value) {
 	if (status=="facefound") { facefound(value); }
 	if (status=="autodocklock") { autodocklock(value)}
 	if (status=="autodockcancelled") { autodocking=false; autodock("cancel"); }
+	if (status=="softwareupdate") {
+		if (value=="downloadcomplete") { softwareupdate("downloadcomplete",""); }
+		else { softwareupdate("available",value); }
+	}
 
 }
 
@@ -381,6 +385,7 @@ function motionenabletoggle() {
 	message("sending: motion enable/disable", sentcmdcolor);
 	callServer("motionenabletoggle", "");
 	lagtimer = new Date().getTime();
+	overlay("off");
 }
 
 function move(str) {
@@ -826,6 +831,8 @@ function systemcall(str,conf) {
 		var a = document.getElementById('usersyscommand');
 		str=a.value;
 		a.value = "";
+		overlay('off');
+		message("sending system command: "+str,sentcmdcolor);
 	}
 	if (conf=="y") {
 		if (confirm("execute:\n'"+str+"'\nare you sure?")) { 
@@ -835,6 +842,36 @@ function systemcall(str,conf) {
 		else { message("sytem command aborted", sentcmdcolor); }
 	}
 	else { callServer("systemcall",str); }
+}
+
+function restart() {
+	message("sending system command: "+str,sentcmdcolor);
+	callServer('restart','');
+	overlay('off');
+}
+
+function softwareupdate(command,value) {
+	if (command=="check") { 
+		callServer("softwareupdate","check");
+		message("sending software update request",sentcmdcolor);
+		lagtimer = new Date().getTime(); // has to be *after* message()
+		overlay('off');
+	}
+	if (command=="available") {
+		if (confirm(value)) {
+			message("sending install software download request",sentcmdcolor);
+			lagtimer = new Date().getTime(); // has to be *after* message()
+			callServer("softwareupdate","download");
+		}
+		else { message("software update declined",sentcmdcolor); }
+	}
+	if (command=="downloadcomplete") {
+		var str = "Software update download complete.\n";
+		str += "Update will take effect on next server restart.\n\n";
+		str += "Do you want to restart server now?\n";
+		str += "(connection will be lost, reload in a few seconds)\n"
+		if (confirm(str)) { restart(); }
+	}
 }
 
 function clicksteer(str) {

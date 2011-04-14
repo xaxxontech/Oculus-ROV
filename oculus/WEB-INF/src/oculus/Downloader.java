@@ -2,6 +2,9 @@ package oculus;
 
 import java.io.*;
 import java.net.*;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
@@ -20,7 +23,7 @@ public class Downloader {
 	 * @return true if the file is down loaded, false on any error. 
 	 * 
 	 */
-	public static boolean FileDownload(final String fileAddress,
+	public boolean FileDownload(final String fileAddress,
 			final String localFileName, final String destinationDir) {
 
 		InputStream is = null;
@@ -75,16 +78,67 @@ public class Downloader {
 		// all good
 		return true;
 	}
+	
+	/**
+	 * @param zipFile the zip file that needs to be unzipped
+	 * @param destFolder the folder into which unzip the zip file and create the folder structure
+	 */
+	public void unzipFolder( String zipFile, String destFolder ) {
+		try {
+			ZipFile zf = new ZipFile(zipFile);
+			Enumeration< ? extends ZipEntry> zipEnum = zf.entries();
+			String dir = destFolder;
+
+			while( zipEnum.hasMoreElements() ) {
+				ZipEntry item = (ZipEntry) zipEnum.nextElement();
+
+				if (item.isDirectory()) {
+					File newdir = new File(dir + File.separator + item.getName());
+					newdir.mkdir();
+				} else {
+					String newfilePath = dir + File.separator + item.getName();
+					File newFile = new File(newfilePath);
+					if (!newFile.getParentFile().exists()) {
+						newFile.getParentFile().mkdirs();
+					}
+
+					InputStream is = zf.getInputStream(item);
+					FileOutputStream fos = new FileOutputStream(newfilePath);
+					int ch;
+					while( (ch = is.read()) != -1 ) {
+						fos.write(ch);
+					}
+					is.close();
+					fos.close();
+				}
+			}
+			zf.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param filename
+	 */
+	public void deleteFile(String filename) {
+		File f = new File(filename);
+		try {
+			f.delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 
 	/** test driver */
 	public static void main(String[] args) {
 
 		// can we update ourselves? 
-		boolean result = FileDownload("http://oculus.googlecode.com/svn/trunk/oculus/WEB-INF/src/oculus/Downloader.java",
-				"Downloader.java", "src/oculus");
+		//boolean result = FileDownload("http://oculus.googlecode.com/svn/trunk/oculus/WEB-INF/src/oculus/Downloader.java",
+		//		"Downloader.java", "src/oculus");
 		
-		if (!result)
-			System.out.println("fail");
+		//if (!result) System.out.println("fail");
 
 	}
 }

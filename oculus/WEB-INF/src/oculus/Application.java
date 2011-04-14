@@ -169,8 +169,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// new EmailAlerts().start();
 		
 		// test 
-		Downloader.main(null);
-		
+		//Downloader.main(null);
 		log.info("initialize");
 	}
 	
@@ -353,6 +352,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("autodock")) { autoDock(str); }
 			if (fn.equals("autodockcalibrate")) { autoDock("calibrate "+str); } // eliminate, combine into 'autodock'
 			if (fn.equals("restart")) { restart(); }
+			if (fn.equals("softwareupdate")) { softwareUpdate(str); }
 		}
 		if (fn.equals("assumecontrol")) { assumeControl(str); }
 		if (fn.equals("beapassenger")) { beAPassenger(str); }
@@ -825,19 +825,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void restart() {
-		File f;
-		f=new File(System.getenv("RED5_HOME")+"\\restart");
-		if(!f.exists()){
-			try {
-				f.createNewFile();
-				Runtime.getRuntime().exec("red5-shutdown.bat");
-			} catch (Exception e) {
-				e.printStackTrace();
+		if (admin) {
+			messageplayer("restarting server application", null, null);
+			File f;
+			f=new File(System.getenv("RED5_HOME")+"\\restart");
+			if(!f.exists()){
+				try {
+					f.createNewFile();
+					Runtime.getRuntime().exec("red5-shutdown.bat");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
-	
-	
+
 	private void monitor(String str) {
 		// uses nircmd.exe from http://www.nirsoft.net/utils/nircmd.html
 		messageplayer("monitor "+str,null,null);
@@ -1364,6 +1366,42 @@ public class Application extends MultiThreadedApplicationAdapter {
 					}
 				}
 			}).start();
+		}
+	}
+	
+	private void softwareUpdate(String str) {
+		if (str.equals("check")) {
+			messageplayer("checking for new software...", null, null);
+			Updater updater = new Updater();
+			int currver = updater.getCurrentVersion();
+			String fileurl  = updater.checkForUpdateFile();
+			int newver = updater.versionNum(fileurl); 
+			if (newver > currver) {
+				String message = "New version available: v."+newver+"\n";
+				message +=  "Current software is v."+currver+"\n";
+				message += "Do you want to download and install?";
+				messageplayer("new version available", "softwareupdate", message);
+			}
+			else {
+				messageplayer("no new version available", null, null);
+			}
+		}
+		if (str.equals("download")) {
+			messageplayer("downloading software update", null, null);
+			new Thread(new Runnable() {  public void run() {
+				String fileurl  = new Updater().checkForUpdateFile();
+				System.out.println(fileurl);
+				Downloader dl =new Downloader(); 
+				if (dl.FileDownload(fileurl,"update.zip", "webapps")) {
+					messageplayer("update download complete, unzipping...", null, null);
+					dl.unzipFolder("webapps\\update.zip", "webapps");
+					dl.deleteFile("webapps\\update.zip");
+					messageplayer("done.", "softwareupdate", "downloadcomplete");
+				}
+				else {
+					messageplayer("update download failed",null,null);
+				}
+			} }).start();
 		}
 	}
 	

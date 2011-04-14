@@ -535,12 +535,13 @@ settings:<br>
 <a class="blackbg" href="javascript: autodock('calibrate');">calibrate auto-dock</a><br>
 </div>
 <table><tr><td style="height: 7px"></td></tr></table>
-system commands:<br>
+server commands:<br>
 <div class="menu" style="padding-left: 10px">
+<a class="blackbg" href="javascript: softwareupdate('check','');">check for software update</a><br>
 <a class="blackbg" href="javascript: systemcall('shutdown -s -f -t 01','y');">shutdown</a><br>
 <a class="blackbg" href="javascript: systemcall('shutdown -r -f -t 01','y')">reboot</a><br>
 <a class="blackbg" href="javascript: relaunchgrabber();">relaunch cam/mic grabber</a><br>
-<a class="blackbg" href="javascript: callServer('restart','');">relaunch server</a><br>
+<a class="blackbg" href="javascript: restart();">relaunch server</a><br>
 <a class="blackbg" href="javascript: document.getElementById('usersyscommanddiv').style.display='';
 document.getElementById('extendedsettingsbox').style.display='none';
 document.getElementById('usersyscommand').value='';
@@ -571,10 +572,11 @@ account settings:<br>
 
 <div id="drivingsettings" style="display: none;">
 driving settings:<br>
-speed offsets: slow <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+
+<div style="white-space: nowrap">speed offsets: slow <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="slowoffset" type="text" size="4" >
 med <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
-onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="medoffset" type="text" size="4" ><br>
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="medoffset" type="text" size="4" ></div>
 nudge delay ms <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="nudgedelay" type="text" size="4" ><br>
 max clicksteer ms <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 

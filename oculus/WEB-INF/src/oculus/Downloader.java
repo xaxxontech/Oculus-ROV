@@ -83,7 +83,8 @@ public class Downloader {
 	 * @param zipFile the zip file that needs to be unzipped
 	 * @param destFolder the folder into which unzip the zip file and create the folder structure
 	 */
-	public void unzipFolder( String zipFile, String destFolder ) {
+	public boolean unzipFolder( String zipFile, String destFolder ) {
+		boolean result = false;
 		try {
 			ZipFile zf = new ZipFile(zipFile);
 			Enumeration< ? extends ZipEntry> zipEnum = zf.entries();
@@ -112,10 +113,12 @@ public class Downloader {
 					fos.close();
 				}
 			}
+			result = true;
 			zf.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return result;
 	}
 	
 	/**
@@ -130,15 +133,35 @@ public class Downloader {
 		}
 	}
 	
+	public static boolean deleteDir(File dir) {
+	    if (dir.isDirectory()) {
+	        String[] children = dir.list();
+	        for (int i=0; i<children.length; i++) {
+	            boolean success = deleteDir(new File(dir, children[i]));
+	            if (!success) {
+	                return false;
+	            }
+	        }
+	    }
+
+	    // The directory is now empty so delete it
+	    return dir.delete();
+	}
+	
 
 	/** test driver */
 	public static void main(String[] args) {
 
-		// can we update ourselves? 
-		//boolean result = FileDownload("http://oculus.googlecode.com/svn/trunk/oculus/WEB-INF/src/oculus/Downloader.java",
-		//		"Downloader.java", "src/oculus");
-		
-		//if (!result) System.out.println("fail");
+			// can we update ourselves? 
+			//boolean result = FileDownload("http://oculus.googlecode.com/svn/trunk/oculus/WEB-INF/src/oculus/Downloader.java",
+			//		"Downloader.java", "src/oculus");
+			
+			//if (!result) System.out.println("fail");
+		String s = System.getProperty("file.separator");
+		String path = "/Users/colin/stuff/java/red5backup";
+		path = path.replaceAll("/", s);
+		System.out.println(path);
+		deleteDir(new File(path));
 
 	}
 }

@@ -424,7 +424,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 
 	/** set the cam servo to a new target, and ms to delay after setting pwm pin */
-	private void camset(final int target, final int delay) {
+	public void camset(final int target, final int delay) {
 
 		// TODO: error check the new target ?
 
@@ -447,9 +447,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 
 	/** set the cam servo to a new target, and use default delay */
-	public void camset(final int target) {
-		camset(target, camwait);
-	}
+	//public void camset(final int target) {
+	//	camset(target, camwait);
+	//}
 
 	/** Set the speed on the bot */
 	public void speedset(String str) {

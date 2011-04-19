@@ -574,7 +574,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void tiltTest(String str) {
-		comport.camset(Integer.parseInt(str));
+		comport.camset(Integer.parseInt(str), 400);
 		messageplayer("cam position: " + str, null, null);
 	}
 

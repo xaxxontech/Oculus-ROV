@@ -18,7 +18,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	public static final int TIME_OUT = 2000;
 	public static final int RESPOND_DELAY = 100;
-	
 	public static final long DEAD_TIME_OUT = 8000;
 
 	// add commands here
@@ -46,19 +45,28 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	// track write times
 	private long lastSent = System.currentTimeMillis();
 	private long lastRead = System.currentTimeMillis();
-	
+
 	Settings settings = new Settings();
 
-	protected int speedslow = Integer.parseInt(settings.readSetting("speedslow"));
+	protected int speedslow = Integer.parseInt(settings
+			.readSetting("speedslow"));
 	protected int speedmed = Integer.parseInt(settings.readSetting("speedmed"));
-	protected int camservohoriz = Integer.parseInt(settings.readSetting("camservohoriz"));
-	protected int camposmax = Integer.parseInt(settings.readSetting("camposmax"));
-	protected int camposmin = Integer.parseInt(settings.readSetting("camposmin"));
-	protected int nudgedelay = Integer.parseInt(settings.readSetting("nudgedelay"));
-	protected int maxclicknudgedelay = Integer.parseInt(settings.readSetting("maxclicknudgedelay"));
-	protected int maxclickcam = Integer.parseInt(settings.readSetting("maxclickcam"));
-	protected double clicknudgemomentummult = Double.parseDouble(settings.readSetting("clicknudgemomentummult"));
-	protected int steeringcomp = Integer.parseInt(settings.readSetting("steeringcomp"));
+	protected int camservohoriz = Integer.parseInt(settings
+			.readSetting("camservohoriz"));
+	protected int camposmax = Integer.parseInt(settings
+			.readSetting("camposmax"));
+	protected int camposmin = Integer.parseInt(settings
+			.readSetting("camposmin"));
+	protected int nudgedelay = Integer.parseInt(settings
+			.readSetting("nudgedelay"));
+	protected int maxclicknudgedelay = Integer.parseInt(settings
+			.readSetting("maxclicknudgedelay"));
+	protected int maxclickcam = Integer.parseInt(settings
+			.readSetting("maxclickcam"));
+	protected double clicknudgemomentummult = Double.parseDouble(settings
+			.readSetting("clicknudgemomentummult"));
+	protected int steeringcomp = Integer.parseInt(settings
+			.readSetting("steeringcomp"));
 
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
@@ -104,8 +112,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public void connect() {
 		try {
 
-			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(portName).open(ArduinoCommDC.class.getName(), TIME_OUT);
-			serialPort.setSerialPortParams(19200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
+					portName).open(ArduinoCommDC.class.getName(), TIME_OUT);
+			serialPort.setSerialPortParams(19200, SerialPort.DATABITS_8,
+					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
 			// open streams
 			out = serialPort.getOutputStream();
@@ -117,16 +127,15 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			// System.out.println(e.getMessage());
 			return;
 		}
 
 		// setup delay, give arduino chance to get ready
-		try {
+		/*try {
 			Thread.sleep(TIME_OUT);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		// all good, ready for commands
 		isconnected = true;
@@ -146,7 +155,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				for (int j = 0; j < read; j++) {
 
 					// print() or println() from ardunio code
-					if ((input[j] == '>') || (input[j] == 13) || (input[j] == 10)) {
+					if ((input[j] == '>') || (input[j] == 13)
+							|| (input[j] == 10)) {
 
 						print();
 
@@ -179,7 +189,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		if (buffSize == 0)
 			return;
 
-		System.out.print("read[" + getReadDelta() + "]\twrite[" + getWriteDelta() + "]\tsize[" + buffSize + "] ");
+		System.out.print("read[" + getReadDelta() + "]\twrite["
+				+ getWriteDelta() + "]\tsize[" + buffSize + "] ");
 		String responce = "";
 		for (int i = 0; i < buffSize; i++)
 			responce += (char) buffer[i];
@@ -228,8 +239,11 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					if (isconnected) {
 
-						System.out.println("in delta: " + (System.currentTimeMillis() - lastRead));
-						System.err.println("no info coming back from arduino, resting: " + portName);
+						System.out.println("in delta: "
+								+ (System.currentTimeMillis() - lastRead));
+						System.err
+								.println("no info coming back from arduino, resting: "
+										+ portName);
 
 						// reset
 						disconnect();
@@ -274,25 +288,28 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	 */
 	private synchronized void sendCommand(final byte[] command) {
 
+		/*
 		if (!isconnected) {
 			System.err.println("not connected, try connecting...");
 			connect();
 			return;
 		}
-
+*/
+		
 		if (getWriteDelta() < RESPOND_DELAY) {
-			try {
+			//try {
 
-				// System.out.println("sending too fast: " + getWriteDelta());
-
+				System.out.println("sending too fast: " + getWriteDelta());
+				return;
+				
 				// only wait as long as needed to make next time slot
-				Thread.sleep((RESPOND_DELAY - getWriteDelta()));
+				// Thread.sleep((RESPOND_DELAY - getWriteDelta()));
 
 				// System.out.println("delta now: " + getWriteDelta());
 
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			//} catch (InterruptedException e) {
+			//	e.printStackTrace();
+			//}
 		}
 
 		try {
@@ -310,11 +327,15 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	/** */
 	public void stopGoing() {
+		
+		if(moving){
+			final byte[] command = { STOP, '\n' };
+			new Sender(command);
+		}
+		
 		moving = false;
 		movingforward = false;
 
-		final byte[] command = { STOP, '\n' };
-		new Sender(command);
 	}
 
 	/** */
@@ -355,7 +376,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	/** */
 	public void turnLeft() {
-	
+
 		// set new speed
 		int tmpspeed = turnspeed;
 		int boost = 10;
@@ -369,7 +390,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		moving = true;
 	}
 
-	/** TODO:  not sure how this steers */
+	/** TODO: not sure how this steers */
 	public void camGo() {
 		while (camservodirection != 0) {
 			camset(camservopos, camdelay);
@@ -410,7 +431,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			if (camservopos > camposmax) {
 				camservopos = camposmax;
 			}
-		
+
 			camset(camservopos, camdelay);
 		}
 	}
@@ -581,7 +602,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		 * CONST(eg 2) as x approaches 0, 1 as approaches 320
 		 * ((320-Math.abs(x))/320)*1+1
 		 */
-		double mult = Math.pow(((320.0 - (Math.abs(x))) / 320.0), 3) * clicknudgemomentummult + 1.0;
+		double mult = Math.pow(((320.0 - (Math.abs(x))) / 320.0), 3)
+				* clicknudgemomentummult + 1.0;
 		// System.out.println("clicknudgedelay-before: "+clicknudgedelay);
 		clicknudgedelay = (int) (clicknudgedelay * mult);
 		// System.out.println("n: "+clicknudgemomentummult+" mult: "+mult+" clicknudgedelay-after: "+clicknudgedelay);
@@ -626,11 +648,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	/** send steering compensation values to the arduino */
 	public void updateSteeringComp() {
-		final byte[] command = { COMP, (byte) steeringcomp, '\n' };
-		new Sender(command);
+		// log.info("set steering comp");
+		// new Thread(new Runnable() {
+		//	public void run() {
+				final byte[] command = { COMP, (byte) steeringcomp, '\n' };
+				new Sender(command);
+			//}
+		//});
 	}
 
-	/* test driver */
+	/* test driver
 	public static void main(String[] args) throws Exception {
 
 		FindPort find = new FindPort();
@@ -674,5 +701,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 		// force exit
 		System.exit(0);
-	}
+	}*/
+	
 }

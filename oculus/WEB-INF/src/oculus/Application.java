@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 public class Application extends MultiThreadedApplicationAdapter {
 	IConnection grabber;
 	IConnection player = null;
-	protected ArduinoCommDC comport = null; //new ArduinoCommDC();
+	protected ArduinoCommDC comport = null; 
 	protected Speech sayit = new Speech("kevin16");
 	protected BatteryLife bl;
 	Settings settings= new Settings();
@@ -153,18 +153,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 		FindPort find = new FindPort();
 		String portstr = find.search(FindPort.OCULUS_DC);
 		if (portstr != null) {
-
 			// no watchdog enabled 
-			ArduinoCommDC dc = new ArduinoCommDC(portstr, false);
-			dc.connect();
-			
-		} else { 
-	
-			comport.isconnected = false; 	
+			comport = new ArduinoCommDC(portstr, false);
+			comport.connect();
+			initializeAfterDelay();	
+		}
+		
+		if( !comport.isconnected ){
+			log.error("null com port!");
 		}
 			
-		initializeAfterDelay();
-	
 		httpPort = settings.readRed5Setting("http.port");
 		if (settings.readSetting("skipsetup").equals("yes")) {
 			grabber_launch();

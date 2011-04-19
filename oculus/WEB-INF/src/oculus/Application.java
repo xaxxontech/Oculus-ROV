@@ -536,6 +536,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (n < 0) { n=0; }
 			comport.steeringcomp = n;
 			settings.writeSettings("steeringcomp", Integer.toString(comport.steeringcomp));
+			
+			//TODO: REMOVE 
+			System.out.println("comp now = " + comport.steeringcomp);
+			
 			comport.updateSteeringComp();
 			String s = comport.speedslow + " " + comport.speedmed + " "
 					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " 

@@ -13,7 +13,7 @@ import gnu.io.*;
 public class FindPort {
 
 	/* serial port configuration parameters */
-	public static final int BAUD_RATE = 19200;
+	public static final int BAUD_RATE = 115200;
 	public static final int TIMEOUT = 2000;
 	public static final int DATABITS = SerialPort.DATABITS_8;
 	public static final int STOPBITS = SerialPort.STOPBITS_1;

@@ -17,7 +17,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private Logger log = Red5LoggerFactory.getLogger(ArduinoCommDC.class, "oculus");
 
 	public static final int TIME_OUT = 2000;
-	public static final int RESPOND_DELAY = 100;
+	public static final int RESPOND_DELAY = 200;
 	public static final long DEAD_TIME_OUT = 8000;
 
 	// add commands here
@@ -37,6 +37,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private SerialPort serialPort = null;
 	private InputStream in;
 	private OutputStream out;
+	
+	// protect port?
+	// private boolean busy = false;
 
 	// input buffer
 	private byte[] buffer = new byte[64];
@@ -48,25 +51,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	Settings settings = new Settings();
 
-	protected int speedslow = Integer.parseInt(settings
-			.readSetting("speedslow"));
+	protected int speedslow = Integer.parseInt(settings.readSetting("speedslow"));
 	protected int speedmed = Integer.parseInt(settings.readSetting("speedmed"));
-	protected int camservohoriz = Integer.parseInt(settings
-			.readSetting("camservohoriz"));
-	protected int camposmax = Integer.parseInt(settings
-			.readSetting("camposmax"));
-	protected int camposmin = Integer.parseInt(settings
-			.readSetting("camposmin"));
-	protected int nudgedelay = Integer.parseInt(settings
-			.readSetting("nudgedelay"));
-	protected int maxclicknudgedelay = Integer.parseInt(settings
-			.readSetting("maxclicknudgedelay"));
-	protected int maxclickcam = Integer.parseInt(settings
-			.readSetting("maxclickcam"));
-	protected double clicknudgemomentummult = Double.parseDouble(settings
-			.readSetting("clicknudgemomentummult"));
-	protected int steeringcomp = Integer.parseInt(settings
-			.readSetting("steeringcomp"));
+	protected int camservohoriz = Integer.parseInt(settings.readSetting("camservohoriz"));
+	protected int camposmax = Integer.parseInt(settings.readSetting("camposmax"));
+	protected int camposmin = Integer.parseInt(settings.readSetting("camposmin"));
+	protected int nudgedelay = Integer.parseInt(settings.readSetting("nudgedelay"));
+	protected int maxclicknudgedelay = Integer.parseInt(settings.readSetting("maxclicknudgedelay"));
+	protected int maxclickcam = Integer.parseInt(settings.readSetting("maxclickcam"));
+	protected double clicknudgemomentummult = Double.parseDouble(settings.readSetting("clicknudgemomentummult"));
+	protected int steeringcomp = Integer.parseInt(settings.readSetting("steeringcomp"));
 
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
@@ -112,10 +106,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public void connect() {
 		try {
 
-			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
-					portName).open(ArduinoCommDC.class.getName(), TIME_OUT);
-			serialPort.setSerialPortParams(19200, SerialPort.DATABITS_8,
-					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(portName).open(ArduinoCommDC.class.getName(), TIME_OUT);
+			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
 			// open streams
 			out = serialPort.getOutputStream();
@@ -130,16 +122,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			return;
 		}
 
-		// setup delay, give arduino chance to get ready
-		/*try {
-			Thread.sleep(TIME_OUT);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}*/
-
 		// all good, ready for commands
 		isconnected = true;
-		log.info("connected to: " + portName);
+		
+		// log.info("connected to: " + portName);
 	}
 
 	@Override
@@ -189,13 +175,13 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		if (buffSize == 0)
 			return;
 
-		System.out.print("read[" + getReadDelta() + "]\twrite["
-				+ getWriteDelta() + "]\tsize[" + buffSize + "] ");
+		// System.out.print("read[" + getReadDelta() + "]\twrite["
+		// + getWriteDelta() + "]\tsize[" + buffSize + "] ");
 		String responce = "";
 		for (int i = 0; i < buffSize; i++)
 			responce += (char) buffer[i];
 
-		System.out.println(responce.trim());
+		System.out.println("ardunio: " + responce.trim());
 	}
 
 	/** @return the time since last write() operation */
@@ -239,11 +225,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					if (isconnected) {
 
-						System.out.println("in delta: "
-								+ (System.currentTimeMillis() - lastRead));
-						System.err
-								.println("no info coming back from arduino, resting: "
-										+ portName);
+						System.out.println("in delta: "	+ (System.currentTimeMillis() - lastRead));
+						System.err.println("no info coming back from arduino, resting: " + portName);
 
 						// reset
 						disconnect();
@@ -259,7 +242,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 				try {
 					// check often
-					Thread.sleep(RESPOND_DELAY + 100);
+					Thread.sleep(RESPOND_DELAY*2);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -288,51 +271,49 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	 */
 	private synchronized void sendCommand(final byte[] command) {
 
-		/*
 		if (!isconnected) {
-			System.err.println("not connected, try connecting...");
-			connect();
+			log.error("comport closed, trying to send.");
 			return;
 		}
-*/
-		
-		if (getWriteDelta() < RESPOND_DELAY) {
-			//try {
-
-				System.out.println("sending too fast: " + getWriteDelta());
-				return;
-				
-				// only wait as long as needed to make next time slot
-				// Thread.sleep((RESPOND_DELAY - getWriteDelta()));
-
-				// System.out.println("delta now: " + getWriteDelta());
-
-			//} catch (InterruptedException e) {
-			//	e.printStackTrace();
-			//}
+		/*
+		if(busy){
+			System.out.println("port busy: " + getWriteDelta());
+			return;
 		}
-
+		*/
 		try {
-
-			// send bytes
+				
+			// send bytes FIRST!
 			out.write(command);
+			
+			if (getWriteDelta() < RESPOND_DELAY) {
 
+				// busy = true;
+				// only wait as long as needed to make next time slot
+				Thread.sleep((RESPOND_DELAY - getWriteDelta()));
+				System.out.println("too fast delta now: " + getWriteDelta());
+				
+			} 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		// track last write
 		lastSent = System.currentTimeMillis();
+		
+		// busy = false;
 	}
 
 	/** */
 	public void stopGoing() {
-		
-		if(moving){
+
+		// TODO: only send if really going?
+		// if (moving) {
 			final byte[] command = { STOP, '\n' };
 			new Sender(command);
-		}
 		
+		// }
+
 		moving = false;
 		movingforward = false;
 
@@ -447,13 +428,22 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 		// TODO: error check the new target ?
 
-		if (delay < camdelay) {
-			System.err.println("skipping, cam delay too small!");
-			return;
-		}
+		/*
+		 * if (delay < camdelay) {
+		 * System.err.println("skipping, cam delay too small!"); return; }
+		 */
+
+		// new Thread(new Runnable() {
+		// public void run() {
 
 		final byte[] command = { CAM, (byte) target, (byte) delay, '\n' };
+
+		// sendCommand(command);
+
 		new Sender(command);
+
+		// }});
+
 	}
 
 	/** set the cam servo to a new target, and use default delay */
@@ -650,57 +640,46 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public void updateSteeringComp() {
 		// log.info("set steering comp");
 		// new Thread(new Runnable() {
-		//	public void run() {
-				final byte[] command = { COMP, (byte) steeringcomp, '\n' };
-				new Sender(command);
-			//}
-		//});
+		// public void run() {
+		final byte[] command = { COMP, (byte) steeringcomp, '\n' };
+		new Sender(command);
+		// }
+		// });
 	}
 
-	/* test driver
-	public static void main(String[] args) throws Exception {
+	/*
+	 * test driver public static void main(String[] args) throws Exception {
+	 * 
+	 * FindPort find = new FindPort(); String portstr =
+	 * find.search(FindPort.OCULUS_DC); if (portstr != null) {
+	 * 
+	 * ArduinoCommDC dc = new ArduinoCommDC(portstr, false);
+	 * 
+	 * dc.connect(); if (!dc.isconnected) {
+	 * System.out.println("can't connect to: " + portstr); System.exit(0); }
+	 * 
+	 * // System.out.println("connected oculus on: " + portstr);
+	 * 
+	 * dc.updateSteeringComp(); dc.goBackward(); dc.camset(170);
+	 * dc.goBackward();
+	 * 
+	 * Thread.sleep(7700);
+	 * 
+	 * dc.turnLeft();
+	 * 
+	 * Thread.sleep(3900);
+	 * 
+	 * dc.turnRight(); dc.camset(0);
+	 * 
+	 * Thread.sleep(4760);
+	 * 
+	 * dc.stopGoing(); dc.camset(100);
+	 * 
+	 * // test watchdog // Thread.sleep(30000); }
+	 * 
+	 * System.out.println(".. done");
+	 * 
+	 * // force exit System.exit(0); }
+	 */
 
-		FindPort find = new FindPort();
-		String portstr = find.search(FindPort.OCULUS_DC);
-		if (portstr != null) {
-
-			ArduinoCommDC dc = new ArduinoCommDC(portstr, false);
-
-			dc.connect();
-			if (!dc.isconnected) {
-				System.out.println("can't connect to: " + portstr);
-				System.exit(0);
-			}
-
-			// System.out.println("connected oculus on: " + portstr);
-
-			dc.updateSteeringComp();
-			dc.goBackward();
-			dc.camset(170);
-			dc.goBackward();
-
-			Thread.sleep(7700);
-
-			dc.turnLeft();
-
-			Thread.sleep(3900);
-
-			dc.turnRight();
-			dc.camset(0);
-
-			Thread.sleep(4760);
-
-			dc.stopGoing();
-			dc.camset(100);
-
-			// test watchdog
-			// Thread.sleep(30000);
-		}
-
-		System.out.println(".. done");
-
-		// force exit
-		System.exit(0);
-	}*/
-	
 }

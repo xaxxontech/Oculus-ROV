@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 public class Application extends MultiThreadedApplicationAdapter {
 	IConnection grabber;
 	IConnection player = null;
-	protected ArduinoCommDC comport = new ArduinoCommDC();
+	protected ArduinoCommDC comport = null; //new ArduinoCommDC();
 	protected Speech sayit = new Speech("kevin16");
 	protected BatteryLife bl;
 	Settings settings= new Settings();
@@ -148,22 +148,29 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void initialize() {
-		FindPort port = new FindPort();
-		try {
-			portstr = port.search(FindPort.OCULUS_DC);
-			if (portstr != null) {
-				comport.connect(portstr);
-			}
-			else  { comport.isconnected = false; }
-			initializeAfterDelay();
-		} catch (Exception e) {
-			e.printStackTrace();
+		
+
+		FindPort find = new FindPort();
+		String portstr = find.search(FindPort.OCULUS_DC);
+		if (portstr != null) {
+
+			// no watchdog enabled 
+			ArduinoCommDC dc = new ArduinoCommDC(portstr, false);
+			dc.connect();
+			
+		} else { 
+	
+			comport.isconnected = false; 	
 		}
+			
+		initializeAfterDelay();
+	
 		httpPort = settings.readRed5Setting("http.port");
 		if (settings.readSetting("skipsetup").equals("yes")) {
 			grabber_launch();
+		} else { 
+			initialize_launch(); 
 		}
-		else { initialize_launch(); }
 		
 		// watch for low battery, start on config flag??
 		// new EmailAlerts().start();
@@ -565,7 +572,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void tiltTest(String str) {
-		comport.camToPos(Integer.parseInt(str));
+		comport.camset(Integer.parseInt(str));
 		messageplayer("cam position: " + str, null, null);
 	}
 

@@ -28,6 +28,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public static byte RIGHT = 'r';
 	public static byte COMP = 'c';
 	public static byte CAM = 'v';
+	public static byte CAMRELEASE = 'w';
 
 	// just do on reset instead?
 	public final byte[] GET_PRODUCT = { 'x' };
@@ -65,7 +66,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
 	protected int camwait = 400;
-	protected int camdelay = 50;
+	protected int camdelay = 50; // for smooth continuous motion
 	protected int speedfast = 255;
 	protected int turnspeed = 255;
 	protected int speed = speedfast; // set default to max
@@ -285,7 +286,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				
 			// send bytes FIRST!
 			out.write(command);
-			
+			/*
 			if (getWriteDelta() < RESPOND_DELAY) {
 
 				// busy = true;
@@ -294,6 +295,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				System.out.println("too fast delta now: " + getWriteDelta());
 				
 			} 
+			*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -371,20 +373,29 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		moving = true;
 	}
 
-	/** TODO: not sure how this steers */
 	public void camGo() {
-		while (camservodirection != 0) {
-			camset(camservopos, camdelay);
-			camservopos += camservodirection;
-			if (camservopos > camposmax) {
-				camservopos = camposmax;
-				camservodirection = 0;
-			}
-			if (camservopos < camposmin) {
-				camservopos = camposmin;
-				camservodirection = 0;
-			}
-		}
+		new Thread(new Runnable() { public void run() {
+			try {
+				while (camservodirection != 0) {
+					//camset(camservopos, camdelay);
+					final byte[] command = { CAM, (byte) camservopos, '\n' };
+					sendCommand(command);
+					Thread.sleep(camdelay);
+					camservopos += camservodirection;
+					if (camservopos > camposmax) {
+						camservopos = camposmax;
+						camservodirection = 0;
+					}
+					if (camservopos < camposmin) {
+						camservopos = camposmin;
+						camservodirection = 0;
+					}
+				}
+				Thread.sleep(250);
+				final byte[] command = { CAMRELEASE, '\n' };
+				sendCommand(command);
+	        } catch (Exception e) {e.printStackTrace(); }
+		} }).start();
 	}
 
 	public void camCommand(String str) {
@@ -403,54 +414,81 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			if (camservopos < camposmin) {
 				camservopos = camposmin;
 			}
-
-			camset(camservopos, camwait);
-
-		}
-		if (str.equals("upabit")) {
+			new Thread(new Runnable() { public void run() {
+				try {
+					final byte[] command = { CAM, (byte) camservopos, '\n' };
+					sendCommand(command);
+					Thread.sleep(camwait);
+					final byte[] command1 = { CAMRELEASE, '\n' };
+					sendCommand(command1);
+				} catch (Exception e) {e.printStackTrace(); }
+			} }).start();
+		} else  if (str.equals("upabit")) {
 			camservopos += 5;
 			if (camservopos > camposmax) {
 				camservopos = camposmax;
 			}
-
-			camset(camservopos, camdelay);
+			new Thread(new Runnable() { public void run() {
+				try {
+					final byte[] command = { CAM, (byte) camservopos, '\n' };
+					sendCommand(command);
+					Thread.sleep(camwait);
+					final byte[] command1 = { CAMRELEASE, '\n' };
+					sendCommand(command1);
+				} catch (Exception e) {e.printStackTrace(); }
+			} }).start();
 		}
 	}
 
 	/** level the camera servo */
 	public void camHoriz() {
 		camservopos = camservohoriz;
-		camset(camservopos, camwait);
+		new Thread(new Runnable() { public void run() {
+			try {
+				final byte[] command = { CAM, (byte) camservopos, '\n' };
+				sendCommand(command);
+				Thread.sleep(camwait);
+				final byte[] command1 = { CAMRELEASE, '\n' };
+				sendCommand(command1);
+			} catch (Exception e) {e.printStackTrace(); }
+		} }).start();
 	}
 
 	/** set the cam servo to a new target, and ms to delay after setting pwm pin */
-	public void camset(final int target, final int delay) {
-
-		// TODO: error check the new target ?
-
-		/*
-		 * if (delay < camdelay) {
-		 * System.err.println("skipping, cam delay too small!"); return; }
-		 */
-
-		// new Thread(new Runnable() {
-		// public void run() {
-
-		final byte[] command = { CAM, (byte) target, (byte) delay, '\n' };
-
-		// sendCommand(command);
-
-		new Sender(command);
-
-		// }});
-
+	/*
+	public void camset() {
+		new Thread(new Runnable() { public void run() {
+			try {
+				final byte[] command = { CAM, (byte) camservopos, '\n' };
+				sendCommand(command);
+				Thread.sleep(camwait);
+				final byte[] command1 = { CAMRELEASE, '\n' };
+				sendCommand(command1);
+			} catch (Exception e) {e.printStackTrace(); }
+		} }).start();
 	}
+	*/
 
 	/** set the cam servo to a new target, and use default delay */
 	//public void camset(final int target) {
 	//	camset(target, camwait);
 	//}
 
+    public void camToPos(Integer n) {
+        camservopos = n;
+        new Thread(new Runnable() {public void run() {
+            try {
+            	final byte[] command = { CAM, (byte) camservopos, '\n' };
+            	sendCommand(command);
+            	Thread.sleep(camwait);
+            	final byte[] command1 = { CAMRELEASE, '\n' };
+            	sendCommand(command1);
+            } catch (Exception e) {
+                    e.printStackTrace();
+            }
+        } }).start();
+    }
+	
 	/** Set the speed on the bot */
 	public void speedset(String str) {
 		if (str.equals("slow")) {
@@ -632,7 +670,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}
 
 		// TODO: check with colin... why return if we have access to this??
-		camset(camservopos, camwait + clicknudgedelay);
+		//camset(camservopos, camwait + clicknudgedelay);
+		new Thread(new Runnable() { public void run() {
+			try {
+				final byte[] command = { CAM, (byte) camservopos, '\n' };
+				sendCommand(command);
+				Thread.sleep(camwait + clicknudgedelay);
+				final byte[] command1 = { CAMRELEASE, '\n' };
+				sendCommand(command1);
+			} catch (Exception e) {e.printStackTrace(); }
+		} }).start();
 		return camservopos;
 	}
 

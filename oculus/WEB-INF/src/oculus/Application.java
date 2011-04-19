@@ -151,7 +151,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 
 		FindPort find = new FindPort();
-		String portstr = find.search(FindPort.OCULUS_DC);
+		portstr = find.search(FindPort.OCULUS_DC);
 		if (portstr != null) {
 			// no watchdog enabled 
 			comport = new ArduinoCommDC(portstr, false);
@@ -574,7 +574,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void tiltTest(String str) {
-		comport.camset(Integer.parseInt(str), 400);
+		comport.camToPos(Integer.parseInt(str));
 		messageplayer("cam position: " + str, null, null);
 	}
 

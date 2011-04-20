@@ -384,7 +384,7 @@ function keyBoardPressed(event) {
 function motionenabletoggle() {
 	message("sending: motion enable/disable", sentcmdcolor);
 	callServer("motionenabletoggle", "");
-	lagtimer = new Date().getTime();
+	lagtimer = new Date().getTime(); // has to be *after* message()
 	overlay("off");
 }
 

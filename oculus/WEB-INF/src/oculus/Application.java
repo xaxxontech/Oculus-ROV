@@ -836,15 +836,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void restart() {
 		if (admin) {
 			messageplayer("restarting server application", null, null);
+			messageGrabber("restarting server application", null);
 			File f;
 			f=new File(System.getenv("RED5_HOME")+"\\restart");
-			if(!f.exists()){
-				try {
-					f.createNewFile();
-					Runtime.getRuntime().exec("red5-shutdown.bat");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			try {
+				if(!f.exists()){ f.createNewFile(); }
+				Runtime.getRuntime().exec("red5-shutdown.bat");
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

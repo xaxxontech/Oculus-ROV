@@ -541,11 +541,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void wasReset(){
-		messageplayer("reset firmware", "reset firmware", null);
+		messageplayer("firmware reseting", null, null);
 		new Thread(new Runnable() { public void run() {
 			try {
 				Thread.sleep(300);
-				messageplayer("firmware version = " + comport.getVersion(), null, null);
+				messageplayer("firmware version: " + comport.getVersion(), null, null);
 			}catch (Exception e) {
 				log.error(e.getMessage());
 			}

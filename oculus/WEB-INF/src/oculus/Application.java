@@ -374,7 +374,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (fn.equals("facerect")) { messageplayer(null, "facefound", str); }
 		if (fn.equals("dockgrabbed")) { autoDock("dockgrabbed "+str); }
 		if (fn.equals("autodock")) { autoDock(str); }
-		if (fn.equals("restart")) { restart(); }
+		if (fn.equals("restart")) { admin=true; restart(); }
 	}
 	
 	private void grabberSetStream(String str) {

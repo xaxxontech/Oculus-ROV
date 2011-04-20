@@ -149,20 +149,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	public void initialize() {
 		
-
 		FindPort find = new FindPort();
 		portstr = find.search(FindPort.OCULUS_DC);
 		if (portstr != null) {
-			// no watchdog enabled 
-			comport = new ArduinoCommDC(portstr, false);
+			// true for watch dog enabled 
+			comport = new ArduinoCommDC(portstr, true, this);
 			comport.connect();
-			initializeAfterDelay();	
+			// not used 
+			// initializeAfterDelay();	
 		}
 		
-		if( !comport.isconnected ){
-			log.error("null com port!");
-		}
-			
 		httpPort = settings.readRed5Setting("http.port");
 		if (settings.readSetting("skipsetup").equals("yes")) {
 			grabber_launch();
@@ -536,10 +532,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (n < 0) { n=0; }
 			comport.steeringcomp = n;
 			settings.writeSettings("steeringcomp", Integer.toString(comport.steeringcomp));
-			
-			//TODO: REMOVE 
-			System.out.println("comp now = " + comport.steeringcomp);
-			
 			comport.updateSteeringComp();
 			String s = comport.speedslow + " " + comport.speedmed + " "
 					+ comport.nudgedelay + " " + comport.maxclicknudgedelay + " " 
@@ -548,6 +540,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
+	public void wasReset(){
+		messageplayer("reset firmware", "reset firmware", null);
+		new Thread(new Runnable() { public void run() {
+			try {
+				Thread.sleep(300);
+				messageplayer("firmware version = " + comport.getVersion(), null, null);
+			}catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}}).start();
+	}
+	
 	private void getTiltSettings() {
 		if (admin) {
 			String str = comport.camservohoriz + " " + comport.camposmax + " "
@@ -700,6 +704,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
+	/*
 	private void initializeAfterDelay() {
 		new Thread(new Runnable() {
 			public void run() {
@@ -713,7 +718,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		}).start();
-	}
+	}*/
 	
 	private void cameraCommand(String str) {
 		comport.camCommand(str);

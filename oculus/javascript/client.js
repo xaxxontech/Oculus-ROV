@@ -850,6 +850,11 @@ function restart() {
 	overlay('off');
 }
 
+function arduinoEcho(){
+	message("enable firmware command echo");
+	
+}
+
 function softwareupdate(command,value) {
 	if (command=="check") { 
 		callServer("softwareupdate","check");

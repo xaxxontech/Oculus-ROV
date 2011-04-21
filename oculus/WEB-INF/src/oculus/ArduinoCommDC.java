@@ -40,7 +40,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private OutputStream out;
 	
 	// add a 'z' to commands 
-	protected boolean echo = true;
+	protected boolean echo = false;
+	
+	// will be discovered from the device 
 	protected String version = null;
 
 	// input buffer
@@ -97,6 +99,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	 *            set to true to enable an internal thread to watch for a
 	 *            non-responsive arduino. Will try to disconnect() and then
 	 *            connect() again.
+	 *            
+	 * @param app 
+	 * 			  is the main oculus application, we need to call it on
+	 * 			Serial events like restet            
 	 */
 	public ArduinoCommDC(String str, boolean watchdog, Application app) {
 
@@ -185,13 +191,13 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private void execute() {
 
 		// copy out of buffer 
-		String responce = "";
+		String response = "";
 		for(int i = 0 ; i < buffSize ; i++)
-			responce += (char)buffer[i];
-		responce = responce.trim();
+			response += (char)buffer[i];
+		response = response.trim();
 		
 		// take action as ardiuno has just turned on 
-		if(responce.equals("reset")){
+		if(response.equals("reset")){
 			
 			application.wasReset();
 			isconnected = true;
@@ -202,28 +208,28 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			version = null;
 			new Sender(GET_VERSION);
 		
-		} else if(responce.startsWith("version:")){
-			
+		} else if(response.startsWith("version:")){
 			// NOTE: watchdog will send a get version command if idle comport 
 			if(version == null) 
-				version = responce.substring(
-						responce.indexOf("version:")+8, responce.length());
+				version = response.substring( 
+						response.indexOf("version:")+8, response.length());
 	
 			// don't flood std.out 
 			return;
 			
-		} else if(responce.equals("overflow")){
-			log.error("Sending too fast: " + getWriteDelta());
+		} else if(response.equals("overflow")){
+			log.error("disconnecting, sending too fast: " + getWriteDelta());
 			disconnect();
 		}
 		
 		// act on feedback
-		if(responce.charAt(0) == STOP[0]){
+		if(response.charAt(0) == STOP[0]){
 			movingforward = false;
 			moving = false;
-		} else if(responce.charAt(0) != GET_VERSION[0]){
+		} else if(response.charAt(0) != GET_VERSION[0]){
 			// don't bother showing watchdog pings 
-			System.out.println("ardunio: " + responce);
+			// System.out.println("ardunio: " + response);
+			application.message("arduino: " + response, null, null);
 		}
 	}
 
@@ -262,7 +268,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/** inner class to check if getting responses */
 	private class WatchDog extends Thread {
 		public WatchDog() {
-			System.out.println("starting watchdog thread");
+			application.message("starting watchdog thread", null, null);
 			this.setDaemon(true);
 		}
 		public void run() {
@@ -275,9 +281,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					if (isconnected) {
 
-						// System.out.println("in delta: "	+ getReadDelta());
-						System.err.println("disconnecting, no data coming in on port: " + portName);
-
+						// show user 
+						application.message("watchdog time out, resting", null, null);
+						
 						// reset arduino
 						disconnect();
 						
@@ -316,7 +322,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	 * Send a multi byte command to send the arduino 
 	 * 
 	 * @param command
-	 *            is a finalized byte array of messages to send
+	 *            is a byte array of messages to send
 	 */
 	private synchronized void sendCommand(final byte[] command) {
 		
@@ -422,7 +428,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					}
 				}
 				Thread.sleep(250);
-				// [] command = { CAMRELEASE };
 				sendCommand(CAMRELEASE);
 	        } catch (Exception e) {e.printStackTrace(); }
 		} }).start();
@@ -704,21 +709,4 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		byte[] command = { COMP, (byte) steeringcomp };
 		new Sender(command);
 	}
-	
-	/*
-	 * test driver public static void main(String[] args) throws Exception {
-	 * 
-	 * FindPort find = new FindPort(); String portstr =
-	 * find.search(FindPort.OCULUS_DC); if (portstr != null) {
-	 * 
-	 * ArduinoCommDC dc = new ArduinoCommDC(portstr, false);
-	 * 
-	 * dc.connect(); if (!dc.isconnected) {
-	 * System.out.println("can't connect to: " + portstr); System.exit(0); }
-	 * 
-	 * // System.out.println("connected oculus on: " + portstr);
-	 * 
-	 * dc.updateSteeringComp();
-	 */
-
 }

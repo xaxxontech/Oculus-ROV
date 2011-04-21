@@ -352,6 +352,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("autodockcalibrate")) { autoDock("calibrate "+str); } // eliminate, combine into 'autodock'
 			if (fn.equals("restart")) { restart(); }
 			if (fn.equals("softwareupdate")) { softwareUpdate(str); }
+			if (fn.equals("arduinoecho")){ 
+				if(str.equals("on")) comport.setEcho(true); else comport.setEcho(false); }
+		
 		}
 		if (fn.equals("assumecontrol")) { assumeControl(str); }
 		if (fn.equals("beapassenger")) { beAPassenger(str); }
@@ -550,6 +553,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 				log.error(e.getMessage());
 			}
 		}}).start();
+	}
+	
+	// TODO... WHY NEEDED?
+	public void message(String str, String status, String value){
+		messageplayer(str, status, value);
 	}
 	
 	private void getTiltSettings() {

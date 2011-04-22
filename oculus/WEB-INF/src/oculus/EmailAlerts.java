@@ -35,17 +35,21 @@ public class EmailAlerts extends Thread {
 		boolean alive = true;
 		while (alive) {
 			
-			app.message("email thread checking: " + battery.hashCode(), null, null);
+			int batt[] = battery.battStatsCombined(); 
+			String life = Integer.toString(batt[0]);
+			int s = batt[1];
+			String status = Integer.toString(s); // in case its not 1 or 2
+			
+			app.message("email thread checking: " + "battery "+life+"%,"+status, null, null);
 
 			if (battery.batteryStatus() < WARN_LEVEL) {
 				app.message("battery low, sending email", null, null);
 
-				if (!SendMail.sendMessage("Oculus Message", "battery low, now at: " + battery.batteryStatus())){
+				if (!SendMail.sendMessage("Oculus Message", "battery "+life+"%,"+status)){
 				
 					app.message("<font color=\"red\">cound not send battery warming email</a>", null, null);
 				
 					log.error("turning off email alerts");
-					
 					alive = false;
 				}
 				

@@ -363,7 +363,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/** */
 	public void goForward() {
 
-		 byte[] command = { FORWARD, (byte) speed };
+		byte[] command = { FORWARD, (byte) speed };
 		new Sender(command);
 
 		moving = true;
@@ -373,7 +373,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/** */
 	public void goBackward() {
 
-		 byte[] command = { BACKWARD, (byte) speed };
+	    byte[] command = { BACKWARD, (byte) speed };
 		new Sender(command);
 
 		moving = true;

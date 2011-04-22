@@ -359,9 +359,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 				// took pic above, now send it 
 					messageplayer("email frame command received", null, null);
-					if( ! SendMail.sendMessage("Oculus Screen Shot", "pic attached")) 
-						// , "images/framegrab.png"))			
-						message("<font color=\"red\">failed to send email</font", null, null);
+					SendMail.sendMessage("Oculus Screen Shot", "pic attached", "images/framegrab.png");			
+						
+						
+						//message("<font color=\"red\">failed to send email</font", null, null);
 			
 			}
 			if (fn.equals("facegrab")) { faceGrab(str); }

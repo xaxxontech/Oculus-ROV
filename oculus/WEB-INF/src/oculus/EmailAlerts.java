@@ -5,7 +5,8 @@ import org.slf4j.Logger;
 
 public class EmailAlerts extends Thread {
 
-	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class, "oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class,
+			"oculus");
 
 	// how low of battery to warm user with email
 	public static final int WARN_LEVEL = 30;
@@ -26,31 +27,39 @@ public class EmailAlerts extends Thread {
 		app.message("starting email alert thread", null, null);
 		boolean alive = true;
 		while (alive) {
-			
-			if(app.battery != null){
+
+			if (app.battery != null) {
 
 				// TODO: use instance in application?
 				int batt[] = app.battery.battStatsCombined();
 				String life = Integer.toString(batt[0]);
-				
-				//int s = batt[1];
-				//String status = Integer.toString(s); // in case its not 1 or 2
-	
-				app.message("email thread checking: " + "battery " + life + "%", null, null);
-	
-				if (app.battery.batteryStatus() < WARN_LEVEL) {
-					app.message("battery low, sending email", null, null);
-	
-					if (! new SendMail().sendMessage("Oculus Message", "battery " + life + "%")) {
-	
-						app.message("<font color=\"red\">cound not send battery warning email</font>", null, null);
-	
-						log.error("failed to send, turning off email alerts");
-						alive = false;
+
+				int s = batt[1];
+
+				// String status = Integer.toString(s); // in case its not 1 or
+				// 2
+
+				// if draining only 
+				if (s == 1) {
+
+					app.message("email thread checking: " + "battery " + life
+							+ "%", null, null);
+
+					if (app.battery.batteryStatus() < WARN_LEVEL) {
+						app.message("battery low, sending email", null, null);
+
+						if (!new SendMail().sendMessage("Oculus Message",
+								"battery " + life + "% and is draining")) {
+
+							app.message("<font color=\"red\">cound not send battery warning email</font>", null, null);
+
+							log.error("failed to send, turning off email alerts");
+							alive = false;
+						}
+
+						// don't flood
+						Util.delay(DELAY * 10);
 					}
-			
-					// don't flood
-					Util.delay(DELAY * 10);
 				}
 			}
 			Util.delay(DELAY);

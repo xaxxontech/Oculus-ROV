@@ -288,7 +288,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 	
 	public void reset(){
-		application.message("<font color\"red\">resetting firmware</font>", null, null);
+		application.message("<font color\"red\">reset firmware</font>", null, null);
 		disconnect();
 		connect();
 	}

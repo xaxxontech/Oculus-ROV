@@ -53,25 +53,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 	int autodockctrattempts;
 	String docktarget;
 	protected String portstr = null;
-	
-	
-	// singleton 
-	// private static Application application = null;
-	
+
 	public Application() { 
 		super();
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		initialize();
-		
-		//if(application == null)
-			//application = this;
 	}
 	
-	//public static Application getRefrence(){
-	//	return application;
-	//}
-
 	public boolean appConnect(IConnection connection, Object[] params) { // override
 		String logininfo[] = ((String) params[0]).split(" ");
 		if ((connection.getRemoteAddress()).equals("127.0.0.1") && logininfo[0].equals("")) { // always accept local grabber
@@ -358,7 +347,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 			if (fn.equals("emailgrab")) {
-				// took pic above, now send it 
+				
+					// takes time to save file 
+					Util.delay(1200);
+				    // took pic above, now send it 
 					messageplayer("email frame command received", null, null);
 					new SendMail().sendMessage("Oculus Screen Shot", "pic attached", System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");						
 			}

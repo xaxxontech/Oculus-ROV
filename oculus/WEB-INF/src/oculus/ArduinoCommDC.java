@@ -53,8 +53,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private long lastSent = System.currentTimeMillis();
 	private long lastRead = System.currentTimeMillis();
 
-	Settings settings = new Settings();
- 
+	Settings settings = new Settings(); 
 	protected int speedslow = settings.getInteger("speedslow"); 
 	protected int speedmed = settings.getInteger("speedmed");
 	protected int camservohoriz = settings.getInteger("camservohoriz");
@@ -110,7 +109,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		portName = str;
 
 		// call back to notify on reset events etc
-		application  = app; //Application.getRefrence();
+		application  = app; 
 		
 		// check for lost connection
 		if (watchdog)
@@ -133,7 +132,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			serialPort.notifyOnDataAvailable(true);
 			
 			// setup delay 
-			Thread.sleep(SETUP);
+			Util.delay(SETUP);
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
@@ -189,42 +188,35 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	// TODO: store commands sent if echo'ing.. record errors and dropped commands 
 	private void execute() {
-
-		// copy out of buffer 
 		String response = "";
 		for(int i = 0 ; i < buffSize ; i++)
 			response += (char)buffer[i];
-		response = response.trim();
 		
 		// take action as ardiuno has just turned on 
 		if(response.equals("reset")){
-		
 			// might have new firmware after reseting? 
 			version = null;
 			new Sender(GET_VERSION);
-			
-			// application.wasReset();
 			isconnected = true;
 			updateSteeringComp();
 			camHoriz();
 		
 		} else if(response.startsWith("version:")){
 			
-			// NOTE: watchdog will send a get version command if idle comport 
+			// NOTE: watchdog will send a get version command if idle comm port  
 			if(version == null){
-				
 				// get just the number 
 				version = response.substring( 
 						response.indexOf("version:")+8, response.length());
 	
-				application.message("firmware version: " + version, "arduino connected", null);
+				application.message("firmware version: " + version, null, null);
 			}
 				
 			// don't flood std.out 
 			return;
 			
 		} else if(response.equals("overflow")){
-			log.error("disconnecting, sending too fast: " + getWriteDelta());
+			log.error("resetting firmware, sending too fast: " + getWriteDelta());
 			reset(); 
 		}
 		
@@ -232,8 +224,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		if(response.charAt(0) == STOP[0]){
 			movingforward = false;
 			moving = false;
-		} else if(/*(!response.startsWith("version:")) && */
-			response.charAt(0) != GET_VERSION[0]){
+		} else if(response.charAt(0) != GET_VERSION[0]){
 			// don't bother showing watchdog pings to user screen 
 			application.message("arduino: " + response, null, null);
 		}
@@ -274,36 +265,30 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/** inner class to check if getting responses */
 	private class WatchDog extends Thread {
 		public WatchDog() {
-			application.message("starting watchdog thread", null, null);
 			this.setDaemon(true);
 		}
 		public void run() {
-			//Util.delay(SETUP);
-			try {
-				Thread.sleep(SETUP);
-				while (true) {
-					if (getReadDelta() > DEAD_TIME_OUT) {
-						if (isconnected) {
-	
-							reset();
-							
-							// show user 
-							application.message("watchdog time out, resetting", null, null);
-						}
+			Util.delay(SETUP);
+			application.message("starting watchdog thread", null, null);
+			while (true) {
+				if (getReadDelta() > DEAD_TIME_OUT) {
+					if (isconnected) {
+						reset(); 
+						application.message("watchdog time out, resetting", null, null);
 					}
-	
-					// send ping to keep connection alive 
-					if(getReadDelta() > (DEAD_TIME_OUT / 3))
-						new Sender(GET_VERSION);
-				
-					//Util.delay(WATCHDOG_DELAY);
-					Thread.sleep(WATCHDOG_DELAY);
 				}
-	        } catch (Exception e) {e.printStackTrace(); }
+
+				// send ping to keep connection alive 
+				if(getReadDelta() > (DEAD_TIME_OUT / 3))
+					if(isconnected) new Sender(GET_VERSION);
+			
+				Util.delay(WATCHDOG_DELAY);
+			}
 		}
 	}
 	
 	public void reset(){
+		application.message("<font color\"red\">resetting firmware</font>", null, null);
 		disconnect();
 		connect();
 	}
@@ -343,7 +328,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			out.write(13);
 			
 		} catch (Exception e) {
-			disconnect();
+			reset();
 			log.error(e.getMessage());
 		}
 
@@ -353,48 +338,40 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	/** */
 	public void stopGoing() {
-
 		// TODO: only send if really going?
-		// if (moving) { 
-		// byte[] command = { STOP };
+		// if (moving)	
 		
 		new Sender(STOP);
-		
 		moving = false;
 		movingforward = false;
 	}
 
 	/** */
 	public void goForward() {
-
-		byte[] command = { FORWARD, (byte) speed };
-		new Sender(command);
-
+///		byte[] command = { FORWARD, (byte) speed };
+		new Sender(new byte[]{ FORWARD, (byte) speed });
 		moving = true;
 		movingforward = true;
 	}
 
 	/** */
 	public void goBackward() {
-
-	    byte[] command = { BACKWARD, (byte) speed };
-		new Sender(command);
-
+//	    byte[] command = { BACKWARD, (byte) speed };
+		new Sender(new byte[]{ BACKWARD, (byte) speed });
 		moving = true;
 		movingforward = false;
 	}
 
 	/** */
 	public void turnRight() {
-
 		// set new speed
 		int tmpspeed = turnspeed;
 		int boost = 10;
 		if (speed < turnspeed && (speed + boost) < speedfast)
 			tmpspeed = speed + boost;
 
-		byte[] command = { RIGHT, (byte) tmpspeed };
-		new Sender(command);
+//		byte[] command = { RIGHT, (byte) tmpspeed };
+		new Sender(new byte[]{ RIGHT, (byte) tmpspeed });
 		moving = true;
 	}
 
@@ -407,18 +384,19 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		if (speed < turnspeed && (speed + boost) < speedfast)
 			tmpspeed = speed + boost;
 
-		byte[] command = { LEFT, (byte) tmpspeed };
-		new Sender(command);
+		// byte[] command = { LEFT, (byte) tmpspeed };
+		new Sender(new byte[] { LEFT, (byte) tmpspeed });
 		moving = true;
 	}
 
 	public void camGo() {
 		new Thread(new Runnable() { public void run() {
-			try {
+			//try {
 				while (camservodirection != 0) {
-					byte[] command = { CAM, (byte) camservopos };
-					sendCommand(command);
-					Thread.sleep(camdelay);
+				//	byte[] command = { CAM, (byte) camservopos };
+					sendCommand(new byte[] { CAM, (byte) camservopos });
+					Util.delay(camdelay);
+					// Thread.sleep(camdelay);
 					camservopos += camservodirection;
 					if (camservopos > camposmax) {
 						camservopos = camposmax;
@@ -429,9 +407,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 						camservodirection = 0;
 					}
 				}
-				Thread.sleep(250);
+				Util.delay(250);
+				//Thread.sleep(250);
 				sendCommand(CAMRELEASE);
-	        } catch (Exception e) {e.printStackTrace(); }
+	       // } catch (Exception e) {e.printStackTrace(); }
 		} }).start();
 	}
 
@@ -452,13 +431,14 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				camservopos = camposmin;
 			}
 			new Thread(new Runnable() { public void run() {
-				try {
-					byte[] command = { CAM, (byte) camservopos };
-					sendCommand(command);
-					Thread.sleep(camwait);
+				// try {
+					//byte[] command = { CAM, (byte) camservopos };
+					sendCommand(new byte[]{ CAM, (byte) camservopos });
+					Util.delay(camdelay);
+					////Thread.sleep(camwait);
 					// byte[] command1 = { CAMRELEASE };
 					sendCommand(CAMRELEASE);
-				} catch (Exception e) {e.printStackTrace(); }
+				// } catch (Exception e) {e.printStackTrace(); }
 			} }).start();
 		} else  if (str.equals("upabit")) {
 			camservopos += 5;
@@ -466,13 +446,14 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				camservopos = camposmax;
 			}
 			new Thread(new Runnable() { public void run() {
-				try {
-					byte[] command = { CAM, (byte) camservopos };
-					sendCommand(command);
-					Thread.sleep(camwait);
+				//try {
+					// byte[] command = { CAM, (byte) camservopos };
+					sendCommand(new byte[]{ CAM, (byte) camservopos }); //command);
+					//Thread.sleep(camwait);
 					//byte[] command1 = { CAMRELEASE };
+					Util.delay(camwait);
 					sendCommand(CAMRELEASE);
-				} catch (Exception e) {e.printStackTrace(); }
+				//} catch (Exception e) {e.printStackTrace(); }
 			} }).start();
 		}
 	}
@@ -549,11 +530,13 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			n *= 4;
 		}
 
+		Util.delay(n);
+		/*
 		try {
 			Thread.sleep(n);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		if (movingforward == true) {
 			goForward();

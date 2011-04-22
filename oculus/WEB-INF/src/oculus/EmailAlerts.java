@@ -13,63 +13,47 @@ public class EmailAlerts extends Thread {
 	// how often to check
 	public static final int DELAY = 60000;
 
-	// call back to message window 
+	// call back to message window
 	private Application app = null;
-	
-	// Application.getRefrence();
-	
-	public EmailAlerts(Application app){
+
+	public EmailAlerts(Application app) {
 		this.app = app;
 	}
-	
+
 	@Override
 	public void run() {
-		
-		BatteryLife battery = new BatteryLife();
-		
-		try {
-			// wait for setup 
-			//Util.delay(DELAY);
-			Thread.sleep(DELAY);
+		Util.delay(DELAY);
+		app.message("starting email alert thread", null, null);
+		boolean alive = true;
+		while (alive) {
 			
-			app.message("starting email alert thread", null, null);
-			
-			boolean alive = true;
-			while (alive) {
-				
-				int batt[] = battery.battStatsCombined(); 
+			if(app.battery != null){
+
+				// TODO: use instance in application?
+				int batt[] = app.battery.battStatsCombined();
 				String life = Integer.toString(batt[0]);
-				int s = batt[1];
-				String status = Integer.toString(s); // in case its not 1 or 2
 				
-				app.message("email thread checking: " + "battery "+life+"%,"+status, null, null);
+				//int s = batt[1];
+				//String status = Integer.toString(s); // in case its not 1 or 2
 	
-				if (battery.batteryStatus() < WARN_LEVEL) {
+				app.message("email thread checking: " + "battery " + life + "%", null, null);
+	
+				if (app.battery.batteryStatus() < WARN_LEVEL) {
 					app.message("battery low, sending email", null, null);
 	
-					if (!SendMail.sendMessage("Oculus Message", "battery "+life+"%,"+status)){
-					
-						app.message("cound not send battery warning email", null, null);
-					
-						log.error("turning off email alerts");
+					if (! new SendMail().sendMessage("Oculus Message", "battery " + life + "%")) {
+	
+						app.message("<font color=\"red\">cound not send battery warning email</font>", null, null);
+	
+						log.error("failed to send, turning off email alerts");
 						alive = false;
 					}
-					
+			
 					// don't flood
-					//Util.delay(DELAY*10);
-					Thread.sleep(DELAY*10);
+					Util.delay(DELAY * 10);
 				}
-				//Util.delay(DELAY);
-				Thread.sleep(DELAY);
 			}
-        } catch (Exception e) {e.printStackTrace(); }
+			Util.delay(DELAY);
+		}
 	}
-
-		
-	/** test driver 
-	public static void main(String[] args) {
-
-		// must kill with control C
-		new EmailAlerts().start();
-	} */
 }

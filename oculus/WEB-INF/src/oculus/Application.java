@@ -26,7 +26,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	IConnection player = null;
 	protected ArduinoCommDC comport = null; 
 	protected Speech sayit = new Speech("kevin16");
-	protected BatteryLife bl;
+	protected BatteryLife battery;
 	Settings settings= new Settings();
 	volatile boolean docking = false;
 	protected boolean initialstatuscalled = false;
@@ -245,7 +245,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str += " streamsettings "+streamSettings();
 			messageplayer(userconnected + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
-			if (batterypresent) { bl = new BatteryLife(); }
+			if (batterypresent) { battery = new BatteryLife(); }
 			// if (((settings.readSetting("wifienabled")).toUpperCase()).equals("YES")) {
 			//	wifi = new WifiConnection();  }
 			if (userconnected.equals(settings.readSetting("user0"))) {
@@ -348,7 +348,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("disconnectotherconnections")) { disconnectOtherConnections(); }
 			if (fn.equals("monitor")) { monitor(str); }
 			if (fn.equals("showlog")) { showlog(); }
-			if (fn.equals("framegrab")) {
+			
+			// TODO: Dont we need a new screen shot first?
+			if (fn.equals("framegrab") || fn.equals("emailgrab")) {
 				if (grabber instanceof IServiceCapableConnection) {
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					sc.invoke("framegrab", new Object[] { });
@@ -358,7 +360,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("emailgrab")) {
 				// took pic above, now send it 
 					messageplayer("email frame command received", null, null);
-					SendMail.sendMessage("Oculus Screen Shot", "pic attached", System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");						
+					new SendMail().sendMessage("Oculus Screen Shot", "pic attached", System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");						
 			}
 			if (fn.equals("facegrab")) { faceGrab(str); }
 			if (fn.equals("autodockgo")) { autoDock("go "+str); }
@@ -368,12 +370,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("softwareupdate")) { softwareUpdate(str); }
 			if (fn.equals("arduinoecho")){ 
 				if(str.equals("on")) comport.setEcho(true); else comport.setEcho(false);
-				messageplayer("echo set to: "+str, null, null);
+				// messageplayer("echo set to: "+str, null, null);
 			}
-			if(fn.equals("arduinoreset")){
-				message("resetting firmware", "resetting", null);
-				comport.reset();
-			}
+			if(fn.equals("arduinoreset")) comport.reset();
+		
 		
 		}
 		if (fn.equals("assumecontrol")) { assumeControl(str); }
@@ -387,6 +387,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (fn.equals("populatesettings")) { populateSettings(); }
 		if (fn.equals("systemcall")) {
 			str = str.trim();
+			// systemCall(str);
+			
 			try {
 				Runtime.getRuntime().exec(str);
 			} catch (Exception e) {
@@ -491,7 +493,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new Thread(new Runnable() {
 			public void run() {
 				if (batterypresent == true && !dockstatus.equals("docking")) {
-					int batt[] = bl.battStatsCombined();
+					int batt[] = battery.battStatsCombined();
 					String life = Integer.toString(batt[0]);
 					int s = batt[1];
 					String status = Integer.toString(s); // in case its not 1 or 2
@@ -640,7 +642,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 								}
 								comport.stopGoing();
 								messageplayer(null,"motion","stopped");
-								if (bl.batteryStatus() == 2) {
+								if (battery.batteryStatus() == 2) {
 									docking = false;
 									String str = "";
 									if (autodocking) {
@@ -853,7 +855,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	
-	// thread it and record output 
+	//TODO: thread it and record output 
 	private void systemCall(String str) {
 		if (admin) {
 			
@@ -870,7 +872,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 						String line = null;
 						while ((line = procReader.readLine()) != null){
-
+							message("systemCall() : " + line, null, null);
 							log.info("systemCall() : " + line);
 							System.out.println("systemCall() : " + line);
 						

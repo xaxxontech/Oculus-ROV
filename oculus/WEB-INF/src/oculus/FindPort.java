@@ -34,20 +34,9 @@ public class FindPort {
 	/* list of all free ports */
 	private Vector<String> ports = new Vector<String>();
 
-	// private static Logger log = Red5LoggerFactory.getLogger(FindPort.class,
-	// "oculus");
-
 	/* constructor makes a list of available ports */
 	public FindPort() {
 		getAvailableSerialPorts();
-
-		// setup thread to fire on shutdown
-		/*
-		 * Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-		 * public void run() { serialPort.close();
-		 * System.out.println("closed by cleanup thread"); } }));
-		 */
-
 	}
 
 	/** */
@@ -88,14 +77,12 @@ public class FindPort {
 		if (outputStream == null)
 			return false;
 
-		// System.out.println("connected to: " + address);
 		return true;
 	}
 
 	/** Close the serial port streams */
 	private void close() {
 		if (serialPort != null) {
-			// System.out.println("FindPort close(): " + serialPort.getName());
 			serialPort.close();
 			serialPort = null;
 		}
@@ -125,18 +112,14 @@ public class FindPort {
 	public String search(String target) {
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (connect(ports.get(i))) {
-				try {
-					Thread.sleep(TIMEOUT);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 
+				Util.delay(TIMEOUT);
+				
 				String id = null;
 				try {
 					id = getProduct();
 				} catch (Exception e) {
 					System.out.println("couldn't get a product id on: " + serialPort.getName());
-					e.printStackTrace();
 				}
 				if (id.equalsIgnoreCase(target)) {
 
@@ -147,11 +130,9 @@ public class FindPort {
 					return ports.get(i);
 				}
 			}
-
 			// close on each loop
 			close();
 		}
-
 		// error state
 		return null;
 	}
@@ -175,49 +156,7 @@ public class FindPort {
 		int read = inputStream.read(buffer);
 		for (int j = 0; j < read; j++)
 			device += (char) buffer[j];
-
-		// System.out.println("responce: " + device.trim());
-		
+	
 		return device.trim();
-	}
-
-	/*
-	 * public String getVersion(String port) throws Exception {
-	 * 
-	 * byte[] buffer = new byte[32]; String version = "";
-	 * 
-	 * if (connect(port)) { Thread.sleep(TIMEOUT);
-	 * 
-	 * // send command to arduino outputStream.write('y');
-	 * Thread.sleep(RESPONCE_DELAY);
-	 * 
-	 * int read = inputStream.read(buffer); for (int j = 0; j < read; j++)
-	 * version += (char) buffer[j];
-	 * 
-	 * close(); }
-	 * 
-	 * return version.trim(); }
-	 */
-
-	/**
-	 * test driver
-	 * 
-	 * @throws Exception
-	 */
-
-	public static void main(String[] args) throws Exception {
-
-		long start = System.currentTimeMillis();
-
-		FindPort port = new FindPort();
-
-		String oculus = port.search(OCULUS_DC);
-		if (oculus != null) {
-			System.out.println("found oculus on: " + oculus); 
-		} else {
-			System.out.println("oculus NOT found");
-		}
-
-		System.out.println("scan took: " + (System.currentTimeMillis() - start) + " ms");
 	}
 }

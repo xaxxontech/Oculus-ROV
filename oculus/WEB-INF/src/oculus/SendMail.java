@@ -18,12 +18,14 @@ import org.slf4j.Logger;
  */
 public class SendMail {
 
-	private static Logger log = Red5LoggerFactory.getLogger(Downloader.class,
-			"oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(SendMail.class, "oculus");
 
 	// take this from properties on startup if we want any smtp server
 	private static int SMTP_HOST_PORT = 587;
 	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
+
+	// send result back 
+	private boolean result = true;
 
 	/**
 	 * 
@@ -34,42 +36,47 @@ public class SendMail {
 	 *            is the message body to form the email body
 	 * @return True if mail was sent successfully
 	 */
-	public static boolean sendMessage(String sub, String text) {
-		try {
+	public boolean sendMessage(final String sub, final String text) {
+		new Thread(new Runnable() {
+			public void run() {
+				try {
 
-			Settings settings = new Settings();
-			// private static final String SMTP_HOST_NAME = "smtp.gmail.com";
-			final String user = settings.readSetting("email");
-			final String pass = settings.readSetting("email_password");
+					Settings settings = new Settings();
+					// private static final String SMTP_HOST_NAME =
+					// "smtp.gmail.com";
+					final String user = settings.readSetting("email");
+					final String pass = settings.readSetting("email_password");
 
-			Properties props = new Properties();
-			props.put("mail.smtps.host", SMTP_HOST_NAME);
-			props.put("mail.smtps.auth", "true");
-			props.put("mail.smtp.starttls.enable", "true");
+					Properties props = new Properties();
+					props.put("mail.smtps.host", SMTP_HOST_NAME);
+					props.put("mail.smtps.auth", "true");
+					props.put("mail.smtp.starttls.enable", "true");
 
-			Session mailSession = Session.getDefaultInstance(props);
-			Transport transport = mailSession.getTransport("smtp");
+					Session mailSession = Session.getDefaultInstance(props);
+					Transport transport = mailSession.getTransport("smtp");
 
-			/* turn off on deply */
-			mailSession.setDebug(true);
+					/* turn off on deply */
+					mailSession.setDebug(true);
 
-			MimeMessage message = new MimeMessage(mailSession);
-			message.setSubject(sub);
-			message.setContent(text, "text/plain");
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
-					user));
+					MimeMessage message = new MimeMessage(mailSession);
+					message.setSubject(sub);
+					message.setContent(text, "text/plain");
+					message.addRecipient(Message.RecipientType.TO,
+							new InternetAddress(user));
 
-			transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user, pass);
-			transport.sendMessage(message,
-					message.getRecipients(Message.RecipientType.TO));
-			transport.close();
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			return false;
-		}
+					transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user, pass);
+					transport.sendMessage(message,
+							message.getRecipients(Message.RecipientType.TO));
+					transport.close();
+				} catch (Exception e) {
+					log.error(e.getMessage());
+					result = false;
+				}
+			}
+		}).start();
 
 		// all good
-		return true;
+		return result;
 	}
 
 	/**
@@ -84,11 +91,11 @@ public class SendMail {
 	 *            is the path to the file to attach to the email
 	 * 
 	 */
-	public static boolean sendMessage(final String sub, final String text, final String path) {
-		//new Thread(new Runnable() {
-			//public void run() {
+	public boolean sendMessage(final String sub, final String text,
+			final String path) {
+		new Thread(new Runnable() {
+			public void run() {
 				try {
-
 					Settings settings = new Settings();
 					// private static final String SMTP_HOST_NAME =
 					// "smtp.gmail.com";
@@ -108,7 +115,8 @@ public class SendMail {
 
 					MimeMessage message = new MimeMessage(mailSession);
 					message.setSubject(sub);
-					message.addRecipient(Message.RecipientType.TO,new InternetAddress(user));
+					message.addRecipient(Message.RecipientType.TO,
+							new InternetAddress(user));
 
 					BodyPart messageBodyPart = new MimeBodyPart();
 					messageBodyPart.setText(text);
@@ -122,15 +130,18 @@ public class SendMail {
 					multipart.addBodyPart(messageBodyPart);
 					message.setContent(multipart);
 
-					transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user,pass);
-					transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+					transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user,
+							pass);
+					transport.sendMessage(message,
+							message.getRecipients(Message.RecipientType.TO));
 					transport.close();
 
 				} catch (Exception e) {
 					log.error(e.getMessage());
-					return false;
+					result = false;
 				}
-		//}).start();
-	return true;
+			}
+		}).start();
+		return result;
 	}
 }

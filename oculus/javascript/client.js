@@ -859,6 +859,12 @@ function arduinoEcho(value){
 	overlay('off');
 }
 
+function restart() {
+	  message("sending system command: "+str,sentcmdcolor);
+	  callServer('restart','');
+	  overlay('off');
+}
+
 function softwareupdate(command,value) {
 	if (command=="check") { 
 		callServer("softwareupdate","check");

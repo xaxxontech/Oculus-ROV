@@ -8,7 +8,7 @@ public class EmailAlerts extends Thread {
 	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class, "oculus");
 
 	// how low of battery to warm user with email
-	public static final int WARN_LEVEL = 90;
+	public static final int WARN_LEVEL = 30;
 
 	// how often to check
 	public static final int DELAY = 60000;
@@ -27,42 +27,45 @@ public class EmailAlerts extends Thread {
 		
 		BatteryLife battery = new BatteryLife();
 		
-		// wait for setup 
-		Util.delay(DELAY);
-		
-		app.message("starting email alert thread", null, null);
-		
-		boolean alive = true;
-		while (alive) {
+		try {
+			// wait for setup 
+			//Util.delay(DELAY);
+			Thread.sleep(DELAY);
 			
-			int batt[] = battery.battStatsCombined(); 
-			String life = Integer.toString(batt[0]);
-			int s = batt[1];
-			String status = Integer.toString(s); // in case its not 1 or 2
+			app.message("starting email alert thread", null, null);
 			
-			app.message("email thread checking: " + "battery "+life+"%,"+status, null, null);
-
-			if (battery.batteryStatus() < WARN_LEVEL) {
-				app.message("battery low, sending email", null, null);
-
-				if (!SendMail.sendMessage("Oculus Message", "battery "+life+"%,"+status)){
+			boolean alive = true;
+			while (alive) {
 				
-					app.message("<font color=\"red\">cound not send battery warming email</a>", null, null);
+				int batt[] = battery.battStatsCombined(); 
+				String life = Integer.toString(batt[0]);
+				int s = batt[1];
+				String status = Integer.toString(s); // in case its not 1 or 2
 				
-					log.error("turning off email alerts");
-					alive = false;
+				app.message("email thread checking: " + "battery "+life+"%,"+status, null, null);
+	
+				if (battery.batteryStatus() < WARN_LEVEL) {
+					app.message("battery low, sending email", null, null);
+	
+					if (!SendMail.sendMessage("Oculus Message", "battery "+life+"%,"+status)){
+					
+						app.message("cound not send battery warning email", null, null);
+					
+						log.error("turning off email alerts");
+						alive = false;
+					}
+					
+					// don't flood
+					//Util.delay(DELAY*10);
+					Thread.sleep(DELAY*10);
 				}
-				
-				// don't flood
-				Util.delay(DELAY*10);
+				//Util.delay(DELAY);
+				Thread.sleep(DELAY);
 			}
-			Util.delay(DELAY);
-		}
+        } catch (Exception e) {e.printStackTrace(); }
 	}
 
-	
-	
-	
+		
 	/** test driver 
 	public static void main(String[] args) {
 

@@ -40,7 +40,7 @@ public class SendMail {
 			Settings settings = new Settings();
 			// private static final String SMTP_HOST_NAME = "smtp.gmail.com";
 			final String user = settings.readSetting("email");
-			final String pass = settings.readSetting("password");
+			final String pass = settings.readSetting("email_password");
 
 			Properties props = new Properties();
 			props.put("mail.smtps.host", SMTP_HOST_NAME);
@@ -93,7 +93,7 @@ public class SendMail {
 					// private static final String SMTP_HOST_NAME =
 					// "smtp.gmail.com";
 					final String user = settings.readSetting("email");
-					final String pass = settings.readSetting("password");
+					final String pass = settings.readSetting("email_password");
 
 					Properties props = new Properties();
 					props.put("mail.smtps.host", SMTP_HOST_NAME);

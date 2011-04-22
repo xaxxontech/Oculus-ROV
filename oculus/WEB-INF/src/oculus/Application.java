@@ -348,7 +348,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("disconnectotherconnections")) { disconnectOtherConnections(); }
 			if (fn.equals("monitor")) { monitor(str); }
 			if (fn.equals("showlog")) { showlog(); }
-			if (fn.equals("framegrab") || fn.equals("emailgrab")) {
+			if (fn.equals("framegrab")) {
 				if (grabber instanceof IServiceCapableConnection) {
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					sc.invoke("framegrab", new Object[] { });
@@ -356,14 +356,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 			if (fn.equals("emailgrab")) {
-			
 				// took pic above, now send it 
 					messageplayer("email frame command received", null, null);
-					SendMail.sendMessage("Oculus Screen Shot", "pic attached", "images/framegrab.png");			
-						
-						
-						//message("<font color=\"red\">failed to send email</font", null, null);
-			
+					SendMail.sendMessage("Oculus Screen Shot", "pic attached", System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");						
 			}
 			if (fn.equals("facegrab")) { faceGrab(str); }
 			if (fn.equals("autodockgo")) { autoDock("go "+str); }
@@ -372,7 +367,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("restart")) { restart(); }
 			if (fn.equals("softwareupdate")) { softwareUpdate(str); }
 			if (fn.equals("arduinoecho")){ 
-				if(str.equals("on")) comport.setEcho(true); else comport.setEcho(false); 	
+				if(str.equals("on")) comport.setEcho(true); else comport.setEcho(false);
+				messageplayer("echo set to: "+str, null, null);
 			}
 			if(fn.equals("arduinoreset")){
 				message("<font color=\"red\">reseting firmware</font>", "reseting", null);

@@ -278,24 +278,28 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			this.setDaemon(true);
 		}
 		public void run() {
-			Util.delay(SETUP);
-			while (true) {
-				if (getReadDelta() > DEAD_TIME_OUT) {
-					if (isconnected) {
-
-						reset();
-						
-						// show user 
-						application.message("watchdog time out, resting", null, null);
+			//Util.delay(SETUP);
+			try {
+				Thread.sleep(SETUP);
+				while (true) {
+					if (getReadDelta() > DEAD_TIME_OUT) {
+						if (isconnected) {
+	
+							reset();
+							
+							// show user 
+							application.message("watchdog time out, resetting", null, null);
+						}
 					}
+	
+					// send ping to keep connection alive 
+					if(getReadDelta() > (DEAD_TIME_OUT / 3))
+						new Sender(GET_VERSION);
+				
+					//Util.delay(WATCHDOG_DELAY);
+					Thread.sleep(WATCHDOG_DELAY);
 				}
-
-				// send ping to keep connection alive 
-				if(getReadDelta() > (DEAD_TIME_OUT / 3))
-					new Sender(GET_VERSION);
-			
-				Util.delay(WATCHDOG_DELAY);
-			}
+	        } catch (Exception e) {e.printStackTrace(); }
 		}
 	}
 	

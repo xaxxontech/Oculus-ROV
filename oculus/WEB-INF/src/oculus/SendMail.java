@@ -26,7 +26,21 @@ public class SendMail {
 
 	// send result back 
 	private boolean result = true;
+	private String user = null;
+	private String pass = null;
+	
+	/**
+	 * Check props for email auth info 
+	 */
+	SendMail(){
 
+		Settings settings = new Settings();
+		// TODO: take smtp info from props?
+		// private static final String SMTP_HOST_NAME = "smtp.gmail.com";
+		user = settings.readSetting("email");
+		pass = settings.readSetting("email_password");
+	}
+	
 	/**
 	 * 
 	 * Send yourself an error message from the robot. This method requires a
@@ -37,15 +51,12 @@ public class SendMail {
 	 * @return True if mail was sent successfully
 	 */
 	public boolean sendMessage(final String sub, final String text) {
+		
+		if( user == null || pass == null ) return false;
+			
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-
-					Settings settings = new Settings();
-					// private static final String SMTP_HOST_NAME =
-					// "smtp.gmail.com";
-					final String user = settings.readSetting("email");
-					final String pass = settings.readSetting("email_password");
 
 					Properties props = new Properties();
 					props.put("mail.smtps.host", SMTP_HOST_NAME);
@@ -91,17 +102,14 @@ public class SendMail {
 	 *            is the path to the file to attach to the email
 	 * 
 	 */
-	public boolean sendMessage(final String sub, final String text,
-			final String path) {
+	public boolean sendMessage(final String sub, final String text, final String path) {
+		
+		if( user == null || pass == null ) return false;
+		
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					Settings settings = new Settings();
-					// private static final String SMTP_HOST_NAME =
-					// "smtp.gmail.com";
-					final String user = settings.readSetting("email");
-					final String pass = settings.readSetting("email_password");
-
+				
 					Properties props = new Properties();
 					props.put("mail.smtps.host", SMTP_HOST_NAME);
 					props.put("mail.smtps.auth", "true");
@@ -130,8 +138,7 @@ public class SendMail {
 					multipart.addBodyPart(messageBodyPart);
 					message.setContent(multipart);
 
-					transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user,
-							pass);
+					transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user,pass);
 					transport.sendMessage(message,
 							message.getRecipients(Message.RecipientType.TO));
 					transport.close();

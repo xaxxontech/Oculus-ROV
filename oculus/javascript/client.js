@@ -845,7 +845,7 @@ function systemcall(str,conf) {
 }
 
 function arduinoReset() {
-	message("resetiing arduino ",sentcmdcolor);
+	message("resetting arduino ",sentcmdcolor);
 	callServer('arduinoreset');
 	overlay('off');
 }

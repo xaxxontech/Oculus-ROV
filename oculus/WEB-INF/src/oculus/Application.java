@@ -371,7 +371,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				messageplayer("echo set to: "+str, null, null);
 			}
 			if(fn.equals("arduinoreset")){
-				message("<font color=\"red\">reseting firmware</font>", "reseting", null);
+				message("reseting firmware", "resetting", null);
 				comport.reset();
 			}
 		

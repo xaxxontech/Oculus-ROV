@@ -13,7 +13,10 @@ public class EmailAlerts extends Thread {
 	// how often to check
 	public static final int DELAY = 60000;
 
-	private Application app = null; // Application.getRefrence();
+	// call back to message window 
+	private Application app = null;
+	
+	// Application.getRefrence();
 	
 	public EmailAlerts(Application app){
 		this.app = app;
@@ -24,36 +27,38 @@ public class EmailAlerts extends Thread {
 		
 		BatteryLife battery = new BatteryLife();
 		
-		/*
-		try { // setup time 
-			Thread.sleep(DELAY/3);
-		} catch (InterruptedException e) {
-			log.error(e.getMessage());
-		}
-		*/
+		// wait for setup 
+		Util.delay(DELAY);
 		
 		app.message("starting email alert thread", null, null);
 		
-		while (true) {
+		boolean alive = true;
+		while (alive) {
 			
-			app.message("email thread checking", null, null);
+			app.message("email thread checking: " + battery.hashCode(), null, null);
 
 			if (battery.batteryStatus() < WARN_LEVEL) {
 				app.message("battery low, sending email", null, null);
 
-				if (!SendMail.sendMessage("Oculus Message", "battery low, now at: " + battery.batteryStatus()))
+				if (!SendMail.sendMessage("Oculus Message", "battery low, now at: " + battery.batteryStatus())){
+				
 					app.message("<font color=\"red\">cound not send battery warming email</a>", null, null);
+				
+					log.error("turning off email alerts");
+					
+					alive = false;
+				}
+				
+				// don't flood
+				Util.delay(DELAY*10);
 			}
-
-			try {
-				Thread.sleep(DELAY);
-			} catch (InterruptedException e) {
-				log.error("Thread delay error, closing.");
-				break;
-			}
+			Util.delay(DELAY);
 		}
 	}
 
+	
+	
+	
 	/** test driver 
 	public static void main(String[] args) {
 

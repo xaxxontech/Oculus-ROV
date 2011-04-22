@@ -31,7 +31,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	
 	public static final byte[] STOP = {'s'};
 	// public static final byte[] GET_PRODUCT = { 'x' };
-	public static final byte[] GET_VERSION = { 'y' };
+	public static final byte[] GET_VERSION = {'y',};
 	public static final byte[] CAMRELEASE = {'w'};
 	
 	private String portName = null;
@@ -55,16 +55,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	Settings settings = new Settings();
  
-	protected int speedslow = settings.getInteger("speedslow"); // Integer.parseInt(settings.readSetting("speedslow"));
-	protected int speedmed = Integer.parseInt(settings.readSetting("speedmed"));
-	protected int camservohoriz = Integer.parseInt(settings.readSetting("camservohoriz"));
-	protected int camposmax = Integer.parseInt(settings.readSetting("camposmax"));
-	protected int camposmin = Integer.parseInt(settings.readSetting("camposmin"));
-	protected int nudgedelay = Integer.parseInt(settings.readSetting("nudgedelay"));
-	protected int maxclicknudgedelay = Integer.parseInt(settings.readSetting("maxclicknudgedelay"));
-	protected int maxclickcam = Integer.parseInt(settings.readSetting("maxclickcam"));
-	protected double clicknudgemomentummult = Double.parseDouble(settings.readSetting("clicknudgemomentummult"));
-	protected int steeringcomp = Integer.parseInt(settings.readSetting("steeringcomp"));
+	protected int speedslow = settings.getInteger("speedslow"); 
+	protected int speedmed = settings.getInteger("speedmed");
+	protected int camservohoriz = settings.getInteger("camservohoriz");
+	protected int camposmax = settings.getInteger("camposmax");
+	protected int camposmin = settings.getInteger("camposmin");
+	protected int nudgedelay = settings.getInteger("nudgedelay");
+	protected int maxclicknudgedelay = settings.getInteger("maxclicknudgedelay");
+	protected int maxclickcam = settings.getInteger("maxclickcam");
+	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
+	protected int steeringcomp = settings.getInteger("steeringcomp");
 
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
@@ -194,22 +194,22 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		String response = "";
 		for(int i = 0 ; i < buffSize ; i++)
 			response += (char)buffer[i];
-	
-		//response = response.trim();
+		response = response.trim();
 		
 		// take action as ardiuno has just turned on 
 		if(response.equals("reset")){
+		
+			// might have new firmware after reseting? 
+			version = null;
+			new Sender(GET_VERSION);
 			
 			// application.wasReset();
 			isconnected = true;
 			updateSteeringComp();
 			camHoriz();
-			
-			// might have new firmware after reseting? 
-			version = null;
-			new Sender(GET_VERSION);
 		
 		} else if(response.startsWith("version:")){
+			
 			// NOTE: watchdog will send a get version command if idle comport 
 			if(version == null){
 				
@@ -217,21 +217,23 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				version = response.substring( 
 						response.indexOf("version:")+8, response.length());
 	
-				application.message("firmware version: " + version, null, null);
-				
-				// don't flood std.out 
-				return;
+				application.message("firmware version: " + version, "arduino connected", null);
 			}
+				
+			// don't flood std.out 
+			return;
+			
 		} else if(response.equals("overflow")){
 			log.error("disconnecting, sending too fast: " + getWriteDelta());
-			disconnect();
+			reset(); 
 		}
 		
 		// act on feedback
 		if(response.charAt(0) == STOP[0]){
 			movingforward = false;
 			moving = false;
-		} else if(response.charAt(0) != GET_VERSION[0] && (!response.startsWith("version:"))){
+		} else if(/*(!response.startsWith("version:")) && */
+			response.charAt(0) != GET_VERSION[0]){
 			// don't bother showing watchdog pings to user screen 
 			application.message("arduino: " + response, null, null);
 		}
@@ -276,38 +278,30 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			this.setDaemon(true);
 		}
 		public void run() {
-			try {
-				Thread.sleep(SETUP);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Util.delay(SETUP);
 			while (true) {
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					if (isconnected) {
 
+						reset();
+						
 						// show user 
 						application.message("watchdog time out, resting", null, null);
-						
-						// reset arduino
-						disconnect();
-						
-						// try again 
-						connect();
 					}
 				}
 
 				// send ping to keep connection alive 
 				if(getReadDelta() > (DEAD_TIME_OUT / 3))
 					new Sender(GET_VERSION);
-				
-				try {
-					// check often
-					Thread.sleep(WATCHDOG_DELAY);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			
+				Util.delay(WATCHDOG_DELAY);
 			}
 		}
+	}
+	
+	public void reset(){
+		disconnect();
+		connect();
 	}
 
 	/** shutdown serial port */

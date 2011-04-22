@@ -348,12 +348,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("disconnectotherconnections")) { disconnectOtherConnections(); }
 			if (fn.equals("monitor")) { monitor(str); }
 			if (fn.equals("showlog")) { showlog(); }
-			if (fn.equals("framegrab")) {
+			if (fn.equals("framegrab") || fn.equals("emailgrab")) {
 				if (grabber instanceof IServiceCapableConnection) {
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					sc.invoke("framegrab", new Object[] { });
 					messageplayer("framegrab command received", null, null);
 				}
+			}
+			if (fn.equals("emailgrab")) {
+			
+				// took pic above, now send it 
+					messageplayer("email frame command received", null, null);
+					if( ! SendMail.sendMessage("Oculus Screen Shot", "pic attached")) 
+						// , "images/framegrab.png"))			
+						message("<font color=\"red\">failed to send email</font", null, null);
+			
 			}
 			if (fn.equals("facegrab")) { faceGrab(str); }
 			if (fn.equals("autodockgo")) { autoDock("go "+str); }
@@ -362,7 +371,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("restart")) { restart(); }
 			if (fn.equals("softwareupdate")) { softwareUpdate(str); }
 			if (fn.equals("arduinoecho")){ 
-				if(str.equals("on")) comport.setEcho(true); else comport.setEcho(false); }
+				if(str.equals("on")) comport.setEcho(true); else comport.setEcho(false); 	
+			}
+			if(fn.equals("arduinoreset")){
+				message("<font color=\"red\">reseting firmware</font>", "reseting", null);
+				comport.reset();
+			}
 		
 		}
 		if (fn.equals("assumecontrol")) { assumeControl(str); }

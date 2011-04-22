@@ -20,22 +20,10 @@ public class SendMail {
 
 	private static Logger log = Red5LoggerFactory.getLogger(Downloader.class, "oculus");
 	
-	// take this from properties on startup 
-	private static final int SMTP_HOST_PORT = 587;
+	// take this from properties on startup if we want any smtp server 
+	private static int SMTP_HOST_PORT = 587;
 	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
-	private static final String SMTP_AUTH_USER = "xxx@gmail.com";
-	private static final String SMTP_AUTH_PWD = "xxx";
-
-	/* test driver 
-	public static void main(String[] args) throws Exception {
-		
-		// simple testing, send the projects details to yourself 
-		if (sendMessage("Oculus Event", "testinting attachement", ".classpath"))
-			System.out.println("email sent");
-		else
-			System.out.println("email failed, check your settings");
-	}*/
-
+	
 	/**
 	 * 
 	 * Send yourself an error message from the robot. This method requires a
@@ -47,6 +35,12 @@ public class SendMail {
 	 */
 	public static boolean sendMessage(String sub, String text) {
 		try {
+			
+			Settings settings = new Settings();
+			// private static final String SMTP_HOST_NAME = "smtp.gmail.com";
+			final String user = settings.readSetting("email");
+			final String pass = settings.readSetting("password");
+			
 			Properties props = new Properties();
 			props.put("mail.smtps.host", SMTP_HOST_NAME);
 			props.put("mail.smtps.auth", "true");
@@ -61,9 +55,9 @@ public class SendMail {
 			MimeMessage message = new MimeMessage(mailSession);
 			message.setSubject(sub);
 			message.setContent(text, "text/plain");
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(SMTP_AUTH_USER));
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(user));
 
-			transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, SMTP_AUTH_USER, SMTP_AUTH_PWD);
+			transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user, pass);
 			transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
 			transport.close();
 		} catch (Exception e) {
@@ -88,6 +82,11 @@ public class SendMail {
 	public static boolean sendMessage(final String sub, final String text, final String path) {
 		
 		try{
+			
+			Settings settings = new Settings();
+			// private static final String SMTP_HOST_NAME = "smtp.gmail.com";
+			final String user = settings.readSetting("email");
+			final String pass = settings.readSetting("password");
 		
 			Properties props = new Properties();
 			props.put("mail.smtps.host", SMTP_HOST_NAME);
@@ -96,11 +95,13 @@ public class SendMail {
 			
 			Session mailSession = Session.getDefaultInstance(props);
 			Transport transport = mailSession.getTransport("smtp");
+	
+			// debug flag in props 
 			mailSession.setDebug(false);
 	
 			MimeMessage message = new MimeMessage(mailSession);
 			message.setSubject(sub);
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(SMTP_AUTH_USER));
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(user));
 	    	 
 	        BodyPart messageBodyPart = new MimeBodyPart();
 	        messageBodyPart.setText(text);
@@ -114,7 +115,7 @@ public class SendMail {
 	        multipart.addBodyPart(messageBodyPart);
 	        message.setContent(multipart);
 	        
-	        transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, SMTP_AUTH_USER, SMTP_AUTH_PWD);
+	        transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user, pass);
 			transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
 			transport.close();
 	       

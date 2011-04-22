@@ -844,9 +844,9 @@ function systemcall(str,conf) {
 	else { callServer("systemcall",str); }
 }
 
-function restart() {
-	message("sending system command: "+str,sentcmdcolor);
-	callServer('restart','');
+function arduinoReset() {
+	message("resetiing arduino ",sentcmdcolor);
+	callServer('arduinoreset');
 	overlay('off');
 }
 
@@ -1668,6 +1668,13 @@ function facegrab() {
 	callServer("facegrab",str);
 	overlay("off");
 }
+
+
+function emailgrab() {
+	callServer("emailgrab", null);
+	overlay("off");
+}
+
 
 function facefound(str) {
 	if (clicksteeron) {

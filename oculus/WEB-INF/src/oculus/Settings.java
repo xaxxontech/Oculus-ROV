@@ -6,9 +6,8 @@ public class Settings {
 	
 	private static final int ERROR = -1;
 	
-	
 	// String filename = System.getenv("RED5_HOME")+"\\webapps\\oculus\\settings.txt";
-	String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
+	private static String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
 	
 	/**
 	 * lookup values from props file
@@ -56,6 +55,31 @@ public class Settings {
 		return value;
 	}
 
+	/**
+	 * lookup values from props file
+	 * 
+	 * @param key
+	 *            is the lookup value
+	 * @return the matching value from properties file (or zero if not found)
+	 */
+	public double getDouble(String key) {
+
+		String ans = null;
+		double value = ERROR;
+
+		try {
+
+			ans = readSetting(key);
+			value = Double.parseDouble(ans);
+
+		} catch (Exception e) {
+			return ERROR;
+		}
+
+		return value;
+	}
+
+	
 	public String readSetting(String str) {
 		// read through whole file line by line, extract result
 		FileInputStream filein;	

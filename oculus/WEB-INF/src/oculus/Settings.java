@@ -4,16 +4,64 @@ import java.io.*;
 
 public class Settings {
 	
+	private static final int ERROR = -1;
+	
+	
 	// String filename = System.getenv("RED5_HOME")+"\\webapps\\oculus\\settings.txt";
 	String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
 	
+	/**
+	 * lookup values from props file
+	 * 
+	 * @param key
+	 *            is the lookup value
+	 * @return the matching value from properties file (or false if not found)
+	 */
+	public boolean getBoolean(String key) {
+
+		boolean value = false;
+
+		try {
+
+			value = Boolean.parseBoolean(readSetting((key)));
+
+		} catch (Exception e) {
+			return false;
+		}
+
+		return value;
+	}
+
+	/**
+	 * lookup values from props file
+	 * 
+	 * @param key
+	 *            is the lookup value
+	 * @return the matching value from properties file (or zero if not found)
+	 */
+	public int getInteger(String key) {
+
+		String ans = null;
+		int value = ERROR;
+
+		try {
+
+			ans = readSetting(key);
+			value = Integer.parseInt(ans);
+
+		} catch (Exception e) {
+			return ERROR;
+		}
+
+		return value;
+	}
 
 	public String readSetting(String str) {
 		// read through whole file line by line, extract result
 		FileInputStream filein;	
 		String result=null;
-		try
-		{
+		try{
+			
 			filein = new FileInputStream(filename);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			String line = "";
@@ -32,8 +80,8 @@ public class Settings {
 		value = value.replaceAll("\\s+$", ""); // remove trailing whitespace
 		FileInputStream filein;
 		String[] lines = new String[999];
-		try
-		{
+		try{
+			
 			filein = new FileInputStream(filename);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));			
 			int i=0;

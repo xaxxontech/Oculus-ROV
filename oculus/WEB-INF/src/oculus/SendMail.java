@@ -8,6 +8,9 @@ import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
 
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * Send yourself an email from your gmail account 
  *
@@ -15,13 +18,15 @@ import javax.mail.internet.*;
  */
 public class SendMail {
 
+	private static Logger log = Red5LoggerFactory.getLogger(Downloader.class, "oculus");
+	
 	// take this from properties on startup 
 	private static final int SMTP_HOST_PORT = 587;
 	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
 	private static final String SMTP_AUTH_USER = "xxx@gmail.com";
 	private static final String SMTP_AUTH_PWD = "xxx";
 
-	/* test driver */
+	/* test driver 
 	public static void main(String[] args) throws Exception {
 		
 		// simple testing, send the projects details to yourself 
@@ -29,7 +34,7 @@ public class SendMail {
 			System.out.println("email sent");
 		else
 			System.out.println("email failed, check your settings");
-	}
+	}*/
 
 	/**
 	 * 
@@ -51,7 +56,7 @@ public class SendMail {
 			Transport transport = mailSession.getTransport("smtp");
 			
 			/* turn off on deply */
-			mailSession.setDebug(true);
+			mailSession.setDebug(false);
 
 			MimeMessage message = new MimeMessage(mailSession);
 			message.setSubject(sub);
@@ -62,7 +67,7 @@ public class SendMail {
 			transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
 			transport.close();
 		} catch (Exception e) {
-			// e.printStackTrace();
+			log.error(e.getMessage());
 			return false;
 		}
 
@@ -91,7 +96,7 @@ public class SendMail {
 			
 			Session mailSession = Session.getDefaultInstance(props);
 			Transport transport = mailSession.getTransport("smtp");
-			mailSession.setDebug(true);
+			mailSession.setDebug(false);
 	
 			MimeMessage message = new MimeMessage(mailSession);
 			message.setSubject(sub);
@@ -114,13 +119,11 @@ public class SendMail {
 			transport.close();
 	       
 	    }catch (Exception e) {
-	       // e.printStackTrace();
+	       log.error(e.getMessage());
 	       return false;
 	    }
     
 	    // all well
 	    return true;
-	}
-
-	
+	}	
 }

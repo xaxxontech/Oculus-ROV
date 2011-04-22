@@ -54,8 +54,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private long lastRead = System.currentTimeMillis();
 
 	Settings settings = new Settings();
-
-	protected int speedslow = Integer.parseInt(settings.readSetting("speedslow"));
+ 
+	protected int speedslow = settings.getInteger("speedslow"); // Integer.parseInt(settings.readSetting("speedslow"));
 	protected int speedmed = Integer.parseInt(settings.readSetting("speedmed"));
 	protected int camservohoriz = Integer.parseInt(settings.readSetting("camservohoriz"));
 	protected int camposmax = Integer.parseInt(settings.readSetting("camposmax"));
@@ -110,7 +110,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		portName = str;
 
 		// call back to notify on reset events etc
-		application  = app;
+		application  = app; //Application.getRefrence();
 		
 		// check for lost connection
 		if (watchdog)
@@ -194,12 +194,13 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		String response = "";
 		for(int i = 0 ; i < buffSize ; i++)
 			response += (char)buffer[i];
-		response = response.trim();
+	
+		//response = response.trim();
 		
 		// take action as ardiuno has just turned on 
 		if(response.equals("reset")){
 			
-			application.wasReset();
+			// application.wasReset();
 			isconnected = true;
 			updateSteeringComp();
 			camHoriz();
@@ -210,13 +211,17 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		
 		} else if(response.startsWith("version:")){
 			// NOTE: watchdog will send a get version command if idle comport 
-			if(version == null) 
+			if(version == null){
+				
+				// get just the number 
 				version = response.substring( 
 						response.indexOf("version:")+8, response.length());
 	
-			// don't flood std.out 
-			return;
-			
+				application.message("firmware version: " + version, null, null);
+				
+				// don't flood std.out 
+				return;
+			}
 		} else if(response.equals("overflow")){
 			log.error("disconnecting, sending too fast: " + getWriteDelta());
 			disconnect();
@@ -226,9 +231,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		if(response.charAt(0) == STOP[0]){
 			movingforward = false;
 			moving = false;
-		} else if(response.charAt(0) != GET_VERSION[0]){
-			// don't bother showing watchdog pings 
-			// System.out.println("ardunio: " + response);
+		} else if(response.charAt(0) != GET_VERSION[0] && (!response.startsWith("version:"))){
+			// don't bother showing watchdog pings to user screen 
 			application.message("arduino: " + response, null, null);
 		}
 	}

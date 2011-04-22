@@ -54,12 +54,23 @@ public class Application extends MultiThreadedApplicationAdapter {
 	String docktarget;
 	protected String portstr = null;
 	
+	
+	// singleton 
+	// private static Application application = null;
+	
 	public Application() { 
 		super();
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		initialize();
+		
+		//if(application == null)
+			//application = this;
 	}
+	
+	//public static Application getRefrence(){
+	//	return application;
+	//}
 
 	public boolean appConnect(IConnection connection, Object[] params) { // override
 		String logininfo[] = ((String) params[0]).split(" ");
@@ -155,8 +166,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			// true for watch dog enabled 
 			comport = new ArduinoCommDC(portstr, true, this);
 			comport.connect();
-			// not used 
-			// initializeAfterDelay();	
 		}
 		
 		httpPort = settings.readRed5Setting("http.port");
@@ -166,8 +175,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			initialize_launch(); 
 		}
 		
-		// watch for low battery, start on config flag??
-		// new EmailAlerts().start();
+		if(settings.getBoolean("emailalerts"))
+			new EmailAlerts(this).start();
 		
 		log.info("initialize");
 	}
@@ -420,6 +429,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
+	// TODO: use rolling file names? 
 	public void frameGrabbed(ByteArray _RAWBitmapImage) {
 		String str= "frame grabbed <a href='images/framegrab.png' target='_blank'>view</a>";
 		messageplayer(str, null, null);
@@ -543,6 +553,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
+	/*
 	public void wasReset(){
 		messageplayer("firmware reseting", null, null);
 		new Thread(new Runnable() { public void run() {
@@ -553,7 +564,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				log.error(e.getMessage());
 			}
 		}}).start();
-	}
+	}*/
 	
 	// TODO... WHY NEEDED?
 	public void message(String str, String status, String value){
@@ -830,17 +841,52 @@ public class Application extends MultiThreadedApplicationAdapter {
 		return result;
 	}
 	
+	
+	// thread it and record output 
 	private void systemCall(String str) {
 		if (admin) {
-			str = str.trim();
-			try {
-				Runtime.getRuntime().exec(str);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			
+			final String args = str.trim();
+			new Thread(new Runnable() { public void run() {
+				try {
+					 			 
+					try {
+						
+						// log output of process 
+						Process proc = Runtime.getRuntime().exec(args);
+						BufferedReader procReader = new BufferedReader(
+								new InputStreamReader(proc.getInputStream()));
+
+						String line = null;
+						while ((line = procReader.readLine()) != null){
+
+							log.info("systemCall() : " + line);
+							System.out.println("systemCall() : " + line);
+						
+						}
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}		
+					
+				} catch (Exception e) {e.printStackTrace(); }
+			} }).start();	
 		}
 	}
 	
+	/*
+	 private void systemCall(String str) {
+         if (admin) {
+                 str = str.trim();
+                 try {
+                         Runtime.getRuntime().exec(str);
+                 } catch (Exception e) {
+                         e.printStackTrace();
+                 }
+         }
+	 }
+	 */
+
 	private void restart() {
 		if (admin) {
 			messageplayer("restarting server application", null, null);

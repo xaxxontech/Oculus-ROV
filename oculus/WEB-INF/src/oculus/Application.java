@@ -49,6 +49,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	boolean facegrabon = false;
 	boolean autodocking = false;
 	boolean autodockingcamctr = false;
+	boolean grabdone = false;
 	int autodockgrabattempts;
 	int autodockctrattempts;
 	String docktarget;
@@ -337,22 +338,31 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("disconnectotherconnections")) { disconnectOtherConnections(); }
 			if (fn.equals("monitor")) { monitor(str); }
 			if (fn.equals("showlog")) { showlog(); }
-			
-			// TODO: Dont we need a new screen shot first?
 			if (fn.equals("framegrab") || fn.equals("emailgrab")) {
 				if (grabber instanceof IServiceCapableConnection) {
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					sc.invoke("framegrab", new Object[] { });
 					messageplayer("framegrab command received", null, null);
+					grabdone = false;
 				}
-			}
+			} // took pic about, now email it  
 			if (fn.equals("emailgrab")) {
-				
-					// takes time to save file 
-					Util.delay(1200);
-				    // took pic above, now send it 
-					messageplayer("email frame command received", null, null);
-					new SendMail().sendMessage("Oculus Screen Shot", "pic attached", System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");						
+				new Thread(new Runnable() { public void run() {
+					// long start = System.currentTimeMillis();
+					while(!grabdone){
+						Util.delay(3000); // don't hang 
+						// if((System.currentTimeMillis() - start) > 60000){
+						//	messageplayer("time out on screen grab", null, null);
+						//	grabdone = true;
+						//}
+					}
+					
+					// grab finished, now send it 
+					messageplayer("sending email", null, null);
+					new SendMail().sendMessage("Oculus Screen Shot", "pic attached", 
+							System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");					
+
+				}}).start();	
 			}
 			if (fn.equals("facegrab")) { faceGrab(str); }
 			if (fn.equals("autodockgo")) { autoDock("go "+str); }
@@ -458,6 +468,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		} catch(IOException e) {log.info("Save_ScreenShot: Writing of screenshot failed " + e); System.out.println("IO Error " + e);}
 		}
+		
+		// email option needs to wait for this to finnish 
+		grabdone = true;
 	}
 		
 	private void messageplayer(String str, String status, String value) {

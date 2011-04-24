@@ -43,7 +43,7 @@ public class EmailAlerts extends Thread {
 				// if draining only 
 				if (s == 1) {
 
-					app.message("email thread checking: " + "battery " + life
+					app.message("email thread checking: " + "battery " +  Integer.toString(life)
 							+ "%", null, null);
 
 //					if (app.battery.batteryStatus() < WARN_LEVEL) {
@@ -65,6 +65,7 @@ public class EmailAlerts extends Thread {
 				}
 			}
 			Util.delay(DELAY);
+			// TODO: add condition to only send ONE email if below life% threshold?
 		}
 	}
 }

@@ -49,7 +49,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	boolean facegrabon = false;
 	boolean autodocking = false;
 	boolean autodockingcamctr = false;
-	boolean grabdone = false;
+	boolean emailgrab = false;
 	int autodockgrabattempts;
 	int autodockctrattempts;
 	String docktarget;
@@ -343,26 +343,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					sc.invoke("framegrab", new Object[] { });
 					messageplayer("framegrab command received", null, null);
-					grabdone = false;
 				}
 			} // took pic about, now email it  
 			if (fn.equals("emailgrab")) {
-				new Thread(new Runnable() { public void run() {
-					// long start = System.currentTimeMillis();
-					while(!grabdone){
-						Util.delay(3000); // don't hang 
-						// if((System.currentTimeMillis() - start) > 60000){
-						//	messageplayer("time out on screen grab", null, null);
-						//	grabdone = true;
-						//}
-					}
-					
-					// grab finished, now send it 
-					messageplayer("sending email", null, null);
-					new SendMail().sendMessage("Oculus Screen Shot", "pic attached", 
-							System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");					
-
-				}}).start();	
+				emailgrab = true;
+				messageplayer("sending email", null, null);
 			}
 			if (fn.equals("facegrab")) { faceGrab(str); }
 			if (fn.equals("autodockgo")) { autoDock("go "+str); }
@@ -458,19 +443,22 @@ public class Application extends MultiThreadedApplicationAdapter {
 		ByteArrayInputStream db = new ByteArrayInputStream(c);
 
 		if(BCurrentlyAvailable > 0) {
-		System.out.println("The byte Array currently has " + BCurrentlyAvailable + " bytes. The Buffer has " + db.available());
-		try{
-		BufferedImage JavaImage = ImageIO.read(db);
-		// Now lets try and write the buffered image out to a file
-		if(JavaImage != null) { // If you sent a jpeg to the server, just change PNG to JPEG and Red5ScreenShot.png to .jpeg
-		ImageIO.write(JavaImage, "PNG", new File(System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png"));
+			System.out.println("The byte Array currently has " + BCurrentlyAvailable + " bytes. The Buffer has " + db.available());
+			try{
+				BufferedImage JavaImage = ImageIO.read(db);
+				// Now lets try and write the buffered image out to a file
+				if(JavaImage != null) { // If you sent a jpeg to the server, just change PNG to JPEG and Red5ScreenShot.png to .jpeg
+					ImageIO.write(JavaImage, "PNG", new File(System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png"));
+					if (emailgrab) {
+						emailgrab = false;
+						new SendMail().sendMessage("Oculus Screen Shot", "pic attached", 
+								System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");	
+					}
+				}
+			} catch(IOException e) {log.info("Save_ScreenShot: Writing of screenshot failed " + e); 
+			System.out.println("IO Error " + e);}
 		}
 
-		} catch(IOException e) {log.info("Save_ScreenShot: Writing of screenshot failed " + e); System.out.println("IO Error " + e);}
-		}
-		
-		// email option needs to wait for this to finnish 
-		grabdone = true;
 	}
 		
 	private void messageplayer(String str, String status, String value) {

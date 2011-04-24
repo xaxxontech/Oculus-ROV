@@ -5,8 +5,7 @@ import org.slf4j.Logger;
 
 public class EmailAlerts extends Thread {
 
-	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class,
-			"oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class, "oculus");
 
 	// how low of battery to warm user with email
 	public static final int WARN_LEVEL = 30;
@@ -30,37 +29,31 @@ public class EmailAlerts extends Thread {
 
 			if (app.battery != null) {
 
-				// TODO: use instance in application?
 				int batt[] = app.battery.battStatsCombined();
-//				String life = Integer.toString(batt[0]);
+				String life_str = Integer.toString(batt[0]);
 				int life = batt[0];
-
-				int s = batt[1];
-
-				// String status = Integer.toString(s); // in case its not 1 or
-				// 2
+				int status = batt[1];
 
 				// if draining only 
-				if (s == 1) {
+				if (status == 1) {
 
-					app.message("email thread checking: " + "battery " +  Integer.toString(life)
-							+ "%", null, null);
-
-//					if (app.battery.batteryStatus() < WARN_LEVEL) {
+					// debug only, remove 
+					app.message("email thread checking: " + "battery " + life_str+ "%", null, null);
 					if (life < WARN_LEVEL) {
+					
 						app.message("battery low, sending email", null, null);
-
 						if (!new SendMail().sendMessage("Oculus Message",
 								"battery " + Integer.toString(life) + "% and is draining")) {
 
-							app.message("<font color=\"red\">cound not send battery warning email</font>", null, null);
-
+							app.message("<font color=\"purple\">cound not send battery warning email</font>", null, null);
 							log.error("failed to send, turning off email alerts");
 							alive = false;
 						}
 
+						// only send single email
+						alive = false;
 						// don't flood
-						Util.delay(DELAY * 10);
+						// Util.delay(DELAY * 10);
 					}
 				}
 			}

@@ -32,7 +32,8 @@ public class EmailAlerts extends Thread {
 
 				// TODO: use instance in application?
 				int batt[] = app.battery.battStatsCombined();
-				String life = Integer.toString(batt[0]);
+//				String life = Integer.toString(batt[0]);
+				int life = batt[0];
 
 				int s = batt[1];
 
@@ -45,11 +46,12 @@ public class EmailAlerts extends Thread {
 					app.message("email thread checking: " + "battery " + life
 							+ "%", null, null);
 
-					if (app.battery.batteryStatus() < WARN_LEVEL) {
+//					if (app.battery.batteryStatus() < WARN_LEVEL) {
+					if (life < WARN_LEVEL) {
 						app.message("battery low, sending email", null, null);
 
 						if (!new SendMail().sendMessage("Oculus Message",
-								"battery " + life + "% and is draining")) {
+								"battery " + Integer.toString(life) + "% and is draining")) {
 
 							app.message("<font color=\"red\">cound not send battery warning email</font>", null, null);
 

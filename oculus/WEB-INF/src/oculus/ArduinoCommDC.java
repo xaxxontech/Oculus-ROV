@@ -18,7 +18,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	// if watchdog'n, re-connect if not seen input since this long ago 
 	public static final long DEAD_TIME_OUT = 10000;
 	public static final int SETUP = 2000;
-	public static final int WATCHDOG_DELAY = 1000;
+	public static final int WATCHDOG_DELAY = 1500;
 
 	// add commands here
 	public static final byte FORWARD = 'f';
@@ -27,7 +27,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public static final byte RIGHT = 'r';
 	public static final byte COMP = 'c';
 	public static final byte CAM = 'v';
-	public static final byte ECHO = 'z';
+	
+	// public static final byte ECHO = 'e';
 	
 	public static final byte[] STOP = {'s'};
 	// public static final byte[] GET_PRODUCT = { 'x' };
@@ -40,7 +41,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private OutputStream out;
 	
 	// add a 'z' to commands 
-	protected boolean echo = false;
+	// protected boolean echo = false;
 	
 	// will be discovered from the device 
 	protected String version = null;
@@ -112,8 +113,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		application  = app; 
 		
 		// check for lost connection
-		if (watchdog)
-			new WatchDog().start();
+		//if (watchdog)
+			//new WatchDog().start();
 	}
 
 	/** open port, enable read and write, enable events */
@@ -157,7 +158,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				int read = in.read(input);
 				for (int j = 0; j < read; j++) {
 
-					// print() or println() from ardunio code
+					// print() or println() from arduino code
 					if ((input[j] == '>') || (input[j] == 13) || (input[j] == 10)) {
 
 						// do what ever is in buffer 
@@ -186,15 +187,17 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}
 	}
 
-	// TODO: store commands sent if echo'ing.. record errors and dropped commands 
+	// act on feedback from arduino  
 	private void execute() {
 		String response = "";
 		for(int i = 0 ; i < buffSize ; i++)
 			response += (char)buffer[i];
+		response = response.trim();
 		
 		// take action as ardiuno has just turned on 
 		if(response.equals("reset")){
-			// might have new firmware after reseting? 
+			
+			// might have new firmware after reseting 
 			version = null;
 			new Sender(GET_VERSION);
 			isconnected = true;
@@ -215,19 +218,22 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			// don't flood std.out 
 			return;
 			
-		} else if(response.equals("overflow")){
+		} /* else if(response.equals("overflow")){
 			log.error("resetting firmware, sending too fast: " + getWriteDelta());
 			reset(); 
-		}
+		} */
 		
 		// act on feedback
+		/*
 		if(response.charAt(0) == STOP[0]){
 			movingforward = false;
 			moving = false;
-		} else if(response.charAt(0) != GET_VERSION[0]){
+		} else */
+		
+		//if(response.charAt(0) != GET_VERSION[0]){
 			// don't bother showing watchdog pings to user screen 
 			application.message("arduino: " + response, null, null);
-		}
+		//}
 	}
 
 	/** @return the time since last write() operation */
@@ -259,10 +265,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	/** @param update is set to true to turn on echo'ing of serial commands */
 	public void setEcho(boolean update){
-		echo = update;
+		/// echo = update;
 	}
 	
-	/** inner class to check if getting responses */
+	/** inner class to check if getting responses 
 	private class WatchDog extends Thread {
 		public WatchDog() {
 			this.setDaemon(true);
@@ -285,10 +291,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				Util.delay(WATCHDOG_DELAY);
 			}
 		}
-	}
+	}*/
 	
 	public void reset(){
-		application.message("<font color\"red\">reset firmware</font>", null, null);
+		// application.message("<font color\"red\">reset firmware</font>", null, null);
 		disconnect();
 		connect();
 	}
@@ -321,8 +327,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			out.write(command);
 			
 			// add flag for echo 
-			if(echo)
-				out.write(ECHO);
+			// if(echo)
+				// out.write(ECHO);
 			
 			// end of command 
 			out.write(13);

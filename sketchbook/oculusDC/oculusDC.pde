@@ -1,4 +1,4 @@
-#include <Math.h>
+// #include <Math.h>
 #include <Servo.h>
 
 // pins
@@ -109,8 +109,7 @@ void manageCommand(){
       parseCommand();
       commandSize = 0; 
     }
-  } 
-  else {
+  } else {
 
     // buffer it 
     buffer[commandSize++] = input;
@@ -118,7 +117,7 @@ void manageCommand(){
     // protect buffer
     if(commandSize >= MAX_BUFFER){
       commandSize = 0;
-      Serial.println("<overflow>");
+      // Serial.println("<overflow>");
     }
   }
 }
@@ -197,17 +196,15 @@ void parseCommand(){
     }
     // Serial.println("<setComp " + (String)buffer[1] + ">"); 
   } 
-  
-  /*
-  else if(buffer[0] == 'z'){
+  else if(buffer[0] == 'e'){
     if(buffer[1] == '1')
       echo = true;
     if(buffer[1] == '0')
       echo = false ;
-  }
-*/
+  } 
 
   // echo the command back 
+  // if(echo) { 
   if(buffer[commandSize-1] == 'z'){ 
     Serial.print("<");
     Serial.print((char)buffer[0]);
@@ -221,7 +218,7 @@ void parseCommand(){
         Serial.print(',');    
     } 
     Serial.println(">");
-  }
+ }
 }
 
 // send back each i/o line or sensor's values on one line 

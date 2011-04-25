@@ -3,7 +3,6 @@
 
 // pins
 // const int analogInPin = 0;  
-
 const int motorA1Pin = 4;    // H-bridge pin 2         LEFT motor
 const int motorA2Pin = 2;    // H-bridge pin 7         LEFT motor
 const int motorB1Pin = 7;    // H-bridge pin 10        RIGHT motor
@@ -18,22 +17,12 @@ Servo camservo; // tilt
 int acomp = 0;
 int bcomp = 0;
 
-boolean echo = true;
-
-// how long to wait before sending a rudundant packet 
-// const int MIN_DELAY = 7000;
-
-// how much change is enough to be worthy of sending 
-// const int A2D_THRESHOLD = 2;
+boolean echo = false;
 
 // buffer the command in byte buffer 
 const int MAX_BUFFER = 8;
 int buffer[MAX_BUFFER];
 int commandSize = 0;
-
-// int sensorValue = 0;        
-// int outputValue = 0;     
-// long start, delta, last = 0; 
 
 void setup() { 
   pinMode(motorA1Pin, OUTPUT); 
@@ -68,35 +57,6 @@ void loop() {
   // if(commandSize == 0) digitalWrite(13, LOW);
   // else digitalWrite(13, HIGH);
 }
-
-// look at i/o lines for changes in state 
-/*
- void pollSensors(){
- 
- sensorValue = analogRead(analogInPin);  
- outputValue = map(sensorValue, 0, 1024, 1, 255);  
- 
- // new value detected 
- if( abs(last - outputValue) >= A2D_THRESHOLD ){ 
- 
- start = millis(); 
- send();
- 
- // track last new value
- last = outputValue;
- 
- } 
- else if( delta >= MIN_DELAY ){
- 
- // clear timer, send old value to keep refreshed on host 
- start = millis();
- send();
- } 
- 
- // track time if looping on no changes
- delta = millis() - start;
- }
- */
 
 // buffer and/or execute commands from host controller 
 void manageCommand(){
@@ -164,7 +124,7 @@ void parseCommand(){
     Serial.println("<id:oculusDC>");
   }   
   else if(buffer[0] == 'y'){
-    Serial.println("<version:0.5.1>"); 
+    Serial.println("<version:0.5.bug>"); 
   }   
   else if (buffer[0] == 's') {
     OCR2A = 0;
@@ -204,8 +164,8 @@ void parseCommand(){
   } 
 
   // echo the command back 
-  // if(echo) { 
-  if(buffer[commandSize-1] == 'z'){ 
+  if(echo) { 
+//  if(buffer[commandSize-1] == 'z'){ 
     Serial.print("<");
     Serial.print((char)buffer[0]);
 
@@ -220,8 +180,3 @@ void parseCommand(){
     Serial.println(">");
  }
 }
-
-// send back each i/o line or sensor's values on one line 
-// void send(){
-//  Serial.println("<sonar " + (String) outputValue + ">");  
-//

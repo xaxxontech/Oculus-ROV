@@ -156,6 +156,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			// true for watch dog enabled 
 			comport = new ArduinoCommDC(portstr, true, this);
 			comport.connect();
+		} else {
+			
+			log.error("error connecting to arduino on: " + portstr);
+			//TODO: how to manage this? 
 		}
 		
 		httpPort = settings.readRed5Setting("http.port");

@@ -1,4 +1,3 @@
-// #include <Math.h>
 #include <Servo.h>
 
 // pins
@@ -50,12 +49,7 @@ void loop() {
   } 
 
   // if not busy doing a command  
-  // interupts();
   // pollSensors();
-
-  // toggle debug led 
-  // if(commandSize == 0) digitalWrite(13, LOW);
-  // else digitalWrite(13, HIGH);
 }
 
 // buffer and/or execute commands from host controller 
@@ -124,7 +118,7 @@ void parseCommand(){
     Serial.println("<id:oculusDC>");
   }   
   else if(buffer[0] == 'y'){
-    Serial.println("<version:0.5.bug>"); 
+    Serial.println("<version:0.5.2>"); 
   }   
   else if (buffer[0] == 's') {
     OCR2A = 0;
@@ -165,7 +159,6 @@ void parseCommand(){
 
   // echo the command back 
   if(echo) { 
-//  if(buffer[commandSize-1] == 'z'){ 
     Serial.print("<");
     Serial.print((char)buffer[0]);
 

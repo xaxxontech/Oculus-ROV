@@ -16,19 +16,24 @@ public class EmailAlerts extends Thread {
 	// call back to message window
 	private Application app = null;
 
+	// "developer true" is config file
+	private boolean debug = new Settings().getBoolean("developer");
+	
 	public EmailAlerts(Application app) {
 		this.app = app;
 	}
 
 	@Override
 	public void run() {
+		
+		// setup time
 		Util.delay(DELAY);
-		app.message("starting email alert thread", null, null);
+		
+		if(debug)app.message("starting email alert thread", null, null);
+		
 		boolean alive = true;
 		while (alive) {
-
 			if (app.battery != null) {
-
 				int batt[] = app.battery.battStatsCombined();
 				String life_str = Integer.toString(batt[0]);
 				int life = batt[0];
@@ -37,28 +42,28 @@ public class EmailAlerts extends Thread {
 				// if draining only 
 				if (status == 1) {
 
-					// debug only, remove 
-					app.message("email thread checking: " + "battery " + life_str+ "%", null, null);
-					if (life < WARN_LEVEL) {
+					if(debug) app.message("email thread checking: " 
+							+ "battery " + life_str+ "%", null, null);
 					
+					if (life < WARN_LEVEL) {
 						app.message("battery low, sending email", null, null);
 						if (!new SendMail().sendMessage("Oculus Message",
-								"battery " + Integer.toString(life) + "% and is draining")) {
+								"battery " + Integer.toString(life) + "% and is draining! ")) {
 
-							app.message("<font color=\"purple\">cound not send battery warning email</font>", null, null);
-							log.error("failed to send, turning off email alerts");
-							alive = false;
+							// TODO: trigger auto dock 
+							// app.autodock(); 
+							
+							if(debug) app.message("cound not send battery warning email", null, null);
+							
+							log.error("failed to send warning email, check settings");
 						}
 
 						// only send single email
 						alive = false;
-						// don't flood
-						// Util.delay(DELAY * 10);
 					}
 				}
 			}
 			Util.delay(DELAY);
-			// TODO: add condition to only send ONE email if below life% threshold?
 		}
 	}
 }

@@ -608,7 +608,7 @@ function autodock(str) {
 	    var b = document.getElementById("docklinecalibratebox")
 	    tempdivtext = b.innerHTML;
 	    var str = "Dock with charger: <table><tr><td style='height: 7px'></td></tr></table>";
-	    str+="Get the dock in view, within 3 meters"
+	    str+="Get the dock in view, within 2 meters"
     	str+="<table><tr><td style='height: 11px'></td></tr></table>";
 	    
 	    str+="<a href='javascript: autodock(&quot;go&quot;);'>"

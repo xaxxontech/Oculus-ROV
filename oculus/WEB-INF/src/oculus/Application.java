@@ -365,10 +365,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			if(fn.equals("arduinoreset")) {
 				comport.reset();
-				messageplayer("resetting arduino: "+str, null, null);
+				messageplayer("resetting arduino", null, null);
 			}
-		
-		
 		}
 		if (fn.equals("assumecontrol")) { assumeControl(str); }
 		if (fn.equals("beapassenger")) { beAPassenger(str); }

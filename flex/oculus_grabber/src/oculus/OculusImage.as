@@ -8,13 +8,14 @@ package oculus
 		private var parr:Array = []; // working pixels, whole image, 8-bit greyscale 
 		private var width:int;
 		private var height:int;
-		public var lastThreshhold:int;
+		private var lastThreshhold:int;
 		private var threshholdMult:Number;  //  = 0.65;
 		private var lastBlobRatio:Number;
 		private var lastTopRatio:Number;
 		private var lastBottomRatio:Number;
 		private var lastMidRatio:Number;
 		private var parrorig:Array;
+		private var imgaverage:int;
 		
 		public function OculusImage()
 		{
@@ -40,7 +41,7 @@ package oculus
 				n++;
 				runningttl += p;
 			}
-			var imgaverage:int = runningttl/n;
+			imgaverage = runningttl/n;
 			threshholdMult = 0.65 - 0.2 + (0.40*( imgaverage/255));
 		}
 		
@@ -78,7 +79,7 @@ package oculus
 			return r;
 		}
 		
-		public function findBlobStartSub(x:int, y:int, w:int, h:int, bar:ByteArray):Array { 
+		public function findBlobStartSub(x:int, y:int, w:int, h:int, bar:ByteArray):Array { // calibrate sub
 			width = w;
 			height = h;
 			convertToGrey(bar);
@@ -132,7 +133,7 @@ package oculus
 			return result;
 		}
 		
-		public function getThreshholdxy(x:int, y:int, w:int, h:int, bar:ByteArray):Array { // this is actually findblobstart...
+		public function getThreshholdxy(x:int, y:int, w:int, h:int, bar:ByteArray):Array { 
 			width = w;
 			height = h;
 			convertToGrey(bar);
@@ -181,7 +182,8 @@ package oculus
 			var n:int = inc;
 			var deleteddir:int = 0;
 			var result:Array;
-			while (attemptnum < 20) {
+ 			lastThreshhold = 999;
+			while (attemptnum < 10) { // was 20 before auto threshhold guessing 
 				result = findBlobsSub(bar, w, h);
 				if (result[2]==0) {
 					if (deleteddir != 0) {
@@ -222,6 +224,7 @@ package oculus
 			//var imgaverageOld:int = imgaverage;
 			convertToGrey(bar);
 			parrorig = parr.slice();
+			if (lastThreshhold == 999) { lastThreshhold = imgaverage+45; } // auto contrast finding with magical constant
 			var threshhold:int = lastThreshhold;
 			var i:int;
 			var parrinv:Array = []; // inverse, used to check for inner black blob

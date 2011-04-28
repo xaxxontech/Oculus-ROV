@@ -361,9 +361,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("softwareupdate")) { softwareUpdate(str); }
 			if (fn.equals("arduinoecho")){ 
 				if(str.equals("on")) comport.setEcho(true); else comport.setEcho(false);
-				// messageplayer("echo set to: "+str, null, null);
+				messageplayer("echo set to: "+str, null, null);
 			}
-			if(fn.equals("arduinoreset")) comport.reset();
+			if(fn.equals("arduinoreset")) {
+				comport.reset();
+				messageplayer("resetting arduino: "+str, null, null);
+			}
 		
 		
 		}

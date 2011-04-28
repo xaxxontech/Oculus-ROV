@@ -598,18 +598,21 @@ function dock(str) {
 }
 
 function autodock(str) {
-	if (str=="start") {
+	if (str=="start" &! autodocking) {
 		overlay("off");
 		clicksteeron = false;
 		document.getElementById("video").style.zIndex = "-1";
 		videooverlayposition();
-		var a =document.getElementById("videooverlay");
-	    a.onclick = autodockclick;
+		//var a =document.getElementById("videooverlay");
+	    //a.onclick = autodockclick;
 	    var b = document.getElementById("docklinecalibratebox")
 	    tempdivtext = b.innerHTML;
 	    var str = "Dock with charger: <table><tr><td style='height: 7px'></td></tr></table>";
-	    str+="With the dock in view, click on the white target"
+	    str+="Get the dock in view, within 3 meters"
     	str+="<table><tr><td style='height: 11px'></td></tr></table>";
+	    
+	    str+="<a href='javascript: autodock(&quot;go&quot;);'>"
+	    str+= "<span class='cancelbox'>&radic;</span> GO</a> &nbsp; &nbsp;"
 	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>"
 	    str+= "<span class='cancelbox'>X</span> CANCEL</a><br>"
 	    b.innerHTML = str;
@@ -651,9 +654,22 @@ function autodock(str) {
 	    docklinecalibrate('position');
 	    setTimeout("docklinecalibrate('position');",10); // rendering fix
 	}
+	if (str=="go") {
+		callServer("autodock", "go");
+		message("sending autodock-go", sentcmdcolor);
+		lagtimer = new Date().getTime(); // has to be *after* message()
+		autodocking = true;
+		var b = document.getElementById("docklinecalibratebox")
+	    var str = "Auto Dock: <table><tr><td style='height: 7px'></td></tr></table>";
+	    str+="in progress... stand by"
+		str+="<table><tr><td style='height: 11px'></td></tr></table>";
+	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>"
+	    str+= "<span class='cancelbox'>X</span> CANCEL</a><br>"
+	    b.innerHTML = str;
+	}
 }
 
-function autodockclick(ev) {
+function autodockclick(ev) { // TODO: unused if autodock("go") used above, instead
 	ev = ev || window.event;
 	if (ev.pageX) {
 		var x = ev.pageX;

@@ -354,7 +354,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				messageplayer("sending email", null, null);
 			}
 			if (fn.equals("facegrab")) { faceGrab(str); }
-			if (fn.equals("autodockgo")) { autoDock("go "+str); }
+			if (fn.equals("autodockgo")) { autoDock("go "+str); } // TODO: unused if autoDock("go") used w/o xy, delete
 			if (fn.equals("autodock")) { autoDock(str); }
 			if (fn.equals("autodockcalibrate")) { autoDock("calibrate "+str); } // eliminate, combine into 'autodock'
 			if (fn.equals("restart")) { restart(); }
@@ -1543,10 +1543,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		if (cmd[0].equals("go")) {
 			if (motionenabled == true) {
-				int x = Integer.parseInt(cmd[1])/2; //assuming 320x240
-				int y = Integer.parseInt(cmd[2])/2; //assuming 320x240
+				//int x = Integer.parseInt(cmd[1])/2; //assuming 320x240
+				//int y = Integer.parseInt(cmd[2])/2; //assuming 320x240
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
+				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
+				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 				autodocking = true;
 				autodockingcamctr = false;
 				autodockgrabattempts = 0;

@@ -177,6 +177,8 @@ function message(message, colour, status, value) {
 	if (message != null) {
 		var tempmessage = message;
 		var d = new Date();
+		
+
 		if (message == "status check received") { 
 			statuscheckreceived=true;
 			if (officiallagtimer != 0) {
@@ -185,6 +187,21 @@ function message(message, colour, status, value) {
 			}
 		}
 		else {
+			
+			
+//		if (false) {
+//		}
+//		else {
+//			if (message == "status check received") { 
+//				message += ":"+status + ":"+value;
+//				statuscheckreceived=true;
+//				if (officiallagtimer != 0) {
+//					var i = d.getTime() - officiallagtimer;
+//					setstatus("lag",i+"ms");
+//				}
+//			}
+			
+			
 			message = "<span style='color: #444444'>:</span><span style='color: "
 					+ colour + "';>" + message + "</span>";
 			messageboxping = "";

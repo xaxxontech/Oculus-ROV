@@ -115,7 +115,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					try {
 						Thread.sleep(8000);
 						if (grabber==null) {
-							initialize();							
+							grabberInitialize();							
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -149,30 +149,38 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void initialize() {
-		
 		FindPort find = new FindPort();
 		portstr = find.search(FindPort.OCULUS_DC);
 		if (portstr != null) {
 			// true for watch dog enabled 
 			comport = new ArduinoCommDC(portstr, true, this);
-			comport.connect();
+			new Thread(new Runnable() { public void run() {
+				comport.connect();
+				comport.camHoriz(); 
+			} }).start(); // threaded due to delay built into ArduinoCommDC.connect
 		} else {
-			
-			log.error("error connecting to arduino on: " + portstr);
+			comport = new ArduinoCommDC(portstr, false, this); // need comport object for running w/o hardware
+
+			//log.error("error connecting to arduino on: " + portstr);
 			//TODO: how to manage this? 
 		}
 		
 		httpPort = settings.readRed5Setting("http.port");
-		if (settings.readSetting("skipsetup").equals("yes")) {
-			grabber_launch();
-		} else { 
-			initialize_launch(); 
-		}
+		
+		grabberInitialize();
 		
 		if(settings.getBoolean("emailalerts"))
 			new EmailAlerts(this).start();
 		
 		log.info("initialize");
+	}
+	
+	private void grabberInitialize() {
+		if (settings.readSetting("skipsetup").equals("yes")) {
+			grabber_launch();
+		} else { 
+			initialize_launch(); 
+		}
 	}
 	
 	public void initialize_launch() {
@@ -577,7 +585,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}}).start();
 	}*/
 	
-	// TODO... WHY NEEDED?
+	// TODO... THIS IS NEEDED... BUT WHY?
 	public void message(String str, String status, String value){
 		messageplayer(str, status, value);
 	}
@@ -734,21 +742,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
-	/*
-	private void initializeAfterDelay() {
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					Thread.sleep(3000);
-					comport.updateSteeringComp();
-					Thread.sleep(25);
-					comport.camHoriz();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-	}*/
+//	private void initializeAfterDelay() {
+//		new Thread(new Runnable() {
+//			public void run() {
+//				try {
+//					Thread.sleep(3000);
+//					comport.camHoriz();
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}).start();
+//	}
 	
 	private void cameraCommand(String str) {
 		comport.camCommand(str);
@@ -772,13 +777,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 			initialstatuscalled=true; 
 			battStats();
 			// signalStrength();
-			String spd = "FAST";
-			if (comport.speed == comport.speedmed) { spd = "MED"; }
-			if (comport.speed== comport.speedslow) { spd = "SLOW"; }
-			String mov = "STOPPED";
-			if (!motionenabled) { mov = "DISABLED"; }
-			if (comport.moving == true) { mov = "MOVING"; }
-			String str = "speed "+spd+" cameratilt "+camTiltPos()+" motion "+mov;
+			String str = "";
+			if (portstr != null) {
+				String spd = "FAST";
+				if (comport.speed == comport.speedmed) { spd = "MED"; }
+				if (comport.speed== comport.speedslow) { spd = "SLOW"; }
+				String mov = "STOPPED";
+				if (!motionenabled) { mov = "DISABLED"; }
+				if (comport.moving == true) { mov = "MOVING"; }
+				str += " speed "+spd+" cameratilt "+camTiltPos()+" motion "+mov;
+			}
 			str += " vidctroffset "+Integer.parseInt(settings.readSetting("vidctroffset"));
 			str += " stream "+stream;
 			//str += " address "+settings.readSetting("address");
@@ -789,36 +797,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (!dockstatus.equals("")) { 
 				str += " dock "+dockstatus;
 			}
-			messageplayer("status check received","multiple",str);
+			messageplayer("status check received","multiple",str.trim());
 		}
 		else {
 			String str = " stream "+stream;
-			// signalStrength();
-			messageplayer("status check received","multiple",str);
+			messageplayer("status check received","multiple",str.trim());
 		}
 		if (s.equals("battcheck")) { 
 			battStats();
 		}
 	}
-	
-	/*
-	private void getStreamSettings() {
-		String str = settings.readSetting("vwidth") + " " + settings.readSetting("vheight") + " "
-				+ settings.readSetting("vfps")+ " " + settings.readSetting("vquality");
-		sendplayerfunction("streamsettingsdisplay", str);
-	}
-	*/
-	
-	/*
-	private void streamSettingsUpdate(String str) {
-		String comps[] = str.split(" ");
-		settings.writeSettings("vwidth", comps[0]);
-		settings.writeSettings("vheight", comps[1]);
-		settings.writeSettings("vfps", comps[2]);
-		settings.writeSettings("vquality", comps[3]);
-		messageplayer("stream settings set to: " + str, null, null);
-	}
-	*/
 	
 	private void streamSettingsCustom(String str) {
 		settings.writeSettings("vset","vcustom");
@@ -1567,7 +1555,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					else { 
 						//failed, give up
 						autodocking = false;
-						messageplayer("auto-dock target lost, try again","multiple","cameratilt "+camTiltPos()+" autodockcancelled blank");
+						messageplayer("auto-dock target not found, try again","multiple","cameratilt "+camTiltPos()+" autodockcancelled blank");
 						log.info("target lost");
 					}
 				}

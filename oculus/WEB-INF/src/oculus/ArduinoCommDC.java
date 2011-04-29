@@ -17,7 +17,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	// if watchdog'n, re-connect if not seen input since this long ago 
 	public static final long DEAD_TIME_OUT = 10000;
-	public static final int SETUP = 2000;
+	public static final int SETUP = 3000;
 	public static final int WATCHDOG_DELAY = 1500;
 
 	// this commands require arguments from current state 
@@ -192,7 +192,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			new Sender(GET_VERSION);
 			isconnected = true;
 			updateSteeringComp();
-			camHoriz();
 		
 		} else if(response.startsWith("version:")){
 			
@@ -271,8 +270,12 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 	
 	public void reset(){
-		disconnect();
-		connect();
+		if (this.isConnected()) {
+			new Thread(new Runnable() { public void run() {
+				disconnect();
+				connect();
+			} }).start();
+		}
 	}
 
 	/** shutdown serial port */

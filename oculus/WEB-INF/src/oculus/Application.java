@@ -47,19 +47,30 @@ public class Application extends MultiThreadedApplicationAdapter {
 	String dockstatus = "";
 	String httpPort; 
 	boolean facegrabon = false;
-	boolean autodocking = false;
+	
+	
+	// boolean autodocking = false;
+	
 	boolean autodockingcamctr = false;
 	boolean emailgrab = false;
 	int autodockgrabattempts;
 	int autodockctrattempts;
 	String docktarget;
 	protected String portstr = null;
+	
+	// shared vars 
+	protected State state = State.getReference();
+	
+	
 
 	public Application() { 
 		super();
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		initialize();
+		
+		System.out.println("booted on: " + state.get(State.boottime));
+	
 	}
 	
 	public boolean appConnect(IConnection connection, Object[] params) { // override
@@ -101,7 +112,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			userconnected = null;
 			player = null;
 			facegrabon = false;
-			if (!autodocking) {
+			if (!state.getBoolean(State.autodocking)) {
 				if (!stream.equals("stop")) { publish("stop"); }
 				if (comport.moving) { comport.stopGoing(); }
 			}
@@ -149,21 +160,35 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void initialize() {
-		FindPort find = new FindPort();
-		portstr = find.search(FindPort.OCULUS_DC);
-		if (portstr != null) {
+		
+//<<<<<<< .mine
+		//FindPort find = new FindPort();
+		//portstr = find.search(FindPort.OCULUS_DC);
+		//if (portstr != null) {
+		//	
+//=======
+		//FindPort find = new FindPort();
+	//	portstr = find.search(FindPort.OCULUS_DC);
+	//	if (portstr != null) {
 			// true for watch dog enabled 
-			comport = new ArduinoCommDC(portstr, true, this);
-			new Thread(new Runnable() { public void run() {
-				comport.connect();
-				comport.camHoriz(); 
-			} }).start(); // threaded due to delay built into ArduinoCommDC.connect
-		} else {
-			comport = new ArduinoCommDC(portstr, false, this); // need comport object for running w/o hardware
+		//	comport = new ArduinoCommDC(portstr, true, this);
+			//new Thread(new Runnable() { public void run() {
+			//	comport.connect();
+			//	comport.camHoriz(); 
+		//	} }).start(); // threaded due to delay built into ArduinoCommDC.connect
+	//	} else {
+		//	comport = new ArduinoCommDC(portstr, false, this); // need comport object for running w/o hardware
 
 			//log.error("error connecting to arduino on: " + portstr);
 			//TODO: how to manage this? 
-		}
+	//	}
+//>>>>>>> .r174
+		
+		// true for watch dog enabled 
+		// call connect and camhoz on startup
+		
+		comport = new ArduinoCommDC(true, this);
+		// comport.connect();
 		
 		httpPort = settings.readRed5Setting("http.port");
 		
@@ -651,8 +676,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 								if (battery.batteryStatus() == 2) {
 									docking = false;
 									String str = "";
-									if (autodocking) {
-										autodocking = false;
+									if (state.getBoolean(State.autodocking)) {
+										state.set(State.autodocking, false);
 										str += " cameratilt "+camTiltPos()+" autodockcancelled blank";
 										if (!stream.equals("stop") && userconnected==null) { publish("stop"); }
 									}
@@ -674,7 +699,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 									messageplayer("docking timed out", "multiple", s);
 									log.info(userconnected +" docking timed out");
 									dockstatus = "un-docked";
-									if (autodocking) {
+									if (state.getBoolean(State.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
 											comport.speedset("slow");
 											comport.goBackward();
@@ -737,7 +762,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (comport.sliding == true) {
 			comport.slidecancel();
 		}
-		if (autodocking == true) {
+		if (state.getBoolean(State.autodocking)) {
 			autoDock("cancel");
 		}
 	}
@@ -1521,7 +1546,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String cmd[] = str.split(" ");
 		
 		if (cmd[0].equals("cancel")) {
-			autodocking = false;
+			
+			// autodocking = false;
+			state.set(State.autodocking, false);
+			
 			messageplayer("auto-dock ended","multiple","cameratilt "+camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
 			//IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -1534,7 +1562,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
 				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
-				autodocking = true;
+				
+				// autodocking = true;
+				state.set(State.autodocking, false);
+				
 				autodockingcamctr = false;
 				autodockgrabattempts = 0;
 				autodockctrattempts = 0;
@@ -1544,7 +1575,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			else {  messageplayer("motion disabled","autodockcancelled", null); }
 		}
 		if (cmd[0].equals("dockgrabbed")) { // RESULTS FROM GRABBER: calibrate, findfromxy, find
-			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && autodocking) { // x,y,width,height,slope
+			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.autodocking)) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 				if (cmd[4].equals("0")) { // width==0, failed to find target
 					if (autodockgrabattempts < 0) { // TODO: remove this condition if unused
@@ -1554,7 +1585,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 					}
 					else { 
 						//failed, give up
-						autodocking = false;
+						// autodocking = false;
+						state.set(State.autodocking, false);
+						
 						messageplayer("auto-dock target not found, try again","multiple","cameratilt "+camTiltPos()+" autodockcancelled blank");
 						log.info("target lost");
 					}

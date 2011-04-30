@@ -15,6 +15,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	private Logger log = Red5LoggerFactory.getLogger(ArduinoCommDC.class, "oculus");
 
+	// shared state variables 
+	private State state = State.getReference();
+	
 	// if watchdog'n, re-connect if not seen input since this long ago 
 	public static final long DEAD_TIME_OUT = 10000;
 	public static final int SETUP = 3000;
@@ -36,7 +39,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private static final byte[] ECHO_ON = {'e', '1'};
 	private static final byte[] ECHO_OFF = {'e', '0'};
 	
-	private String portName = null;
+	// private String portName = null;
+	
+	// comm cannel 
 	private SerialPort serialPort = null;
 	private InputStream in;
 	private OutputStream out;
@@ -102,13 +107,19 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	 * 			  is the main oculus application, we need to call it on
 	 * 			Serial events like restet            
 	 */
-	public ArduinoCommDC(String str, boolean watchdog, Application app) {
+	public ArduinoCommDC(/*String str, */ boolean watchdog, Application app) {
 
+		FindPort finder = new FindPort();	
+		state.set(State.serialport, finder.search(FindPort.OCULUS_DC));
+		
 		// keep port name, need it to re-connect
-		portName = str;
+		// portName = str;
 
 		// call back to notify on reset events etc
 		application  = app; 
+		
+		connect();
+		camHoriz();
 		
 		// check for lost connection
 		if (watchdog) new WatchDog().start();
@@ -118,7 +129,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public void connect() {
 		try {
 
-			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(portName).open(ArduinoCommDC.class.getName(), SETUP);
+			serialPort = (SerialPort)CommPortIdentifier.getPortIdentifier(
+					state.get(State.serialport)).open(ArduinoCommDC.class.getName(), SETUP);
 			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
 			// open streams

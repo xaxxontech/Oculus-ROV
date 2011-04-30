@@ -633,7 +633,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				byte[] command = { CAM, (byte) camservopos };
 				sendCommand(command);
 				Thread.sleep(camwait + clicknudgedelay);
-				// byte[] command1 = { CAMRELEASE };
 				sendCommand(CAMRELEASE);
 			} catch (Exception e) {e.printStackTrace(); }
 		} }).start();

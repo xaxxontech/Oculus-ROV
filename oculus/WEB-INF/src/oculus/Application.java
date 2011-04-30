@@ -1387,7 +1387,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// comport
 		if (comport == null)
-			result += "comport not found";
+			result += "comport nil ";
 		
 		// battery
 		result += "battery " + settings.readSetting("batterypresent") + " ";

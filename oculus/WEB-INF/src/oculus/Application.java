@@ -48,23 +48,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 	String httpPort; 
 	boolean facegrabon = false;
 	
-	
 	// boolean autodocking = false;
-	
 	boolean autodockingcamctr = false;
-	boolean emailgrab = false;
+	private boolean emailgrab = false;
 	int autodockgrabattempts;
 	int autodockctrattempts;
 	String docktarget;
 	
 	protected String portstr = null;
 	
-	AutoDock docker = null;
+	private AutoDock docker = null;
 	
-	// shared vars 
-	protected State state = State.getReference();
-	
-	
+	private State state = State.getReference();
 
 	public Application() { 
 		super();
@@ -72,11 +67,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		passwordEncryptor.setPlainDigest(true);
 		initialize();
 		
+		// use call back 
 		docker = new AutoDock(this, grabber);
-		
-		System.out.println("booted on: " + state.get(State.boottime));
-	
-		
+		System.out.println("booted on: " + state.get(State.boottime));	
 	}
 	
 	public boolean appConnect(IConnection connection, Object[] params) { // override
@@ -167,34 +160,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	public void initialize() {
 		
-//<<<<<<< .mine
-		//FindPort find = new FindPort();
-		//portstr = find.search(FindPort.OCULUS_DC);
-		//if (portstr != null) {
-		//	
-//=======
-		//FindPort find = new FindPort();
-	//	portstr = find.search(FindPort.OCULUS_DC);
-	//	if (portstr != null) {
-			// true for watch dog enabled 
-		//	comport = new ArduinoCommDC(portstr, true, this);
-			//new Thread(new Runnable() { public void run() {
-			//	comport.connect();
-			//	comport.camHoriz(); 
-		//	} }).start(); // threaded due to delay built into ArduinoCommDC.connect
-	//	} else {
-		//	comport = new ArduinoCommDC(portstr, false, this); // need comport object for running w/o hardware
-
-			//log.error("error connecting to arduino on: " + portstr);
-			//TODO: how to manage this? 
-	//	}
-//>>>>>>> .r174
-		
 		// true for watch dog enabled 
 		// call connect and camhoz on startup
-		
 		comport = new ArduinoCommDC(true, this);
-		// comport.connect();
 		
 		httpPort = settings.readRed5Setting("http.port");
 		
@@ -473,7 +441,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
-	// TODO: use rolling file names? 
 	public void frameGrabbed(ByteArray _RAWBitmapImage) {
 		String str= "frame grabbed <a href='images/framegrab.png' target='_blank'>view</a>";
 		messageplayer(str, null, null);
@@ -602,19 +569,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("driving settings set to: " + s, null, null);
 		}
 	}
-
-	/*
-	public void wasReset(){
-		messageplayer("firmware reseting", null, null);
-		new Thread(new Runnable() { public void run() {
-			try {
-				Thread.sleep(300);
-				messageplayer("firmware version: " + comport.getVersion(), null, null);
-			}catch (Exception e) {
-				log.error(e.getMessage());
-			}
-		}}).start();
-	}*/
 	
 	// TODO... THIS IS NEEDED... BUT WHY?
 	public void message(String str, String status, String value){

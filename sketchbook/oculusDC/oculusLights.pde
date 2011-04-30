@@ -1,10 +1,11 @@
 #include <Servo.h>
 
-// pins
+// default pin 
 const int ledPin = 13; 
+const int MAX = 179;
+const int MIN = 0;
 
 Servo led; 
-
 int bright = 100;
 boolean echo = false;
 
@@ -60,9 +61,9 @@ void parseCommand(){
   if (buffer[0] == 'b') {
     
     // max
-    if(bright >= 220) return;
+    if(bright >= MAX) return;
     
-    bright = bright + 10;
+    bright = bright + 5;
     led.write(bright);
    
     // Serial.println("<bright>");  
@@ -70,25 +71,34 @@ void parseCommand(){
   else if (buffer[0] == 'd') {
     
     // min 
-    if(bright <= 50) return;
+    if(bright <= MIN) return;
     
-    bright = bright + 10;
+    bright = bright + 5;
     led.write(bright);
     
     // Serial.println("<dim>"); 
   }  
   else if (buffer[0] == 's') {
   
+    if(buffer[1] > MAX) {
+      Serial.println("<max>");  
+      return;
+    }
+    if(buffer[1] < MIN){
+     Serial.println("<min>");  
+     return;
+    }
+    
     bright = buffer[1];
     led.write(bright);
     
-    // Serial.println("<brigth " + (String)buffer[1] + ">");      
+    Serial.println("<bright " + (String)buffer[1] + ">");      
   }  
   else if(buffer[0] == 'x'){
     Serial.println("<id:oculusLights>");
   }   
   else if(buffer[0] == 'y'){
-    Serial.println("<version:0.1.1>"); 
+    Serial.println("<version:0.1.2>"); 
   }   
   else if(buffer[0] == 'e'){
     if(buffer[1] == '1')

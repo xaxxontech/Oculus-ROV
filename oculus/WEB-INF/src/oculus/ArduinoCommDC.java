@@ -100,25 +100,26 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	 * 			Serial events like restet            
 	 */
 	public ArduinoCommDC(Application app) {
-
+		
+		// call back to notify on reset events etc
+		application = app; 
+		
+		// look for hardware 
 		String port = new FindPort().search(FindPort.OCULUS_DC);
 		if(port!=null){
 			state.set(State.serialport, port);
-			connect();
-			camHoriz();
+			new Thread(new Runnable() { public void run() {
+				
+				connect();				
+				Util.delay(SETUP);
+				camHoriz();
 			
-			// check for lost connection
-			new WatchDog().start();			
-		}
-		
-		// call back to notify on reset events etc
-		application  = app; 
+				// check for lost connection
+				new WatchDog().start();	
+			}}).start();
+		} 
 	}
 	
-	//public String getName(){
-	//	return serialPort.getName();
-	//}
-
 	/** open port, enable read and write, enable events */
 	public void connect() {
 		try {
@@ -135,9 +136,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			serialPort.addEventListener(this);
 			serialPort.notifyOnDataAvailable(true);
 			
-			// setup delay 
-			Util.delay(SETUP);
-
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			return;
@@ -187,8 +185,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		String response = "";
 		for(int i = 0 ; i < buffSize ; i++)
 			response += (char)buffer[i];
-		
-		//response = response.trim();
 		
 		// take action as arduino has just turned on 
 		if(response.equals("reset")){
@@ -260,10 +256,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			application.message("starting watchdog thread", null, null);
 			while (true) {
 				if (getReadDelta() > DEAD_TIME_OUT) {
-					//if (isconnected) {
+					if (isconnected) {
 						reset(); 
 						application.message("watchdog time out, resetting", null, null);
-					//}
+					}
 				}
 
 				// send ping to keep connection alive 
@@ -277,10 +273,12 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	
 	public void reset(){
 		if (this.isConnected()) {
-			new Thread(new Runnable() { public void run() {
-				disconnect();
-				connect();
-			} }).start();
+			new Thread(new Runnable() { 
+				public void run() {
+					disconnect();
+					connect();
+				}
+			}).start();
 		}
 	}
 

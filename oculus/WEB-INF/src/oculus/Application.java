@@ -47,20 +47,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 	String dockstatus = "";
 	String httpPort; 
 	boolean facegrabon = false;
-	
 	boolean autodocking = false;
-	
 	boolean autodockingcamctr = false;
 	private boolean emailgrab = false;
 	int autodockgrabattempts;
 	int autodockctrattempts;
 	String docktarget;
-	
-	// protected String portstr = null;
-	
 	private AutoDock docker = null;
-	
-	// private State state = State.getReference();
+	private State state = State.getReference();
 
 	public Application() { 
 		super();
@@ -68,9 +62,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		passwordEncryptor.setPlainDigest(true);
 		initialize();
 		
-		// use call back 
-		// docker = new AutoDock(this, grabber);
-		// System.out.println("booted on: " + state.get(State.boottime));	
+		System.out.println("booted on: " + state.get(State.boottime));	
 	}
 	
 	public boolean appConnect(IConnection connection, Object[] params) { // override
@@ -1386,8 +1378,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (str != null) { result += "username " + str +" "; }
 		
 		// comport
-		if (comport == null)
-			result += "comport nil ";
+		if (state.get(State.serialport) == null) result += "comport nil ";
 		
 		// battery
 		result += "battery " + settings.readSetting("batterypresent") + " ";

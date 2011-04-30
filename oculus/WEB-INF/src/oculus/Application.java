@@ -1379,6 +1379,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// comport
 		if (state.get(State.serialport) == null) result += "comport nil ";
+		else result += "comport "+state.get(State.serialport)+" ";
 		
 		// battery
 		result += "battery " + settings.readSetting("batterypresent") + " ";

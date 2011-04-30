@@ -40,7 +40,7 @@ public class AutoDock {
 	 */
 
 	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
-	private State state = State.getReference();
+	 //private State state = State.getReference();
 	Settings settings= new Settings();
 
 	// call backs 
@@ -63,8 +63,8 @@ public class AutoDock {
 		
 		if (cmd[0].equals("cancel")) {
 			
-			// autodocking = false;
-			state.set(State.autodocking, false);
+			app.autodocking = false;
+			// state.set(State.autodocking, false);
 			
 			app.message("auto-dock ended","multiple","cameratilt "); //+app.camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
@@ -79,8 +79,8 @@ public class AutoDock {
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
 				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 				
-				// autodocking = true;
-				state.set(State.autodocking, false);
+				app.autodocking = true;
+				// state.set(State.autodocking, false);
 				
 				app.autodockingcamctr = false;
 				app.autodockgrabattempts = 0;
@@ -91,7 +91,7 @@ public class AutoDock {
 			else { app.message("motion disabled","autodockcancelled", null); }
 		}
 		if (cmd[0].equals("dockgrabbed")) { // RESULTS FROM GRABBER: calibrate, findfromxy, find
-			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.autodocking)) { // x,y,width,height,slope
+			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && app.autodocking) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 				if (cmd[4].equals("0")) { // width==0, failed to find target
 					if (app.autodockgrabattempts < 0) { // TODO: remove this condition if unused
@@ -101,10 +101,10 @@ public class AutoDock {
 					}
 					else { 
 						//failed, give up
-						// autodocking = false;
-						state.set(State.autodocking, false);
+						app.autodocking = false;
+						// state.set(State.autodocking, false);
 						
-						app.message("auto-dock target not found, try again","multiple", null); // "cameratilt "+camTiltPos()+" autodockcancelled blank");
+						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
 					}
 				}

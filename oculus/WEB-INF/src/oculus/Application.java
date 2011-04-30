@@ -48,18 +48,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 	String httpPort; 
 	boolean facegrabon = false;
 	
-	// boolean autodocking = false;
+	boolean autodocking = false;
+	
 	boolean autodockingcamctr = false;
 	private boolean emailgrab = false;
 	int autodockgrabattempts;
 	int autodockctrattempts;
 	String docktarget;
 	
-	protected String portstr = null;
+	// protected String portstr = null;
 	
 	private AutoDock docker = null;
 	
-	private State state = State.getReference();
+	// private State state = State.getReference();
 
 	public Application() { 
 		super();
@@ -68,8 +69,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		initialize();
 		
 		// use call back 
-		docker = new AutoDock(this, grabber);
-		System.out.println("booted on: " + state.get(State.boottime));	
+		// docker = new AutoDock(this, grabber);
+		// System.out.println("booted on: " + state.get(State.boottime));	
 	}
 	
 	public boolean appConnect(IConnection connection, Object[] params) { // override
@@ -111,7 +112,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			userconnected = null;
 			player = null;
 			facegrabon = false;
-			if (!state.getBoolean(State.autodocking)) {
+			if (!autodocking) { // state.getBoolean(State.autodocking)) {
 				if (!stream.equals("stop")) { publish("stop"); }
 				if (comport.moving) { comport.stopGoing(); }
 			}
@@ -156,6 +157,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		}
+		
+		docker = new AutoDock(this, grabber);
 	}
 
 	public void initialize() {
@@ -636,8 +639,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 								if (battery.batteryStatus() == 2) {
 									docking = false;
 									String str = "";
-									if (state.getBoolean(State.autodocking)) {
-										state.set(State.autodocking, false);
+									if (autodocking){ // state.getBoolean(State.autodocking)) {
+										//state.set(State.autodocking, false);
+										autodocking = false;
 										str += " cameratilt "+camTiltPos()+" autodockcancelled blank";
 										if (!stream.equals("stop") && userconnected==null) { publish("stop"); }
 									}
@@ -659,7 +663,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 									messageplayer("docking timed out", "multiple", s);
 									log.info(userconnected +" docking timed out");
 									dockstatus = "un-docked";
-									if (state.getBoolean(State.autodocking)) {
+									if (autodocking){ // tate.getBoolean(State.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
 											comport.speedset("slow");
 											comport.goBackward();
@@ -722,7 +726,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (comport.sliding == true) {
 			comport.slidecancel();
 		}
-		if (state.getBoolean(State.autodocking)) {
+		if (autodocking){ // state.getBoolean(State.autodocking)) {
 			docker.autoDock("cancel");
 		}
 	}
@@ -763,7 +767,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			battStats();
 			// signalStrength();
 			String str = "";
-			if (portstr != null) {
+			if (comport != null) {
 				String spd = "FAST";
 				if (comport.speed == comport.speedmed) { spd = "MED"; }
 				if (comport.speed== comport.speedslow) { spd = "SLOW"; }
@@ -1377,12 +1381,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void populateSettings() {
 		settings.writeSettings("skipsetup", "no");
 		String result = "populatevalues ";
+		
 		// username
 		String str = settings.readSetting("user0");
 		if (str != null) { result += "username " + str +" "; }
+		
 		// comport
-		if (portstr == null) { portstr = "nil"; }
-		result += "comport " + portstr + " ";
+		// if (comport == null) { portstr = "nil"; }
+		// if(comport.getName())
+		// result += "comport " + portstr + " ";
+		
 		// battery
 		result += "battery " + settings.readSetting("batterypresent") + " ";
 		// http port

@@ -124,6 +124,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		// check for lost connection
 		if (watchdog) new WatchDog().start();
 	}
+	
+	public String getName(){
+		return serialPort.getName();
+	}
 
 	/** open port, enable read and write, enable events */
 	public void connect() {

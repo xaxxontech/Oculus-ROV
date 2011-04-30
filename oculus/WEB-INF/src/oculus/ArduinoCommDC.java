@@ -95,39 +95,29 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/**
 	 * Constructor but call connect to configure
 	 * 
-	 * @param str
-	 *            is the name of the serial port on the host computer
-	 * 
-	 * @param watchdog
-	 *            set to true to enable an internal thread to watch for a
-	 *            non-responsive arduino. Will try to disconnect() and then
-	 *            connect() again.
-	 *            
 	 * @param app 
 	 * 			  is the main oculus application, we need to call it on
 	 * 			Serial events like restet            
 	 */
-	public ArduinoCommDC(/*String str, */ boolean watchdog, Application app) {
+	public ArduinoCommDC(Application app) {
 
-		FindPort finder = new FindPort();	
-		state.set(State.serialport, finder.search(FindPort.OCULUS_DC));
+		String port = new FindPort().search(FindPort.OCULUS_DC);
+		if(port!=null){
+			state.set(State.serialport, port);
+			connect();
+			camHoriz();
+			
+			// check for lost connection
+			new WatchDog().start();			
+		}
 		
-		// keep port name, need it to re-connect
-		// portName = str;
-
 		// call back to notify on reset events etc
 		application  = app; 
-		
-		connect();
-		camHoriz();
-		
-		// check for lost connection
-		if (watchdog) new WatchDog().start();
 	}
 	
-	public String getName(){
-		return serialPort.getName();
-	}
+	//public String getName(){
+	//	return serialPort.getName();
+	//}
 
 	/** open port, enable read and write, enable events */
 	public void connect() {

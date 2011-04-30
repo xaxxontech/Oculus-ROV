@@ -162,10 +162,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void initialize() {
-		
-		// true for watch dog enabled 
-		// call connect and camhoz on startup
-		comport = new ArduinoCommDC(true, this);
+		 
+		// call connect() and camhoz() on startup
+		comport = new ArduinoCommDC(this);
 		
 		httpPort = settings.readRed5Setting("http.port");
 		
@@ -1387,9 +1386,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (str != null) { result += "username " + str +" "; }
 		
 		// comport
-		// if (comport == null) { portstr = "nil"; }
-		// if(comport.getName())
-		// result += "comport " + portstr + " ";
+		if (comport == null)
+			result += "comport not found";
 		
 		// battery
 		result += "battery " + settings.readSetting("batterypresent") + " ";

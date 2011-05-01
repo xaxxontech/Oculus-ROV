@@ -726,19 +726,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
-//	private void initializeAfterDelay() {
-//		new Thread(new Runnable() {
-//			public void run() {
-//				try {
-//					Thread.sleep(3000);
-//					comport.camHoriz();
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}).start();
-//	}
-	
 	private void cameraCommand(String str) {
 		comport.camCommand(str);
 		messageplayer("tilt command received: " + str, null, null);
@@ -1368,6 +1355,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// comport
 		if (state.get(State.serialport) == null) result += "comport nil ";
 		else result += "comport "+state.get(State.serialport)+" ";
+
+		// lights
+		if (state.get(State.lightport) == null) result += "lightport nil ";
+		else result += "lightport "+state.get(State.lightport)+" ";
 		
 		// battery
 		result += "battery " + settings.readSetting("batterypresent") + " ";

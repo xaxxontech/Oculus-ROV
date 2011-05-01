@@ -165,6 +165,12 @@ function populatevalues(values) {
 			if (str == "nil") { a.innerHTML="not found"; }
 			else { a.innerHTML = "found on "+str; }
 		}
+		if (splitstr[n]=="lightport") {
+			a = document.getElementById("lightport");
+			var str = splitstr[n+1];
+			if (str == "nil") { a.innerHTML="not found"; }
+			else { a.innerHTML = "found on "+str; }
+		}
 		if (splitstr[n]=="httpport") { document.getElementById("httpport").value = splitstr[n+1]; }
 		if (splitstr[n]=="rtmpport") { document.getElementById("rtmpport").value = splitstr[n+1]; }
 	}

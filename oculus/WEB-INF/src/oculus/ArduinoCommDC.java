@@ -272,7 +272,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 	
 	public void reset(){
-		if (this.isConnected()) {
+		if (isconnected) {
 			new Thread(new Runnable() { 
 				public void run() {
 					disconnect();

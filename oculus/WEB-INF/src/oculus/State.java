@@ -23,11 +23,13 @@ public class State {
 	// public static final String kill = "kill";
 	
 	public static final String serialport = "serialport";
+	public static final String lightport = "lightport";
+	
 	public static final String enable = "enable";
 	public static final String disable = "disable";
 	public static final String boottime = "boottime";
-	public static final String autodocking = "autodocking";
 	
+	//public static final String autodocking = "autodocking";
 	//public static final String noardunio = "noardunio";
 
 	public static final long ONE_MINUTE = 60000;
@@ -54,16 +56,13 @@ public class State {
 	/** private constructor for this singleton class */
 	private State() {
 
-		props.put(boottime, System.currentTimeMillis());
-		props.put(autodocking, "false");
-
+		props.put(boottime, String.valueOf(System.currentTimeMillis()));
+		
+		//props.put(autodocking, "false");
 		//props.put(home, System.getProperty("java.home"));
-		//props.put(path, System.getProperty("java.class.path"));
-		//props.put(loggingEnabled, "true");
-		//props.put(enableWatchDog, "true");
 	}
 
-	/** @param file is the properties file to configure the framework	 */
+	/** @param file is the properties file to configure the framework
 	public void parseFile(final String path) {
 
 		if (path == null) {
@@ -88,12 +87,12 @@ public class State {
 			System.out.println("can't parse config file [" + path + "], terminate.");
 			return;
 		}
-	}
+	}*/
 
-	/** @return a copy of the properties file */
+	/** @return a copy of the properties file
 	public Properties getProperties() {
 		return (Properties) props.clone();
-	}
+	}*/
 	
 	/**
 	 * Put a name/value pair into the configuration
@@ -135,13 +134,7 @@ public class State {
 	}
 
 	
-	/**
-	 * lookup values from props file
-	 * 
-	 * @param key
-	 *            is the lookup value
-	 * @return the matching value from properties file (or null if not found)
-	 */
+	/** */
 	public synchronized String get(String key) {
 
 		String ans = null;
@@ -157,14 +150,8 @@ public class State {
 
 		return ans;
 	}
-
-	/**
-	 * lookup values from props file
-	 * 
-	 * @param key
-	 *            is the lookup value
-	 * @return the matching value from properties file (or false if not found)
-	 */
+	
+	/** */
 	public boolean getBoolean(String key) {
 
 		boolean value = false;
@@ -180,13 +167,7 @@ public class State {
 		return value;
 	}
 
-	/**
-	 * lookup values from props file
-	 * 
-	 * @param key
-	 *            is the lookup value
-	 * @return the matching value from properties file (or zero if not found)
-	 */
+	/** */
 	public int getInteger(String key) {
 
 		String ans = null;
@@ -202,6 +183,29 @@ public class State {
 		}
 
 		return value;
+	}
+	
+	/** */
+	public long getLong(String key) {
+
+		String ans = null;
+		long value = ERROR;
+
+		try {
+
+			ans = get(key);
+			value = Long.parseLong(ans);
+
+		} catch (Exception e) {
+			return ERROR;
+		}
+
+		return value;
+	}
+	
+	/**@return the ms since last boot */
+	public long getUpTime(){
+		return System.currentTimeMillis() - getLong(boottime);
 	}
 	
 	public synchronized void lock() {

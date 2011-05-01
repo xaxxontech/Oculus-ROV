@@ -25,6 +25,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	IConnection grabber;
 	IConnection player = null;
 	protected ArduinoCommDC comport = null; 
+	protected LightsComm light = null;
 	protected Speech sayit = new Speech("kevin16");
 	protected BatteryLife battery;
 	Settings settings= new Settings();
@@ -157,6 +158,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		 
 		// call connect() and camhoz() on startup
 		comport = new ArduinoCommDC(this);
+		
+		// too simple to need the call back? 
+		light = new LightsComm(this);
 		
 		httpPort = settings.readRed5Setting("http.port");
 		
@@ -840,10 +844,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 						while ((line = procReader.readLine()) != null){
 							message("systemCall() : " + line, null, null);
 							log.info("systemCall() : " + line);
-							System.out.println("systemCall() : " + line);
-						
+							System.out.println("systemCall() : " + line);					
 						}
-						
 					} catch (Exception e) {
 						e.printStackTrace();
 					}		
@@ -853,19 +855,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
-	/*
-	 private void systemCall(String str) {
-         if (admin) {
-                 str = str.trim();
-                 try {
-                         Runtime.getRuntime().exec(str);
-                 } catch (Exception e) {
-                         e.printStackTrace();
-                 }
-         }
-	 }
-	 */
-
 	private void restart() {
 		if (admin) {
 			messageplayer("restarting server application", null, null);
@@ -1302,7 +1291,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (s[n].equals("user")) { user = s[n+1]; }
 			if (s[n].equals("password")) { password = s[n+1]; }
 			if (s[n].equals("battery")) { battery = s[n+1]; }
-			//if (s[n].equals("comport")) { com_port = s[n+1]; }
 			if (s[n].equals("httpport")) { httpport = s[n+1]; }
 			if (s[n].equals("rtmpport")) { rtmpport = s[n+1]; }
 			if (s[n].equals("skipsetup")) { skipsetup = s[n+1]; }

@@ -23,7 +23,7 @@ public class FindPort {
 	/* add known devices here, strings returned from the firmware */
 	public static final String OCULUS_SERVO = "<id:oculusServo>";
 	public static final String OCULUS_DC = "<id:oculusDC>";
-	public static final String LIGHTS = "<id:lights>";
+	public static final String LIGHTS = "<id:oculusLights>";
 	private static final long RESPONCE_DELAY = 300;
 
 	/* reference to the underlying serial port */

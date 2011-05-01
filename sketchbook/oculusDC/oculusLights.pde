@@ -6,7 +6,7 @@ const int MAX = 179;
 const int MIN = 0;
 
 Servo led; 
-int bright = 100;
+int bright = 0;
 boolean echo = false;
 
 // buffer the command in byte buffer 
@@ -64,6 +64,7 @@ void parseCommand(){
     if(bright >= MAX) return;
     
     bright = bright + 5;
+    led.attach(ledPin);
     led.write(bright);
    
     // Serial.println("<bright>");  
@@ -73,7 +74,8 @@ void parseCommand(){
     // min 
     if(bright <= MIN) return;
     
-    bright = bright + 5;
+    bright = bright - 5;
+    led.attach(ledPin);
     led.write(bright);
     
     // Serial.println("<dim>"); 
@@ -90,15 +92,28 @@ void parseCommand(){
     }
     
     bright = buffer[1];
+    led.attach(ledPin);
     led.write(bright);
     
-    Serial.println("<bright " + (String)buffer[1] + ">");      
+    // Serial.println("<bright " + (String)buffer[1] + ">");      
   }  
+  else if(buffer[0] == 'f'){
+    bright = 0;
+    led.write(bright);
+    led.detach();
+    Serial.println("<off>");
+  }   
+  else if(buffer[0] == 'o'){
+    bright = MAX;
+    led.attach(ledPin);
+    led.write(MAX);
+    Serial.println("<on>");
+  }   
   else if(buffer[0] == 'x'){
     Serial.println("<id:oculusLights>");
   }   
   else if(buffer[0] == 'y'){
-    Serial.println("<version:0.1.2>"); 
+    Serial.println("<version:0.1.3>"); 
   }   
   else if(buffer[0] == 'e'){
     if(buffer[1] == '1')

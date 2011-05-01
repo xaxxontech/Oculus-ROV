@@ -63,7 +63,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		passwordEncryptor.setPlainDigest(true);
 		initialize();
 		
-		System.out.println("booted on: " + state.get(State.boottime));	
+		//
+		// just example
+		//
+		// System.out.println("booted on: " + state.get(State.boottime));	
+		// System.out.println("booted [" + state.get(State.boottime) + "] ms ago");	
 	}
 	
 	public boolean appConnect(IConnection connection, Object[] params) { // override

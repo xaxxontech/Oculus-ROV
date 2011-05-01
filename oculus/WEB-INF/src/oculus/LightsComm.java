@@ -69,14 +69,18 @@ public class LightsComm implements SerialPortEventListener {
 		if(port!=null){
 			state.set(State.lightport, port);
 			
-			System.out.println("lights found on: " + state.get(State.lightport));
+			// System.out.println("lights found on: " + state.get(State.lightport));
 			
 			new Thread(new Runnable() { 
 				public void run() {
 				
 					connect();				
 					Util.delay(SETUP);
-					setEcho(true);
+					
+					// start with them off 
+					off();
+					
+					// setEcho(true);
 					
 					// check for lost connection
 					// new WatchDog().start();	
@@ -169,7 +173,7 @@ public class LightsComm implements SerialPortEventListener {
 				version = response.substring( 
 						response.indexOf("version:")+8, response.length());
 	
-				application.message("firmware version: " + version, null, null);
+				application.message("lights version: " + version, null, null);
 				
 			} else return;
 			// don't bother showing watchdog pings to user screen 

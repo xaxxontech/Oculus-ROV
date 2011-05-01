@@ -159,12 +159,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void initialize() {
-		 
-		// call connect() and camhoz() on startup
-		comport = new ArduinoCommDC(this);
 		
-		// too simple to need the call back? 
-		light = new LightsComm(this);
+		// must be blocking search of all ports, but only once!  
+		new Discovery().search();
+		
+		// System.out.println("discovery done...");
+		 
+		if( state.get(State.serialport) != null )
+			comport = new ArduinoCommDC(this);
+		
+		if( state.get(State.lightport) != null )
+			light = new LightsComm(this);
 		
 		httpPort = settings.readRed5Setting("http.port");
 		

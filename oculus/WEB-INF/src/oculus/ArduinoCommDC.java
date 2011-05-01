@@ -104,20 +104,18 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		// call back to notify on reset events etc
 		application = app; 
 		
-		// look for hardware 
-		String port = new FindPort().search(FindPort.OCULUS_DC);
-		if(port!=null){
-			state.set(State.serialport, port);
-			new Thread(new Runnable() { public void run() {
+		new Thread(new Runnable() {
+			public void run() {
 				
 				connect();				
 				Util.delay(SETUP);
 				camHoriz();
 			
 				// check for lost connection
-				new WatchDog().start();	
-			}}).start();
-		} 
+				new WatchDog().start();
+				
+			}
+		}).start();
 	}
 	
 	/** open port, enable read and write, enable events */

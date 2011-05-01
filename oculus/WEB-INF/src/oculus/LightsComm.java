@@ -64,29 +64,20 @@ public class LightsComm implements SerialPortEventListener {
 		// call back to notify on reset events etc
 		application = app; 
 		
-		// look for hardware 
-		String port = new FindPort().search(FindPort.LIGHTS);
-		if(port!=null){
-			state.set(State.lightport, port);
-			
-			// System.out.println("lights found on: " + state.get(State.lightport));
-			
-			new Thread(new Runnable() { 
-				public void run() {
-				
-					connect();				
-					Util.delay(SETUP);
+		new Thread(new Runnable() { 
+			public void run() {
+				connect();				
+				Util.delay(SETUP);
 					
-					// start with them off 
+					// start with them off ??
 					off();
 					
 					// setEcho(true);
 					
 					// check for lost connection
 					// new WatchDog().start();	
-				}
-			}).start();
-		} 
+			}	
+		}).start();
 	}
 	
 	/** open port, enable read and write, enable events */

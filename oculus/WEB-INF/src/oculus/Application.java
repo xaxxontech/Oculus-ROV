@@ -175,8 +175,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		grabberInitialize();
 		
-		if(settings.getBoolean("emailalerts"))
-			new EmailAlerts(this).start();
+		//if(settings.getBoolean("emailalerts"))
+		// new EmailAlerts(this).start();
+		
+		// checks setting for flag
+		new SystemWatchdog(this);
+		new EmailAlerts(this);
 		
 		log.info("initialize");
 	}
@@ -379,6 +383,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			if(fn.equals("arduinoreset")) {
 				comport.reset();
+				// messageplayer("up: " + (state.getUpTime()/1000) + " sec", null, null);
 				messageplayer("resetting arduino", null, null);
 			}
 		}
@@ -851,7 +856,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
-	private void restart() {
+	public void restart() {
 		if (admin) {
 			messageplayer("restarting server application", null, null);
 			messageGrabber("restarting server application", null);

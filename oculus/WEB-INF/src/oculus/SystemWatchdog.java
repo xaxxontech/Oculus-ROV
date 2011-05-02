@@ -49,6 +49,9 @@ public class SystemWatchdog {
 				String boot = new Date(state.getLong(State.boottime)).toString();
 				app.message("been awake since: " + boot, null, null);
 				
+				if(debug)
+					new SendMail().sendMessage("Oculus Reboot", "been awake since: " + boot);
+				
 				Util.delay(5000);
 				
 				log.info("Rebooting, been awake since: " + boot);

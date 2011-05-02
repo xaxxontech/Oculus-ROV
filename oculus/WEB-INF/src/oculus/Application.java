@@ -383,7 +383,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			if(fn.equals("arduinoreset")) {
 				comport.reset();
-				// messageplayer("up: " + (state.getUpTime()/1000) + " sec", null, null);
 				messageplayer("resetting arduino", null, null);
 			}
 		}
@@ -505,7 +504,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		log.info("voice synth: '"+str+"'");
 	}
 
-	private void battStats() { 
+	public void battStats() { 
 		new Thread(new Runnable() {
 			public void run() {
 				if (batterypresent == true && !dockstatus.equals("docking")) {

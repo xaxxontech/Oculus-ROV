@@ -3,10 +3,12 @@ package oculus;
 import java.util.Date;
 import java.util.TimerTask;
 
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
+
 public class SystemWatchdog {
 
-	// private static Logger log =
-	// Red5LoggerFactory.getLogger(SystemWatchdog.class, "oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(SystemWatchdog.class, "oculus");
 
 	// if reboot is "true" in config file
 	private final boolean reboot = new Settings().getBoolean("reboot");
@@ -43,10 +45,13 @@ public class SystemWatchdog {
 				app.message("system watchdog : " + (state.getUpTime()/1000) + " sec", null, null);
 
 			if (state.getUpTime() > STALE) {
-
-				app.message("been awake since: " 
-						+ new Date(state.getLong(State.boottime)).toString(), null, null);
+				
+				String boot = new Date(state.getLong(State.boottime)).toString();
+				app.message("been awake since: " + boot, null, null);
+				
 				Util.delay(5000);
+				
+				log.info("Rebooting, been awake since: " + boot);
 				app.message("rebooting now...", null, null);
 				app.restart();
 			}

@@ -251,13 +251,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}
 		public void run() {
 			Util.delay(SETUP);
-			application.message("starting watchdog thread", null, null);
+			// application.message("starting watchdog thread", null, null);
 			while (true) {
 				if (getReadDelta() > DEAD_TIME_OUT) {
-					if (isconnected) {
+					//
+					// TODO: this happens alots... should do something? means cable up plugged, email?
+					//
+					//if (isconnected) {
+						application.message("arduino watchdog time out", null, null);
 						reset(); 
-						application.message("watchdog time out, resetting", null, null);
-					}
+					//}
 				}
 
 				// send ping to keep connection alive 

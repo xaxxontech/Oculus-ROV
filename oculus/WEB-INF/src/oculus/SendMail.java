@@ -29,13 +29,15 @@ public class SendMail {
 	private String user = null;
 	private String pass = null;
 	
+	//private State state = State.getReference();
+	
 	/**
 	 * Check props for email auth info 
 	 */
 	SendMail(){
 
 		Settings settings = new Settings();
-		// TODO: take smtp info from props?
+		// TODO: take smtp info from props too?
 		// private static final String SMTP_HOST_NAME = "smtp.gmail.com";
 		user = settings.readSetting("email");
 		pass = settings.readSetting("email_password");
@@ -104,12 +106,17 @@ public class SendMail {
 	 */
 	public boolean sendMessage(final String sub, final String text, final String path) {
 		
-		if( user == null || pass == null ) return false;
+		if( user == null || pass == null ) {
+			System.out.println("no email and password found in settings");
+			return false;
+		}
 		
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-				
+
+					State.getReference().set(State.emailbusy, true);
+					
 					Properties props = new Properties();
 					props.put("mail.smtps.host", SMTP_HOST_NAME);
 					props.put("mail.smtps.auth", "true");
@@ -119,7 +126,7 @@ public class SendMail {
 					Transport transport = mailSession.getTransport("smtp");
 
 					// debug flag in props
-					mailSession.setDebug(true);
+					mailSession.setDebug(false);
 
 					MimeMessage message = new MimeMessage(mailSession);
 					message.setSubject(sub);
@@ -139,9 +146,10 @@ public class SendMail {
 					message.setContent(multipart);
 
 					transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user,pass);
-					transport.sendMessage(message,
-							message.getRecipients(Message.RecipientType.TO));
+					transport.sendMessage(message,message.getRecipients(Message.RecipientType.TO));
 					transport.close();
+
+					State.getReference().set(State.emailbusy, false);
 
 				} catch (Exception e) {
 					log.error(e.getMessage());

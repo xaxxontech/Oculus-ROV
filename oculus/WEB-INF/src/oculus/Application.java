@@ -162,21 +162,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// must be blocking search of all ports, but only once!  
 		new Discovery().search();
-		
-		// System.out.println("discovery done...");
+		System.out.println("discovery done...");
 		 
-		if( state.get(State.serialport) != null )
-			comport = new ArduinoCommDC(this);
+		// start if discovered and in state 
+		// if( state.get(State.serialport) != null )
+		comport = new ArduinoCommDC(this);
 		
-		if( state.get(State.lightport) != null )
-			light = new LightsComm(this);
+		// if( state.get(State.lightport) != null )
+		light = new LightsComm(this);
 		
 		httpPort = settings.readRed5Setting("http.port");
 		
 		grabberInitialize();
-		
-		//if(settings.getBoolean("emailalerts"))
-		// new EmailAlerts(this).start();
 		
 		// checks setting for flag
 		new SystemWatchdog(this);
@@ -825,8 +822,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	
-	//TODO: thread it and record output 
-	private void systemCall(String str) {
+	public void systemCall(String str) {
 		if (admin) {
 			
 			final String args = str.trim();
@@ -842,9 +838,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 						String line = null;
 						while ((line = procReader.readLine()) != null){
+							
+							//TODO: USE ONLY SYSOUT?
+							
 							message("systemCall() : " + line, null, null);
 							log.info("systemCall() : " + line);
-							System.out.println("systemCall() : " + line);					
+							System.out.println("systemCall() : " + line);
+							
 						}
 					} catch (Exception e) {
 						e.printStackTrace();

@@ -10,10 +10,10 @@ public class EmailAlerts {
 	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class,"oculus");
 
 	// how low of battery to warm user with email
-	public static final int WARN_LEVEL = 30;
+	public static final int WARN_LEVEL = 65;
 
 	// how often to check, ten minutes 
-	public static final int DELAY = 600000;
+	public static final int DELAY = 600; //000;
 
 	// call back to message window
 	private Application app = null;

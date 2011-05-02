@@ -26,6 +26,8 @@ public class State {
 	public static final String enable = "enable";
 	public static final String disable = "disable";
 	public static final String boottime = "boottime";
+	public static final String emailbusy = "emailbusy";
+
 	
 	//public static final String autodocking = "autodocking";
 	//public static final String noardunio = "noardunio";

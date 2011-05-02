@@ -39,8 +39,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private static final byte[] ECHO_ON = {'e', '1'};
 	private static final byte[] ECHO_OFF = {'e', '0'};
 	
-	// private String portName = null;
-	
 	// comm cannel 
 	private SerialPort serialPort = null;
 	private InputStream in;
@@ -104,18 +102,20 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		// call back to notify on reset events etc
 		application = app; 
 		
-		new Thread(new Runnable() {
-			public void run() {
+		if( state.get(State.serialport) != null ){
+			new Thread(new Runnable() {
+				public void run() {
+					
+					connect();				
+					Util.delay(SETUP);
+					camHoriz();
 				
-				connect();				
-				Util.delay(SETUP);
-				camHoriz();
-			
-				// check for lost connection
-				new WatchDog().start();
-				
-			}
-		}).start();
+					// check for lost connection
+					new WatchDog().start();
+					
+				}
+			}).start();
+		}
 	}
 	
 	/** open port, enable read and write, enable events */

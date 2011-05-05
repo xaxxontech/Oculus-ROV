@@ -32,12 +32,15 @@ public class State {
 	//public static final String autodocking = "autodocking";
 	//public static final String noardunio = "noardunio";
 
+	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
 	public static final long FIVE_MINUTES = 300000;
 	public static final long TEN_MINUTES = 600000;
 	public static final int ERROR = -1;
 	
+	//
+	MulticastChannel channel = MulticastChannel.getReference();
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
@@ -60,6 +63,10 @@ public class State {
 		
 		//props.put(autodocking, "false");
 		//props.put(home, System.getProperty("java.home"));
+		Command test = new Command();
+		test.add(boottime, get(boottime));
+		channel.write(test);
+		
 	}
 
 	/** @param file is the properties file to configure the framework

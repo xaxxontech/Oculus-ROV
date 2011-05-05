@@ -1,11 +1,10 @@
 package oculus;
 
-import java.io.File;
 import java.util.Date;
 import java.util.TimerTask;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
+//import org.red5.logging.Red5LoggerFactory;
+//import org.slf4j.Logger;
 
 public class SystemWatchdog {
 
@@ -16,11 +15,10 @@ public class SystemWatchdog {
 	private final boolean debug = new Settings().getBoolean("developer");
 
 	// check every hour
-	public static final int DELAY = 3600 * 1000;
+	public static final long DELAY = State.FIVE_MINUTES;
 
 	// when is the system stale and need reboot
-	// seconds in day = 86400
-	public static final int STALE = (86400 * 2) * 1000;
+	public static final long STALE = State.ONE_DAY * 2;
 
 	// shared state variables
 	private State state = State.getReference();
@@ -40,12 +38,12 @@ public class SystemWatchdog {
 	private class Task extends TimerTask {
 		@Override
 		public void run() {
-
+			
 			if (debug)
 				app.message("system watchdog : " + (state.getUpTime()/1000) + " sec", null, null);
 
 			// only reboot is idle 
-			if ((state.getUpTime() > STALE) && app.motionenabled ){ // && (app.userconnected==null)) {
+			if ((state.getUpTime() > STALE) && !app.motionenabled ){ // && (app.userconnected==null)) {
 				
 				String boot = new Date(state.getLong(State.boottime)).toString();
 				app.message("been awake since: " + boot, null, null);
@@ -81,6 +79,7 @@ public class SystemWatchdog {
 				
 				*/
 				
+				app.message("rebooting now...", null, null);				
 				app.systemCall("shutdown -r -f -t 01");				
 			}
 		}

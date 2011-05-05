@@ -27,7 +27,7 @@ public class EmailAlerts {
 	public EmailAlerts(Application app) {
 		this.app = app;
 		if (alerts && app.batterypresent){
-			timer.scheduleAtFixedRate(new Task(), 5000, DELAY);
+			timer.scheduleAtFixedRate(new Task(), 30000, DELAY);
 			System.out.println("starting email alerts...");
 		}
 	}

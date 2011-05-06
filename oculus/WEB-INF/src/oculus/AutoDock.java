@@ -77,7 +77,7 @@ public class AutoDock {
 				//int y = Integer.parseInt(cmd[2])/2; //assuming 320x240
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
-				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unused
 				
 				app.autodocking = true;
 				// state.set(State.autodocking, false);

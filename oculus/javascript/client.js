@@ -322,6 +322,7 @@ function setstatus(status, value) {
 		if (value=="downloadcomplete") { softwareupdate("downloadcomplete",""); }
 		else { softwareupdate("available",value); }
 	}
+	if (status == "framegrabbed") { framegrabbed(); }
 
 }
 
@@ -1731,3 +1732,9 @@ function facefound(str) {
 		faceboxtimer = setTimeout("document.getElementById('facebox').style.display='none';",1000);
 	}
 }
+
+function framegrabbed() {
+	document.getElementById("framegrabbox").style.display = "";
+	document.getElementById('framegrabpic').src = 'images/framegrab.png'+ '?' + (new Date()).getTime();
+}
+

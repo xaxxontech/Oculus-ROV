@@ -177,7 +177,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// checks setting for flag
 		new SystemWatchdog(this);
-		new EmailAlerts(this);
+		//new EmailAlerts(this);
 		
 		log.info("initialize");
 	}
@@ -450,8 +450,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void frameGrabbed(ByteArray _RAWBitmapImage) {
-		String str= "frame grabbed <a href='images/framegrab.png' target='_blank'>view</a>";
-		messageplayer(str, null, null);
+		//String str= "frame grabbed <a href='images/framegrab.png' target='_blank'>view</a>";
+		//String str= "frame grabbed <a href='javascript: framegrabbed();'>view</a>";
+		messageplayer(null, "framegrabbed", null);
 		// Use functionality in org.red5.io.amf3.ByteArray to get parameters of the ByteArray
 		int BCurrentlyAvailable = _RAWBitmapImage.bytesAvailable();
 		int BWholeSize = _RAWBitmapImage.length(); // Put the Red5 ByteArray into a standard Java array of bytes
@@ -1429,7 +1430,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 			if (str.equals("download")) {
-				messageplayer("downloading software update", null, null);
+				messageplayer("downloading software update...", null, null);
 				new Thread(new Runnable() {  public void run() {
 					String fileurl  = new Updater().checkForUpdateFile();
 					System.out.println(fileurl);

@@ -40,7 +40,7 @@ public class AutoDock {
 	 */
 
 	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
-	 //private State state = State.getReference();
+	private State state = State.getReference();
 	Settings settings= new Settings();
 
 	// call backs 
@@ -49,6 +49,9 @@ public class AutoDock {
 	private ArduinoCommDC comport = null; 
 	private Application app = null;
 	
+	boolean autodockingcamctr = false;
+	private int autodockgrabattempts;
+	private int autodockctrattempts;
 	
 	public AutoDock(Application theapp, IConnection thegrab){
 		this.app = theapp;
@@ -58,13 +61,15 @@ public class AutoDock {
 	
 
 	public void autoDock(String str) {
-	
+		
+		System.out.println("autodock: " + str);
+		
 		String cmd[] = str.split(" ");
 		
 		if (cmd[0].equals("cancel")) {
 			
-			app.autodocking = false;
-			// state.set(State.autodocking, false);
+			// app.autodocking = false;
+			state.set(State.autodocking, false);
 			
 			app.message("auto-dock ended","multiple","cameratilt "); //+app.camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
@@ -79,30 +84,30 @@ public class AutoDock {
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unused
 				
-				app.autodocking = true;
-				// state.set(State.autodocking, false);
+				// app.autodocking = true;
+				state.set(State.autodocking, true);
 				
-				app.autodockingcamctr = false;
-				app.autodockgrabattempts = 0;
-				app.autodockctrattempts = 0;
+				autodockingcamctr = false;
+				autodockgrabattempts = 0;
+				autodockctrattempts = 0;
 				app.message("auto-dock in progress","motion", "moving");
 				log.info("autodock started");
 			}
 			else { app.message("motion disabled","autodockcancelled", null); }
 		}
 		if (cmd[0].equals("dockgrabbed")) { // RESULTS FROM GRABBER: calibrate, findfromxy, find
-			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && app.autodocking) { // x,y,width,height,slope
+			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.autodocking)) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 				if (cmd[4].equals("0")) { // width==0, failed to find target
-					if (app.autodockgrabattempts < 0) { // TODO: remove this condition if unused
-						app.autodockgrabattempts ++;
+					if (autodockgrabattempts < 0) { // TODO: remove this condition if unused
+						autodockgrabattempts ++;
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 					}
 					else { 
 						//failed, give up
-						app.autodocking = false;
-						// state.set(State.autodocking, false);
+						// app.autodocking = false;
+						state.set(State.autodocking, false);
 						
 						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
@@ -112,7 +117,7 @@ public class AutoDock {
 					app.message(null,"autodocklock",s);
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
 						Integer.parseInt(cmd[5]),new Float(cmd[6]));
-					app.autodockgrabattempts ++;
+					autodockgrabattempts ++;
 				}
 			}
 			if (cmd[1].equals("calibrate")) { // x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
@@ -182,8 +187,8 @@ public class AutoDock {
 			}
 		} // end of S1 check
 		if (w*h >= s1 && w*h < s2) {
-			if (app.autodockingcamctr) { // if cam centered do check and comps below
-				app.autodockingcamctr = false;
+			if (autodockingcamctr) { // if cam centered do check and comps below
+				autodockingcamctr = false;
 				int autodockcompdir = 0;
 				if (Math.abs(slopedeg-dockslopedeg) > 1.7) {
 					autodockcompdir = (int) (160 -(w*1.0) -20 -Math.abs(160 -x));  // was 160 - w - 25 - Math.abs(160-x)
@@ -217,7 +222,7 @@ public class AutoDock {
 				}
 			}
 			else { // !autodockingcamctr
-				app.autodockingcamctr = true;
+				autodockingcamctr = true;
 				if (Math.abs(x-dockx) > 10 || Math.abs(y-120) > 30) {
 					comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 					new Thread(new Runnable() { public void run() { try {
@@ -233,8 +238,8 @@ public class AutoDock {
 			}
 		}
 		if (w*h >= s2) {
-			if ((Math.abs(x-dockx) > 5) && app.autodockctrattempts <= 10) {
-				app.autodockctrattempts ++;
+			if ((Math.abs(x-dockx) > 5) && autodockctrattempts <= 10) {
+				autodockctrattempts ++;
 				comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 				new Thread(new Runnable() { public void run() { try {
 					Thread.sleep(1500);
@@ -243,9 +248,9 @@ public class AutoDock {
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else {
-				if (Math.abs(slopedeg-dockslopedeg) > 1.6 || app.autodockctrattempts >10) { // backup and try again
-					System.out.println("backup "+dockslopedeg+" "+slopedeg+" ctrattempts:"+app.autodockctrattempts);
-					app.autodockctrattempts = 0; 
+				if (Math.abs(slopedeg-dockslopedeg) > 1.6 || autodockctrattempts >10) { // backup and try again
+					System.out.println("backup "+dockslopedeg+" "+slopedeg+" ctrattempts:"+autodockctrattempts);
+					autodockctrattempts = 0; 
 					int comp = 80;
 					if (slope < dockslope) { comp = -80; }
 					x += comp;

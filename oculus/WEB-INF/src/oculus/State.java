@@ -3,19 +3,10 @@ package oculus;
 import java.util.Properties;
 
 /**
- * <p>
- * Holds the framework configuration parameters. Used as a shared resource for
- * all other classes to initialize from. The defaults are enough to send
- * commands and register API's for incoming XML events.
- * 
  * @author <a href="mailto:brad.zdanivsky@gmail.com">Brad Zdanivsky</a>
  */
 public class State {
 
-	// public static final String DEFAULT_PORT = "4444";
-	// public static final String DEFAULT_ADDRESS = "230.0.0.1";
-	// public static final String shutdown = "shutdown";
-	
 	public static final String user = "user";
 	public static final String logintime = "logintime";
 	public static final String userconnected = "userconnected";
@@ -23,15 +14,12 @@ public class State {
 	public static final String developer = "developer";
 	public static final String serialport = "serialport";
 	public static final String lightport = "lightport";
-	
 	public static final String enable = "enable";
 	public static final String disable = "disable";
 	public static final String boottime = "boottime";
-	public static final String emailbusy = "emailbusy";
-
-	
-	//public static final String autodocking = "autodocking";
-	//public static final String noardunio = "noardunio";
+	// public static final String emailbusy = "emailbusy";
+	public static final String autodocking = "autodocking";
+	// public static final String noardunio = "noardunio";
 
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
@@ -48,7 +36,8 @@ public class State {
 
 	/** properties object to hold configuration */
 	private Properties props = new Properties();
-	private boolean locked = false;
+	
+	// private boolean locked = false;
 
 	public static State getReference() {
 		if (singleton == null) {
@@ -113,10 +102,11 @@ public class State {
 	 */
 	public synchronized void set(String key, String value) {
 
+		/*
 		if (locked) {
 			System.out.println(" state locked, can't put(): " + key);
 			return;
-		}
+		}*/
 
 		if (props.containsKey(key))
 			System.out.println("refreshing property for: " + key + " = " + value);
@@ -133,10 +123,11 @@ public class State {
 	 */
 	public synchronized void set(String key, boolean value) {
 
+		/*
 		if (locked) {
 			System.out.println(" state locked, can't put(): " + key);
 			return;
-		}
+		}*/
 
 		if (props.containsKey(key))
 			System.out.println("refreshing property for: " + key + " = " + value);
@@ -153,10 +144,11 @@ public class State {
 	 */
 	public synchronized void set(String key, long value) {
 
+		/*
 		if (locked) {
 			System.out.println(" state locked, can't put(): " + key);
 			return;
-		}
+		}*/
 
 		if (props.containsKey(key))
 			System.out.println("refreshing property for: " + key + " = " + value);
@@ -239,6 +231,7 @@ public class State {
 		return System.currentTimeMillis() - getLong(boottime);
 	}
 	
+	/*
 	public synchronized void lock() {
 		locked = true;
 	}
@@ -249,5 +242,5 @@ public class State {
 
 	public synchronized boolean isLocked() {
 		return locked;
-	}
+	}*/
 }

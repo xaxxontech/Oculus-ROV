@@ -48,14 +48,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	String dockstatus = "";
 	String httpPort; 
 	boolean facegrabon = false;
-	boolean autodocking = false;
-	boolean autodockingcamctr = false;
 	private boolean emailgrab = false;
-	int autodockgrabattempts;
-	int autodockctrattempts;
 	String docktarget;
 	private AutoDock docker = null;
 	private State state = State.getReference();
+	private CommandManager commandManager = CommandManager.getReference();
 
 	public Application() { 
 		super();
@@ -103,11 +100,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			userconnected = null;
 			
 			// TODO: BRAD JUNK, not needed.. stateis run time only values
-			// state.set(State.userconnected, false);
+			state.set(State.userconnected, false);
 			
 			player = null;
 			facegrabon = false;
-			if (!autodocking) { // state.getBoolean(State.autodocking)) {
+			if (state.getBoolean(State.autodocking)) {
 				if (!stream.equals("stop")) { publish("stop"); }
 				if (comport.moving) { comport.stopGoing(); }
 			}
@@ -172,6 +169,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// checks setting for flag
 		new SystemWatchdog(this);
 		new EmailAlerts(this);
+		
+		commandManager.init(this);
 		
 		log.info("initialize");
 	}
@@ -649,9 +648,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 								if (battery.batteryStatus() == 2) {
 									docking = false;
 									String str = "";
-									if (autodocking){ // state.getBoolean(State.autodocking)) {
-										//state.set(State.autodocking, false);
-										autodocking = false;
+									if (state.getBoolean(State.autodocking)) {
+										state.set(State.autodocking, false);
+										//autodocking = false;
 										str += " cameratilt "+camTiltPos()+" autodockcancelled blank";
 										if (!stream.equals("stop") && userconnected==null) { publish("stop"); }
 									}
@@ -673,7 +672,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 									messageplayer("docking timed out", "multiple", s);
 									log.info(userconnected +" docking timed out");
 									dockstatus = "un-docked";
-									if (autodocking){ // tate.getBoolean(State.autodocking)) {
+									if (state.getBoolean(State.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
 											comport.speedset("slow");
 											comport.goBackward();
@@ -736,7 +735,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (comport.sliding == true) {
 			comport.slidecancel();
 		}
-		if (autodocking){ // state.getBoolean(State.autodocking)) {
+		if (state.getBoolean(State.autodocking)) {
 			docker.autoDock("cancel");
 		}
 	}

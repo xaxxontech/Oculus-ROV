@@ -29,6 +29,8 @@ public class MulticastChannel implements Runnable {
 	private String local = null;
 	private Thread server = null;
 	private boolean loopback = true;
+	
+	private CommandManager manager = CommandManager.getReference();
 
 	/** @return a reference to this singleton class. */
 	public static MulticastChannel getReference() {
@@ -103,11 +105,13 @@ public class MulticastChannel implements Runnable {
             if( valid(input, sendersIp) ) {  
             	
            		/** build a command and dispatch it to the API */
-            	Command command = xmlParser.parse(input); 
+            	// Command command = xmlParser.parse(input); 
             	
-            	System.out.println("in: " + command);
+            	// System.out.println("in: " + command);
             	
             	/** dispatch the command */
+            	manager.execute(input);
+            	
             	// CommandDispatcher.dispatch(command); 	
                 	
             }

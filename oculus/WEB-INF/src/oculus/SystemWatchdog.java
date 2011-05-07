@@ -1,7 +1,7 @@
 package oculus;
 
-// import java.io.File;
-// import java.util.Date;
+import java.io.File;
+import java.util.Date;
 import java.util.TimerTask;
 
 public class SystemWatchdog {
@@ -39,9 +39,8 @@ public class SystemWatchdog {
 			// only reboot is idle 
 			if ((state.getUpTime() > STALE) && !app.motionenabled ){
 				
-				/* String boot = new Date(state.getLong(State.boottime)).toString();
-				
-				app.message("been awake since: <br>  " + boot, null, null);
+				String boot = new Date(state.getLong(State.boottime)).toString();
+				app.message("last boot: " + boot, null, null);
 				
 				if(debug){
 					
@@ -49,6 +48,8 @@ public class SystemWatchdog {
 					String log = System.getenv("RED5_HOME")+"\\log\\jvm.stdout";
 					String temp = System.getenv("RED5_HOME")+"\\log\\debug.txt";
 			
+					// delete if exists from before 
+					new File(temp).delete();
 					if(Util.copyfile(log, temp)){
 					
 						// blocking send 
@@ -56,13 +57,11 @@ public class SystemWatchdog {
 				
 						// emailed it, now delete it 
 						new File(temp).delete();
+						new File(log).deleteOnExit();
 					}
-				} */
+				} 
 				
 				app.message("rebooting now...", null, null);				
-				
-				// app.restart(); 
-				
 				app.systemCall("shutdown -r -f -t 01");				
 			}
 		}

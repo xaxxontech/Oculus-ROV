@@ -20,143 +20,191 @@ public class SendMail {
 
 	private static Logger log = Red5LoggerFactory.getLogger(SendMail.class, "oculus");
 
-	// take this from properties on startup if we want any smtp server
+	// TODO: take this from properties on startup if we want any smtp server
 	private static int SMTP_HOST_PORT = 587;
 	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
 
-	// send result back 
-	private boolean result = true;
-	private String user = null;
-	private String pass = null;
-	
-	//private State state = State.getReference();
-	
-	/**
-	 * Check props for email auth info 
-	 */
-	SendMail(){
+	private Settings settings = new Settings();
+	private final String user = settings.readSetting("email");
+	private final String pass = settings.readSetting("email_password");
+	private final boolean debug = settings.getBoolean("developer");
 
-		Settings settings = new Settings();
-		// TODO: take smtp info from props too?
-		// private static final String SMTP_HOST_NAME = "smtp.gmail.com";
-		user = settings.readSetting("email");
-		pass = settings.readSetting("email_password");
-	}
+	private String subject = null;
+	private String body = null;
+	private String fileName = null;
 	
-	/**
-	 * 
-	 * Send yourself an error message from the robot. This method requires a
-	 * Gmail user account.
-	 * 
-	 * @param text
-	 *            is the message body to form the email body
-	 * @return True if mail was sent successfully
-	 */
-	public boolean sendMessage(final String sub, final String text) {
-		
-		if( user == null || pass == null ) return false;
-			
+	// if set, send error messages to user screen 
+	private Application application = null;
+
+	/** */
+	SendMail(final String sub, final String text, final String file) {
+
+		subject = sub;
+		body = text;
+		fileName = file;
+
 		new Thread(new Runnable() {
 			public void run() {
-				try {
-
-					Properties props = new Properties();
-					props.put("mail.smtps.host", SMTP_HOST_NAME);
-					props.put("mail.smtps.auth", "true");
-					props.put("mail.smtp.starttls.enable", "true");
-
-					Session mailSession = Session.getDefaultInstance(props);
-					Transport transport = mailSession.getTransport("smtp");
-
-					/* turn off on deply */
-					mailSession.setDebug(true);
-
-					MimeMessage message = new MimeMessage(mailSession);
-					message.setSubject(sub);
-					message.setContent(text, "text/plain");
-					message.addRecipient(Message.RecipientType.TO,
-							new InternetAddress(user));
-
-					transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user, pass);
-					transport.sendMessage(message,
-							message.getRecipients(Message.RecipientType.TO));
-					transport.close();
-				} catch (Exception e) {
-					log.error(e.getMessage());
-					result = false;
-				}
+				sendAttachment();
 			}
 		}).start();
-
-		// all good
-		return result;
 	}
 
-	/**
-	 * Send yourself an error message from the robot. This method requires a
-	 * Gmail user account.
-	 * 
-	 * @param sub
-	 *            is the subject text of the email
-	 * @param text
-	 *            is the body of the email
-	 * @param path
-	 *            is the path to the file to attach to the email
-	 * 
-	 */
-	public boolean sendMessage(final String sub, final String text, final String path) {
+	/**	*/
+	SendMail(final String sub, final String text) {
+
+		subject = sub;
+		body = text;
+
+		new Thread(new Runnable() {
+			public void run() {
+				sendMessage();
+			}
+		}).start();
+	}
+
+
+	/** send messages to user */
+	SendMail(final String sub, final String text, final String file, Application app) {
 		
-		if( user == null || pass == null ) {
-			System.out.println("no email and password found in settings");
-			return false;
+		subject = sub;
+		body = text;
+		fileName = file;
+		application = app;
+		
+		new Thread(new Runnable() {
+			public void run() {
+				sendAttachment();
+			}
+		}).start();
+	}
+
+	/** send messages to user */
+	SendMail(final String sub, final String text, Application app) {
+		
+		subject = sub;
+		body = text;
+		application = app;
+		
+		new Thread(new Runnable() {
+			public void run() {
+				sendMessage();
+			}
+		}).start();
+	}
+	
+
+	/** blocking send */
+	SendMail(final String sub, final String text, final String file, boolean block) {
+
+		subject = sub;
+		body = text;
+		fileName = file;
+			
+		sendAttachment();	
+	}
+
+	/**	blocking send */
+	SendMail(final String sub, final String text, boolean block) {
+
+		subject = sub;
+		body = text;
+
+		sendMessage();
+	}
+	
+	/** */
+	private void sendMessage() {
+
+		if (user == null || pass == null) {
+			log.error("no email and password found in settings");
+			if(debug) System.out.println("no email and password found in settings");
+			return;
 		}
 		
-		new Thread(new Runnable() {
-			public void run() {
-				try {
+		try {
 
-					State.getReference().set(State.emailbusy, true);
-					
-					Properties props = new Properties();
-					props.put("mail.smtps.host", SMTP_HOST_NAME);
-					props.put("mail.smtps.auth", "true");
-					props.put("mail.smtp.starttls.enable", "true");
+			Properties props = new Properties();
+			props.put("mail.smtps.host", SMTP_HOST_NAME);
+			props.put("mail.smtps.auth", "true");
+			props.put("mail.smtp.starttls.enable", "true");
 
-					Session mailSession = Session.getDefaultInstance(props);
-					Transport transport = mailSession.getTransport("smtp");
+			Session mailSession = Session.getDefaultInstance(props);
+			Transport transport = mailSession.getTransport("smtp");
 
-					// debug flag in props
-					mailSession.setDebug(false);
+			if (debug) mailSession.setDebug(true);
 
-					MimeMessage message = new MimeMessage(mailSession);
-					message.setSubject(sub);
-					message.addRecipient(Message.RecipientType.TO,
-							new InternetAddress(user));
+			MimeMessage message = new MimeMessage(mailSession);
+			message.setSubject(subject);
+			message.setContent(body, "text/plain");
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(user));
 
-					BodyPart messageBodyPart = new MimeBodyPart();
-					messageBodyPart.setText(text);
-					Multipart multipart = new MimeMultipart();
-					multipart.addBodyPart(messageBodyPart);
+			transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user, pass);
+			transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+			transport.close();
 
-					messageBodyPart = new MimeBodyPart();
-					DataSource source = new FileDataSource(path);
-					messageBodyPart.setDataHandler(new DataHandler(source));
-					messageBodyPart.setFileName(path);
-					multipart.addBodyPart(messageBodyPart);
-					message.setContent(multipart);
+			if (debug) System.out.println("... email sent");
+			if(application!=null) application.message("email has been sent", null, null);
 
-					transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user,pass);
-					transport.sendMessage(message,message.getRecipients(Message.RecipientType.TO));
-					transport.close();
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			if(debug) System.out.println("error sending email, check settings");
+			if(application!=null) application.message("error sending email", null, null);
+		}
+	}
 
-					State.getReference().set(State.emailbusy, false);
+	
+	
+	/** */
+	private void sendAttachment() {
 
-				} catch (Exception e) {
-					log.error(e.getMessage());
-					result = false;
-				}
-			}
-		}).start();
-		return result;
+		if (user == null || pass == null) {
+			log.error("no email and password found in settings");
+			if(debug) System.out.println("no email and password found in settings");
+			return;
+		}
+		
+		try {
+
+			if (debug) System.out.println("sending email..");
+			
+			Properties props = new Properties();
+			props.put("mail.smtps.host", SMTP_HOST_NAME);
+			props.put("mail.smtps.auth", "true");
+			props.put("mail.smtp.starttls.enable", "true");
+
+			Session mailSession = Session.getDefaultInstance(props);
+			Transport transport = mailSession.getTransport("smtp");
+
+			if (debug) mailSession.setDebug(true);
+
+			MimeMessage message = new MimeMessage(mailSession);
+			message.setSubject(subject);
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(user));
+
+			BodyPart messageBodyPart = new MimeBodyPart();
+			messageBodyPart.setText(body);
+			Multipart multipart = new MimeMultipart();
+			multipart.addBodyPart(messageBodyPart);
+
+			messageBodyPart = new MimeBodyPart();
+			DataSource source = new FileDataSource(fileName);
+			messageBodyPart.setDataHandler(new DataHandler(source));
+			messageBodyPart.setFileName(fileName);
+			multipart.addBodyPart(messageBodyPart);
+			message.setContent(multipart);
+
+			transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, user, pass);
+			transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+			transport.close();
+
+			if (debug) System.out.println("... email sent");
+			if(application!=null) application.message("email has been sent", null, null);
+
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			if(debug) System.out.println("error sending email, check settings");
+			if(application!=null) application.message("error sending email", null, null);
+		}
 	}
 }

@@ -1,18 +1,14 @@
 package oculus;
 
-import java.util.Date;
+// import java.io.File;
+// import java.util.Date;
 import java.util.TimerTask;
-
-//import org.red5.logging.Red5LoggerFactory;
-//import org.slf4j.Logger;
 
 public class SystemWatchdog {
 
-	// private static Logger log = Red5LoggerFactory.getLogger(SystemWatchdog.class, "oculus");
-
 	// if reboot is "true" in config file
-	private final boolean reboot = new Settings().getBoolean("reboot");
-	private final boolean debug = new Settings().getBoolean("developer");
+	private final boolean reboot = new Settings().getBoolean(State.reboot);
+	private final boolean debug = new Settings().getBoolean(State.developer);
 
 	// check every hour
 	public static final long DELAY = State.FIVE_MINUTES;
@@ -27,59 +23,46 @@ public class SystemWatchdog {
 	private Application app = null;
 
 	public SystemWatchdog(Application app) {
-		this.app = app;
 		if (reboot){
+			this.app = app;
 			java.util.Timer timer = new java.util.Timer();
 			timer.scheduleAtFixedRate(new Task(), 5000, DELAY);
-			System.out.println("system watchdog starting...");
+			if(debug) System.out.println("system watchdog starting...");
 		}	
 	}
-
+	
 	private class Task extends TimerTask {
-		@Override
 		public void run() {
 			
-			if (debug)
-				app.message("system watchdog : " + (state.getUpTime()/1000) + " sec", null, null);
+			if (debug) app.message("system watchdog : " + (state.getUpTime()/1000) + " sec", null, null);
 
 			// only reboot is idle 
-			if ((state.getUpTime() > STALE) && !app.motionenabled ){ // && (app.userconnected==null)) {
+			if ((state.getUpTime() > STALE) && !app.motionenabled ){
 				
-				String boot = new Date(state.getLong(State.boottime)).toString();
-				app.message("been awake since: " + boot, null, null);
+				/* String boot = new Date(state.getLong(State.boottime)).toString();
 				
-				/*
+				app.message("been awake since: <br>  " + boot, null, null);
+				
 				if(debug){
-				
 					
-					state.set(State.emailbusy, true);
-					
-				String filename = System.getenv("RED5_HOME")+"\\log\\oculus.log"; //jvm.stdout";
-				
-				if(!new SendMail().sendMessage("Oculus Reboot", "been awake since: " + boot, filename))
-					app.message("failed to send email", null, null); // value)
-				
-				// wait for email to send 
-				state.set(State.emailbusy, true);
-				
-				long start = System.currentTimeMillis();
-				while(state.getBoolean(State.emailbusy) && (System.currentTimeMillis() - start > 60000)){
-					System.out.println("waiting..." + (System.currentTimeMillis() - start));
-					Util.delay(1000);
-				}
-				
-				new File(filename).deleteOnExit();
-				
-				app.message("rebooting now...", null, null);
-				
-				// System.exit(0);
+					// copy std out and email it 
+					String log = System.getenv("RED5_HOME")+"\\log\\jvm.stdout";
+					String temp = System.getenv("RED5_HOME")+"\\log\\debug.txt";
 			
-				app.restart();
-				System.exit(0);
+					if(Util.copyfile(log, temp)){
+					
+						// blocking send 
+						new SendMail("Oculus Rebooting", "been awake since: " + boot, temp, true);
 				
-				*/
+						// emailed it, now delete it 
+						new File(temp).delete();
+					}
+				} */
 				
 				app.message("rebooting now...", null, null);				
+				
+				// app.restart(); 
+				
 				app.systemCall("shutdown -r -f -t 01");				
 			}
 		}

@@ -2,18 +2,14 @@ package oculus;
 
 import java.util.TimerTask;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
-
+/** */
 public class EmailAlerts {
-
-	private static Logger log = Red5LoggerFactory.getLogger(EmailAlerts.class,"oculus");
 
 	// how low of battery to warm user with email
 	public static final int WARN_LEVEL = 30;
 
 	// how often to check, ten minutes 
-	public static final int DELAY = 600; //000;
+	public static final long DELAY = State.TEN_MINUTES;
 
 	// call back to message window
 	private Application app = null;
@@ -25,10 +21,10 @@ public class EmailAlerts {
 	public java.util.Timer timer = new java.util.Timer();
 
 	public EmailAlerts(Application app) {
-		this.app = app;
 		if (alerts && app.batterypresent){
-			timer.scheduleAtFixedRate(new Task(), 30000, DELAY);
-			System.out.println("starting email alerts...");
+			this.app = app;
+			timer.scheduleAtFixedRate(new Task(), 10000, DELAY);
+			if(debug) System.out.println("starting email alerts...");
 		}
 	}
 
@@ -51,21 +47,14 @@ public class EmailAlerts {
 					if (life < WARN_LEVEL) {
 		
 						app.message("battery low, sending email", null, null);
+						new SendMail("Oculus Message", "battery " + Integer.toString(life) 
+								+ "% and is draining!", app); 
 
-						if (new SendMail().sendMessage("Oculus Message", 
-								"battery " + Integer.toString(life)
-										+ "% and is draining! ")) {
+						// TODO: trigger auto dock
+						// app.autodock();
 
-							// TODO: trigger auto dock
-							// app.autodock();
-
-							// only send single email
-							timer.cancel();
-
-						} else {
-							app.message("cound not send battery warning email", null, null);
-							log.error("failed to send warning email, check settings");
-						}
+						// only send single email
+						timer.cancel();
 					}
 				}
 			}

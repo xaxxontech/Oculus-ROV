@@ -18,8 +18,9 @@ public class State {
 	// public static final String command = "command";
 	// public static final String action = "action";
 	// public static final String launch = "launch";
-	// public static final String kill = "kill";
 	
+	public static final String reboot = "reboot";
+	public static final String developer = "developer";
 	public static final String serialport = "serialport";
 	public static final String lightport = "lightport";
 	
@@ -63,9 +64,10 @@ public class State {
 		
 		//props.put(autodocking, "false");
 		//props.put(home, System.getProperty("java.home"));
-		Command test = new Command();
-		test.add(boottime, get(boottime));
-		channel.write(test);
+	
+		//Command test = new Command();
+		//test.add(boottime, get(boottime));
+		//channel.write(test);
 		
 	}
 

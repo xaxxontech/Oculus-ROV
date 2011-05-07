@@ -164,11 +164,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new Discovery().search();
 		System.out.println("discovery done...");
 		 
-		// start if discovered and in state 
-		// if( state.get(State.serialport) != null )
 		comport = new ArduinoCommDC(this);
-		
-		// if( state.get(State.lightport) != null )
 		light = new LightsComm(this);
 		
 		httpPort = settings.readRed5Setting("http.port");
@@ -177,7 +173,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// checks setting for flag
 		new SystemWatchdog(this);
-		//new EmailAlerts(this);
+		new EmailAlerts(this);
 		
 		log.info("initialize");
 	}
@@ -366,7 +362,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			} // took pic about, now email it  
 			if (fn.equals("emailgrab")) {
 				emailgrab = true;
-				messageplayer("sending email", null, null);
+				// dont message unless is configured 
+				// messageplayer("sending email", null, null);
 			}
 			if (fn.equals("facegrab")) { faceGrab(str); }
 			if (fn.equals("autodockgo")) { docker.autoDock("go "+str); } // TODO: unused if autoDock("go") used w/o xy, delete
@@ -467,12 +464,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 			try{
 				BufferedImage JavaImage = ImageIO.read(db);
 				// Now lets try and write the buffered image out to a file
-				if(JavaImage != null) { // If you sent a jpeg to the server, just change PNG to JPEG and Red5ScreenShot.png to .jpeg
-					ImageIO.write(JavaImage, "PNG", new File(System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png"));
+				String file = System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png";	
+				if(JavaImage != null) { 
+					// If you sent a jpeg to the server, just change PNG to JPEG and Red5ScreenShot.png to .jpeg
+					ImageIO.write(JavaImage, "PNG", new File(file));
 					if (emailgrab) {
 						emailgrab = false;
-						new SendMail().sendMessage("Oculus Screen Shot", "pic attached", 
-								System.getenv("RED5_HOME")+"\\webapps\\oculus\\images\\framegrab.png");	
+						
+						//TODO: this is the app for calback message 
+						new SendMail("Oculus Screen Shot", "image attached", file, this);
 					}
 				}
 			} catch(IOException e) {log.info("Save_ScreenShot: Writing of screenshot failed " + e); 
@@ -841,9 +841,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 						while ((line = procReader.readLine()) != null){
 							
 							//TODO: USE ONLY SYSOUT?
-							
-							message("systemCall() : " + line, null, null);
-							log.info("systemCall() : " + line);
+							// message("systemCall() : " + line, null, null);
+							//  log.info("systemCall() : " + line);
 							System.out.println("systemCall() : " + line);
 							
 						}

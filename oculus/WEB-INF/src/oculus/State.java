@@ -15,10 +15,10 @@ public class State {
 	// public static final String DEFAULT_PORT = "4444";
 	// public static final String DEFAULT_ADDRESS = "230.0.0.1";
 	// public static final String shutdown = "shutdown";
-	// public static final String command = "command";
-	// public static final String action = "action";
-	// public static final String launch = "launch";
 	
+	public static final String user = "user";
+	public static final String logintime = "logintime";
+	public static final String userconnected = "userconnected";
 	public static final String reboot = "reboot";
 	public static final String developer = "developer";
 	public static final String serialport = "serialport";
@@ -61,6 +61,8 @@ public class State {
 	private State() {
 
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
+		props.put(userconnected, false);
+		
 		
 		//props.put(autodocking, "false");
 		//props.put(home, System.getProperty("java.home"));
@@ -140,6 +142,26 @@ public class State {
 			System.out.println("refreshing property for: " + key + " = " + value);
 
 		props.put(key.trim(), Boolean.toString(value));
+	}
+
+
+	/**
+	 * Put a name/value pair into the configuration
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	public synchronized void set(String key, long value) {
+
+		if (locked) {
+			System.out.println(" state locked, can't put(): " + key);
+			return;
+		}
+
+		if (props.containsKey(key))
+			System.out.println("refreshing property for: " + key + " = " + value);
+
+		props.put(key.trim(), Long.toString(value));
 	}
 
 	

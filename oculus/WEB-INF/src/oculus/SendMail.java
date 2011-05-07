@@ -132,7 +132,7 @@ public class SendMail {
 			Session mailSession = Session.getDefaultInstance(props);
 			Transport transport = mailSession.getTransport("smtp");
 
-			if (debug) mailSession.setDebug(true);
+			// if (debug) mailSession.setDebug(true);
 
 			MimeMessage message = new MimeMessage(mailSession);
 			message.setSubject(subject);
@@ -176,7 +176,7 @@ public class SendMail {
 			Session mailSession = Session.getDefaultInstance(props);
 			Transport transport = mailSession.getTransport("smtp");
 
-			if (debug) mailSession.setDebug(true);
+			// if (debug) mailSession.setDebug(true);
 
 			MimeMessage message = new MimeMessage(mailSession);
 			message.setSubject(subject);

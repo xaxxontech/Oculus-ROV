@@ -62,12 +62,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		initialize();
-		
-		//
-		// just example
-		//
-		// System.out.println("booted on: " + state.get(State.boottime));	
-		// System.out.println("booted [" + state.get(State.boottime) + "] ms ago");	
 	}
 	
 	public boolean appConnect(IConnection connection, Object[] params) { // override
@@ -107,6 +101,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				admin = false;
 			}
 			userconnected = null;
+			
+			// TODO: BRAD JUNK, not needed.. stateis run time only values
+			// state.set(State.userconnected, false);
+			
 			player = null;
 			facegrabon = false;
 			if (!autodocking) { // state.getBoolean(State.autodocking)) {
@@ -262,6 +260,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str = userconnected + " connected from: "+player.getRemoteAddress();
 			log.info(str); 
 			messageGrabber(str,"connection "+userconnected+"&nbsp;connected");
+			
+
+			// TODO: BRAD JUNK 
+			state.set(State.userconnected, true);
+			state.set(State.logintime, System.currentTimeMillis());
+			state.set(State.user, userconnected);
 		}
 	}
 
@@ -1009,6 +1013,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			admin = true;
 		}
 		else { admin = false; }
+		
+		// TODO: BRAD JUNK 
+		state.set(State.userconnected, true);
+		state.set(State.logintime, System.currentTimeMillis());
+		state.set(State.user, userconnected);
+		
 	}
 	
 	private void beAPassenger(String user) {

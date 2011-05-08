@@ -108,16 +108,21 @@ public class State {
 	 */
 	public synchronized void set(String key, String value) {
 
+		if(key==null || value==null) return;
+
+		if((key.length() > 1) || (value.length() > 1)) return;
+
+		
 		/*
 		if (locked) {
 			System.out.println(" state locked, can't put(): " + key);
 			return;
 		}*/
 
-		if (props.containsKey(key)){
+		//if (props.containsKey(key)){
 			System.out.println("refreshing property for: " + key + " = " + value);
     		log.debug("refreshing property for: " + key + " = " + value);
-		}
+		//}
 		
 		props.put(key.trim(), value.trim());
 	}
@@ -131,16 +136,18 @@ public class State {
 	 */
 	public synchronized void set(String key, boolean value) {
 
+		if(key==null) return;
+
 		/*
 		if (locked) {
 			System.out.println(" state locked, can't put(): " + key);
 			return;
-		}*/
-
-		if (props.containsKey(key)){
+		}
+*/
+	//	if (props.containsKey(key)){
 			System.out.println("refreshing property for: " + key + " = " + value);
     		log.debug("refreshing property for: " + key + " = " + value);
-		}
+		//}
 		
 		props.put(key.trim(), Boolean.toString(value));
 	}
@@ -154,16 +161,18 @@ public class State {
 	 */
 	public synchronized void set(String key, long value) {
 
+		if(key==null) return;
+		
 		/*
 		if (locked) {
 			System.out.println(" state locked, can't put(): " + key);
 			return;
 		}*/
 
-		if (props.containsKey(key)){
+	//	if (props.containsKey(key)){
 			System.out.println("refreshing property for: " + key + " = " + value);
     		log.debug("refreshing property for: " + key + " = " + value);
-		}
+	//	}
 		
 		props.put(key.trim(), Long.toString(value));
 	}

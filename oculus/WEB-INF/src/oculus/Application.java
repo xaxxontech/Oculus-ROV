@@ -61,8 +61,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public boolean appConnect(IConnection connection, Object[] params) { // override
+			
 		String logininfo[] = ((String) params[0]).split(" ");
 		if ((connection.getRemoteAddress()).equals("127.0.0.1") && logininfo[0].equals("")) { // always accept local grabber
+
+			// TODO: BRAD JUNK 
+			state.set(State.userisconnected, true);
+			state.set(State.logintime, System.currentTimeMillis()); 
+			
+			//???
+			if(userconnected==null) System.out.println("null user??");
+			else state.set(State.user, userconnected);
+			
 			return true;
 		}
 		
@@ -70,6 +80,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			String username = logintest("",logininfo[0]);
 			if (username != null) {
 				pendinguserconnected = username;
+
+				if(pendinguserconnected==null) System.out.println("null user??");
+				else state.set(State.user, pendinguserconnected);
+				
 				return true;
 			}
 		}
@@ -80,6 +94,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 					remember = encryptedPassword;
 				}
 				pendinguserconnected = logininfo[0];
+				
+
+				if(pendinguserconnected==null) System.out.println("null user??");
+				else state.set(State.user, pendinguserconnected);
+				
 				return true;
 			}
 		}
@@ -134,8 +153,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		str += " stream "+stream;
 		messageGrabber("connected to subsystem","connection "+ str);
 		log.info("grabber signed in from "+grabber.getRemoteAddress());
-		//System.out.println("grabbbersignin");
+		System.out.println("grabbbersignin: " + userconnected);
 		stream = "stop";
+		
+		// TODO: BRAD JUNK 
+		if(userconnected==null){
+			System.out.println("grabbersignin: null user??");
+			state.set(State.user, "whhhhyyyy?");
+		}
+		else state.set(State.user, userconnected);
 		
 		//eliminate any other grabbers
 		int i = 0;
@@ -169,7 +195,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new SystemWatchdog(this);
 		new EmailAlerts(this);
 		
-		// command line interface 
+		// command line interface optional
 		if(settings.getBoolean(State.developer)) 
 			commandManager.init(this);
 		
@@ -261,12 +287,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			log.info(str); 
 			messageGrabber(str,"connection "+userconnected+"&nbsp;connected");
 			
-
-			// TODO: BRAD JUNK 
-			state.set(State.userisconnected, true);
-			state.set(State.logintime, System.currentTimeMillis());
-			state.set(State.user, userconnected);
 		}
+			// TODO: BRAD JUNK 
+			
+		state.set(State.userisconnected, true);
+		state.set(State.logintime, System.currentTimeMillis());
+		state.set(State.user, userconnected);
+	
 	}
 
 	public void playerCallServer(String fn, String str) { // distribute commands from player

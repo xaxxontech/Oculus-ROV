@@ -62,6 +62,7 @@ public class AutoDock {
 
 	public void autoDock(String str) {
 		
+		log.debug("autodock: " + str);
 		System.out.println("autodock: " + str);
 		
 		String cmd[] = str.split(" ");

@@ -13,15 +13,12 @@ import java.net.MulticastSocket;
  */
 public class MulticastChannel implements Runnable {
 
-	/** global constants */ 
-	// final private static ZephyrOpen constants = ZephyrOpen.getReference();
-
 	public static final String DEFAULT_PORT = "4444";
-	public static final String DEFAULT_ADDRESS = "230.0.0.1";
-	
+	public static final String DEFAULT_ADDRESS = "230.0.0.1";	
 	private final static int BUFFER_SIZE = 1024;
 	private static MulticastChannel singleton = null;
-	private static XMLParser xmlParser = new XMLParser();
+	
+	// private static XMLParser xmlParser = new XMLParser();
 	
 	private MulticastSocket serverSocket = null;
 	private InetAddress groupAddress = null;

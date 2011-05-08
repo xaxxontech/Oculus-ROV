@@ -1,23 +1,25 @@
 package oculus;
 
-import java.util.TimerTask;
+// import java.util.TimerTask;
+
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
 
 /** */
 public class CommandManager {
-
-	private Application app = null;
 	
-	// private final boolean debug = new Settings().getBoolean("developer");
+	private static Logger log = Red5LoggerFactory.getLogger(CommandManager.class, "oculus");
+	private Application app = null;
 
 	private static CommandManager singleton = null;
 
-	// private MulticastChannel channel = MulticastChannel.getReference();
-		
+	/** */ 
 	private CommandManager(){
-		
-		
+		System.out.println("command manager ready...");
+		log.debug("command manager ready...");
 	}
 	
+	/** */ 
 	public static CommandManager getReference() {
 		if (singleton  == null) {
 			singleton = new CommandManager();
@@ -25,9 +27,11 @@ public class CommandManager {
 		return singleton;
 	}
 	
+	/** */
 	public void init(Application app) {
 			
 		if(app != null){
+			log.debug("configured, don't call twice");
 			System.out.println("configured, don't call twice");
 			return;
 		}
@@ -35,6 +39,7 @@ public class CommandManager {
 		this.app = app;
 	}
 	
+	/** */
 	public void execute(String command){
 		
 		if(app == null) {
@@ -43,6 +48,7 @@ public class CommandManager {
 		}
 		
 		System.out.println("manager exec: " + command);
+		log.info("manager exec: " + command);
 		
 		String cmd[] = command.split(" ");
 		app.playerCallServer(cmd[0], cmd[1]);
@@ -51,6 +57,7 @@ public class CommandManager {
 		
 	}
 
+	/*
 	private class Task extends TimerTask {
 		@Override
 		public void run() {
@@ -59,4 +66,6 @@ public class CommandManager {
 			
 		}
 	}
+	*/
+	
 }

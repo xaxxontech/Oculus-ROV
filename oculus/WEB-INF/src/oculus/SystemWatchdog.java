@@ -37,7 +37,8 @@ public class SystemWatchdog {
 			if (debug) app.message("system watchdog : " + (state.getUpTime()/1000) + " sec", null, null);
 
 			// only reboot is idle 
-			if ((state.getUpTime() > STALE) && !app.motionenabled ){
+			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ 
+				// !app.motionenabled ){
 				
 				String boot = new Date(state.getLong(State.boottime)).toString();
 				app.message("last boot: " + boot, null, null);

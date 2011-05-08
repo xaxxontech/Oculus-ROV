@@ -2,14 +2,20 @@ package oculus;
 
 import java.util.Properties;
 
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * @author <a href="mailto:brad.zdanivsky@gmail.com">Brad Zdanivsky</a>
  */
 public class State {
 
+	private static Logger log = Red5LoggerFactory.getLogger(State.class, "oculus");
+
+	
 	public static final String user = "user";
 	public static final String logintime = "logintime";
-	public static final String userconnected = "userconnected";
+	public static final String userisconnected = "userisconnected";
 	public static final String reboot = "reboot";
 	public static final String developer = "developer";
 	public static final String serialport = "serialport";
@@ -50,7 +56,7 @@ public class State {
 	private State() {
 
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
-		props.put(userconnected, false);
+		props.put(userisconnected, false);
 		
 		
 		//props.put(autodocking, "false");
@@ -108,9 +114,11 @@ public class State {
 			return;
 		}*/
 
-		if (props.containsKey(key))
+		if (props.containsKey(key)){
 			System.out.println("refreshing property for: " + key + " = " + value);
-
+    		log.debug("refreshing property for: " + key + " = " + value);
+		}
+		
 		props.put(key.trim(), value.trim());
 	}
 
@@ -129,9 +137,11 @@ public class State {
 			return;
 		}*/
 
-		if (props.containsKey(key))
+		if (props.containsKey(key)){
 			System.out.println("refreshing property for: " + key + " = " + value);
-
+    		log.debug("refreshing property for: " + key + " = " + value);
+		}
+		
 		props.put(key.trim(), Boolean.toString(value));
 	}
 
@@ -150,9 +160,11 @@ public class State {
 			return;
 		}*/
 
-		if (props.containsKey(key))
+		if (props.containsKey(key)){
 			System.out.println("refreshing property for: " + key + " = " + value);
-
+    		log.debug("refreshing property for: " + key + " = " + value);
+		}
+		
 		props.put(key.trim(), Long.toString(value));
 	}
 

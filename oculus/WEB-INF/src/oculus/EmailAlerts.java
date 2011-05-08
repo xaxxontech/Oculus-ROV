@@ -1,25 +1,27 @@
 package oculus;
 
+import java.util.Timer;
 import java.util.TimerTask;
 
 /** */
 public class EmailAlerts {
 
 	// how low of battery to warm user with email
-	public static final int WARN_LEVEL = 30;
+	public static final int WARN_LEVEL = 35;
 
 	// how often to check, ten minutes 
-	public static final long DELAY = State.TEN_MINUTES;
+	public static final long DELAY = State.FIVE_MINUTES;
 
 	// call back to message window
 	private Application app = null;
+	private Timer timer = new java.util.Timer();
+
+	// configuration 
+	private Settings settings = new Settings();
+	private final boolean debug = settings.getBoolean("developer");
+	private final boolean alerts = settings.getBoolean("emailalerts");
 	
-	// set to "true" is config file
-	private final boolean debug = new Settings().getBoolean("developer");
-	private final boolean alerts = new Settings().getBoolean("emailalerts");
-
-	public java.util.Timer timer = new java.util.Timer();
-
+	/** constuctor */
 	public EmailAlerts(Application app) {
 		if (alerts && app.batterypresent){
 			this.app = app;
@@ -28,6 +30,7 @@ public class EmailAlerts {
 		}
 	}
 
+	/** run on timer */
 	private class Task extends TimerTask {
 		@Override
 		public void run() {

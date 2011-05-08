@@ -81,6 +81,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 					remember = encryptedPassword;
 				}
 				pendinguserconnected = logininfo[0];
+				
+				//TODO: BRAD JUNK
+				state.set(State.userisconnected, true);
+				state.set(State.logintime, System.currentTimeMillis());
+				state.set(State.user, pendinguserconnected);
+				
 				return true;
 			}
 		}
@@ -100,7 +106,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			userconnected = null;
 			
 			// TODO: BRAD JUNK, not needed.. stateis run time only values
-			state.set(State.userconnected, false);
+			state.set(State.userisconnected, false);
 			
 			player = null;
 			facegrabon = false;
@@ -262,7 +268,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 
 			// TODO: BRAD JUNK 
-			state.set(State.userconnected, true);
+			state.set(State.userisconnected, true);
 			state.set(State.logintime, System.currentTimeMillis());
 			state.set(State.user, userconnected);
 		}
@@ -1014,10 +1020,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		else { admin = false; }
 		
 		// TODO: BRAD JUNK 
-		state.set(State.userconnected, true);
+		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);
-		
 	}
 	
 	private void beAPassenger(String user) {

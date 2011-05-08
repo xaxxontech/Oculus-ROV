@@ -14,7 +14,7 @@ public class SystemWatchdog {
 	public static final long DELAY = State.FIVE_MINUTES;
 
 	// when is the system stale and need reboot
-	public static final long STALE = State.ONE_DAY / 12;
+	public static final long STALE = State.ONE_DAY * 2;
 
 	// shared state variables
 	private State state = State.getReference();

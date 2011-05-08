@@ -62,6 +62,8 @@ public class MulticastChannel implements Runnable {
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
+		
+		
 
 		/** start thread, block wait on input from socket */
 		server = new Thread(this);

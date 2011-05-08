@@ -13,15 +13,15 @@ public class State {
 	private static Logger log = Red5LoggerFactory.getLogger(State.class, "oculus");
 
 	
-	public static final String user = "user";
+	// public static final String user = "user";
 	public static final String logintime = "logintime";
 	public static final String userisconnected = "userisconnected";
 	public static final String reboot = "reboot";
 	public static final String developer = "developer";
 	public static final String serialport = "serialport";
 	public static final String lightport = "lightport";
-	public static final String enable = "enable";
-	public static final String disable = "disable";
+	//public static final String enable = "enable";
+//	public static final String disable = "disable";
 	public static final String boottime = "boottime";
 	// public static final String emailbusy = "emailbusy";
 	public static final String autodocking = "autodocking";
@@ -35,7 +35,7 @@ public class State {
 	public static final int ERROR = -1;
 	
 	//
-	MulticastChannel channel = MulticastChannel.getReference();
+	// MulticastChannel channel = MulticastChannel.getReference();
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
@@ -108,9 +108,8 @@ public class State {
 	 */
 	public synchronized void set(String key, String value) {
 
-		if(key==null || value==null) return;
-
-		if((key.length() > 1) || (value.length() > 1)) return;
+		//if(key==null || value==null) return;
+		//if((key.length() > 1) || (value.length() > 1)) return;
 
 		
 		/*
@@ -136,7 +135,7 @@ public class State {
 	 */
 	public synchronized void set(String key, boolean value) {
 
-		if(key==null) return;
+		//if(key==null) return;
 
 		/*
 		if (locked) {
@@ -161,7 +160,7 @@ public class State {
 	 */
 	public synchronized void set(String key, long value) {
 
-		if(key==null) return;
+		//if(key==null) return;
 		
 		/*
 		if (locked) {

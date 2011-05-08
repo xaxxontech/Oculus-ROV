@@ -51,7 +51,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean emailgrab = false;
 	private AutoDock docker = null;
 	private State state = State.getReference();
-	private CommandManager commandManager = CommandManager.getReference();
+
+	// private CommandManager commandManager = null; // CommandManager.getReference();
 
 	public Application() { 
 		super();
@@ -61,18 +62,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public boolean appConnect(IConnection connection, Object[] params) { // override
-			
 		String logininfo[] = ((String) params[0]).split(" ");
 		if ((connection.getRemoteAddress()).equals("127.0.0.1") && logininfo[0].equals("")) { // always accept local grabber
-
-			// TODO: BRAD JUNK 
-			state.set(State.userisconnected, true);
-			state.set(State.logintime, System.currentTimeMillis()); 
-			
-			//???
-			if(userconnected==null) System.out.println("null user??");
-			else state.set(State.user, userconnected);
-			
 			return true;
 		}
 		
@@ -80,10 +71,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			String username = logintest("",logininfo[0]);
 			if (username != null) {
 				pendinguserconnected = username;
-
-				if(pendinguserconnected==null) System.out.println("null user??");
-				else state.set(State.user, pendinguserconnected);
-				
 				return true;
 			}
 		}
@@ -95,9 +82,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 				pendinguserconnected = logininfo[0];
 				
-
-				if(pendinguserconnected==null) System.out.println("null user??");
-				else state.set(State.user, pendinguserconnected);
+				//TODO: BRAD JUNK
+				// state.set(State.userisconnected, true);
+				// state.set(State.logintime, System.currentTimeMillis());
+				//state.set(State.user, pendinguserconnected);
 				
 				return true;
 			}
@@ -153,15 +141,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		str += " stream "+stream;
 		messageGrabber("connected to subsystem","connection "+ str);
 		log.info("grabber signed in from "+grabber.getRemoteAddress());
-		System.out.println("grabbbersignin: " + userconnected);
+		//System.out.println("grabbbersignin");
 		stream = "stop";
-		
-		// TODO: BRAD JUNK 
-		if(userconnected==null){
-			System.out.println("grabbersignin: null user??");
-			state.set(State.user, "whhhhyyyy?");
-		}
-		else state.set(State.user, userconnected);
 		
 		//eliminate any other grabbers
 		int i = 0;
@@ -195,10 +176,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new SystemWatchdog(this);
 		new EmailAlerts(this);
 		
-		// command line interface optional
-		if(settings.getBoolean(State.developer)) 
-			commandManager.init(this);
-		
+		//if(settings.getBoolean(State.developer))			
+			//CommandManager.getReference().init(this);
+
 		log.info("initialize");
 	}
 	
@@ -288,12 +268,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageGrabber(str,"connection "+userconnected+"&nbsp;connected");
 			
 		}
+		
 			// TODO: BRAD JUNK 
 			
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
-		state.set(State.user, userconnected);
-	
+			// state.set(State.user, userconnected);
 	}
 
 	public void playerCallServer(String fn, String str) { // distribute commands from player
@@ -501,14 +481,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 					ImageIO.write(JavaImage, "PNG", new File(file));
 					if (emailgrab) {
 						emailgrab = false;
+						
+						//TODO: this is the app for calback message 
 						new SendMail("Oculus Screen Shot", "image attached", file, this);
 					}
 				}
-			} catch(IOException e) {
-				log.info("Save_ScreenShot: Writing of screenshot failed " + e); 
-				System.out.println("IO Error " + e);
-			}
+			} catch(IOException e) {log.info("Save_ScreenShot: Writing of screenshot failed " + e); 
+			System.out.println("IO Error " + e);}
 		}
+
 	}
 		
 	private void messageplayer(String str, String status, String value) {
@@ -869,7 +850,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 						String line = null;
 						while ((line = procReader.readLine()) != null){
+							
+							//TODO: USE ONLY SYSOUT?
+							// message("systemCall() : " + line, null, null);
+							//  log.info("systemCall() : " + line);
 							System.out.println("systemCall() : " + line);
+							
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -1038,7 +1024,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// TODO: BRAD JUNK 
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
-		state.set(State.user, userconnected);
+		// state.set(State.user, userconnected);
 	}
 	
 	private void beAPassenger(String user) {

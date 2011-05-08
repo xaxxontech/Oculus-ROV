@@ -14,7 +14,7 @@ public class SystemWatchdog {
 	public static final long DELAY = State.FIVE_MINUTES;
 
 	// when is the system stale and need reboot
-	public static final long STALE = State.ONE_DAY;
+	public static final long STALE = State.ONE_DAY / 12;
 
 	// shared state variables
 	private State state = State.getReference();
@@ -34,10 +34,13 @@ public class SystemWatchdog {
 	private class Task extends TimerTask {
 		public void run() {
 			
-			if (debug) app.message("system watchdog : " + (state.getUpTime()/1000) + " sec", null, null);
+			if (debug) {
+				System.out.println("system watchdog : " + (state.getUpTime()/1000) + " sec");
+				app.message("system watchdog : " + (state.getUpTime()/1000) + " sec", null, null);
+			}
 
 			// only reboot is idle 
-			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected) && !app.motionenabled ){
+			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ // && !app.motionenabled ){
 				
 				String boot = new Date(state.getLong(State.boottime)).toString();
 				app.message("last boot: " + boot, null, null);

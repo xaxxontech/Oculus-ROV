@@ -45,7 +45,7 @@ public class AutoDock {
 
 	// call backs 
 	private IConnection grabber = null;
-	// private IConnection player = null;
+	private String docktarget = null;
 	private ArduinoCommDC comport = null; 
 	private Application app = null;
 	
@@ -122,8 +122,8 @@ public class AutoDock {
 				}
 			}
 			if (cmd[1].equals("calibrate")) { // x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
-				app.docktarget = cmd[7]+"_"+cmd[8]+"_"+cmd[9]+"_"+cmd[10]+"_"+cmd[2]+"_"+cmd[3]+"_"+cmd[4]+"_"+cmd[5]+"_"+cmd[6];
-				settings.writeSettings("docktarget",app.docktarget); 
+				docktarget = cmd[7]+"_"+cmd[8]+"_"+cmd[9]+"_"+cmd[10]+"_"+cmd[2]+"_"+cmd[3]+"_"+cmd[4]+"_"+cmd[5]+"_"+cmd[6];
+				settings.writeSettings("docktarget", docktarget); 
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 				//messageplayer("dock"+cmd[1]+": "+s,"autodocklock",s);
 				app.message("auto-dock calibrated","autodocklock",s);
@@ -138,8 +138,10 @@ public class AutoDock {
 			}
 		}
 		if (cmd[0].equals("getdocktarget")) {
-			app.docktarget = settings.readSetting("docktarget");
-			app.messageGrabber("docksettings",app.docktarget);
+			docktarget = settings.readSetting("docktarget");
+			app.messageGrabber("docksettings", docktarget);
+			
+			log.info("got dock target: " + docktarget);
 		}
 
 	}
@@ -147,7 +149,7 @@ public class AutoDock {
 	private void autoDockNav(int x, int y, int w, int h, float slope) {
 		x =x+(w/2); //convert to center from upper left
 		y=y+(h/2);  //convert to center from upper left
-		String s[] = app.docktarget.split("_");
+		String s[] = docktarget.split("_");
 		// s[] = 0 lastBlobRatio,1 lastTopRatio,2 lastMidRatio,3 lastBottomRatio,4 x,5 y,6 width,7 height,8 slope
 		// 0.71053_0.27940_0.16028_0.31579_123_93_81_114_0.014493
 		// neg slope = approaching from left

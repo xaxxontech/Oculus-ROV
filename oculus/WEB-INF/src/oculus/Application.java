@@ -49,7 +49,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	String httpPort; 
 	boolean facegrabon = false;
 	private boolean emailgrab = false;
-	String docktarget;
 	private AutoDock docker = null;
 	private State state = State.getReference();
 	private CommandManager commandManager = CommandManager.getReference();
@@ -81,12 +80,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 					remember = encryptedPassword;
 				}
 				pendinguserconnected = logininfo[0];
-				
-				//TODO: BRAD JUNK
-				state.set(State.userisconnected, true);
-				state.set(State.logintime, System.currentTimeMillis());
-				state.set(State.user, pendinguserconnected);
-				
 				return true;
 			}
 		}
@@ -176,7 +169,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new SystemWatchdog(this);
 		new EmailAlerts(this);
 		
-		commandManager.init(this);
+		// command line interface 
+		if(settings.getBoolean(State.developer)) 
+			commandManager.init(this);
 		
 		log.info("initialize");
 	}
@@ -479,15 +474,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 					ImageIO.write(JavaImage, "PNG", new File(file));
 					if (emailgrab) {
 						emailgrab = false;
-						
-						//TODO: this is the app for calback message 
 						new SendMail("Oculus Screen Shot", "image attached", file, this);
 					}
 				}
-			} catch(IOException e) {log.info("Save_ScreenShot: Writing of screenshot failed " + e); 
-			System.out.println("IO Error " + e);}
+			} catch(IOException e) {
+				log.info("Save_ScreenShot: Writing of screenshot failed " + e); 
+				System.out.println("IO Error " + e);
+			}
 		}
-
 	}
 		
 	private void messageplayer(String str, String status, String value) {
@@ -848,12 +842,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 						String line = null;
 						while ((line = procReader.readLine()) != null){
-							
-							//TODO: USE ONLY SYSOUT?
-							// message("systemCall() : " + line, null, null);
-							//  log.info("systemCall() : " + line);
 							System.out.println("systemCall() : " + line);
-							
 						}
 					} catch (Exception e) {
 						e.printStackTrace();

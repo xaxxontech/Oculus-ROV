@@ -52,8 +52,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private AutoDock docker = null;
 	private State state = State.getReference();
 
-	// private CommandManager commandManager = null; // CommandManager.getReference();
-
 	public Application() { 
 		super();
 		passwordEncryptor.setAlgorithm("SHA-1");
@@ -81,12 +79,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 					remember = encryptedPassword;
 				}
 				pendinguserconnected = logininfo[0];
-				
-				//TODO: BRAD JUNK
-				// state.set(State.userisconnected, true);
-				// state.set(State.logintime, System.currentTimeMillis());
-				//state.set(State.user, pendinguserconnected);
-				
 				return true;
 			}
 		}
@@ -104,8 +96,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				admin = false;
 			}
 			userconnected = null;
-			
-			// TODO: BRAD JUNK, not needed.. stateis run time only values
 			state.set(State.userisconnected, false);
 			
 			player = null;
@@ -262,15 +252,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			else { admin = false; }
 			// System.out.println(userconnected+" connected");
-			//log.info(userconnected+" connected");
+			// log.info(userconnected+" connected");
 			str = userconnected + " connected from: "+player.getRemoteAddress();
 			log.info(str); 
 			messageGrabber(str,"connection "+userconnected+"&nbsp;connected");
 			
 		}
 		
-			// TODO: BRAD JUNK 
-			
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);
@@ -340,7 +328,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (fn.equals("statuscheck")) { statusCheck(str); }
 			if (fn.equals("streamsettingscustom")) { streamSettingsCustom(str); }
 			if (fn.equals("streamsettingsset")) { streamSettingsSet(str); } 
-			if (fn.equals("systemcall")) { messageplayer("system command received", null, null); systemCall(str); }
+			if (fn.equals("systemcall")) { 
+			
+				System.out.println("received: " + str);
+				messageplayer("system command received", null, null); 
+				systemCall(str); 
+				
+			}
 			if (fn.equals("clicksteer")) { clickSteer(str); }
 			if (fn.equals("motionenabletoggle")) { motionEnableToggle(); }
 			if (fn.equals("playerexit")) { appDisconnect(player); } //  System.out.println("onunload called"); }
@@ -401,14 +395,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (fn.equals("saveandlaunch")) { saveAndLaunch(str); }
 		if (fn.equals("populatesettings")) { populateSettings(); }
 		if (fn.equals("systemcall")) {
-			str = str.trim();
-			// systemCall(str);
 			
+			str = str.trim();
+			systemCall(str);
+
+			/*
+			System.out.println("doing sys call: " + str);
 			try {
 				Runtime.getRuntime().exec(str);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
+			
 		}
 		if (fn.equals("chat")) { chat(str); }
 		if (fn.equals("facerect")) { messageplayer(null, "facefound", str); }
@@ -658,7 +657,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 									String str = "";
 									if (state.getBoolean(State.autodocking)) {
 										state.set(State.autodocking, false);
-										//autodocking = false;
 										str += " cameratilt "+camTiltPos()+" autodockcancelled blank";
 										if (!stream.equals("stop") && userconnected==null) { publish("stop"); }
 									}
@@ -833,11 +831,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		return result;
 	}
 	
-	
+	/* */
 	public void systemCall(String str) {
 		if (admin) {
-			
 			final String args = str.trim();
+			
+			System.out.println("application calling system: " + args);
+			
 			new Thread(new Runnable() { public void run() {
 				try {
 					 			 
@@ -850,22 +850,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 						String line = null;
 						while ((line = procReader.readLine()) != null){
-							
-							//TODO: USE ONLY SYSOUT?
-							// message("systemCall() : " + line, null, null);
-							//  log.info("systemCall() : " + line);
 							System.out.println("systemCall() : " + line);
-							
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}		
-					
 				} catch (Exception e) {e.printStackTrace(); }
 			} }).start();	
 		}
 	}
+
 	
+	// TODO: NOTESSSSS
 	public void restart() {
 		if (admin) {
 			messageplayer("restarting server application", null, null);
@@ -1021,10 +1017,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		else { admin = false; }
 		
-		// TODO: BRAD JUNK 
+		// TODO: BRAD Junk 
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
-		// state.set(State.user, userconnected);
+		state.set(State.user, userconnected);
 	}
 	
 	private void beAPassenger(String user) {

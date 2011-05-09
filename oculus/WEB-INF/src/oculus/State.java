@@ -13,7 +13,7 @@ public class State {
 	private static Logger log = Red5LoggerFactory.getLogger(State.class, "oculus");
 
 	
-	// public static final String user = "user";
+	public static final String user = "user";
 	public static final String logintime = "logintime";
 	public static final String userisconnected = "userisconnected";
 	public static final String reboot = "reboot";

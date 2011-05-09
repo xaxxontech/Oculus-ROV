@@ -273,7 +273,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
-			// state.set(State.user, userconnected);
+		state.set(State.user, userconnected);
 	}
 
 	public void playerCallServer(String fn, String str) { // distribute commands from player

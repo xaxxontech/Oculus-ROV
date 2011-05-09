@@ -45,7 +45,7 @@ public class SystemWatchdog {
 				String boot = new Date(state.getLong(State.boottime)).toString();
 				app.message("last boot: " + boot, null, null);
 				
-				System.out.println("rebboting, last was: " + boot);
+				System.out.println("rebooting, last was: " + boot);
 				
 				if(debug){
 					

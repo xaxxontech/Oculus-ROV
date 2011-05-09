@@ -110,7 +110,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 			player = null;
 			facegrabon = false;
-			if (state.getBoolean(State.autodocking)) {
+			if (!state.getBoolean(State.autodocking)) {
 				if (!stream.equals("stop")) { publish("stop"); }
 				if (comport.moving) { comport.stopGoing(); }
 			}

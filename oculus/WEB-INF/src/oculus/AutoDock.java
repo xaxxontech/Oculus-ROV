@@ -72,7 +72,7 @@ public class AutoDock {
 			// app.autodocking = false;
 			state.set(State.autodocking, false);
 			
-			app.message("auto-dock ended","multiple","cameratilt "); //+app.camTiltPos()+" autodockcancelled blank motion stopped");
+			app.message("auto-dock ended","multiple","cameratilt " +app.camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("dockgrab", new Object[] {0,0,"cancel"});

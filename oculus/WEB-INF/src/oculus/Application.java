@@ -757,7 +757,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (str.equals("horiz")) { 	messageplayer(null,"cameratilt","0&deg;"); }
 	}
 	
-	private String camTiltPos() {
+	protected String camTiltPos() {
 		int n = comport.camservohoriz - comport.camservopos;
 		n *= -1;
 		String s = "";

@@ -396,27 +396,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * should list these 
 	 * 
 	 * @param fn is the function to call 
-	 * @param str is the parameters to 
+	 * @param str is the parameters to pass
 	 */
 	public void grabberCallServer(String fn, String str) {
 		
-		if (fn.equals("streammode")) grabberSetStream(str); 
-		
-		else if (fn.equals("saveandlaunch")) saveAndLaunch(str); 
-		
-		else if (fn.equals("populatesettings")) populateSettings(); 
-		
-		else if (fn.equals("systemcall")) Util.systemCall(str, admin);
-	
-		else if (fn.equals("chat")) chat(str); 
-		
-		else if (fn.equals("facerect")) messageplayer(null, "facefound", str); 
+        if (fn.equals("streammode")) grabberSetStream(str); 
+        else if (fn.equals("saveandlaunch")) saveAndLaunch(str); 
+        else if (fn.equals("populatesettings")) populateSettings(); 
+        else if (fn.equals("systemcall")) Util.systemCall(str, admin);
+        else if (fn.equals("chat")) chat(str); 
+        else if (fn.equals("facerect")) messageplayer(null, "facefound", str); 
+        else if (fn.equals("dockgrabbed"))  docker.autoDock("dockgrabbed "+str); 
+        else if (fn.equals("autodock")) docker.autoDock(str); 
+        else if (fn.equals("restart")) { admin=true; restart(); }
 
-		else if (fn.equals("dockgrabbed")) docker.autoDock("dockgrabbed "+str); 
-		
-		else if (fn.equals("autodock")) docker.autoDock(str); 
-		
-		else if (fn.equals("restart")) admin=true; restart(); 
 	}
 	
 	private void grabberSetStream(String str) {

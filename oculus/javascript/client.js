@@ -878,6 +878,10 @@ function systemcall(str,conf) {
 	else { callServer("systemcall",str); }
 }
 
+function usersyscommanddivHide() {
+	document.getElementById('usersyscommanddiv').style.display='none';
+}
+
 function arduinoReset() {
 	message("resetting arduino ",sentcmdcolor);
 	callServer('arduinoreset');
@@ -1554,21 +1558,47 @@ function disconnectOtherConnections() {
 }
 
 function speakchat(command,id) {
-	var a=document.getElementById(id);
-	var b=document.getElementById("speakchatlinks");
-	var c=document.getElementById(id+"_input");
-	if (command=='show') { 
-		b.style.display = "none";
-		a.style.display = "";
-		c.focus();
+	var links = document.getElementById("speakchatlinks");
+	var over = document.getElementById(id);
+	var under = document.getElementById("popoutbox_under");
+	var linksinput = document.getElementById(id+"_input");
+	if (command=='show') {
+		var xy = findpos(links);
+		over.style.display = "";
+		over.style.left = xy[0] + "px";
+		over.style.top = xy[1] + "px";
+		under.style.display = "";
+		under.style.left = (xy[0] - 5) + "px";
+		under.style.top = (xy[1] -5) + "px";
+		under.style.width = (over.offsetWidth + 12) + "px";
+		under.style.height = (over.offsetHeight + 10) + "px";
+		linksinput.focus();
 		keyboard('disable');
-		//resized();
 	}
-	else { a.style.display = "none";
-		b.style.display = "";
+	else {
+		over.style.display = "none";
+		under.style.display = "none";
 		keyboard('enable');
-		//resized();
 	}
+}
+
+function findpos(obj) { // derived from http://bytes.com/groups/javascript/148568-css-javascript-find-absolute-position-element
+	var left = 0;
+	var top = 0;
+	var ll = 0;
+	var tt = 0;
+	while(obj) {
+		lb = parseInt(obj.style.borderLeftWidth);
+		if (lb > 0) { ll += lb }
+		tb = parseInt(obj.style.borderTopWidth);
+		if (tb > 0) { tt += tb; }
+		left += obj.offsetLeft;
+		top += obj.offsetTop;
+		obj = obj.offsetParent;
+	}
+	left += ll;
+	top += tt;
+	return [left,top];
 }
 
 function speech() {

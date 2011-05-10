@@ -364,25 +364,10 @@ self cam on/off</div>
 &nbsp; <a href="javascript: docklinetoggle('off'); move('stop');"><span class="cancelbox">X</span> CANCEL</a>
 </div>
 <div>
-<div id="speakchatlinks"><img src="images/bubble.gif" border=0" style="vertical-align: bottom"> <a href="javascript: speakchat('show','chatbox');">text</a>
+<div id="speakchatlinks"><img src="images/bubble.gif" border=0" style="vertical-align: bottom">
+<a href="javascript: speakchat('show','chatbox');">text</a>
 <span style="font-size: 11px; color: #4c56fe">/</span>
 <a href="javascript: speakchat('show','speechbox');">speak</a></div>
-<div id="speechbox" style="display: none;">
-<span style="font-size: 11px">speak</span>
-<input id="speechbox_input" onblur="javascript: speakchat('hide','speechbox');" type="text"  
-onKeyPress="if (keypress(event)==13) { speech(); }" 
-class="inputbox" style="width: 150px; background-color: #000000;">
-<a class="cancelbox" href="">X</a>
-<a class="cancelbox" href="" onmousedown="speech();">&radic;</a>
-</div>
-<div id="chatbox" style="display: none;">
-<span style="font-size: 11px">text</span>
-<input id="chatbox_input" onblur="javascript: speakchat('hide','chatbox');" type="text"  
-onKeyPress="if (keypress(event)==13) { chat(); }" 
-class="inputbox" style="width: 150px; background-color: #000000;">
-<a class="cancelbox" href="">X</a>
-<a class="cancelbox" href="" onmousedown="chat();">&radic;</a>
-</div>
 </div>
 
 <a href="javascript: logout();"><img src="images/x.gif" border=0" style="vertical-align: bottom"> logout</a><br>
@@ -456,6 +441,26 @@ with dock spire.
 <a href="javascript: docklinecalibrate('cancel');">
 <span class="cancelbox">X</span> CANCEL</a><br>
 </div>
+
+<div id="popoutbox_under" class="overlay" style="position: absolute; display: none;"></div>
+<div id="speechbox" style="position: absolute; display: none;">
+<span style="font-size: 11px">speak</span>
+<input id="speechbox_input" onblur="javascript: speakchat('hide','speechbox');" type="text"  
+onKeyPress="if (keypress(event)==13) { speech(); }" 
+class="inputbox" style="width: 150px; background-color: #000000;">
+<a class="cancelbox" href="">X</a>
+<a class="cancelbox" href="" onmousedown="speech();">&radic;</a>
+</div>
+<div id="chatbox" style="position: absolute; display: none;">
+<span style="font-size: 11px">text</span>
+<input id="chatbox_input" onblur="javascript: speakchat('hide','chatbox');" type="text"  
+onKeyPress="if (keypress(event)==13) { chat(); }" 
+class="inputbox" style="width: 150px; background-color: #000000;">
+<a class="cancelbox" href="">X</a>
+<a class="cancelbox" href="" onmousedown="chat();">&radic;</a>
+</div>
+
+
 
 <div id="overlay" class="overlay" 
 style="position: fixed; display: none; z-index: 7; left: 0px; top: 0px; width: 100%; height: 100%"> </div>
@@ -570,10 +575,10 @@ document.getElementById('usersyscommand').focus();">system command</a><span
 id="usersyscommanddiv" style="display: none">:
 <input id="usersyscommand" class="inputbox" type="text" size="30" 
 onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
-onblur="keyboard('enable'); this.style.backgroundColor='#262626';"
+onblur="keyboard('enable'); this.style.backgroundColor='#262626'; usersyscommanddivHide();"
 onKeyPress="if (keypress(event)==13) { systemcall('',''); }">
-<a class="cancelbox" href="javascript: document.getElementById('usersyscommanddiv').style.display='none';">X</a>
-<a class="cancelbox" href="javascript: systemcall('','');" onmousedown="speech();">&radic;</a>
+<a class="cancelbox" href="javascript: usersyscommanddivHide();">X</a>
+<a class="cancelbox" href="javascript: systemcall('','');" onmousedown="systemcall('','');">&radic;</a>
 </span><br/>  
 <a class="blackbg" href="javascript: serverlog();">server log</a><br>
 </div>

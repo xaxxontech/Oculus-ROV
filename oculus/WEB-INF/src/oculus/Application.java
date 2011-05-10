@@ -162,8 +162,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		grabberInitialize();
 		
-		// checks setting for flag
-		new SystemWatchdog(this);
+		// checks setting for flag before starting 
+		new SystemWatchdog();
 		new EmailAlerts(this);
 		
 		//if(settings.getBoolean(State.developer))			
@@ -332,7 +332,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 				System.out.println("received: " + str);
 				messageplayer("system command received", null, null); 
-				systemCall(str); 
+				Util.systemCall(str, admin); 
 				
 			}
 			if (fn.equals("clicksteer")) { clickSteer(str); }
@@ -390,30 +390,33 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (fn.equals("chat")) { chat(str); }
  	}
 	
-	public void grabberCallServer(String fn, String str) { // distribute commands from grabber
-		if (fn.equals("streammode")) { grabberSetStream(str); }
-		if (fn.equals("saveandlaunch")) { saveAndLaunch(str); }
-		if (fn.equals("populatesettings")) { populateSettings(); }
-		if (fn.equals("systemcall")) {
-			
-			str = str.trim();
-			systemCall(str);
+	/**
+	 * distribute commands from grabber
+	 * 
+	 * should list these 
+	 * 
+	 * @param fn is the function to call 
+	 * @param str is the parameters to 
+	 */
+	public void grabberCallServer(String fn, String str) {
+		
+		if (fn.equals("streammode")) grabberSetStream(str); 
+		
+		else if (fn.equals("saveandlaunch")) saveAndLaunch(str); 
+		
+		else if (fn.equals("populatesettings")) populateSettings(); 
+		
+		else if (fn.equals("systemcall")) Util.systemCall(str, admin);
+	
+		else if (fn.equals("chat")) chat(str); 
+		
+		else if (fn.equals("facerect")) messageplayer(null, "facefound", str); 
 
-			/*
-			System.out.println("doing sys call: " + str);
-			try {
-				Runtime.getRuntime().exec(str);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			*/
-			
-		}
-		if (fn.equals("chat")) { chat(str); }
-		if (fn.equals("facerect")) { messageplayer(null, "facefound", str); }
-		if (fn.equals("dockgrabbed")) { docker.autoDock("dockgrabbed "+str); }
-		if (fn.equals("autodock")) { docker.autoDock(str); }
-		if (fn.equals("restart")) { admin=true; restart(); }
+		else if (fn.equals("dockgrabbed")) docker.autoDock("dockgrabbed "+str); 
+		
+		else if (fn.equals("autodock")) docker.autoDock(str); 
+		
+		else if (fn.equals("restart")) admin=true; restart(); 
 	}
 	
 	private void grabberSetStream(String str) {
@@ -831,37 +834,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		return result;
 	}
 	
-	/* */
-	public void systemCall(String str) {
-		if (admin) {
-			
-			final String args = str.trim();
-			
-			System.out.println("application calling system: " + args);
-			
-			new Thread(new Runnable() { 
-				public void run() {
-					try {
-					
-						// log output of process 
-						Process proc = Runtime.getRuntime().exec(args);
-						BufferedReader procReader = new BufferedReader(
-								new InputStreamReader(proc.getInputStream()));
-
-						String line = null;
-						while ((line = procReader.readLine()) != null){
-							System.out.println("systemCall() : " + line);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}		
-				} 	
-			}).start();	
-		}
-	}
-
 	
-	// TODO: NOTESSSSS
 	public void restart() {
 		if (admin) {
 			messageplayer("restarting server application", null, null);

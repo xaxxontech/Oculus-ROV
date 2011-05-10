@@ -1,6 +1,6 @@
 package oculus;
 
-// import java.io.File;
+import java.io.File;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -13,35 +13,24 @@ public class SystemWatchdog {
 	private final boolean debug = settings.getBoolean(State.developer);
 
 	// check every hour
-	public static final long DELAY = State.FIVE_MINUTES / 10;
+	public static final long DELAY = State.FIVE_MINUTES;
 
 	// when is the system stale and need reboot
-	public static final long STALE = State.ONE_DAY / 1000; // * 2;
+	public static final long STALE = State.ONE_DAY * 2;
 
 	// shared state variables
 	private State state = State.getReference();
-
-	// call back to message window
-	private Application app = null;
 	
+	// do at set interval 
 	private Timer timer = new Timer();
 
     /** */
-	public SystemWatchdog(Application app) {
+	public SystemWatchdog() {
 		if (reboot){
 			
-			this.app = app;
 			timer.scheduleAtFixedRate(new Task(), 5000, DELAY);
 			
 			if(debug) System.out.println("system watchdog starting...");
-			
-			// String test = System.getenv("RED5_HOME")+"\\test.bat";
-			// app.systemCall("test.bat");
-			// app.systemCall(test);
-
-			// app.systemCall("notepad.exe");
-
-			
 		}	
 	}
 	
@@ -52,17 +41,17 @@ public class SystemWatchdog {
 				System.out.println("system watchdog : " + (state.getUpTime()/1000) + " sec");
 
 			// only reboot is idle 
-			if ((state.getUpTime() > STALE)){ //  && !state.getBoolean(State.userisconnected)){ 
+			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ 
 				
 				// redundant if no user connected??
 				// && !app.motionenabled ){
 				
 				// reboot should be enough? 
-				timer.cancel();
+				// timer.cancel();
 				
 				String boot = new Date(state.getLong(State.boottime)).toString();				
 				System.out.println("rebboting, last was: " + boot);
-/*
+			
 				if(debug){
 					
 					// copy std out and email it 
@@ -83,14 +72,8 @@ public class SystemWatchdog {
 						//new File(log).deleteOnExit();
 					}
 				} 
-	*/			
-				System.out.println("rebooting now...");
-				// app.restart();
-				// System.out.println(app.toString());
 	
-				app.systemCall("notepad");
-				
-				app.systemCall("shutdown -r -f -t 01");				
+				Util.systemCall("shutdown -r -f -t 01", true);				
 			}
 		}
 	}

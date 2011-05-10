@@ -1,9 +1,11 @@
 package oculus;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Date;
 
@@ -197,4 +199,47 @@ public class Util {
 		// file copied
 		return true;
 	}
+	
+
+	/**
+	 * Run the given text string as a command on the windows host computer. 
+	 * 
+	 * @param str is the command to run, like: "restart
+	 * @param admin will return if set, check on user level. 
+	 */
+	public static void systemCall(String str, boolean admin) {
+		
+		final String args = str.trim();
+		System.out.println("application calling system: " + args);
+	
+		// only test for admin if flag not set 
+		if (admin) {
+			System.out.println("not AMIN, cant exec!");
+			return;
+		}
+	
+		new Thread(new Runnable() { 
+			public void run() {
+				try {
+				
+					// log output of process 
+					Process proc = Runtime.getRuntime().exec(args);
+					BufferedReader procReader = new BufferedReader(
+							new InputStreamReader(proc.getInputStream()));
+
+					String line = null;
+					while ((line = procReader.readLine()) != null){
+						System.out.println("systemCall() : " + line);
+					}
+					
+					System.out.println("process exit vale = " + proc.exitValue());
+				
+				} catch (Exception e) {
+					e.printStackTrace();
+				}		
+			} 	
+		}).start();
+	}
+
+	
 }

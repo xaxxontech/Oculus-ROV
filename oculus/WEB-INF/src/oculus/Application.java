@@ -834,15 +834,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/* */
 	public void systemCall(String str) {
 		if (admin) {
+			
 			final String args = str.trim();
 			
 			System.out.println("application calling system: " + args);
 			
-			new Thread(new Runnable() { public void run() {
-				try {
-					 			 
+			new Thread(new Runnable() { 
+				public void run() {
 					try {
-						
+					
 						// log output of process 
 						Process proc = Runtime.getRuntime().exec(args);
 						BufferedReader procReader = new BufferedReader(
@@ -855,8 +855,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}		
-				} catch (Exception e) {e.printStackTrace(); }
-			} }).start();	
+				} 	
+			}).start();	
 		}
 	}
 

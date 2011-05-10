@@ -213,7 +213,7 @@ public class Util {
 		System.out.println("application calling system: " + args);
 	
 		// only test for admin if flag not set 
-		if (admin) {
+		if (!admin) {
 			System.out.println("not AMIN, cant exec!");
 			return;
 		}

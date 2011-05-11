@@ -775,7 +775,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str += " speed "+spd+" cameratilt "+camTiltPos()+" motion "+mov;
 			}
 			str += " vidctroffset "+Integer.parseInt(settings.readSetting("vidctroffset"));
-			str += " stream "+stream;
+			str += " stream "+stream+" selfstream stop";
 			//str += " address "+settings.readSetting("address");
 			//str += " wifi "+wifi.wifiSignalStrength();
 			if (admin) {
@@ -1024,8 +1024,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void playerBroadCast(String str) {
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
-			if (str.equals("on")) {
-				sc.invoke("publish", new Object[] { "on", 160, 120, 8, 85 });
+			if (!str.equals("off")) {
+				sc.invoke("publish", new Object[] { str, 160, 120, 8, 85 });
 				new Thread(new Runnable() {
 					public void run() {
 						try { Thread.sleep(2000); }

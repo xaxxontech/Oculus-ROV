@@ -152,19 +152,29 @@ function getFlashMovie(movieName) {
 }
 
 function publish(str) {
-	if (str=="broadcast") {
-		if (broadcasting) { 
-			callServer("playerbroadcast","off"); 
-			broadcasting = false;
-			message ("sending: playerbroadcast off",sentcmdcolor);
-			clicksteer("on");
-		}
-		else { 
-			callServer("playerbroadcast","on");
-			broadcasting = true;
-			message ("sending: playerbroadcast on",sentcmdcolor);
-			clicksteer("off");
-		}
+	if (str=="broadcast_camandmic") {
+		callServer("playerbroadcast","camandmic");
+		broadcasting = true;
+		message ("sending: playerbroadcast camandmic",sentcmdcolor);
+		clicksteer("off");
+	}
+	else if (str=="broadcast_camera") {
+		callServer("playerbroadcast","camera");
+		broadcasting = true;
+		message ("sending: playerbroadcast camonly",sentcmdcolor);
+		clicksteer("off");
+	}
+	else if (str=="broadcast_mic") {
+		callServer("playerbroadcast","mic");
+		broadcasting = true;
+		message ("sending: playerbroadcast miconly",sentcmdcolor);
+		clicksteer("off");
+	}
+	else if (str=="broadcast_off") {
+		callServer("playerbroadcast","off"); 
+		broadcasting = false;
+		message ("sending: playerbroadcast off",sentcmdcolor);
+		clicksteer("on");
 	}
 	else {
 		message("sending command: publish " + str, sentcmdcolor);
@@ -1565,10 +1575,10 @@ function speakchat(command,id) {
 	if (command=='show') {
 		var xy = findpos(links);
 		over.style.display = "";
-		over.style.left = xy[0] + "px";
+		over.style.left = (xy[0] - 60) + "px";
 		over.style.top = xy[1] + "px";
 		under.style.display = "";
-		under.style.left = (xy[0] - 5) + "px";
+		under.style.left = (xy[0] - 65) + "px";
 		under.style.top = (xy[1] -5) + "px";
 		under.style.width = (over.offsetWidth + 12) + "px";
 		under.style.height = (over.offsetHeight + 10) + "px";
@@ -1648,7 +1658,7 @@ function camiconbutton(str,id) {
 	if (str == "over") { a.style.color = "#ffffff"; }
 	if (str == "out") { a.style.color = "#4c56fe"; }
 	if (str == "click") {
-		if (id=="pubstop") { id="stop"; }
+		if (id=="pubstop") { id="stop"; } // stop already in use?
 		publish(id); 
 	}
 }

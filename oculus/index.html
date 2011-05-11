@@ -48,7 +48,7 @@ a:hover { color: #ffffff; background-color: transparent; text-decoration: none; 
 .cancelbox { border: 1px solid #4c56fe; padding-left: 3px; padding-right: 3px }
 .messagebox {  font-size: 13px; line-height: 16px; }
 .menu { color: #999999; }
-.cambutton { color: #4c56fe; cursor: pointer; background-repeat: no-repeat; background-position: center}
+.cambutton { color: #4c56fe; cursor: pointer; background-repeat: no-repeat; background-position: center; height: 22px}
 .facebox { border: 1px solid #4c56fe; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
 </style>
 <script src="javascript/client.js" type="text/javascript"></script>
@@ -166,8 +166,14 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="stream_title">stream:
+<span class="status_title" id="stream_title">
+<span style="font-variant: small-caps;">rov</span> stream:
 <span class="status" id="stream_status" style="color: #45F239; background-color: #262626">
+<span class="status_unknown">unknown</span></span>
+&nbsp; &nbsp;</span><br>
+
+<span class="status_title" id="selfstream_title">self stream:
+<span class="status" id="selfstream_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
@@ -206,13 +212,13 @@ text-transform: none;">
 <span class="status" id="user_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
-<table><tr><td style="height: 20px"></td></tr></table>
+<table><tr><td style="height: 15px"></td></tr></table>
 </div>
 <div style="padding-left: 7px">
 <a id="admincommands" href="javascript: advancedmenu();" >
 MENU <img src="images/wrench.gif" border=0 style="vertical-align: middle;"></a><br>
 </div>
-<table><tr><td style="height: 20px"></td></tr></table>
+<table><tr><td style="height: 10px"></td></tr></table>
 
 <div style="padding-left: 3px; width: 195px">
 <table class="boxcolor" style="background-image: url('images/steering_icons.gif'); background-repeat: no-repeat;
@@ -308,72 +314,112 @@ onmouseout="document.getElementById('messageboxcontainer').style.overflow = 'hid
 ...show more</a>
 </div>
 </td>
-<td>
+
 <td style="padding-right: 8px; text-align: center">
 <div class="cambutton" onmouseover="camiconbutton('over','camandmic');"
 onmouseout="camiconbutton('out','camandmic');"
 onclick="camiconbutton('click','camandmic');"
 style="background-image: url(images/cammic.gif);"> &nbsp;
 </div>
-<div class="cambutton" onmouseover="camiconbutton('over','camonly');"
-onmouseout="camiconbutton('out','camonly');"
-onclick="camiconbutton('click','camonly');"
+<div class="cambutton" onmouseover="camiconbutton('over','camera');"
+onmouseout="camiconbutton('out','camera');"
+onclick="camiconbutton('click','camera');"
 style="background-image: url(images/cam_icon.gif);"> &nbsp;
 </div>
-<div class="cambutton" onmouseover="camiconbutton('over','miconly');"
-onmouseout="camiconbutton('out','miconly');"
-onclick="camiconbutton('click','miconly');"
+<div class="cambutton" onmouseover="camiconbutton('over','mic');"
+onmouseout="camiconbutton('out','mic');"
+onclick="camiconbutton('click','mic');"
 style="background-image: url(images/mic_icon.gif);"> &nbsp;
 </div>
 <div class="cambutton" onmouseover="camiconbutton('over','pubstop');"
 onmouseout="camiconbutton('out','pubstop');"
 onclick="camiconbutton('click','pubstop');"
-style="background-image: url(images/cammicoff.gif);"> &nbsp;
+style="background-image: url(images/cammicoff.gif); width: 37px;"> &nbsp;
 </div>
-<div class="cambutton" onmouseover="camiconbutton('over','broadcast');"
-onmouseout="camiconbutton('out','broadcast');"
-onclick="camiconbutton('click','broadcast');"
-style="background-image: url(images/tvface.gif); width: 37px;"> &nbsp;
-</div>
-</td><td style="padding-right: 20px">
+</td>
+<td style="padding-right: 20px">
 <div class="cambutton" id="camandmic" onmouseover="camiconbutton('over',this.id);" 
 onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+<span style="font-variant: small-caps;">rov</span>
 cam/mic ON</div>
-<div class="cambutton" id="camonly" onmouseover="camiconbutton('over',this.id);" 
+<div class="cambutton" id="camera" onmouseover="camiconbutton('over',this.id);" 
 onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+<span style="font-variant: small-caps;">rov</span>
 cam ON</div>
-<div class="cambutton" id="miconly" onmouseover="camiconbutton('over',this.id);" 
+<div class="cambutton" id="mic" onmouseover="camiconbutton('over',this.id);" 
 onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+<span style="font-variant: small-caps;">rov</span>
 mic ON</div>
 <div class="cambutton" id="pubstop" onmouseover="camiconbutton('over',this.id);" 
 onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+<span style="font-variant: small-caps;">rov</span>
 cam/mic OFF</div>
-<div class="cambutton" id="broadcast" onmouseover="camiconbutton('over',this.id);" 
-onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
-self cam on/off</div>
 </td>
-<td style="width: 250px;">
-<a href="javascript: autodock('start');"><img src="images/charge.gif" border=0" style="vertical-align: bottom"> dock</a><br>
-<a href="javascript: dock('undock');"><img src="images/chargeoff.gif" border=0" style="vertical-align: bottom"> un-dock</a><br>
+
+<td style="padding-right: 8px; text-align: center">
+<div class="cambutton" onmouseover="camiconbutton('over','broadcast_camandmic');"
+onmouseout="camiconbutton('out','broadcast_camandmic');"
+onclick="camiconbutton('click','broadcast_camandmic');"
+style="background-image: url(images/tvface_mic.gif); width: 37px;"> &nbsp;
+</div>
+<div class="cambutton" onmouseover="camiconbutton('over','broadcast_camera');"
+onmouseout="camiconbutton('out','broadcast_camera');"
+onclick="camiconbutton('click','broadcast_camera');"
+style="background-image: url(images/tvface.gif); width: 37px;"> &nbsp;
+</div>
+<div class="cambutton" onmouseover="camiconbutton('over','broadcast_mic');"
+onmouseout="camiconbutton('out','broadcast_mic');"
+onclick="camiconbutton('click','broadcast_mic');"
+style="background-image: url(images/mic_icon.gif); width: 37px;"> &nbsp;
+</div>
+<div class="cambutton" onmouseover="camiconbutton('over','broadcast_off');"
+onmouseout="camiconbutton('out','broadcast_off');"
+onclick="camiconbutton('click','broadcast_off');"
+style="background-image: url(images/tvface_mic_off.gif); width: 37px;"> &nbsp;
+</div>
+</td>
+<td style="padding-right: 20px">
+<div class="cambutton" id="broadcast_camandmic" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+self cam/mic ON</div>
+<div class="cambutton" id="broadcast_camera" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+self cam ON</div>
+<div class="cambutton" id="broadcast_mic" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+self mic ON</div>
+<div class="cambutton" id="broadcast_off" onmouseover="camiconbutton('over',this.id);" 
+onmouseout="camiconbutton('out',this.id);" onclick="camiconbutton('click',this.id);">
+self cam/mic OFF</div>
+</td>
+
+<td>
+<a href="javascript: autodock('start');" style="line-height: 22px"><img src="images/charge.gif" border=0" style="vertical-align: bottom"> dock</a><br>
+<a class="cambutton" href="javascript: dock('undock');" style="line-height: 22px">
+<img src="images/chargeoff.gif" border=0" style="vertical-align: bottom"> un-dock</a><br>
+<!-- 
 <div id="manualdockstart">
 <a href="javascript: docklinetoggle('on');"><img src="images/dockline.gif" border=0" style="vertical-align: bottom"> manual dock</a><br>
-</div>
+</div>  
 <div id="manualdockgocancel" style="display: none; line-height: 20px;">
 <img src="images/dockline.gif" border=0" style="vertical-align: bottom"> 
 &nbsp; <a href="javascript: dock('dock');"><span class="cancelbox">&radic;</span> GO</a>
 &nbsp; <a href="javascript: docklinetoggle('off'); move('stop');"><span class="cancelbox">X</span> CANCEL</a>
 </div>
+-->
 <div>
-<div id="speakchatlinks"><img src="images/bubble.gif" border=0" style="vertical-align: bottom">
+<div id="speakchatlinks" style="line-height: 22px"><img src="images/bubble.gif" border=0" style="vertical-align: bottom">
 <a href="javascript: speakchat('show','chatbox');">text</a>
 <span style="font-size: 11px; color: #4c56fe">/</span>
 <a href="javascript: speakchat('show','speechbox');">speak</a></div>
 </div>
 
-<a href="javascript: logout();"><img src="images/x.gif" border=0" style="vertical-align: bottom"> logout</a><br>
-</td></tr>
+<a href="javascript: logout();"  style="line-height: 22px"><img src="images/x.gif" border=0" style="vertical-align: bottom"> logout</a><br>
+</td>
 
-<tr><td>
+</tr></table>
+
+
 <div id="framegrabbox" style="display: none; padding-top: 10px">
 <table><tr><td>
 <img id ="framegrabpic" alt="">
@@ -384,9 +430,8 @@ self cam on/off</div>
 <span class="cancelbox">X</span> CLOSE</a>
 </td></tr></table>
 </div> 
-</td></tr>
 
-</table>
+
 </td></tr></table>
 
 

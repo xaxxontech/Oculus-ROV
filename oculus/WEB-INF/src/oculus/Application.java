@@ -29,7 +29,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	protected Speech sayit = new Speech("kevin16");
 	protected BatteryLife battery;
 	Settings settings= new Settings();
-	volatile boolean docking = false;
+	
+	//volatile boolean docking = false;
+	
 	protected boolean initialstatuscalled = false;
 	boolean batterypresent;
 	boolean motionenabled = false;
@@ -40,7 +42,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	String remember = null;
 	IConnection pendingplayer = null;
 	boolean pendingplayerisnull = true;
-	String stream = "stop";
+	protected String stream = "stop";
 	// WifiConnection wifi; // = new WifiConnection();
 	boolean battcharging;
 	boolean admin = false;
@@ -317,7 +319,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			
 			if (fn.equals("dock")) {
-				dock(str);
+				docker.dock(str);
 			}
 			if (fn.equals("relaunchgrabber")) {
 				if (admin) {
@@ -490,7 +492,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}).start();		
 	}
 
-	private void publish(String str) {
+	public void publish(String str) {
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			String current = settings.readSetting("vset");
@@ -528,8 +530,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 					ImageIO.write(JavaImage, "PNG", new File(file));
 					if (emailgrab) {
 						emailgrab = false;
-						
-						//TODO: this is the app for calback message 
 						new SendMail("Oculus Screen Shot", "image attached", file, this);
 					}
 				}
@@ -672,111 +672,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageplayer("cam position: " + str, null, null);
 	}
 
-	void dock(String str) {
-		if (str.equals("dock") && !docking) {
-			if (motionenabled == true) {
-				if (!battcharging) {
-					messageplayer("docking initiated", "multiple", "speed slow motion moving dock docking");
-					comport.movingforward = false; // need to set this because speedset calls goForward also if true
-					comport.speedset("slow");
-					//comport.goForward();
-					docking = true;
-					dockstatus = "docking";
-					//Date d = new Date();
-					//dockstarttime = d.getTime();
-					new Thread(new Runnable() {
-						public void run() {
-							int counter = 0;
-							int n;
-							while (docking == true) {
-								n = 500;
-								if (counter <= 3) { n += 500; }
-								if (counter > 0) { messageplayer(null,"motion","moving"); }
-								comport.goForward();
-								try {
-									Thread.sleep(n);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-								comport.stopGoing();
-								messageplayer(null,"motion","stopped");
-								if (battery.batteryStatus() == 2) {
-									docking = false;
-									String str = "";
-									if (state.getBoolean(State.autodocking)) {
-										state.set(State.autodocking, false);
-										str += " cameratilt "+camTiltPos()+" autodockcancelled blank";
-										if (!stream.equals("stop") && userconnected==null) { publish("stop"); }
-									}
-									messageplayer("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
-									log.info(userconnected +" docked successfully");
-									motionenabled = false;
-									dockstatus = "docked"; // needs to be before battStats()
-									battStats(); 
-									break;
-								}
-								counter += 1;
-								if (counter >12) { // failed
-									docking = false;
-									String s = "dock un-docked";
-									if (comport.moving) { 
-										comport.stopGoing();
-										s += " motion stopped";
-									} 
-									messageplayer("docking timed out", "multiple", s);
-									log.info(userconnected +" docking timed out");
-									dockstatus = "un-docked";
-									if (state.getBoolean(State.autodocking)) {
-										new Thread(new Runnable() { public void run() { try {
-											comport.speedset("slow");
-											comport.goBackward();
-											Thread.sleep(2000);
-											comport.speedset("fast");
-											comport.goBackward();
-											Thread.sleep(750);
-											comport.stopGoing();
-											IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-											sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
-										} catch (Exception e) { e.printStackTrace(); } } }).start();
-									}
-									
-									break;
-								}
-							}
-						}
-					}).start();
-				}
-				else { messageplayer("**battery indicating charging, auto-dock unavailable**", null, null); }
-			}
-			else { messageplayer("motion disabled", null, null); }
-		}
-		if (str.equals("undock")) {
-			comport.speedset("slow");
-			comport.goBackward();
-			motionenabled = true;
-			messageplayer("un-docking", "multiple", "speed fast motion moving dock un-docked");
-			dockstatus = "un-docked";
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						Thread.sleep(2000);
-						comport.speedset("fast");
-						comport.goBackward();
-						Thread.sleep(750);
-						comport.stopGoing();
-						messageplayer("disengaged from dock", "motion", "stopped");
-						log.info(userconnected + " un-docked");
-						battStats();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-		}
-	}
-
 	private void moveMacroCancel() {
-		if (docking == true) {
+		if (docker.isDocking() == true) {
 			String str = "";
 			if (!dockstatus.equals("docked")) {
 				dockstatus = "un-docked";
@@ -784,7 +681,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			// if (!comport.moving) { str += " motion stopped"; }
 			messageplayer("docking cancelled by movement", "multiple", str);
-			docking = false; 
+			docker.cancel();
+			// docking = false; 
 		}
 		if (comport.sliding == true) {
 			comport.slidecancel();
@@ -939,7 +837,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (motionenabled == true) {
 			comport.nudge(str);
 			messageplayer("command received: nudge" + str, null, null);
-			if (!docking) { moveMacroCancel(); }
+			if (docker.isDocking()) moveMacroCancel(); 
 		}
 		else {
 			messageplayer("motion disabled", "motion", "disabled");
@@ -1035,7 +933,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		else { admin = false; }
 		
-		// TODO: BRAD Junk 
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);

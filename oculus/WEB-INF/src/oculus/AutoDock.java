@@ -41,15 +41,13 @@ public class AutoDock {
 
 	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
 	private State state = State.getReference();
-	Settings settings= new Settings();
-
-	// call backs 
+	private Settings settings= new Settings();
 	private IConnection grabber = null;
 	private String docktarget = null;
 	private ArduinoCommDC comport = null; 
 	private Application app = null;
-	
-	boolean autodockingcamctr = false;
+	private boolean docking = false;
+	private boolean autodockingcamctr = false;
 	private int autodockgrabattempts;
 	private int autodockctrattempts;
 	
@@ -59,6 +57,14 @@ public class AutoDock {
 		this.comport = app.comport;
 	}
 	
+	// TODO: Move to state! 
+	public boolean isDocking(){
+		return docking;
+	}
+	
+	public void cancel(){
+		docking = false;
+	}
 
 	public void autoDock(String str) {
 		
@@ -143,8 +149,118 @@ public class AutoDock {
 			
 			log.info("got dock target: " + docktarget);
 		}
-
 	}
+	
+	
+
+	void dock(String str) {
+		if (str.equals("dock") && !docking) {
+			if (app.motionenabled == true) {
+				if (!app.battcharging) {
+					app.message("docking initiated", "multiple", "speed slow motion moving dock docking");
+
+					// need to set this because speedset calls goForward also if true
+					comport.movingforward = false; 
+					
+					comport.speedset("slow");
+					//comport.goForward();
+					docking = true;
+					app.dockstatus = "docking";
+					//Date d = new Date();
+					//dockstarttime = d.getTime();
+					new Thread(new Runnable() {
+						public void run() {
+							int counter = 0;
+							int n;
+							while (docking == true) {
+								n = 500;
+								if (counter <= 3) { n += 500; }
+								if (counter > 0) { app.message(null,"motion","moving"); }
+								comport.goForward();
+								try {
+									Thread.sleep(n);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								comport.stopGoing();
+								app.message(null,"motion","stopped");
+								if (app.battery.batteryStatus() == 2) {
+									docking = false;
+									String str = "";
+									if (state.getBoolean(State.autodocking)) {
+										state.set(State.autodocking, false);
+										str += " cameratilt "+app.camTiltPos()+" autodockcancelled blank";
+										if (!app.stream.equals("stop") && app.userconnected==null) { 
+											app.publish("stop"); 
+										}
+									}
+									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
+									log.info(app.userconnected +" docked successfully");
+									app.motionenabled = false;
+									app.dockstatus = "docked"; // needs to be before battStats()
+									app.battStats(); 
+									break;
+								}
+								counter += 1;
+								if (counter >12) { // failed
+									docking = false;
+									String s = "dock un-docked";
+									if (comport.moving) { 
+										comport.stopGoing();
+										s += " motion stopped";
+									} 
+									app.message("docking timed out", "multiple", s);
+									log.info(app.userconnected +" docking timed out");
+									app.dockstatus = "un-docked";
+									if (state.getBoolean(State.autodocking)) {
+										new Thread(new Runnable() { public void run() { try {
+											comport.speedset("slow");
+											comport.goBackward();
+											Thread.sleep(2000);
+											comport.speedset("fast");
+											comport.goBackward();
+											Thread.sleep(750);
+											comport.stopGoing();
+											IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+											sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+										} catch (Exception e) { e.printStackTrace(); } } }).start();
+									}
+									
+									break;
+								}
+							}
+						}
+					}).start();
+				}
+				else { app.message("**battery indicating charging, auto-dock unavailable**", null, null); }
+			}
+			else { app.message("motion disabled", null, null); }
+		}
+		if (str.equals("undock")) {
+			comport.speedset("slow");
+			comport.goBackward();
+			app.motionenabled = true;
+			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
+			app.dockstatus = "un-docked";
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						Thread.sleep(2000);
+						comport.speedset("fast");
+						comport.goBackward();
+						Thread.sleep(750);
+						comport.stopGoing();
+						app.message("disengaged from dock", "motion", "stopped");
+						log.info(app.userconnected + " un-docked");
+						app.battStats();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+		}
+	}
+
 	
 	private void autoDockNav(int x, int y, int w, int h, float slope) {
 		x =x+(w/2); //convert to center from upper left
@@ -274,7 +390,7 @@ public class AutoDock {
 					System.out.println("dock "+dockslopedeg+" "+slopedeg);
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(100);
-						app.dock("dock"); 
+						dock("dock"); 
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 			}

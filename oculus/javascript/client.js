@@ -41,6 +41,8 @@ var tempimage = new Image();
 tempimage.src = 'images/eye.gif';
 var tempimage2 = new Image();
 tempimage2.src = 'images/ajax-loader.gif';
+var tempimage3 = new Image();
+tempimage3.src = 'images/dockline.gif';
 var admin = false;
 var userlistcalledby;
 var initialdockedmessage = false;
@@ -51,6 +53,9 @@ var tempdivtext;
 var autodocking = false;
 var sendcommandtimelast = 0;
 var lastcommandsent;
+//var popupmenumouseposinterval;
+var popupmenu_xoffset = null;
+var popupmenu_yoffset = null;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -197,21 +202,7 @@ function message(message, colour, status, value) {
 			}
 		}
 		else {
-			
-			
-//		if (false) {
-//		}
-//		else {
-//			if (message == "status check received") { 
-//				message += ":"+status + ":"+value;
-//				statuscheckreceived=true;
-//				if (officiallagtimer != 0) {
-//					var i = d.getTime() - officiallagtimer;
-//					setstatus("lag",i+"ms");
-//				}
-//			}
-			
-			
+		
 			message = "<span style='color: #444444'>:</span><span style='color: "
 					+ colour + "';>" + message + "</span>";
 			messageboxping = "";
@@ -345,7 +336,7 @@ function setstatusmultiple(value) {
 }
 
 function setstatusunknown() {
-	var statuses = "stream speed battery cameratilt motion lag keyboard user dock";
+	var statuses = "stream speed battery cameratilt motion lag keyboard user dock selfstream";
 	str = statuses.split(" ");
 	var a;
 	var i;
@@ -448,6 +439,7 @@ function docklinetoggle(str) {
 		a.style.display="none"; 
 		b.style.display="none";
 		c.style.display="none";
+		popupmenu("close");
 	}
 	if (str=="on" && streammode != "stop") {
 		//document.getElementById('manualdockstart').style.display = "none";
@@ -457,6 +449,17 @@ function docklinetoggle(str) {
 		b.style.display="";
 		c.style.display="";
 		docklineposition();
+		
+		var str = "<table><tr><td style='height: 5px'></td></tr></table>";
+		str += "Manual dock <table><tr><td style='height: 7px'></td></tr></table>"; 
+		str += "&nbsp; <a href='javascript: dock(&quot;dock&quot;);'><span class='cancelbox'>&radic;</span> GO</a>";
+		str += "&nbsp; <a href='javascript: docklinetoggle(&quot;off&quot;); move(&quot;stop&quot;);'><span "; 
+		str += "class='cancelbox'>X</span> CANCEL</a>";
+		
+	    var link = document.getElementById("docklink");
+	    var xy = findpos(link);
+	    popupmenu("show", xy[0] + link.offsetWidth + 60, xy[1] + link.offsetHeight, str, null, 1,1);
+
 	}
 }
 
@@ -626,35 +629,30 @@ function dock(str) {
 }
 
 function autodock(str) {
-	if (str=="start" &! autodocking) {
-		overlay("off");
+	if (str=="start" &! autodocking && streammode != "stop") {
+ 		overlay("off");
 		clicksteeron = false;
 		document.getElementById("video").style.zIndex = "-1";
-		videooverlayposition();
-		//var a =document.getElementById("videooverlay");
-	    //a.onclick = autodockclick;
-	    var b = document.getElementById("docklinecalibratebox")
-	    tempdivtext = b.innerHTML;
+		
 	    var str = "Dock with charger: <table><tr><td style='height: 7px'></td></tr></table>";
 	    str+="Get the dock in view, within 2 meters"
     	str+="<table><tr><td style='height: 11px'></td></tr></table>";
 	    
-	    str+="<a href='javascript: autodock(&quot;go&quot;);'>"
-	    str+= "<span class='cancelbox'>&radic;</span> GO</a> &nbsp; &nbsp;"
-	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>"
-	    str+= "<span class='cancelbox'>X</span> CANCEL</a><br>"
-	    b.innerHTML = str;
-	    b.style.display = "";
-	    document.getElementById("docklinecalibrateoverlay").style.display = "";
-	    docklinecalibrate('position');
-	    setTimeout("docklinecalibrate('position');",10); // rendering fix
+	    str+="<a href='javascript: autodock(&quot;go&quot;);'>";
+	    str+= "<span class='cancelbox'>&radic;</span> GO</a> &nbsp; &nbsp;";
+	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>";
+	    str+= "<span class='cancelbox'>X</span> CANCEL</a><br><br>";
+		str += "<a href='javascript: docklinetoggle(&quot;on&quot;);'><img src='images/dockline.gif'"; 
+		str += " border=0' style='vertical-align: bottom'> manual dock</a>";
+
+	    var link = document.getElementById("docklink");
+	    var xy = findpos(link);
+	    popupmenu("show", xy[0] + link.offsetWidth + 60, xy[1] + link.offsetHeight, str, 160, 1, 1);
 	}
 	if (str=="cancel") {
-		//docklinetoggle("off");
-	    var b = document.getElementById("docklinecalibratebox")
-	    b.innerHTML = tempdivtext;
-		b.style.display = "none";
-		document.getElementById("docklinecalibrateoverlay").style.display = "none";
+
+		popupmenu("close");
+		docklinetoggle("off");
 		clicksteer("on");
 		if (autodocking) {
 			callServer("autodock", "cancel");
@@ -669,31 +667,35 @@ function autodock(str) {
 		videooverlayposition();
 		var a =document.getElementById("videooverlay");
 	    a.onclick = autodockcalibrate;
-	    var b = document.getElementById("docklinecalibratebox")
-	    tempdivtext = b.innerHTML;
+//	    var b = document.getElementById("docklinecalibratebox")
+//	    tempdivtext = b.innerHTML;
 	    var str = "Auto-dock calibration: <table><tr><td style='height: 7px'></td></tr></table>";
 	    str+="Place Oculus square and centered in charging dock, then click within white area of target"
     	str+="<table><tr><td style='height: 11px'></td></tr></table>";
 	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>"
 	    str+= "<span class='cancelbox'>X</span> CANCEL</a><br>"
-	    b.innerHTML = str;
-	    b.style.display = "";
-	    document.getElementById("docklinecalibrateoverlay").style.display = "";
-	    docklinecalibrate('position');
-	    setTimeout("docklinecalibrate('position');",10); // rendering fix
+//	    b.innerHTML = str;
+//	    b.style.display = "";
+//	    document.getElementById("docklinecalibrateoverlay").style.display = "";
+//	    docklinecalibrate('position');
+//	    setTimeout("docklinecalibrate('position');",10); // rendering fix
+	    var video = document.getElementById("video");
+	    var xy = findpos(video);
+	    popupmenu("show", xy[0] + video.offsetWidth - 10, xy[1] + 10, str, 160, 1, 0);
 	}
 	if (str=="go") {
 		callServer("autodock", "go");
 		message("sending autodock-go", sentcmdcolor);
 		lagtimer = new Date().getTime(); // has to be *after* message()
 		autodocking = true;
-		var b = document.getElementById("docklinecalibratebox")
+//		var b = document.getElementById("docklinecalibratebox")
 	    var str = "Auto Dock: <table><tr><td style='height: 7px'></td></tr></table>";
 	    str+="in progress... stand by"
 		str+="<table><tr><td style='height: 11px'></td></tr></table>";
 	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>"
 	    str+= "<span class='cancelbox'>X</span> CANCEL</a><br>"
-	    b.innerHTML = str;
+//	    b.innerHTML = str;
+    	popupmenu("show",null,null,str);
 	}
 }
 
@@ -762,6 +764,94 @@ function autodockcalibrate(ev) {
 	autodock("cancel");
 }
 
+function popupmenu(command, x, y, str, sizewidth, x_offsetmult, y_offsetmult) {
+//	var link = document.getElementById(docklink);
+	var under = document.getElementById("popupmenu_under");
+	var over = document.getElementById("popupmenu_over");
+	var contents = document.getElementById("popupmenu_contents");
+//	var maintable = document.getElementById("maintable");
+	if (command=='show') {
+//		var xy = findpos(link);
+//		var maintablexy = findpos(maintable);
+
+		contents.innerHTML = str;
+		over.style.display = "";
+		if (sizewidth != null) { contents.style.width = sizewidth + "px"; }
+		
+		if (x != null && y !==null) {
+			if (!x_offsetmult) { x_offsetmult = 0; }
+			if (!y_offsetmult) { y_offsetmult = 0; }
+			x = x - (x_offsetmult * over.offsetWidth);
+			y = y - (y_offsetmult * over.offsetHeight); 
+			over.style.left = x + "px";
+			over.style.top = y + "px";		
+			under.style.display = "";
+		}
+		var margin = 0;
+		under.style.left = (over.offsetLeft - margin) + "px";
+		under.style.top = (over.offsetTop -margin) + "px";
+		under.style.width = (over.offsetWidth + margin*2) + "px";
+		under.style.height = (over.offsetHeight + margin*2) + "px";
+	}
+	else if (command=='move') {
+//		debug("down");
+		document.onmousemove = popupmenumove;
+//		document.getElementById("popupmenu_topbar").onmousedown = null;
+//		document.body.style.cursor = "move";
+//		popupmenuSetMousePosGrabber();
+		popupmenu_xoffset = null;
+		popupmenu_yoffset = null;
+		document.onmouseup = function () { 
+			document.onmousemove = null;
+			document.onmouseup = null;
+//			clearTimeout(popupmenumouseposinterval);
+//			document.getElementById("popupmenu_topbar").onmousedown = function() { popupmenu("move"); }
+//			document.body.style.cursor = "auto";
+//			debug("dropped");
+		}
+	}
+	else if (command=="close") {
+		over.style.display = "none";
+		under.style.display = "none";
+	}
+}
+
+//function popupmenuSetMousePosGrabber() {
+//	document.onmousemove = popupmenumove;
+//}
+
+function popupmenumove(ev) {
+	ev = ev || window.event;
+	if (ev.pageX || ev.pageY) {
+		var x = ev.pageX;
+		var y = ev.pageY;
+	}
+	else {
+		var x = ev.clientX + document.body.scrollLeft - document.body.clientLeft;
+		var y = ev.clientY + document.body.scrollTop - document.body.clientTop;
+	}
+//	debug(x+" "+y+" "+videooverlaymouseposinterval);
+//	videooverlaymouseposinterval ++;
+	var under = document.getElementById("popupmenu_under");
+	var over = document.getElementById("popupmenu_over");
+	if (!popupmenu_xoffset) { popupmenu_xoffset = over.offsetLeft - x; }
+	if (!popupmenu_yoffset) { popupmenu_yoffset = over.offsetTop - y; }
+
+	over.style.left = (x + popupmenu_xoffset) + "px";
+	over.style.top = (y + popupmenu_yoffset) + "px";
+//	over.style.top = y + "px";
+	var margin = 0;
+	under.style.left = (over.offsetLeft - margin) + "px";
+	under.style.top = (over.offsetTop -margin) + "px";
+//	document.onmousemove = null;
+//	popupmenumouseposinterval = setTimeout("popupmenuSetMousePosGrabber();", 20)
+
+}
+
+function debug(str) {
+	document.getElementById('debugbox').innerHTML = str;
+	
+}
 function keyboard(str) {
 	if (str=="enable") {
 		setstatus("keyboard","enabled");
@@ -1020,7 +1110,7 @@ function videoOverlayGetMousePos(ev) {
 		var x = ev.clientX + document.body.scrollLeft - document.body.clientLeft;
 		var y = ev.clientY + document.body.scrollTop - document.body.clientTop;
 	}
-//	alert(x+" "+y);
+    //debug(x+" "+y);
 	var b = document.getElementById("videocursor_top");
 	b.style.left = x + "px";
     var video = document.getElementById("video");
@@ -1314,37 +1404,64 @@ function videologo(state) {
 
 function docklinecalibrate(str) {
 	if (str == "start") {
+//		overlay("off");
+//		clicksteeron = false;
+//		document.getElementById("video").style.zIndex = "-1";
+//		videooverlayposition();
+//		var a =document.getElementById("videooverlay");
+//	    a.onclick = docklineclick; // function() { docklineclick; }
+//	    ctroffsettemp = ctroffset;
+//	    document.getElementById("dockline").style.display = "";
+//	    document.getElementById("docklineleft").style.display = "";
+//	    document.getElementById("docklineright").style.display = "";
+//	    docklineposition();
+//	    document.getElementById("docklinecalibratebox").style.display = "";
+//	    document.getElementById("docklinecalibrateoverlay").style.display = "";
+//	    docklinecalibrate('position');
+//	    setTimeout("docklinecalibrate('position');",10); // rendering fix
+		
 		overlay("off");
 		clicksteeron = false;
 		document.getElementById("video").style.zIndex = "-1";
 		videooverlayposition();
 		var a =document.getElementById("videooverlay");
-	    a.onclick = docklineclick; // function() { docklineclick; }
+	    a.onclick = docklineclick;
 	    ctroffsettemp = ctroffset;
 	    document.getElementById("dockline").style.display = "";
 	    document.getElementById("docklineleft").style.display = "";
 	    document.getElementById("docklineright").style.display = "";
 	    docklineposition();
-	    document.getElementById("docklinecalibratebox").style.display = "";
-	    document.getElementById("docklinecalibrateoverlay").style.display = "";
-	    docklinecalibrate('position');
-	    setTimeout("docklinecalibrate('position');",10); // rendering fix
-	}
-	if (str=="position") {
-	    var b = document.getElementById("docklinecalibratebox");
-	    var c = document.getElementById("docklinecalibrateoverlay");
+
+	    var str = "Dockline Calibration:"
+	    str += "<table><tr><td style='height: 7px'></td></tr></table>";
+	    str += "place Oculus square and centered in charging dock, then click screen to align dockline";
+	    str += " with dock spire.";
+	    str += "<table><tr><td style='height: 7px'></td></tr></table>";
+	    str += "<a href='javascript: docklinecalibrate(&quot;save&quot;);'>";
+	    str += "<span class='cancelbox'>&radic;</span> save</a> &nbsp; &nbsp; ";
+	    str += "<a href='javascript: docklinecalibrate(&quot;cancel&quot;);'>";
+	    str += "<span class='cancelbox'>X</span> CANCEL</a><br>";
+	    
 	    var video = document.getElementById("video");
-	    b.style.left = (video.offsetLeft + 20) + "px";
-	    b.style.top = (video.offsetTop + 20) + "px";
-	    c.style.left = (video.offsetLeft + 10) + "px";
-	    c.style.top = (video.offsetTop + 10) + "px";
-	    c.style.height = (b.offsetHeight + 20) + "px";
+	    var xy = findpos(video);
+	    popupmenu("show", xy[0] + video.offsetWidth - 10, xy[1] + 10, str, 160, 1, 0);
 	}
+//	if (str=="position") {
+//	    var b = document.getElementById("docklinecalibratebox");
+//	    var c = document.getElementById("docklinecalibrateoverlay");
+//	    var video = document.getElementById("video");
+//	    b.style.left = (video.offsetLeft + 20) + "px";
+//	    b.style.top = (video.offsetTop + 20) + "px";
+//	    c.style.left = (video.offsetLeft + 10) + "px";
+//	    c.style.top = (video.offsetTop + 10) + "px";
+//	    c.style.height = (b.offsetHeight + 20) + "px";
+//	}
 	if (str == "save") {
 		docklinetoggle("off");
 		ctroffset = ctroffsettemp;
-		document.getElementById("docklinecalibratebox").style.display = "none";
-		document.getElementById("docklinecalibrateoverlay").style.display = "none";
+//		document.getElementById("docklinecalibratebox").style.display = "none";
+//		document.getElementById("docklinecalibrateoverlay").style.display = "none";
+		popupmenu("close");
 		clicksteer("on");
 		message("sending dockline position: " + ctroffset, sentcmdcolor);
 		callServer("docklineposupdate", ctroffset);
@@ -1352,8 +1469,8 @@ function docklinecalibrate(str) {
 	}
 	if (str == "cancel") {
 		docklinetoggle("off");
-		document.getElementById("docklinecalibratebox").style.display = "none";
-		document.getElementById("docklinecalibrateoverlay").style.display = "none";
+//		document.getElementById("docklinecalibratebox").style.display = "none";
+//		document.getElementById("docklinecalibrateoverlay").style.display = "none";
 		clicksteer("on");
 	}
 }
@@ -1656,7 +1773,7 @@ function showserverlog(str) {
 function camiconbutton(str,id) {
 	var a=document.getElementById(id);
 	if (str == "over") { a.style.color = "#ffffff"; }
-	if (str == "out") { a.style.color = "#4c56fe"; }
+	if (str == "out") { a.style.color = "#343fff"; }
 	if (str == "click") {
 		if (id=="pubstop") { id="stop"; } // stop already in use?
 		publish(id); 

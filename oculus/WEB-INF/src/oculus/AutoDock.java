@@ -186,7 +186,7 @@ public class AutoDock {
 								}
 								comport.stopGoing();
 								app.message(null,"motion","stopped");
-								if (life.batteryCharging()){ // (app.battery.batteryStatus() == 2) {
+								if (life.batteryStatus() == 2) {
 									docking = false;
 									String str = "";
 									if (state.getBoolean(State.autodocking)) {

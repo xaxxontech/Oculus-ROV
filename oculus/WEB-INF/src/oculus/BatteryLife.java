@@ -21,8 +21,7 @@ public class BatteryLife {
 	private boolean battcharging = false;
 	boolean batterypresent = false;
 	private static Application app = null;
-	private Settings settings = new Settings();
-
+//	private Settings settings = new Settings();
 	
 	private static BatteryLife singleton = null;
 	public static BatteryLife getReference() {
@@ -32,7 +31,7 @@ public class BatteryLife {
 		return singleton;
 	}
 
-	public static void init(Application parent){
+	public void init(Application parent){
 		//if(app!=null) {
 			System.out.println("battery init...");
 		//	return;
@@ -40,20 +39,20 @@ public class BatteryLife {
 			//System.out.println("battery can't re-init!");
 			app = parent;
 		//}
+			host = "localhost"; //Technically you should be able to connect to other hosts, but it takes setup
+			connectStr = String.format("winmgmts:\\\\%s\\root\\CIMV2", host);
+			query = "Select * from Win32_Battery"; 
+			axWMI = new ActiveXComponent(connectStr);
 	}
 	
 	private BatteryLife() {
-		host = "localhost"; //Technically you should be able to connect to other hosts, but it takes setup
-		connectStr = String.format("winmgmts:\\\\%s\\root\\CIMV2", host);
-		query = "Select * from Win32_Battery"; 
-		axWMI = new ActiveXComponent(connectStr);
 		
-		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
-			batterypresent = true; 
-		} else { 
-			batterypresent = false; 
-			app.motionenabled = true;
-		}
+//		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
+//			batterypresent = true; 
+//		} else { 
+//			batterypresent = false; 
+//			app.motionenabled = true;
+//		}
 	}
 	
 	public boolean batteryPresent(){

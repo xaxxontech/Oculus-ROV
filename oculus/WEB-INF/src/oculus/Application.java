@@ -200,26 +200,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	public void grabber_launch() {
 		
-		// TODO: NEEDED STILL??
-		
-		battery = BatteryLife.getReference();
-		BatteryLife.init(this);
-		if(!battery.batteryPresent())
-			motionenabled = false;
-			
-		/*
 		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
-			
-			//batterypresent = true; 
-			// TODO: BRAD
-			
+			battery.batterypresent = true; 
 		} else { 
-			
-			// batterypresent = false;
-			
-			// TODO: BRAD ASKS WHY? 
+			battery.batterypresent = false; 
 			motionenabled = true;
-		} */
+		}
 		
 		new Thread(new Runnable() {
 			public void run() {
@@ -269,11 +255,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str += " streamsettings "+streamSettings();
 			messageplayer(userconnected + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
+
+			if (battery.batterypresent) { battery.init(this); }
 			
-			// TODO: BRAD 
-			// if (batterypresent) battery = BatteryLife.getReference(); 
-			// if (((settings.readSetting("wifienabled")).toUpperCase()).equals("YES")) {
-			//	wifi = new WifiConnection();  }
 			if (userconnected.equals(settings.readSetting("user0"))) {
 				admin = true;
 			}

@@ -44,11 +44,14 @@ a:hover { color: #ffffff; background-color: transparent; text-decoration: none; 
 .boxbg:link { color: #4c56fe; background-color: transparent; text-decoration: none; }
 .boxbg:visited { color: #4c56fe; background-color: transparent; text-decoration: none; }
 .boxbg:hover { color: #ffffff; background-color: transparent; text-decoration: none; } /* #0711AF */
+.dkbluelink:link { color: #343fff; background-color: transparent; text-decoration: none; }
+.dkbluelink:visited { color: #343fff; background-color: transparent; text-decoration: none; }
+.dkbluelink:hover { color: #ffffff; background-color: transparent; text-decoration: none; } /* #0711AF */
 .inputbox { background-color: #262626; color: #ffffff; border: 1px solid #666666;}
 .cancelbox { border: 1px solid #4c56fe; padding-left: 3px; padding-right: 3px }
 .messagebox {  font-size: 13px; line-height: 16px; }
 .menu { color: #999999; }
-.cambutton { color: #4c56fe; cursor: pointer; background-repeat: no-repeat; background-position: center; height: 22px}
+.cambutton { color: #343fff; cursor: pointer; background-repeat: no-repeat; background-position: center; height: 22px}
 .facebox { border: 1px solid #4c56fe; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
 </style>
 <script src="javascript/client.js" type="text/javascript"></script>
@@ -70,8 +73,8 @@ var requiredRevision = 0;
 <body id="thebody" onkeydown= "keyBoardPressed(event);" onload="loaded();" 
 onunload="playerexit();" onresize="resized();">
 <div style="height: 100%; background-image: url(images/oculus.gif); background-repeat: no-repeat;
-background-position: right bottom"><!-- visible page div -->
-<table align="center" ><tr><td style="padding-left: 5px;">
+background-position: right bottom; "><!-- visible page div -->
+<table id="maintable" align="center"><tr><td style="padding-left: 5px;">
 <table><tr><td style="height: 7px"></td></tr></table>
 <table><tr valign="bottom"><td style="text-align: right">
 <div id="video" style="position: relative; z-index: -1">
@@ -215,7 +218,7 @@ text-transform: none;">
 <table><tr><td style="height: 15px"></td></tr></table>
 </div>
 <div style="padding-left: 7px">
-<a id="admincommands" href="javascript: advancedmenu();" >
+<a class="dkbluelink" id="admincommands" href="javascript: advancedmenu();" >
 MENU <img src="images/wrench.gif" border=0 style="vertical-align: middle;"></a><br>
 </div>
 <table><tr><td style="height: 10px"></td></tr></table>
@@ -394,27 +397,18 @@ self cam/mic OFF</div>
 </td>
 
 <td>
-<a href="javascript: autodock('start');" style="line-height: 22px"><img src="images/charge.gif" border=0" style="vertical-align: bottom"> dock</a><br>
-<a class="cambutton" href="javascript: dock('undock');" style="line-height: 22px">
+<a class="dkbluelink" id="docklink" href="javascript: autodock('start');" style="line-height: 22px"><img src="images/charge.gif" border=0" style="vertical-align: bottom"> dock</a><br>
+<a class="dkbluelink" href="javascript: dock('undock');" style="line-height: 22px">
 <img src="images/chargeoff.gif" border=0" style="vertical-align: bottom"> un-dock</a><br>
-<!-- 
-<div id="manualdockstart">
-<a href="javascript: docklinetoggle('on');"><img src="images/dockline.gif" border=0" style="vertical-align: bottom"> manual dock</a><br>
-</div>  
-<div id="manualdockgocancel" style="display: none; line-height: 20px;">
-<img src="images/dockline.gif" border=0" style="vertical-align: bottom"> 
-&nbsp; <a href="javascript: dock('dock');"><span class="cancelbox">&radic;</span> GO</a>
-&nbsp; <a href="javascript: docklinetoggle('off'); move('stop');"><span class="cancelbox">X</span> CANCEL</a>
-</div>
--->
+
 <div>
 <div id="speakchatlinks" style="line-height: 22px"><img src="images/bubble.gif" border=0" style="vertical-align: bottom">
-<a href="javascript: speakchat('show','chatbox');">text</a>
-<span style="font-size: 11px; color: #4c56fe">/</span>
-<a href="javascript: speakchat('show','speechbox');">speak</a></div>
+<a class="dkbluelink" href="javascript: speakchat('show','chatbox');">text</a>
+<span style="font-size: 11px; color: #343fff">/</span>
+<a class="dkbluelink" href="javascript: speakchat('show','speechbox');">speak</a></div>
 </div>
 
-<a href="javascript: logout();"  style="line-height: 22px"><img src="images/x.gif" border=0" style="vertical-align: bottom"> logout</a><br>
+<a class="dkbluelink" href="javascript: logout();"  style="line-height: 22px"><img src="images/x.gif" border=0" style="vertical-align: bottom"> logout</a><br>
 </td>
 
 </tr></table>
@@ -472,6 +466,7 @@ filter:alpha(opacity=0); opacity: 0.0; -moz-opacity:0.0; line-height: 0px"></div
 <img id="videologo" src="images/eye.gif" width="640" height="480" 
 style="position: absolute; display: none; z-index: 4" alt="">
 
+<!-- 
 <div id="docklinecalibrateoverlay" class="overlay" style="position: absolute; display: none;
 width: 200px; z-index: 5"> </div>
 <div id="docklinecalibratebox" style="position: absolute; display: none;
@@ -486,6 +481,7 @@ with dock spire.
 <a href="javascript: docklinecalibrate('cancel');">
 <span class="cancelbox">X</span> CANCEL</a><br>
 </div>
+-->
 
 <div id="popoutbox_under" class="overlay" style="position: absolute; display: none;"></div>
 <div id="speechbox" style="position: absolute; display: none;">
@@ -505,8 +501,19 @@ class="inputbox" style="width: 150px; background-color: #000000;">
 <a class="cancelbox" href="" onmousedown="chat();">&radic;</a>
 </div>
 
+<!--  popupmenu -->
+<div id="popupmenu_under" class="overlay" style="position: absolute; display: none; z-index: 5;"></div>
+<div id="popupmenu_over" style="position: absolute; display: none; z-index: 5;">
+<div style="line-height: 4px;
+background-color: #4c56fe; filter:alpha(opacity=15); opacity: 0.15; -moz-opacity:0.15;"> &nbsp; </div>
+<div id="popupmenu_topbar" style="line-height: 16px; cursor: move;
+background-color: #4c56fe; filter:alpha(opacity=15); opacity: 0.15; -moz-opacity:0.15;"
+onmousedown="popupmenu('move');"> &nbsp; </div>
+<div id="popupmenu_contents" style="padding: 10px; padding-top: 7px;"></div>
+<table><tr><td style="height: 4px"></td></tr></table>
+</div>
 
-
+<!--  overlay -->
 <div id="overlay" class="overlay" 
 style="position: fixed; display: none; z-index: 7; left: 0px; top: 0px; width: 100%; height: 100%"> </div>
 <!-- <div id="overlay" class="overlay" 
@@ -791,6 +798,8 @@ class="blackbg" href="javascript: streamset('setcustom');">change</a>
 
 </td></tr></table>
 </div> <!--  end of overlaycontents -->
+
+<div id="debugbox" style="position: absolute; z-index: 100; left: 10px; top: 10px"></div>
 
 </body>
 </html>

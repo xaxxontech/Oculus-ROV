@@ -443,15 +443,15 @@ function docklinetoggle(str) {
 		else { str="on"; }
 	}
 	if (str=="off") { 
-		document.getElementById('manualdockstart').style.display = "";
-		document.getElementById('manualdockgocancel').style.display = "none";
+		//document.getElementById('manualdockstart').style.display = "";
+		//document.getElementById('manualdockgocancel').style.display = "none";
 		a.style.display="none"; 
 		b.style.display="none";
 		c.style.display="none";
 	}
 	if (str=="on" && streammode != "stop") {
-		document.getElementById('manualdockstart').style.display = "none";
-		document.getElementById('manualdockgocancel').style.display = "";
+		//document.getElementById('manualdockstart').style.display = "none";
+		//document.getElementById('manualdockgocancel').style.display = "";
 		clicksteer("on");
 		a.style.display="";
 		b.style.display="";
@@ -650,7 +650,7 @@ function autodock(str) {
 	    setTimeout("docklinecalibrate('position');",10); // rendering fix
 	}
 	if (str=="cancel") {
-		docklinetoggle("off");
+		//docklinetoggle("off");
 	    var b = document.getElementById("docklinecalibratebox")
 	    b.innerHTML = tempdivtext;
 		b.style.display = "none";

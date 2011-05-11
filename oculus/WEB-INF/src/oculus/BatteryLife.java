@@ -33,8 +33,13 @@ public class BatteryLife {
 	}
 
 	public static void init(Application parent){
-		if(app!=null) return;
-		else app = parent;
+		//if(app!=null) {
+			System.out.println("battery init...");
+		//	return;
+		//}else{
+			//System.out.println("battery can't re-init!");
+			app = parent;
+		//}
 	}
 	
 	private BatteryLife() {

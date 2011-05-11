@@ -62,6 +62,11 @@ public class BatteryLife {
 	/** threaded update */
 	public void battStats() { 
 		
+		if(app == null){
+			System.out.println("not yet configured");
+			return;
+		}
+		
 		if(batterypresent == false){
 			System.out.println("no battery found");
 			return;
@@ -137,6 +142,18 @@ public class BatteryLife {
 	*/
 	
 	public int batteryStatus() {
+
+		
+		if(app == null){
+			System.out.println("not yet configured");
+			return 999;
+		}
+		
+		if(batterypresent == false){
+			System.out.println("no battery found");
+			return 999;
+		}
+		
 		int result = 999;
 		
 		//Execute the query
@@ -156,6 +173,17 @@ public class BatteryLife {
 	}
 	
 	public int[] battStatsCombined() {
+	
+		if(app == null){
+			System.out.println("not yet configured");
+			return null;
+		}
+		
+		if(batterypresent == false){
+			System.out.println("no battery found");
+			return null;
+		}
+		
 		int[] result = { 999, 999 };
 		Variant vCollection = axWMI.invoke("ExecQuery", new Variant(query));
 		EnumVariant enumVariant = new EnumVariant(vCollection.toDispatch());

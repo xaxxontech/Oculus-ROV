@@ -203,6 +203,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// TODO: NEEDED STILL??
 		
 		battery = BatteryLife.getReference();
+		BatteryLife.init(this);
 		if(!battery.batteryPresent())
 			motionenabled = false;
 			

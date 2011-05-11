@@ -390,17 +390,69 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (fn.equals("chat")) { chat(str); }
  	}
 	
+	/** put all commands here */
+	public enum GabberCommands { streammode, saveandlaunch, populatesettings, 
+		systemcall, chat, facerect, dockgrabbed, autodock, restart;
+	
+		@Override 
+		public String toString() {
+			return super.toString();
+		}	
+	}
+	
 	/**
 	 * distribute commands from grabber
 	 * 
-	 * should list these 
-	 * 
-	 * @param fn is the function to call 
-	 * @param str is the parameters to pass
+	 * @param fn is the funct ion to call 
+	 * @param str is the parameters to pass on to the function.
 	 */
-	public void grabberCallServer(String fn, String str) {
+	public void grabberCallServer(/*Application.GabberCommands cmd*/ String fn, String str){
 		
-        if (fn.equals("streammode")) grabberSetStream(str); 
+		// turn string input to id 
+		Application.GabberCommands cmd = Application.GabberCommands.valueOf(fn);
+		
+		switch (cmd) {	
+		case streammode: grabberSetStream(str);
+			break;
+
+		case saveandlaunch: saveAndLaunch(str);
+			break;
+		
+		case populatesettings: populateSettings();
+			break;
+			
+		case systemcall: Util.systemCall(str, admin);
+			break;
+			
+		case chat: chat(str);
+			break;
+			
+		case facerect: messageplayer(null, "facefound", str);
+			break; 
+			
+			//
+			// TODO: GET RID of string literals 
+			//
+		case dockgrabbed: docker.autoDock("dockgrabbed "+str);
+			break;
+			
+		case autodock: docker.autoDock(str);
+			break;
+			
+		case restart: 
+			admin=true;
+			restart();
+			break;
+			
+		default: 
+			System.out.println("command not found: " + cmd.toString());
+			for( GabberCommands command : GabberCommands.values() )
+				System.out.println(command.ordinal() + " = " + command.toString());
+			break;
+		}
+		
+		/*
+		if (fn.equals("streammode")) grabberSetStream(str); 
         else if (fn.equals("saveandlaunch")) saveAndLaunch(str); 
         else if (fn.equals("populatesettings")) populateSettings(); 
         else if (fn.equals("systemcall")) Util.systemCall(str, admin);
@@ -409,7 +461,7 @@ public class Application extends MultiThreadedApplicationAdapter {
         else if (fn.equals("dockgrabbed"))  docker.autoDock("dockgrabbed "+str); 
         else if (fn.equals("autodock")) docker.autoDock(str); 
         else if (fn.equals("restart")) { admin=true; restart(); }
-
+        */
 	}
 	
 	private void grabberSetStream(String str) {

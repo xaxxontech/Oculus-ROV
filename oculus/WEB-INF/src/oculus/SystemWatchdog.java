@@ -21,13 +21,10 @@ public class SystemWatchdog {
 	// shared state variables
 	private State state = State.getReference();
 	
-	// do at set interval 
-	private Timer timer = new Timer();
-
-    /** */
+    /** Constructor */
 	public SystemWatchdog() {
 		if (reboot){
-			
+			Timer timer = new Timer();
 			timer.scheduleAtFixedRate(new Task(), 5000, DELAY);
 			
 			if(debug) System.out.println("system watchdog starting...");
@@ -43,23 +40,21 @@ public class SystemWatchdog {
 			// only reboot is idle 
 			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ 
 				
-				// redundant if no user connected??
-				// && !app.motionenabled ){
-				
-				// reboot should be enough? 
-				// timer.cancel();
-				
 				String boot = new Date(state.getLong(State.boottime)).toString();				
 				System.out.println("rebboting, last was: " + boot);
 			
 				if(debug){
 					
-					// copy std out and email it 
+					// copy stdout log and email it 
 					String log = System.getenv("RED5_HOME")+"\\log\\jvm.stdout";
 					String temp = System.getenv("RED5_HOME")+"\\log\\debug.txt";
 			
 					// delete if exists from before 
 					new File(temp).delete();
+					
+					// write current state to file
+					state.writeFile(temp);
+					
 					if(Util.copyfile(log, temp)){
 					
 						// blocking send 

@@ -1,5 +1,10 @@
 package oculus;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Date;
 import java.util.Properties;
 
 import org.red5.logging.Red5LoggerFactory;
@@ -94,7 +99,22 @@ public class State {
 			return;
 		}
 	}*/
-
+	
+	public void writeFile(String path){
+		File file = new File(path);
+		FileOutputStream out = null;
+		try {
+			out = new FileOutputStream(file);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		try {
+			props.store(out, "current oculus state on: " + new Date().toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/** @return a copy of the properties file
 	public Properties getProperties() {
 		return (Properties) props.clone();

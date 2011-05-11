@@ -20,12 +20,13 @@ public class EmailAlerts {
 	private Settings settings = new Settings();
 	private final boolean debug = settings.getBoolean("developer");
 	private final boolean alerts = settings.getBoolean("emailalerts");
+	private BatteryLife life = BatteryLife.getReference();
 	
-	/** constuctor */
+	/** Constructor */
 	public EmailAlerts(Application app) {
-		if (alerts && app.batterypresent){
+		if (alerts && life.batteryPresent()){
 			this.app = app;
-			timer.scheduleAtFixedRate(new Task(), 10000, DELAY);
+			timer.scheduleAtFixedRate(new Task(), State.ONE_DAY, DELAY);
 			if(debug) System.out.println("starting email alerts...");
 		}
 	}
@@ -34,9 +35,9 @@ public class EmailAlerts {
 	private class Task extends TimerTask {
 		@Override
 		public void run() {
-			if (app.battery != null) {
+			if (life.batteryPresent()) {
 
-				int batt[] = app.battery.battStatsCombined();
+				int batt[] = life.battStatsCombined();
 				String lifestr = Integer.toString(batt[0]);
 				int life = batt[0];
 				int status = batt[1];

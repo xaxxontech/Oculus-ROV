@@ -41,7 +41,8 @@ public class AutoDock {
 
 	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
 	private State state = State.getReference();
-	private Settings settings= new Settings();
+	private BatteryLife life = BatteryLife.getReference();
+	private Settings settings = new Settings();
 	private IConnection grabber = null;
 	private String docktarget = null;
 	private ArduinoCommDC comport = null; 
@@ -51,10 +52,10 @@ public class AutoDock {
 	private int autodockgrabattempts;
 	private int autodockctrattempts;
 	
-	public AutoDock(Application theapp, IConnection thegrab){
+	public AutoDock(Application theapp, IConnection thegrab, ArduinoCommDC com){
 		this.app = theapp;
 		this.grabber = thegrab;
-		this.comport = app.comport;
+		this.comport = com;
 	}
 	
 	// TODO: Move to state! 
@@ -156,7 +157,8 @@ public class AutoDock {
 	void dock(String str) {
 		if (str.equals("dock") && !docking) {
 			if (app.motionenabled == true) {
-				if (!app.battcharging) {
+				if (!life.batteryCharging()) {
+					
 					app.message("docking initiated", "multiple", "speed slow motion moving dock docking");
 
 					// need to set this because speedset calls goForward also if true
@@ -184,7 +186,7 @@ public class AutoDock {
 								}
 								comport.stopGoing();
 								app.message(null,"motion","stopped");
-								if (app.battery.batteryStatus() == 2) {
+								if (life.batteryCharging()){ // (app.battery.batteryStatus() == 2) {
 									docking = false;
 									String str = "";
 									if (state.getBoolean(State.autodocking)) {
@@ -198,7 +200,7 @@ public class AutoDock {
 									log.info(app.userconnected +" docked successfully");
 									app.motionenabled = false;
 									app.dockstatus = "docked"; // needs to be before battStats()
-									app.battStats(); 
+									life.battStats(); 
 									break;
 								}
 								counter += 1;
@@ -252,7 +254,7 @@ public class AutoDock {
 						comport.stopGoing();
 						app.message("disengaged from dock", "motion", "stopped");
 						log.info(app.userconnected + " un-docked");
-						app.battStats();
+						life.battStats();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

@@ -22,18 +22,21 @@ import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
 public class Application extends MultiThreadedApplicationAdapter {
-	IConnection grabber;
+	
+	IConnection grabber = null;
 	IConnection player = null;
-	protected ArduinoCommDC comport = null; 
-	protected LightsComm light = null;
+
+	private ArduinoCommDC comport = null; 
+	private LightsComm light = null;
+	
 	protected Speech sayit = new Speech("kevin16");
-	protected BatteryLife battery;
-	Settings settings= new Settings();
+	private BatteryLife battery = BatteryLife.getReference();
+	private Settings settings= new Settings();
 	
 	//volatile boolean docking = false;
 	
 	protected boolean initialstatuscalled = false;
-	boolean batterypresent;
+	// boolean batterypresent;
 	boolean motionenabled = false;
 	private static String salt = "PSDLkfkljsdfas345usdofi";
 	ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
@@ -44,10 +47,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	boolean pendingplayerisnull = true;
 	protected String stream = "stop";
 	// WifiConnection wifi; // = new WifiConnection();
-	boolean battcharging;
+	// boolean battcharging;
 	boolean admin = false;
 	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
-	String dockstatus = "";
+	String dockstatus = "unkown";
 	String httpPort; 
 	boolean facegrabon = false;
 	private boolean emailgrab = false;
@@ -148,7 +151,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		
-		docker = new AutoDock(this, grabber);
+		docker = new AutoDock(this, grabber, comport);
 	}
 
 	public void initialize() {
@@ -196,20 +199,39 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void grabber_launch() {
+		
+		// TODO: NEEDED STILL??
+		
+		battery = BatteryLife.getReference();
+		if(!battery.batteryPresent())
+			motionenabled = false;
+			
+		/*
 		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
-			batterypresent = true; 
+			
+			//batterypresent = true; 
+			// TODO: BRAD
+			
 		} else { 
-			batterypresent = false;
+			
+			// batterypresent = false;
+			
+			// TODO: BRAD ASKS WHY? 
 			motionenabled = true;
-		}
+		} */
 		
 		new Thread(new Runnable() {
 			public void run() {
 				try {
 					//String address = settings.readSetting("address") + ":"+ settings.readSetting("http_port");
+					
 					String address="127.0.0.1:"+ httpPort;
+				
 					Runtime.getRuntime().exec("cmd.exe /c start http://" + address+ "/oculus/server.html");
 					// Runtime.getRuntime().exec("cmd.exe /c start /MIN http://" + address+ "/oculus/grabber.html");
+				
+					// Util.systemCall(cmd, true);
+				
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -221,6 +243,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (player != null) { 
 			pendingplayer = Red5.getConnectionLocal();
 			pendingplayerisnull = false;
+			
 			if (pendingplayer instanceof IServiceCapableConnection) {
 				IServiceCapableConnection sc = (IServiceCapableConnection) pendingplayer;
 				String str = "connection PENDING user "+pendinguserconnected;
@@ -234,8 +257,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str = pendinguserconnected + " pending connection from: "+pendingplayer.getRemoteAddress();
 				log.info(str); messageGrabber(str,null);
 			}
-		}
-		else {
+		} else {
 			player = Red5.getConnectionLocal();
 			userconnected = pendinguserconnected;
 			String str = "connection connected user "+userconnected;
@@ -246,7 +268,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str += " streamsettings "+streamSettings();
 			messageplayer(userconnected + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
-			if (batterypresent) { battery = new BatteryLife(); }
+			
+			// TODO: BRAD 
+			// if (batterypresent) battery = BatteryLife.getReference(); 
 			// if (((settings.readSetting("wifienabled")).toUpperCase()).equals("YES")) {
 			//	wifi = new WifiConnection();  }
 			if (userconnected.equals(settings.readSetting("user0"))) {
@@ -258,7 +282,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str = userconnected + " connected from: "+player.getRemoteAddress();
 			log.info(str); 
 			messageGrabber(str,"connection "+userconnected+"&nbsp;connected");
-			
 		}
 		
 		state.set(State.userisconnected, true);
@@ -279,7 +302,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				saySpeech(str);
 			}
 			if (fn.equals("battStats")) {
-				battStats();
+				battery.battStats();
 			}
 			if (fn.equals("getdrivingsettings")) {
 				getDrivingSettings();
@@ -560,48 +583,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		log.info("voice synth: '"+str+"'");
 	}
 
-	public void battStats() { 
-		new Thread(new Runnable() {
-			public void run() {
-				if (batterypresent == true && !dockstatus.equals("docking")) {
-					int batt[] = battery.battStatsCombined();
-					String life = Integer.toString(batt[0]);
-					int s = batt[1];
-					String status = Integer.toString(s); // in case its not 1 or 2
-					String str;
-					if (s == 1) {
-						status = "draining";
-						str = "battery "+life+"%,"+status;
-						if (motionenabled== false) {
-							motionenabled = true;
-							str += " motion enabled";
-						}
-						if (!dockstatus.equals("un-docked")) {
-							dockstatus = "un-docked";
-							str += " dock un-docked";
-						}
-						battcharging = false;
-						messageplayer(null, "multiple", str);
-					}
-					if (s == 2) {
-						status = "CHARGING";
-						// motionenabled = false ;
-						if (life.equals("99") || life.equals("100")) {
-							status = "CHARGED";
-						}
-						battcharging = true;
-						str="battery "+life+"%,"+status;
-						if (dockstatus.equals("")) {
-							dockstatus = "docked";
-							str += " dock docked";
-						}
-						messageplayer(null, "multiple", str);
-					}			
-				}
-			}
-		}).start();
-	}
-	
 	private void getDrivingSettings() {
 		if (admin) {
 			String str = comport.speedslow + " " + comport.speedmed + " " 
@@ -712,7 +693,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void statusCheck(String s) {
 		if (initialstatuscalled==false) {
 			initialstatuscalled=true; 
-			battStats();
+			battery.battStats();
 			// signalStrength();
 			String str = "";
 			if (comport != null) {
@@ -741,7 +722,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("status check received","multiple",str.trim());
 		}
 		if (s.equals("battcheck")) { 
-			battStats();
+			battery.battStats();
 		}
 	}
 	
@@ -1264,11 +1245,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// battery
 		if (battery != null) { 
 			if (battery.equals("yes")) {
-				batterypresent = true;
+				// batterypresent = true;
 			} else { 
-				batterypresent = false;
+				// batterypresent = false;
 				motionenabled = true;
 			}	
+			
+			// TODO: not needed?? 
 			settings.writeSettings("batterypresent", battery); 
 		}
 		// httpport

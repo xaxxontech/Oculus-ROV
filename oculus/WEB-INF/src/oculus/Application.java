@@ -703,8 +703,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("status check received","multiple",str.trim());
 		}
 		else {
-			String str = " stream "+stream;
-			messageplayer("status check received","multiple",str.trim());
+//			String str = " stream "+stream;
+//			messageplayer("status check received","multiple",str.trim());
+			messageplayer("status check received",null,null);
 		}
 		if (s.equals("battcheck")) { 
 			battery.battStats();
@@ -988,7 +989,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					s = settings.readSetting("user"+i);
 					if (s==null) { break; }
 					if ((s.toUpperCase()).equals((u[0]).toUpperCase())) {
-						message += "error: user name already exists ";
+						message += "ERROR: user name already exists ";
 						oktoadd = false;
 					}
 					i++;

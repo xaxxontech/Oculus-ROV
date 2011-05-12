@@ -196,8 +196,8 @@ function ifnotshow() {
 }
 
 function quit() {
-	message("shutdown",null);
 	callServer('systemcall','red5-shutdown.bat');
+	message("shutdown",null);
 }
 
 function restart() {

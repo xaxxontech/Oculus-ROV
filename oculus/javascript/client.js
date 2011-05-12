@@ -1,3 +1,5 @@
+//TODO: clean out unused 'overlay off' and 'extended settings box' references (in html too) 
+
 var sentcmdcolor = "#777777";
 var systimeoffset;
 var enablekeyboard = false;
@@ -434,16 +436,12 @@ function docklinetoggle(str) {
 		else { str="on"; }
 	}
 	if (str=="off") { 
-		//document.getElementById('manualdockstart').style.display = "";
-		//document.getElementById('manualdockgocancel').style.display = "none";
 		a.style.display="none"; 
 		b.style.display="none";
 		c.style.display="none";
-		popupmenu("close");
+		popupmenu("context", "close");
 	}
 	if (str=="on" && streammode != "stop") {
-		//document.getElementById('manualdockstart').style.display = "none";
-		//document.getElementById('manualdockgocancel').style.display = "";
 		clicksteer("on");
 		a.style.display="";
 		b.style.display="";
@@ -458,7 +456,7 @@ function docklinetoggle(str) {
 		
 	    var link = document.getElementById("docklink");
 	    var xy = findpos(link);
-	    popupmenu("show", xy[0] + link.offsetWidth + 60, xy[1] + link.offsetHeight, str, null, 1,1);
+	    popupmenu("context", "show", xy[0] + link.offsetWidth + 60, xy[1] + link.offsetHeight, str, null, 1,1);
 
 	}
 }
@@ -498,23 +496,75 @@ function speech() {
 	lagtimer = new Date().getTime();
 }
 
-function advancedmenu() {
-	document.getElementById("overlaydefault").style.display = "none";
-	document.getElementById("login").style.display = "none";
-	document.getElementById("someonealreadydrivingbox").style.display = "none";
-	document.getElementById("hiddenmessageboxcontainer").style.display = "none";
-	document.getElementById("extrastuffcontainer").style.display = "none";
-	document.getElementById("advancedmenubox").style.display = "";
-	var a= document.getElementById("videosettingsmenu");
-	if (admin) { 
-		document.getElementById("admin_menu").style.display = "";
-		document.getElementById("regular_menu").style.display = "none";
-		document.getElementById("admin_vidmenu").innerHTML = a.innerHTML;
-	}
-	else { document.getElementById("regular_vidmenu").innerHTML = a.innerHTML; }
-	overlay("on");
+//function advancedmenu() {
+//	document.getElementById("overlaydefault").style.display = "none";
+//	document.getElementById("login").style.display = "none";
+//	document.getElementById("someonealreadydrivingbox").style.display = "none";
+//	document.getElementById("hiddenmessageboxcontainer").style.display = "none";
+//	document.getElementById("extrastuffcontainer").style.display = "none";
+//	document.getElementById("advancedmenubox").style.display = "";
+//	var a= document.getElementById("videosettingsmenu");
+//	if (admin) { 
+//		document.getElementById("admin_menu").style.display = "";
+//		document.getElementById("regular_menu").style.display = "none";
+//		document.getElementById("admin_vidmenu").innerHTML = a.innerHTML;
+//	}
+//	else { document.getElementById("regular_vidmenu").innerHTML = a.innerHTML; }
+//	overlay("on");
+//	streamdetailspopulate();
+//	resized();
+//}
+
+function mainmenu(id) {
 	streamdetailspopulate();
-	resized();
+	str = document.getElementById("main_menu").innerHTML;
+	if (admin) { str += document.getElementById("main_menu_admin").innerHTML; }
+	else { str += document.getElementById("main_menu_nonadmin").innerHTML; }
+	x = null;
+	y = null;
+	if (id) {
+		var link = document.getElementById(id);
+		var xy = findpos(link);
+		x = xy[0]+link.offsetWidth;
+		y = 100;
+	}
+	popupmenu("menu", "show", x, y, str, null, 1, 0);
+//	resized();
+}
+
+function streamdetailspopulate() {
+	if (streamdetails.length > 0) {
+		var s = [];
+		s = streamdetails;
+		var i = 1;
+		var a= document.getElementById("low_specs");
+		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
+		i = 5;
+		a= document.getElementById("med_specs");
+		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
+		i = 9;
+		a= document.getElementById("high_specs");
+		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
+		i = 13;
+		a= document.getElementById("full_specs");
+		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
+		i = 17;
+		a= document.getElementById("custom_specs");
+		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
+//		a = document.getElementById(streamdetails[0].slice(1)+"_bull");
+//		a.style.visibility="visible";
+		streamSettingsBullSet(streamdetails[0].slice(1));
+		resized();
+	}
+}
+
+function streamSettingsBullSet(str) {
+	var settings = ["low", "med", "high", "full", "custom"];
+	for (i in settings) {
+//		debug(setting);
+		document.getElementById(settings[i]+"_bull").style.visibility = "hidden";
+	}
+	document.getElementById(str+"_bull").style.visibility = "visible";
 }
 
 function keypress(e) {
@@ -535,13 +585,12 @@ function battStats() {
 }
 
 function drivingsettings(state) {
-	var a= document.getElementById("extendedsettingsbox");
-	a.innerHTML = document.getElementById("drivingsettings").innerHTML;
-	a.style.display = "";
+	var str = document.getElementById("drivingsettings").innerHTML;
+	popupmenu("menu","show",null,null,str);
 	callServer("getdrivingsettings","");
 	message("request driving settings values", sentcmdcolor);
 	lagtimer = new Date().getTime(); // has to be *after* message()
-	resized();
+//	resized();
 }
 
 function drivingsettingsdisplay(str) { // called by server via flashplayer
@@ -580,13 +629,11 @@ function camera(fn) {
 }
 
 function tiltcontrols(state) {
-	var a= document.getElementById("extendedsettingsbox");
-	a.innerHTML = document.getElementById("tiltcontrols").innerHTML;
-	a.style.display = "";
+	var str = document.getElementById("tiltcontrols").innerHTML;
+	popupmenu("menu","show",null,null,str);
 	callServer("gettiltsettings", "");
 	message("request tilt settings values", sentcmdcolor);
 	lagtimer = new Date().getTime(); // has to be *after* message()
-	resized();
 }
 
 function tiltsettingssend() {
@@ -647,11 +694,10 @@ function autodock(str) {
 
 	    var link = document.getElementById("docklink");
 	    var xy = findpos(link);
-	    popupmenu("show", xy[0] + link.offsetWidth + 60, xy[1] + link.offsetHeight, str, 160, 1, 1);
+	    popupmenu("context", "show", xy[0] + link.offsetWidth + 60, xy[1] + link.offsetHeight, str, 160, 1, 1);
 	}
 	if (str=="cancel") {
-
-		popupmenu("close");
+		popupmenu("context", "close");
 		docklinetoggle("off");
 		clicksteer("on");
 		if (autodocking) {
@@ -661,41 +707,33 @@ function autodock(str) {
 		}
 	}
 	if (str=="calibrate" && streammode != "stop") {
-		overlay("off");
+//		overlay("off");
+		popupmenu("menu","close");
 		clicksteeron = false;
 		document.getElementById("video").style.zIndex = "-1";
 		videooverlayposition();
 		var a =document.getElementById("videooverlay");
 	    a.onclick = autodockcalibrate;
-//	    var b = document.getElementById("docklinecalibratebox")
-//	    tempdivtext = b.innerHTML;
 	    var str = "Auto-dock calibration: <table><tr><td style='height: 7px'></td></tr></table>";
 	    str+="Place Oculus square and centered in charging dock, then click within white area of target"
     	str+="<table><tr><td style='height: 11px'></td></tr></table>";
 	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>"
 	    str+= "<span class='cancelbox'>X</span> CANCEL</a><br>"
-//	    b.innerHTML = str;
-//	    b.style.display = "";
-//	    document.getElementById("docklinecalibrateoverlay").style.display = "";
-//	    docklinecalibrate('position');
-//	    setTimeout("docklinecalibrate('position');",10); // rendering fix
 	    var video = document.getElementById("video");
 	    var xy = findpos(video);
-	    popupmenu("show", xy[0] + video.offsetWidth - 10, xy[1] + 10, str, 160, 1, 0);
+	    popupmenu("context", "show", xy[0] + video.offsetWidth - 10, xy[1] + 10, str, 160, 1, 0);
 	}
 	if (str=="go") {
 		callServer("autodock", "go");
 		message("sending autodock-go", sentcmdcolor);
 		lagtimer = new Date().getTime(); // has to be *after* message()
 		autodocking = true;
-//		var b = document.getElementById("docklinecalibratebox")
 	    var str = "Auto Dock: <table><tr><td style='height: 7px'></td></tr></table>";
 	    str+="in progress... stand by"
 		str+="<table><tr><td style='height: 11px'></td></tr></table>";
 	    str+="<a href='javascript: autodock(&quot;cancel&quot;);'>"
 	    str+= "<span class='cancelbox'>X</span> CANCEL</a><br>"
-//	    b.innerHTML = str;
-    	popupmenu("show",null,null,str);
+    	popupmenu("context","show",null,null,str);
 	}
 }
 
@@ -764,11 +802,11 @@ function autodockcalibrate(ev) {
 	autodock("cancel");
 }
 
-function popupmenu(command, x, y, str, sizewidth, x_offsetmult, y_offsetmult) {
+function popupmenu(pre_id, command, x, y, str, sizewidth, x_offsetmult, y_offsetmult) {
 //	var link = document.getElementById(docklink);
-	var under = document.getElementById("popupmenu_under");
-	var over = document.getElementById("popupmenu_over");
-	var contents = document.getElementById("popupmenu_contents");
+	var under = document.getElementById(pre_id+"_menu_under");
+	var over = document.getElementById(pre_id +"_menu_over");
+	var contents = document.getElementById(pre_id+"_menu_contents");
 //	var maintable = document.getElementById("maintable");
 	if (command=='show') {
 //		var xy = findpos(link);
@@ -776,6 +814,8 @@ function popupmenu(command, x, y, str, sizewidth, x_offsetmult, y_offsetmult) {
 
 		contents.innerHTML = str;
 		over.style.display = "";
+		over.style.width = null; //ie fix
+		over.style.height = null; //ie fix
 		if (sizewidth != null) { contents.style.width = sizewidth + "px"; }
 		
 		if (x != null && y !==null) {
@@ -787,15 +827,17 @@ function popupmenu(command, x, y, str, sizewidth, x_offsetmult, y_offsetmult) {
 			over.style.top = y + "px";		
 			under.style.display = "";
 		}
-		var margin = 0;
+		var margin = 4;
 		under.style.left = (over.offsetLeft - margin) + "px";
 		under.style.top = (over.offsetTop -margin) + "px";
 		under.style.width = (over.offsetWidth + margin*2) + "px";
 		under.style.height = (over.offsetHeight + margin*2) + "px";
 		//document.body.onclick = function() { popupmenu("close"); }
+		over.style.width = over.offsetWidth;
+		over.style.height = over.offsetHeight;
 	}
 	else if (command=='move') {
-		document.onmousemove = popupmenumove;
+		document.onmousemove = function() { popupmenumove(event, pre_id); }
 		popupmenu_xoffset = null;
 		popupmenu_yoffset = null;
 		document.body.onclick = null;
@@ -808,11 +850,24 @@ function popupmenu(command, x, y, str, sizewidth, x_offsetmult, y_offsetmult) {
 	else if (command=="close") {
 		over.style.display = "none";
 		under.style.display = "none";
+		contents.innerHTML = "";
 		//document.body.onclick = null;
+		resized();
 	}
+	else if (command=="resize") {
+		over.style.width = null; //ie fix
+		over.style.height = null; //ie fix
+		var margin = 4;
+		under.style.left = (over.offsetLeft - margin) + "px";
+		under.style.top = (over.offsetTop -margin) + "px";
+		under.style.width = (over.offsetWidth + margin*2) + "px";
+		under.style.height = (over.offsetHeight + margin*2) + "px";
+	}
+	resized();
+
 }
 
-function popupmenumove(ev) {
+function popupmenumove(ev, pre_id) {
 	ev = ev || window.event;
 	if (ev.pageX || ev.pageY) {
 		var x = ev.pageX;
@@ -822,14 +877,14 @@ function popupmenumove(ev) {
 		var x = ev.clientX + document.body.scrollLeft - document.body.clientLeft;
 		var y = ev.clientY + document.body.scrollTop - document.body.clientTop;
 	}
-	var under = document.getElementById("popupmenu_under");
-	var over = document.getElementById("popupmenu_over");
+	var under = document.getElementById(pre_id+"_menu_under");
+	var over = document.getElementById(pre_id+"_menu_over");
 	if (!popupmenu_xoffset) { popupmenu_xoffset = over.offsetLeft - x; }
 	if (!popupmenu_yoffset) { popupmenu_yoffset = over.offsetTop - y; }
 
 	over.style.left = (x + popupmenu_xoffset) + "px";
 	over.style.top = (y + popupmenu_yoffset) + "px";
-	var margin = 0;
+	var margin = 4;
 	under.style.left = (over.offsetLeft - margin) + "px";
 	under.style.top = (over.offsetTop -margin) + "px";
 }
@@ -966,6 +1021,14 @@ function systemcall(str,conf) {
 
 function usersyscommanddivHide() {
 	document.getElementById('usersyscommanddiv').style.display='none';
+	popupmenu('menu','resize');
+}
+
+function usersyscommanddivShow() {
+	document.getElementById('usersyscommanddiv').style.display='';
+	document.getElementById('usersyscommand').value='';
+	document.getElementById('usersyscommand').focus();
+	popupmenu('menu','resize');
 }
 
 function arduinoReset() {
@@ -1019,6 +1082,8 @@ function softwareupdate(command,value) {
 }
 
 function clicksteer(str) {
+	var sendmsg = false;
+	if (str=="") { sendmsg = true; }
 	if (str=="" && !clicksteeron) { str = "on"; }
 	if (str == "on") { 
 		document.getElementById("video").style.zIndex = "-1";
@@ -1034,12 +1099,13 @@ function clicksteer(str) {
 	    a.style.cursor="crosshair";
 	}
 	else {
+		str="off";
 		document.getElementById("video").style.zIndex = "5";
 		clicksteeron = false;
 		//str = 'off'
 	}
-	overlay('off');
-	//message("clicksteer "+str,"orange");
+//	overlay('off');
+	if (sendmsg) message("clicksteer "+str,"green");
 }
 
 function videooverlayposition() {
@@ -1391,7 +1457,8 @@ function videologo(state) {
 function docklinecalibrate(str) {
 	if (str == "start" && streammode != "stop") {
 		
-		overlay("off");
+//		overlay("off");
+		popupmenu("menu","close");
 		clicksteeron = false;
 		document.getElementById("video").style.zIndex = "-1";
 		videooverlayposition();
@@ -1415,7 +1482,7 @@ function docklinecalibrate(str) {
 	    
 	    var video = document.getElementById("video");
 	    var xy = findpos(video);
-	    popupmenu("show", xy[0] + video.offsetWidth - 10, xy[1] + 10, str, 160, 1, 0);
+	    popupmenu("context", "show", xy[0] + video.offsetWidth - 10, xy[1] + 10, str, 160, 1, 0);
 	}
 
 	if (str == "save") {
@@ -1449,15 +1516,19 @@ function docklineclick(ev) {
 
 function account(str) { // change_password, password_update  DONE
 	// // change_other_pass, add_user, delete_user, newuser_add, change_username
-	if (str == "change_password") {
+	if (str == "change_password" && admin) {
 		var a= document.getElementById("extendedsettingsbox");
-		a.innerHTML = document.getElementById("changepassword").innerHTML;
-		a.style.display = "";
 		document.getElementById('user_name').innerHTML = username;
-		resized();
+		var str = document.getElementById("changepassword_admin").innerHTML;
+		popupmenu("menu","show",null,null,str);
+	}
+	if (str == "change_password" &! admin) {
+		var a= document.getElementById("extendedsettingsbox");
+		document.getElementById('user_name_nonadmin').innerHTML = username;
+		var str = document.getElementById("changepassword_nonadmin").innerHTML;
+		popupmenu("menu","show",null,null,str);
 	}
 	if (str == "password_update") {
-		overlay("off");
 		var pass = document.getElementById('userpass').value;
 		var passagain = document.getElementById('userpass_again').value;
 		if (pass != passagain || pass=="") { message("*error: passwords didn't match, try again", sentcmdcolor); }
@@ -1465,17 +1536,18 @@ function account(str) { // change_password, password_update  DONE
 			message("sending new password", sentcmdcolor);
 			callServer("password_update", pass);
 			lagtimer = new Date().getTime();
-			document.getElementById("extendedsettingsbox").style.display = "none";
+//			if (admin) {
+//				popupmenu('menu', 'show', null, null, document.getElementById('account_settings').innerHTML);
+//			}
+//			else { mainmenu(); }
 		}
 	}
 	if (str=="add_user") {
-		var a= document.getElementById("extendedsettingsbox");
-		a.innerHTML = document.getElementById("adduser").innerHTML;
-		a.style.display = "";
-		resized();
+		var str = document.getElementById("adduser").innerHTML;
+		popupmenu("menu","show",null,null,str);
 	}
 	if (str=="newuser_add") {
-		overlay("off");
+//		overlay("off");
 		var user = document.getElementById('newusername').value;
 		var pass = document.getElementById('newuserpass').value;
 		var passagain = document.getElementById('newuserpass_again').value;
@@ -1498,36 +1570,26 @@ function account(str) { // change_password, password_update  DONE
 			message("sending new user info", sentcmdcolor);
 			callServer("new_user_add", user + " " + pass);
 			lagtimer = new Date().getTime();
-			document.getElementById("extendedsettingsbox").style.display = "none";
+//			popupmenu('menu', 'show', null, null, document.getElementById('account_settings').innerHTML);
 		}
 	}	
 	if (str=="delete_user") {
 		//deleteuser deluserlist 
-		var a= document.getElementById("extendedsettingsbox");
-		a.innerHTML = document.getElementById("deleteuser").innerHTML;
-		a.style.display = "";
 		userlistcalledby = "deluser";
 		callServer("user_list","");
 		message("request user list", sentcmdcolor);
 		lagtimer = new Date().getTime();
-		resized();
 	}
 	if (str=="change_extra_pass") {  
-		var a= document.getElementById("extendedsettingsbox");
-		a.innerHTML = document.getElementById("changeextrapassword").innerHTML;
-		a.style.display = "";
 		userlistcalledby = "changeextrapass";
 		callServer("user_list","");
 		message("request user list", sentcmdcolor);
 		lagtimer = new Date().getTime();
-		resized();
 	}
 	if (str=="change_username") {
-		var a= document.getElementById("extendedsettingsbox");
-		a.innerHTML = document.getElementById("changeusername").innerHTML;
-		a.style.display = "";
 		document.getElementById('user_name2').innerHTML = username;
-		resized();
+		var str = document.getElementById("changeusername").innerHTML;
+		popupmenu("menu","show",null,null,str);
 	}
 	if (str=="username_update") { //
 		var user = document.getElementById('usernamechanged').value;
@@ -1536,8 +1598,8 @@ function account(str) { // change_password, password_update  DONE
 			message("sending new username", sentcmdcolor);
 			callServer("username_update", user+" "+pass);
 			lagtimer = new Date().getTime();
-			overlay("off");
-			document.getElementById("extendedsettingsbox").style.display = "none";
+//			popupmenu('menu', 'show', null, null, document.getElementById('account_settings').innerHTML);
+//			document.getElementById("extendedsettingsbox").style.display = "none";
 		}
 	}
 }
@@ -1560,6 +1622,8 @@ function userlistpopulate(list) {
 			}
 			a.innerHTML = str;
 		}
+		str = document.getElementById("deleteuser").innerHTML;
+		popupmenu("menu","show",null,null,str);
 	}
 	if (userlistcalledby=="changeextrapass") {
 		userlistcalledby=null;
@@ -1590,14 +1654,14 @@ function userlistpopulate(list) {
 			}
 			a.innerHTML = str;
 		}
+		str = document.getElementById("changeextrapassword").innerHTML;
+		popupmenu("menu","show",null,null,str);
 	}
-	resized();
 } 
 
 function deluserconf(str) {
 	if (confirm("delete: "+str+"\nare you sure?")) {
-		document.getElementById("extendedsettingsbox").style.display = "none";
-		overlay("off");
+		popupmenu('menu', 'show', null, null, document.getElementById('account_settings').innerHTML);
 		message("request delete user: "+str, sentcmdcolor);
 		callServer("delete_user", str);
 		lagtimer = new Date().getTime();
@@ -1629,10 +1693,12 @@ function updateextrapass(str) {
 
 function closebox(str) {
 	document.getElementById(str).style.display = "none";
+	popupmenu("menu","resize");
 }
 
 function openbox(str) {
 	document.getElementById(str).style.display = "";
+	popupmenu("menu","resize");
 }
 
 function disconnectOtherConnections() {
@@ -1731,7 +1797,7 @@ function showserverlog(str) {
 function camiconbutton(str,id) {
 	var a=document.getElementById(id);
 	if (str == "over") { a.style.color = "#ffffff"; }
-	if (str == "out") { a.style.color = "#343fff"; }
+	if (str == "out") { a.style.color = "#484fcd"; }
 	if (str == "click") {
 		if (id=="pubstop") { id="stop"; } // stop already in use?
 		publish(id); 
@@ -1740,14 +1806,12 @@ function camiconbutton(str,id) {
 
 function streamset(str) {
 	if (str=="setcustom") {
-		var a= document.getElementById("extendedsettingsbox");
-		a.innerHTML = document.getElementById("customstreamsettings").innerHTML;
-		a.style.display = "";
+		var str = document.getElementById("customstreamsettings").innerHTML;		
+		popupmenu("menu", "show", null, null, str, null);
 		document.getElementById('vwidth').value = streamdetails[17];
 		document.getElementById('vheight').value = streamdetails[18];
 		document.getElementById('vfps').value = streamdetails[19];
 		document.getElementById('vquality').value = streamdetails[20];
-		resized();
 	}
 	else if (str=="customupdate") {
 		streamdetails[0] = "vcustom";
@@ -1764,51 +1828,17 @@ function streamset(str) {
 		callServer("streamsettingscustom", s);
 		message("sending custom stream values: " + s, sentcmdcolor);
 		lagtimer = new Date().getTime(); // has to be *after* message()
-		// s ="size:"+streamdetails[17]+"x"+streamdetails[18]+" fps:"+streamdetails[19]+" quality:"+streamdetails[20];
-		// document.getElementById("custom_specs").innerHTML = s;
-		// var modes = "low med high full custom".split(" ");
-		// for (i in modes) { document.getElementById(modes[i]+"_bull").style.visibility="hidden"; }
-		// document.getElementById("custom_bull").style.visibility="visible";
 		document.getElementById("extendedsettingsbox").style.display = "none";
 		overlay("off");
 	}
 	else {
-		/* var modes = "low med high full custom".split(" ");
-		var i;	
-		for (i in modes) { document.getElementById(modes[i]+"_bull").style.visibility="hidden"; }
-		document.getElementById(str+"_bull").style.visibility="visible";
-		*/
 		streamdetails[0] = "v"+str;
+//		debug(streamdetails[0]);
 		callServer("streamsettingsset", str);
 		message("sending stream setting " + str, sentcmdcolor);
 		lagtimer = new Date().getTime(); // has to be *after* message()
-		document.getElementById("extendedsettingsbox").style.display = "none";
-		overlay("off");
-	}
-}
-
-function streamdetailspopulate() {
-	if (streamdetails.length > 0) {
-		var s = [];
-		s = streamdetails;
-		var i = 1;
-		var a= document.getElementById("low_specs");
-		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
-		i = 5;
-		a= document.getElementById("med_specs");
-		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
-		i = 9;
-		a= document.getElementById("high_specs");
-		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
-		i = 13;
-		a= document.getElementById("full_specs");
-		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
-		i = 17;
-		a= document.getElementById("custom_specs");
-		a.innerHTML = "size:"+s[i]+"x"+s[i+1]+" fps:"+s[i+2]+" quality:"+s[i+3];
-		a = document.getElementById(streamdetails[0].slice(1)+"_bull");
-		a.style.visibility="visible";
-		resized();
+//		document.getElementById("extendedsettingsbox").style.display = "none";
+		streamSettingsBullSet(str);
 	}
 }
 

@@ -431,7 +431,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case populatesettings: populateSettings();
 			break;
 			
-		case systemcall: Util.systemCall(str, admin);
+		case systemcall: Util.systemCall(str, true);
 			break;
 			
 		case chat: chat(str);

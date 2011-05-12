@@ -660,7 +660,7 @@ function autodock(str) {
 			lagtimer = new Date().getTime(); // has to be *after* message()
 		}
 	}
-	if (str=="calibrate") {
+	if (str=="calibrate" && streammode != "stop") {
 		overlay("off");
 		clicksteeron = false;
 		document.getElementById("video").style.zIndex = "-1";
@@ -792,33 +792,25 @@ function popupmenu(command, x, y, str, sizewidth, x_offsetmult, y_offsetmult) {
 		under.style.top = (over.offsetTop -margin) + "px";
 		under.style.width = (over.offsetWidth + margin*2) + "px";
 		under.style.height = (over.offsetHeight + margin*2) + "px";
+		//document.body.onclick = function() { popupmenu("close"); }
 	}
 	else if (command=='move') {
-//		debug("down");
 		document.onmousemove = popupmenumove;
-//		document.getElementById("popupmenu_topbar").onmousedown = null;
-//		document.body.style.cursor = "move";
-//		popupmenuSetMousePosGrabber();
 		popupmenu_xoffset = null;
 		popupmenu_yoffset = null;
+		document.body.onclick = null;
 		document.onmouseup = function () { 
 			document.onmousemove = null;
 			document.onmouseup = null;
-//			clearTimeout(popupmenumouseposinterval);
-//			document.getElementById("popupmenu_topbar").onmousedown = function() { popupmenu("move"); }
-//			document.body.style.cursor = "auto";
-//			debug("dropped");
+			//setTimeout("document.body.onclick = function() { popupmenu('close'); }",10);
 		}
 	}
 	else if (command=="close") {
 		over.style.display = "none";
 		under.style.display = "none";
+		//document.body.onclick = null;
 	}
 }
-
-//function popupmenuSetMousePosGrabber() {
-//	document.onmousemove = popupmenumove;
-//}
 
 function popupmenumove(ev) {
 	ev = ev || window.event;
@@ -830,8 +822,6 @@ function popupmenumove(ev) {
 		var x = ev.clientX + document.body.scrollLeft - document.body.clientLeft;
 		var y = ev.clientY + document.body.scrollTop - document.body.clientTop;
 	}
-//	debug(x+" "+y+" "+videooverlaymouseposinterval);
-//	videooverlaymouseposinterval ++;
 	var under = document.getElementById("popupmenu_under");
 	var over = document.getElementById("popupmenu_over");
 	if (!popupmenu_xoffset) { popupmenu_xoffset = over.offsetLeft - x; }
@@ -839,13 +829,9 @@ function popupmenumove(ev) {
 
 	over.style.left = (x + popupmenu_xoffset) + "px";
 	over.style.top = (y + popupmenu_yoffset) + "px";
-//	over.style.top = y + "px";
 	var margin = 0;
 	under.style.left = (over.offsetLeft - margin) + "px";
 	under.style.top = (over.offsetTop -margin) + "px";
-//	document.onmousemove = null;
-//	popupmenumouseposinterval = setTimeout("popupmenuSetMousePosGrabber();", 20)
-
 }
 
 function debug(str) {
@@ -1403,22 +1389,7 @@ function videologo(state) {
 }
 
 function docklinecalibrate(str) {
-	if (str == "start") {
-//		overlay("off");
-//		clicksteeron = false;
-//		document.getElementById("video").style.zIndex = "-1";
-//		videooverlayposition();
-//		var a =document.getElementById("videooverlay");
-//	    a.onclick = docklineclick; // function() { docklineclick; }
-//	    ctroffsettemp = ctroffset;
-//	    document.getElementById("dockline").style.display = "";
-//	    document.getElementById("docklineleft").style.display = "";
-//	    document.getElementById("docklineright").style.display = "";
-//	    docklineposition();
-//	    document.getElementById("docklinecalibratebox").style.display = "";
-//	    document.getElementById("docklinecalibrateoverlay").style.display = "";
-//	    docklinecalibrate('position');
-//	    setTimeout("docklinecalibrate('position');",10); // rendering fix
+	if (str == "start" && streammode != "stop") {
 		
 		overlay("off");
 		clicksteeron = false;
@@ -1446,21 +1417,10 @@ function docklinecalibrate(str) {
 	    var xy = findpos(video);
 	    popupmenu("show", xy[0] + video.offsetWidth - 10, xy[1] + 10, str, 160, 1, 0);
 	}
-//	if (str=="position") {
-//	    var b = document.getElementById("docklinecalibratebox");
-//	    var c = document.getElementById("docklinecalibrateoverlay");
-//	    var video = document.getElementById("video");
-//	    b.style.left = (video.offsetLeft + 20) + "px";
-//	    b.style.top = (video.offsetTop + 20) + "px";
-//	    c.style.left = (video.offsetLeft + 10) + "px";
-//	    c.style.top = (video.offsetTop + 10) + "px";
-//	    c.style.height = (b.offsetHeight + 20) + "px";
-//	}
+
 	if (str == "save") {
 		docklinetoggle("off");
 		ctroffset = ctroffsettemp;
-//		document.getElementById("docklinecalibratebox").style.display = "none";
-//		document.getElementById("docklinecalibrateoverlay").style.display = "none";
 		popupmenu("close");
 		clicksteer("on");
 		message("sending dockline position: " + ctroffset, sentcmdcolor);
@@ -1469,8 +1429,6 @@ function docklinecalibrate(str) {
 	}
 	if (str == "cancel") {
 		docklinetoggle("off");
-//		document.getElementById("docklinecalibratebox").style.display = "none";
-//		document.getElementById("docklinecalibrateoverlay").style.display = "none";
 		clicksteer("on");
 	}
 }

@@ -894,7 +894,7 @@ function popupmenu(pre_id, command, x, y, str, sizewidth, x_offsetmult, y_offset
 		over.style.height = over.offsetHeight;
 	}
 	else if (command=='move') {
-		document.onmousemove = function() { popupmenumove(event, pre_id); }
+		document.onmousemove = function(event) { popupmenumove(event, pre_id); }
 		popupmenu_xoffset = null;
 		popupmenu_yoffset = null;
 		document.body.onclick = null;

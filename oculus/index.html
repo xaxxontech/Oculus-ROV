@@ -51,9 +51,10 @@ a:hover { color: #ffffff; background-color: transparent; text-decoration: none; 
 .cancelbox { border: 1px solid #4c56fe; padding-left: 3px; padding-right: 3px }
 .messagebox {  font-size: 13px; line-height: 16px; }
 .menu { color: #999999; }
-.cambutton { color: #484fcd; cursor: pointer; background-repeat: no-repeat; background-position: center; height: 22px}
+.cambutton { color: #434bd2; cursor: pointer; background-repeat: no-repeat; background-position: center; height: 22px} /* 484fcd */
 .facebox { border: 1px solid #4c56fe; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
-.popupmenu_underlay { background-color: #444444; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; } /* 20246d 2d2f5f */
+.popupmenu_underlay { background-color: #20246d; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; } /* 20246d 2d2f5f */
+.popupcontents { background-color: #171900; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; }
 </style>
 <script src="javascript/client.js" type="text/javascript"></script>
 <script src="flash/AC_OETags.js" type="text/javascript"></script>
@@ -499,7 +500,7 @@ class="inputbox" style="width: 150px; background-color: #000000;">
 <div id="context_menu_over" style="position: absolute; display: none; z-index: 5;">
 <div id="context_menu_topbar" style="line-height: 18px; cursor: move; "
 onmousedown="popupmenu('context', 'move');" > &nbsp; </div>
-<div id="context_menu_contents"  class="overlay" style="padding: 10px; padding-top: 7px;"></div>
+<div id="context_menu_contents"  class="popupcontents" style="padding: 10px; padding-top: 7px;"></div>
 </div>
 
 <!--  menu_popup_menu -->
@@ -507,7 +508,7 @@ onmousedown="popupmenu('context', 'move');" > &nbsp; </div>
 <div id="menu_menu_over" style="position: absolute; display: none; z-index: 5;">
 <div id="menu_menu_topbar" style="line-height: 18px; cursor: move; "
 onmousedown="popupmenu('menu', 'move');" > &nbsp; </div>
-<div id="menu_menu_contents"  class="overlay" style="padding: 10px; padding-top: 7px;"></div>
+<div id="menu_menu_contents"  class="popupcontents" style="padding: 10px; padding-top: 7px;"></div>
 </div>
 
 <!--  main menu -->
@@ -570,7 +571,7 @@ developer menu</a><br>
 
 <!-- main menu non-admin -->
 <div id = "main_menu_nonadmin" style="display: none;">
-<a class="blackbg" href="javascript: account('change_password');">change password</a><br>
+<a class="blackbg" href="javascript: account('change_password');">change password &rsaquo;</a><br>
 </div> 
 
 <!-- custom stream settings (ROV) -->

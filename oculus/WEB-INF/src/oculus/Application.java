@@ -173,8 +173,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		//if(settings.getBoolean(State.developer))			
 			//CommandManager.getReference().init(this);
-
+		setSystemVolume(Integer.parseInt(settings.readSetting("volume")));
+		
 		log.info("initialize");
+	}
+	
+	private void setSystemVolume(int percent) {
+		float vol = (float) percent / 100 * 65535;
+		String str = "nircmdc.exe setsysvolume "+ (int) vol;
+		Util.systemCall(str, true);
 	}
 	
 	private void grabberInitialize() {
@@ -691,6 +698,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str += " speed "+spd+" cameratilt "+camTiltPos()+" motion "+mov;
 			}
 			str += " vidctroffset "+Integer.parseInt(settings.readSetting("vidctroffset"));
+			str += " rovvolume "+Integer.parseInt(settings.readSetting("volume"));
 			str += " stream "+stream+" selfstream stop";
 			//str += " address "+settings.readSetting("address");
 			//str += " wifi "+wifi.wifiSignalStrength();

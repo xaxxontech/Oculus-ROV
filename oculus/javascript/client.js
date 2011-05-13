@@ -58,6 +58,8 @@ var lastcommandsent;
 //var popupmenumouseposinterval;
 var popupmenu_xoffset = null;
 var popupmenu_yoffset = null;
+var bworig;
+var rovvolume = 0;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -65,9 +67,15 @@ function loaded() {
 	resized();
 	var b = new Image();
 	b.src = 'images/steering_icon_selected.gif';
+	bworig= document.body.clientWidth;
 }
 
 function resized() {
+	var bw = document.body.clientWidth;
+	if (bw < bworig) {
+		document.body.style.paddingLeft = (bworig-bw)+"px";
+	}
+	else { document.body.style.paddingLeft = "0px"; }
 	docklineposition();
 	videooverlayposition();
 	overlay("");
@@ -326,6 +334,7 @@ function setstatus(status, value) {
 		else { softwareupdate("available",value); }
 	}
 	if (status == "framegrabbed") { framegrabbed(); }
+	if (status == "rovvolume") { rovvolume = parseInt(value); }
 
 }
 
@@ -841,10 +850,16 @@ function popupmenu(pre_id, command, x, y, str, sizewidth, x_offsetmult, y_offset
 		popupmenu_xoffset = null;
 		popupmenu_yoffset = null;
 		document.body.onclick = null;
+		if (clicksteeron && document.getElementById("videologo").style.display == "none") {  
+			clicksteer("off");
+			clicksteeron = true;
+		}
 		document.onmouseup = function () { 
 			document.onmousemove = null;
 			document.onmouseup = null;
-			//setTimeout("document.body.onclick = function() { popupmenu('close'); }",10);
+			if (clicksteeron && document.getElementById("videologo").style.display == "none") {
+				clicksteer("on");
+			}
 		}
 	}
 	else if (command=="close") {
@@ -852,7 +867,6 @@ function popupmenu(pre_id, command, x, y, str, sizewidth, x_offsetmult, y_offset
 		under.style.display = "none";
 		contents.innerHTML = "";
 		//document.body.onclick = null;
-		resized();
 	}
 	else if (command=="resize") {
 		over.style.width = null; //ie fix
@@ -862,9 +876,10 @@ function popupmenu(pre_id, command, x, y, str, sizewidth, x_offsetmult, y_offset
 		under.style.top = (over.offsetTop -margin) + "px";
 		under.style.width = (over.offsetWidth + margin*2) + "px";
 		under.style.height = (over.offsetHeight + margin*2) + "px";
+		over.style.width = over.offsetWidth;
+		over.style.height = over.offsetHeight;
 	}
 	resized();
-
 }
 
 function popupmenumove(ev, pre_id) {
@@ -887,6 +902,7 @@ function popupmenumove(ev, pre_id) {
 	var margin = 4;
 	under.style.left = (over.offsetLeft - margin) + "px";
 	under.style.top = (over.offsetTop -margin) + "px";
+	resized();
 }
 
 function debug(str) {

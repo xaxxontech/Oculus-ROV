@@ -73,7 +73,7 @@ var requiredRevision = 0;
 </script>
 </head>
 <body id="thebody" onkeydown= "keyBoardPressed(event);" onload="loaded();" 
-onunload="playerexit();" onresize="resized();">
+onunload="playerexit();" onresize="browserwindowresized();">
 
 <!-- visible page div -->
 <div style="height: 100%; background-image: url(images/oculus.gif); background-repeat: no-repeat;
@@ -540,8 +540,11 @@ onmousedown="popupmenu('menu', 'move');" > &nbsp; </div>
 <span id="custom_specs" style="font-size: 11px; color: #666666;"></span>&nbsp;<a 
 class="blackbg" href="javascript: streamset('setcustom');">change</a>
 <br/>
+<table><tr><td style="height: 5px"></td></tr></table>
 
-<table><tr><td style="height: 7px"></td></tr></table>
+<div id="rovvolumecontrol"></div>
+
+<table><tr><td style="height: 11px"></td></tr></table>
 
 <a class="blackbg" href="javascript: battStats();">battery status refresh</a><br>
 <a class="blackbg" href="javascript: clicksteer('');">click steer on/off</a><br>

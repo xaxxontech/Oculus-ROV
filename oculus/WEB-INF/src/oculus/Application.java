@@ -178,12 +178,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		log.info("initialize");
 	}
 	
-	private void setSystemVolume(int percent) {
-		float vol = (float) percent / 100 * 65535;
-		String str = "nircmdc.exe setsysvolume "+ (int) vol;
-		Util.systemCall(str, true);
-	}
-	
 	private void grabberInitialize() {
 		if (settings.readSetting("skipsetup").equals("yes")) {
 			grabber_launch();
@@ -401,6 +395,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				comport.reset();
 				messageplayer("resetting arduino", null, null);
 			}
+			if (fn.equals("setsystemvolume")) { setSystemVolume(Integer.parseInt(str)); }
 		}
 		if (fn.equals("assumecontrol")) { assumeControl(str); }
 		if (fn.equals("beapassenger")) { beAPassenger(str); }
@@ -1363,5 +1358,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 				messageplayer(msg, null, null);
 			}
 		}
+	}
+	
+	private void setSystemVolume(int percent) {
+		settings.writeSettings("volume", Integer.toString(percent));
+		float vol = (float) percent / 100 * 65535;
+		String str = "nircmdc.exe setsysvolume "+ (int) vol;
+		Util.systemCall(str, true);
+		messageplayer("ROV volume set to "+Integer.toString(percent)+"%", null, null);
 	}
 }

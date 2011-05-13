@@ -82,6 +82,14 @@ function resized() {
 	videologo("");
 }
 
+function browserwindowresized() {
+	docklineposition();
+	videooverlayposition();
+	overlay("");
+	videologo("");	
+	bworig= document.body.clientWidth;
+}
+
 function flashloaded() {
 	if (/auth=/.test(document.cookie)) { loginfromcookie(); }
 	else { login(); }
@@ -526,6 +534,7 @@ function speech() {
 
 function mainmenu(id) {
 	streamdetailspopulate();
+	rovvolumepopulate();
 	str = document.getElementById("main_menu").innerHTML;
 	if (admin) { str += document.getElementById("main_menu_admin").innerHTML; }
 	else { str += document.getElementById("main_menu_nonadmin").innerHTML; }
@@ -535,10 +544,49 @@ function mainmenu(id) {
 		var link = document.getElementById(id);
 		var xy = findpos(link);
 		x = xy[0]+link.offsetWidth;
-		y = 100;
+		y = 70;
 	}
 	popupmenu("menu", "show", x, y, str, null, 1, 0);
 //	resized();
+}
+
+function rovvolumepopulate() {
+	var str = "<table><tr><td><span style='font-variant: small-caps'>rov</span> volume: &nbsp;</td>";
+	for (var i=0; i<=10; i++) {
+		str+="<td  id='rvoltd"+i+"' style='width: 10px; height: 24px; text-align: center;'>" +
+				"<span style='cursor: pointer; font-size: 15px; color: #4c56fe' id='rvol"+i+"'" +
+				" onmouseover='rovvolumeover(this.id)'" +
+				" onmouseout='rovvolumeout(this.id)'" +
+				" onclick='rovvolumeclick(&quot;"+i+"&quot;)'>|</span></td>";
+	}
+	str += "</tr></table>";
+	document.getElementById("rovvolumecontrol").innerHTML = str;
+	document.getElementById("rvoltd"+parseInt(rovvolume/10)).style.backgroundColor = "#999999";
+}
+
+function rovvolumeover(id) {
+	var a = document.getElementById(id);
+	a.style.color = "#ffffff";
+	a.style.fontSize = "20px";
+//	a.style.fontWeight = "bold";
+}
+
+function rovvolumeout(id) {
+	var a = document.getElementById(id);
+	a.style.color = "#4c56fe";
+	a.style.fontSize = "15px";
+//	a.style.fontWeight = "normal";
+}
+
+function rovvolumeclick(vol) {
+	var b = document.getElementById("rvoltd"+parseInt(rovvolume/10));
+	b.style.backgroundColor = "transparent";
+	var a = document.getElementById("rvoltd"+vol);
+	a.style.backgroundColor = "#999999";
+	message("sending system volume: "+ parseInt(vol*10)+"%", sentcmdcolor);
+	callServer("setsystemvolume", parseInt(vol*10));
+	lagtimer = new Date().getTime();
+	rovvolume = vol*10;
 }
 
 function streamdetailspopulate() {

@@ -7,7 +7,7 @@ import java.util.TimerTask;
 public class EmailAlerts {
 
 	// how low of battery to warm user with email
-	public static final int WARN_LEVEL = 35;
+	public static final int WARN_LEVEL = 25;
 
 	// how often to check, ten minutes 
 	public static final long DELAY = State.FIVE_MINUTES;

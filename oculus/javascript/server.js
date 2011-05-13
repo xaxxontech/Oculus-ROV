@@ -20,6 +20,7 @@ function flashloaded() {
 
 function reload() {
 	if (stream == "stop") {
+		message("refreshing page", null);
 		window.location.reload();
 	}
 	else { setTimeout("reload();", 10000); } //10 sec, keep checking until stream stopped by user

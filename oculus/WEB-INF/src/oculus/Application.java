@@ -173,7 +173,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		//if(settings.getBoolean(State.developer))			
 			//CommandManager.getReference().init(this);
-		setSystemVolume(Integer.parseInt(settings.readSetting("volume")));
+		String str= settings.readSetting("volume");
+		if (str != null) {
+			setSystemVolume(Integer.parseInt(str));
+		}
 		
 		log.info("initialize");
 	}
@@ -567,6 +570,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageplayer("synth voice: "+str, null, null);
 		messageGrabber("synth voice: "+str,null);
 		sayit.mluv(str);
+		//Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
 		log.info("voice synth: '"+str+"'");
 	}
 

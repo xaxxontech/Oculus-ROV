@@ -551,7 +551,7 @@ function mainmenu(id) {
 }
 
 function rovvolumepopulate() {
-	var str = "<table><tr><td><span style='font-variant: small-caps'>rov</span> volume: &nbsp;</td>";
+	var str = "<table><tr><td><span style='font-variant: small-caps'>rov</span> speaker volume: &nbsp;</td>";
 	for (var i=0; i<=10; i++) {
 		str+="<td  id='rvoltd"+i+"' style='width: 10px; height: 24px; text-align: center;'>" +
 				"<span style='cursor: pointer; font-size: 15px; color: #4c56fe' id='rvol"+i+"'" +

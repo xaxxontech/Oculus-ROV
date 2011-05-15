@@ -47,7 +47,10 @@ public class AutoDock {
 	private String docktarget = null;
 	private ArduinoCommDC comport = null; 
 	private Application app = null;
-	private boolean docking = false;
+	
+	// private boolean docking = false;
+	
+	
 	private boolean autodockingcamctr = false;
 	private int autodockgrabattempts;
 	private int autodockctrattempts;
@@ -59,12 +62,14 @@ public class AutoDock {
 	}
 	
 	// TODO: Move to state! 
-	public boolean isDocking(){
-		return docking;
-	}
+	// public boolean isDocking(){
+	//	return docking;
+	//}
 	
 	public void cancel(){
-		docking = false;
+		
+		state.set(State.docking, "false");
+		//docking = false;
 	}
 
 	public void autoDock(String str) {
@@ -85,7 +90,7 @@ public class AutoDock {
 			sc.invoke("dockgrab", new Object[] {0,0,"cancel"});
 		}
 		if (cmd[0].equals("go")) {
-			if (app.motionenabled == true) {
+			if (state.getBoolean(State.motionenabled)) { //app.motionenabled == true) {
 				//int x = Integer.parseInt(cmd[1])/2; //assuming 320x240
 				//int y = Integer.parseInt(cmd[2])/2; //assuming 320x240
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -152,8 +157,8 @@ public class AutoDock {
 	
 
 	void dock(String str) {
-		if (str.equals("dock") && !docking) {
-			if (app.motionenabled == true) {
+		if (str.equals("dock") && !state.getBoolean(State.docking)) {
+			if (state.getBoolean(State.motionenabled)){ //app.motionenabled == true) {
 				if (!life.batteryCharging()) {
 					
 					app.message("docking initiated", "multiple", "speed slow motion moving dock docking");
@@ -163,15 +168,18 @@ public class AutoDock {
 					
 					comport.speedset("slow");
 					//comport.goForward();
-					docking = true;
+					// docking = true;
+					state.set(State.docking, "true");
 					app.dockstatus = "docking";
+					
 					//Date d = new Date();
 					//dockstarttime = d.getTime();
+					
 					new Thread(new Runnable() {
 						public void run() {
 							int counter = 0;
 							int n;
-							while (docking == true) {
+							while (state.getBoolean(State.docking) == true) {
 								n = 500;
 								if (counter <= 3) { n += 500; }
 								if (counter > 0) { app.message(null,"motion","moving"); }
@@ -184,7 +192,8 @@ public class AutoDock {
 								comport.stopGoing();
 								app.message(null,"motion","stopped");
 								if (life.batteryStatus() == 2) {
-									docking = false;
+									state.set(State.docking, "false");
+									//docking = false;
 									String str = "";
 									if (state.getBoolean(State.autodocking)) {
 										state.set(State.autodocking, "false");
@@ -195,14 +204,18 @@ public class AutoDock {
 									}
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
 									log.info(app.userconnected +" docked successfully");
-									app.motionenabled = false;
+									
+									state.set(State.motionenabled, "false");
+									//app.motionenabled = false;
 									app.dockstatus = "docked"; // needs to be before battStats()
 									life.battStats(); 
 									break;
 								}
 								counter += 1;
 								if (counter >12) { // failed
-									docking = false;
+									
+									state.set(State.docking, "false");
+									//docking = false;
 									String s = "dock un-docked";
 									if (comport.moving) { 
 										comport.stopGoing();
@@ -238,7 +251,8 @@ public class AutoDock {
 		if (str.equals("undock")) {
 			comport.speedset("slow");
 			comport.goBackward();
-			app.motionenabled = true;
+			state.set(State.motionenabled, "true");
+			// app.motionenabled = true;
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
 			app.dockstatus = "un-docked";
 			new Thread(new Runnable() {

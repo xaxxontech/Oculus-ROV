@@ -34,7 +34,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private BatteryLife battery = BatteryLife.getReference();
 	private Settings settings= new Settings();
 	protected boolean initialstatuscalled = false;
-	boolean motionenabled = false;
+	// boolean motionenabled = false;
 	private static String salt = "PSDLkfkljsdfas345usdofi";
 	ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 	String userconnected = null; 
@@ -226,9 +226,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				
 					Runtime.getRuntime().exec("cmd.exe /c start http://" + address+ "/oculus/server.html");
 					// Runtime.getRuntime().exec("cmd.exe /c start /MIN http://" + address+ "/oculus/grabber.html");
-				
-					// Util.systemCall(cmd, true);
-				
+			
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -330,7 +328,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			
 			if (fn.equals("slide")) {
-				if (motionenabled == true) {
+				if (state.getBoolean(State.motionenabled)){ //(motionenabled == true) {
 					moveMacroCancel();
 					comport.slide(str);
 					messageplayer("command received: " + fn + str, null, null);
@@ -655,7 +653,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void moveMacroCancel() {
-		if (docker.isDocking() == true) {
+		if (/*docker.isDocking()*/ state.getBoolean(State.docking) == true) {
 			String str = "";
 			if (!dockstatus.equals("docked")) {
 				dockstatus = "un-docked";
@@ -702,7 +700,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (comport.speed == comport.speedmed) { spd = "MED"; }
 				if (comport.speed== comport.speedslow) { spd = "SLOW"; }
 				String mov = "STOPPED";
-				if (!motionenabled) { mov = "DISABLED"; }
+				if (state.getBoolean(State.motionenabled))/*(!motionenabled)*/ { mov = "DISABLED"; }
 				if (comport.moving == true) { mov = "MOVING"; }
 				str += " speed "+spd+" cameratilt "+camTiltPos()+" motion "+mov;
 			}
@@ -801,7 +799,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			s = "STOPPED"; 
 			msg = "command received: "+str;
 		}
-		if (motionenabled == true) {
+		if (state.getBoolean(State.motionenabled)){ // (motionenabled == true) {
 			if (str.equals("forward")) { comport.goForward(); }
 			if (str.equals("backward")) { comport.goBackward(); }
 			if (str.equals("right")) { comport.turnRight(); }
@@ -818,10 +816,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void nudge(String str) {
-		if (motionenabled == true) {
+		if (state.getBoolean(State.motionenabled)){ //motionenabled == true) {
 			comport.nudge(str);
 			messageplayer("command received: nudge" + str, null, null);
-			if (docker.isDocking()) moveMacroCancel(); 
+			
+			// TODO: don't nudge if autodocking too?
+			if (/*docker.isDocking()*/ state.getBoolean(State.docking)
+					|| state.getBoolean(State.autodocking)) moveMacroCancel(); 
 		}
 		else {
 			messageplayer("motion disabled", "motion", "disabled");
@@ -829,18 +830,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void motionEnableToggle() {
-		if (motionenabled == true) {
-			motionenabled = false;
+		if (state.getBoolean(State.motionenabled)) { //motionenabled == true) {
+			//motionenabled = false;
+			state.set(State.motionenabled, "false");
 			messageplayer("motion disabled", "motion", "disabled");
 		}
 		else {
-			motionenabled = true;
+			
+			state.set(State.motionenabled, "true");
+			//motionenabled = true;
 			messageplayer("motion enabled", "motion", "enabled");
 		}
 	}
 	
 	private void clickSteer(String str) {
-		if (motionenabled == true) {
+		if (state.getBoolean(State.motionenabled)){ // motionenabled == true) {
 			int n = comport.clickSteer(str);
 			if (n != 999) {
 				messageplayer("received: clicksteer " + str, "cameratilt", camTiltPos());
@@ -1249,7 +1253,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 				// batterypresent = true;
 			} else { 
 				// batterypresent = false;
-				motionenabled = true;
+				// motionenabled = true;
+				state.set(State.motionenabled, "true");
 			}	
 			
 			// TODO: not needed?? 

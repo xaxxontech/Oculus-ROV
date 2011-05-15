@@ -23,6 +23,8 @@ public class BatteryLife {
 	private static Application app = null;
 	private static BatteryLife singleton = null;
 	private static Settings settings = new Settings();
+	private State state = State.getReference();
+
 	
 	/**
 	 * @return a reference to this singleton class 
@@ -58,7 +60,8 @@ public class BatteryLife {
 				// app.motionenabled = true;
 			} else { 
 				batterypresent = false; 
-				app.motionenabled = false;
+				//app.motionenabled = false;
+				state.set(State.motionenabled, "false");
 				return;
 			}
 	
@@ -114,8 +117,10 @@ public class BatteryLife {
 					if (s == 1) {
 						status = "draining";
 						str = "battery "+life+"%,"+status;
-						if (app.motionenabled== false) {
-							app.motionenabled = true;
+						//if (app.motionenabled== false) {
+						if( ! state.getBoolean(State.motionenabled)) {
+							//app.motionenabled = true;
+							state.set(State.motionenabled, "true");
 							str += " motion enabled";
 						}
 						if (!app.dockstatus.equals("un-docked")) {

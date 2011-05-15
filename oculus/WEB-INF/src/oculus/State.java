@@ -5,16 +5,15 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
+///import org.red5.logging.Red5LoggerFactory;
+///import org.slf4j.Logger;
 
 /**
  * @author <a href="mailto:brad.zdanivsky@gmail.com">Brad Zdanivsky</a>
  */
 public class State {
 
-	private static Logger log = Red5LoggerFactory.getLogger(State.class, "oculus");
-
+	// private static Logger log = Red5LoggerFactory.getLogger(State.class, "oculus");
 	
 	public static final String user = "user";
 	public static final String logintime = "logintime";
@@ -23,13 +22,13 @@ public class State {
 	public static final String developer = "developer";
 	public static final String serialport = "serialport";
 	public static final String lightport = "lightport";
-	//public static final String enable = "enable";
-//	public static final String disable = "disable";
+	//  public static final String enable = "enable";
+    //	public static final String disable = "disable";
 	public static final String boottime = "boottime";
-	// public static final String emailbusy = "emailbusy";
 	public static final String autodocking = "autodocking";
-	// public static final String noardunio = "noardunio";
-
+	public static final String docking = "docking";
+	public static final String motionenabled = "motionenabled";
+	
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
@@ -37,7 +36,7 @@ public class State {
 	public static final long TEN_MINUTES = 600000;
 	public static final int ERROR = -1;
 	
-	//
+	// comand line interface 
 	// MulticastChannel channel = MulticastChannel.getReference();
 	
 	/** reference to this singleton class */
@@ -59,16 +58,9 @@ public class State {
 	private State() {
 
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
-		props.put(userisconnected, "false");
-		
-		
+		props.put(userisconnected, "false");		
 		//props.put(autodocking, "false");
-		//props.put(home, System.getProperty("java.home"));
-	
-		//Command test = new Command();
-		//test.add(boottime, get(boottime));
-		//channel.write(test);
-		
+
 	}
 
 	/** @param file is the properties file to configure the framework
@@ -98,7 +90,9 @@ public class State {
 		}
 	}*/
 	
-	/** */
+	/**
+	 * @param path, is the file to write the state value pairs too
+	 */
 	public void writeFile(String path){
 		
 		System.out.println("state writing to: " + path);
@@ -139,21 +133,9 @@ public class State {
 	 */
 	public synchronized void set(String key, String value) {
 
-		//if(key==null || value==null) return;
-		//if((key.length() > 1) || (value.length() > 1)) return;
-
-		
-		/*
-		if (locked) {
-			System.out.println(" state locked, can't put(): " + key);
-			return;
-		}*/
-
-		//if (props.containsKey(key)){
-			System.out.println("refreshing property for: " + key + " = " + value);
-    		log.debug("refreshing property for: " + key + " = " + value);
-		//}
-		
+		// if(key==null || value==null) return;
+	
+		System.out.println("refreshing property for: " + key + " = " + value);
 		props.put(key.trim(), value.trim());
 	}
 
@@ -165,19 +147,10 @@ public class State {
 	 */
 	public synchronized void set(String key, long value) {
 
-		//if(key==null) return;
+		// if(key==null) return;
 		
-		/*
-		if (locked) {
-			System.out.println(" state locked, can't put(): " + key);
-			return;
-		}*/
-
-	//	if (props.containsKey(key)){
-			System.out.println("refreshing property for: " + key + " = " + value);
-    		log.debug("refreshing property for: " + key + " = " + value);
-	//	}
-		
+		System.out.println("refreshing property for: " + key + " = " + value);
+    
 		props.put(key.trim(), Long.toString(value));
 	}
 
@@ -192,7 +165,7 @@ public class State {
 			ans = props.getProperty(key.trim());
 
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			System.err.println(e.getStackTrace());
 			return null;
 		}
 
@@ -209,6 +182,7 @@ public class State {
 			value = Boolean.parseBoolean(get(key));
 
 		} catch (Exception e) {
+			System.err.println(e.getStackTrace());
 			return false;
 		}
 
@@ -251,10 +225,16 @@ public class State {
 		return value;
 	}
 	
-	/**@return the ms since last boot */
+	/** @return the ms since last boot */
 	public long getUpTime(){
 		return System.currentTimeMillis() - getLong(boottime);
 	}
+	
+	/** @return the ms since last user log in */
+	public long getLoginSince(){
+		return System.currentTimeMillis() - getLong(logintime);
+	}
+	
 	
 	/*
 	public synchronized void lock() {

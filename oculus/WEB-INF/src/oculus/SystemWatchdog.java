@@ -18,10 +18,10 @@ public class SystemWatchdog {
 	private final boolean debug = settings.getBoolean(State.developer);
 
 	// check every hour
-	public static final long DELAY = State.FIVE_MINUTES;
+	public static final long DELAY = State.TWO_MINUTES;
 
 	// when is the system stale and need reboot
-	public static final long STALE = State.ONE_DAY; 
+	public static final long STALE = State.ONE_DAY * 2; 
 	
 	// shared state variables
 	private State state = State.getReference();
@@ -31,25 +31,26 @@ public class SystemWatchdog {
 		if (reboot){
 			Timer timer = new Timer();
 			timer.scheduleAtFixedRate(new Task(), State.ONE_MINUTE, DELAY);
-			if(debug) System.out.println("system watchdog starting...");
+			if(debug) log.info("system watchdog starting...");
 		}	
 	}
 	
 	private class Task extends TimerTask {
 		public void run() {
 			
-			if (debug) 
-				System.out.println("system watchdog : " + (state.getUpTime()/1000) + " sec");
+			if (debug) log.info("system watchdog : " + (state.getUpTime()/1000) + " sec");
 
 			// only reboot is idle 
 			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ 
 				
 				String boot = new Date(state.getLong(State.boottime)).toString();				
-				log.info("rebboting, last was: " + boot);
+				log.info("rebooting, last was: " + boot);
+				log.info("user logged in for: " + state.getLoginSince() + " ms");
 			
 				if(debug){
 					
 					// copy stdout log and email it 
+					String oculus = System.getenv("RED5_HOME")+"\\log\\oculus.log";
 					String logfile = System.getenv("RED5_HOME")+"\\log\\jvm.stdout";
 					String temp = System.getenv("RED5_HOME")+"\\log\\debug.txt";
 			
@@ -61,8 +62,8 @@ public class SystemWatchdog {
 					
 					if(Util.copyfile(logfile, temp)){
 						
-						log.info("Sending email of log file...");
-					
+						if(Util.copyfile(oculus, temp)){
+											
 						// blocking send 
 						new SendMail("Oculus Rebooting", "been awake since: " + boot, temp, true);
 						
@@ -71,12 +72,14 @@ public class SystemWatchdog {
 						
 						// does not work 
 						// new File(log).deleteOnExit();
-					}
+					
+						} System.out.println("error on file copy: " + oculus);
+					} System.out.println("error on file copy: " + logfile);
 				} 
 	
-				//System.exit(-1);
+				System.exit(-1);
 				
-				Util.systemCall("shutdown -r -f -t 01", true);				
+				// Util.systemCall("shutdown -r -f -t 01", true);				
 			}
 		}
 	}

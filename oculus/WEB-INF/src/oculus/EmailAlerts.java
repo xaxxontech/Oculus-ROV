@@ -7,7 +7,7 @@ import java.util.TimerTask;
 public class EmailAlerts {
 
 	// how low of battery to warm user with email
-	public static final int WARN_LEVEL = 25;
+	public static final int WARN_LEVEL = 30;
 
 	// how often to check, ten minutes 
 	public static final long DELAY = State.FIVE_MINUTES;
@@ -26,7 +26,7 @@ public class EmailAlerts {
 	public EmailAlerts(Application app) {
 		if (alerts && life.batteryPresent()){
 			this.app = app;
-			timer.scheduleAtFixedRate(new Task(), State.ONE_DAY, DELAY);
+			timer.scheduleAtFixedRate(new Task(), 5000, DELAY);
 			if(debug) System.out.println("starting email alerts...");
 		}
 	}
@@ -38,6 +38,13 @@ public class EmailAlerts {
 			if (life.batteryPresent()) {
 
 				int batt[] = life.battStatsCombined();
+				
+				//TODO: THIS SHOULDN'T BE NEEDED 
+				if(batt==null) {
+					System.out.println("batery not ready, email alerts");
+					return;
+				}
+				
 				String lifestr = Integer.toString(batt[0]);
 				int life = batt[0];
 				int status = batt[1];

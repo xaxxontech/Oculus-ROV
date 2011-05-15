@@ -19,11 +19,14 @@ public class BatteryLife {
 	private String query; 
 	private ActiveXComponent axWMI;
 	private boolean battcharging = false;
-	boolean batterypresent = false;
+	private boolean batterypresent = false;
 	private static Application app = null;
-//	private Settings settings = new Settings();
-	
 	private static BatteryLife singleton = null;
+	private static Settings settings = new Settings();
+	
+	/**
+	 * @return a reference to this singleton class 
+	 */
 	public static BatteryLife getReference() {
 		if (singleton  == null) {
 			singleton = new BatteryLife();
@@ -31,28 +34,49 @@ public class BatteryLife {
 		return singleton;
 	}
 
+	/**
+	 * @param parent this the multi threaded red5 application to call back 
+	 */
 	public void init(Application parent){
-		//if(app!=null) {
-			System.out.println("battery init...");
-		//	return;
-		//}else{
-			//System.out.println("battery can't re-init!");
-			app = parent;
-		//}
-			host = "localhost"; //Technically you should be able to connect to other hosts, but it takes setup
+		
+		System.out.println("battery init...");
+			
+		if(app == null){
+			
+			// only init once 
+			app = parent;	
+			
+			// Technically you should be able to connect to other hosts, but it takes setup
+			host = "localhost"; 
 			connectStr = String.format("winmgmts:\\\\%s\\root\\CIMV2", host);
 			query = "Select * from Win32_Battery"; 
 			axWMI = new ActiveXComponent(connectStr);
+			
+
+			if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
+				batterypresent = true; 
+				// app.motionenabled = true;
+			} else { 
+				batterypresent = false; 
+				app.motionenabled = false;
+				return;
+			}
+	
+		} else System.out.println("can't init BatteryLife again!");
 	}
 	
+	/** private constructor, by definition of singleton. note this function can only be called exactly once */
 	private BatteryLife() {
 		
-//		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
-//			batterypresent = true; 
-//		} else { 
-//			batterypresent = false; 
-//			app.motionenabled = true;
-//		}
+		/* is ok to do nothing here
+		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
+			batterypresent = true; 
+			// app.motionenabled = true;
+		} else { 
+			batterypresent = false; 
+			app.motionenabled = false;
+			return;
+		}*/
 	}
 	
 	public boolean batteryPresent(){
@@ -78,7 +102,8 @@ public class BatteryLife {
 		
 		new Thread(new Runnable() {
 			public void run() {
-				// TODO: HHHHHHHHHHHHHHHHHHH
+				
+				// TODO: put dock state in State! 
 				if (batterypresent == true && !app.dockstatus.equals("docking")) {
 					
 					int batt[] = battStatsCombined();

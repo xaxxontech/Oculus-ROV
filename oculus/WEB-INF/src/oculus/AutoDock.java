@@ -77,7 +77,7 @@ public class AutoDock {
 		if (cmd[0].equals("cancel")) {
 			
 			// app.autodocking = false;
-			state.set(State.autodocking, false);
+			state.set(State.autodocking, "false");
 			
 			app.message("auto-dock ended","multiple","cameratilt " +app.camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
@@ -92,9 +92,7 @@ public class AutoDock {
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unused
 				
-				// app.autodocking = true;
-				state.set(State.autodocking, true);
-				
+				state.set(State.autodocking, "true");
 				autodockingcamctr = false;
 				autodockgrabattempts = 0;
 				autodockctrattempts = 0;
@@ -114,8 +112,7 @@ public class AutoDock {
 					}
 					else { 
 						//failed, give up
-						// app.autodocking = false;
-						state.set(State.autodocking, false);
+						state.set(State.autodocking, "false");
 						
 						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
@@ -190,7 +187,7 @@ public class AutoDock {
 									docking = false;
 									String str = "";
 									if (state.getBoolean(State.autodocking)) {
-										state.set(State.autodocking, false);
+										state.set(State.autodocking, "false");
 										str += " cameratilt "+app.camTiltPos()+" autodockcancelled blank";
 										if (!app.stream.equals("stop") && app.userconnected==null) { 
 											app.publish("stop"); 

@@ -27,16 +27,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	IConnection player = null;
 
 	private ArduinoCommDC comport = null; 
+	
 	private LightsComm light = null;
 	
 	protected Speech sayit = new Speech("kevin16");
 	private BatteryLife battery = BatteryLife.getReference();
 	private Settings settings= new Settings();
-	
-	//volatile boolean docking = false;
-	
 	protected boolean initialstatuscalled = false;
-	// boolean batterypresent;
 	boolean motionenabled = false;
 	private static String salt = "PSDLkfkljsdfas345usdofi";
 	ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
@@ -64,9 +61,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		initialize();
 	}
 	
-	public boolean appConnect(IConnection connection, Object[] params) { // override
+	@Override
+	public boolean appConnect(IConnection connection, Object[] params) { 
+		
 		String logininfo[] = ((String) params[0]).split(" ");
-		if ((connection.getRemoteAddress()).equals("127.0.0.1") && logininfo[0].equals("")) { // always accept local grabber
+		
+		// always accept local grabber
+		if ((connection.getRemoteAddress()).equals("127.0.0.1") && logininfo[0].equals("")) { 
 			return true;
 		}
 		
@@ -92,6 +93,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		return false;
 	}
 	
+	@Override
 	public void appDisconnect(IConnection connection) {
 		if (connection.equals(player)) {
 			String str = userconnected+" disconnected";
@@ -101,7 +103,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				admin = false;
 			}
 			userconnected = null;
-			state.set(State.userisconnected, false);
+			state.set(State.userisconnected, "false");
 			
 			player = null;
 			facegrabon = false;
@@ -173,6 +175,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		//if(settings.getBoolean(State.developer))			
 			//CommandManager.getReference().init(this);
+		
 		String str= settings.readSetting("volume");
 		if (str != null) {
 			setSystemVolume(Integer.parseInt(str));
@@ -204,12 +207,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	public void grabber_launch() {
 		
+		//TODO: moved to batteryLife.java 
+		/*
 		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
 			battery.batterypresent = true; 
 		} else { 
 			battery.batterypresent = false; 
 			motionenabled = true;
 		}
+		*/
 		
 		new Thread(new Runnable() {
 			public void run() {
@@ -260,7 +266,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer(userconnected + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
 
-			if (battery.batterypresent) { battery.init(this); }
+			//if (battery.batterypresent) {
+				// battery = BatteryLife.getReference();
+			// TODO: PLEASE see if this is best place to init!
+				battery.init(this); 	
+			//}
 			
 			if (userconnected.equals(settings.readSetting("user0"))) {
 				admin = true;
@@ -273,7 +283,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageGrabber(str,"connection "+userconnected+"&nbsp;connected");
 		}
 		
-		state.set(State.userisconnected, true);
+		state.set(State.userisconnected, "true");
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);
 	}
@@ -902,12 +912,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		log.info(str); messageGrabber(str,null);
 		initialstatuscalled = false;
 		pendingplayerisnull = true;
-		if (userconnected.equals(settings.readSetting("user0"))) {
-			admin = true;
-		}
-		else { admin = false; }
+		if (userconnected.equals(settings.readSetting("user0"))) admin = true;
+		else admin = false; 
 		
-		state.set(State.userisconnected, true);
+		state.set(State.userisconnected, "true");
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);
 	}

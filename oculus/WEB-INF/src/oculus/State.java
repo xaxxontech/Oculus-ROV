@@ -1,10 +1,8 @@
 package oculus;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileWriter;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.red5.logging.Red5LoggerFactory;
@@ -61,7 +59,7 @@ public class State {
 	private State() {
 
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
-		props.put(userisconnected, false);
+		props.put(userisconnected, "false");
 		
 		
 		//props.put(autodocking, "false");
@@ -100,19 +98,32 @@ public class State {
 		}
 	}*/
 	
+	/** */
 	public void writeFile(String path){
-		File file = new File(path);
-		FileOutputStream out = null;
+		
+		System.out.println("state writing to: " + path);
+	
 		try {
-			out = new FileOutputStream(file);
-		} catch (FileNotFoundException e) {
+			
+			FileWriter out = new FileWriter(path);
+			out.write("state as of: " + new Date().toString() + "\n");
+			out.write("state writing to: " + path + "\n");
+			
+			Enumeration<Object> keys = props.keys();
+			while(keys.hasMoreElements()){
+				String key = (String) keys.nextElement();
+				String value = (String) props.getProperty(key);
+				
+				System.out.println(key + " = " + value);
+
+				out.write(key + " = " + value + "\r\n");
+			}
+ 			
+			out.close();
+
+		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		try {
-			props.store(out, "current oculus state on: " + new Date().toString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} 		
 	}
 	
 	/** @return a copy of the properties file
@@ -145,32 +156,6 @@ public class State {
 		
 		props.put(key.trim(), value.trim());
 	}
-
-
-	/**
-	 * Put a name/value pair into the configuration
-	 * 
-	 * @param key
-	 * @param value
-	 */
-	public synchronized void set(String key, boolean value) {
-
-		//if(key==null) return;
-
-		/*
-		if (locked) {
-			System.out.println(" state locked, can't put(): " + key);
-			return;
-		}
-*/
-	//	if (props.containsKey(key)){
-			System.out.println("refreshing property for: " + key + " = " + value);
-    		log.debug("refreshing property for: " + key + " = " + value);
-		//}
-		
-		props.put(key.trim(), Boolean.toString(value));
-	}
-
 
 	/**
 	 * Put a name/value pair into the configuration

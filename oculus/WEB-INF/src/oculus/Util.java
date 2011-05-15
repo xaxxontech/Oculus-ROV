@@ -232,7 +232,7 @@ public class Util {
 						System.out.println("systemCall() : " + line);
 					}
 					
-					System.out.println("process exit vale = " + proc.exitValue());
+					System.out.println("process exit value = " + proc.exitValue());
 				
 				} catch (Exception e) {
 					e.printStackTrace();

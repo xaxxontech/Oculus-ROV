@@ -27,14 +27,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 	IConnection player = null;
 
 	private ArduinoCommDC comport = null; 
-	
 	private LightsComm light = null;
 	
 	protected Speech sayit = new Speech("kevin16");
-	private BatteryLife battery = BatteryLife.getReference();
+	private BatteryLife battery = null; // BatteryLife.getReference();
 	private Settings settings= new Settings();
 	protected boolean initialstatuscalled = false;
-	// boolean motionenabled = false;
 	private static String salt = "PSDLkfkljsdfas345usdofi";
 	ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 	String userconnected = null; 
@@ -44,10 +42,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	boolean pendingplayerisnull = true;
 	protected String stream = "stop";
 	// WifiConnection wifi; // = new WifiConnection();
-	// boolean battcharging;
 	boolean admin = false;
 	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
-	String dockstatus = "unkown";
+	String dockstatus = "";
 	String httpPort; 
 	boolean facegrabon = false;
 	private boolean emailgrab = false;
@@ -176,10 +173,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//if(settings.getBoolean(State.developer))			
 			//CommandManager.getReference().init(this);
 		
-		String str= settings.readSetting("volume");
+		String str = settings.readSetting("volume");
 		if (str != null) {
 			setSystemVolume(Integer.parseInt(str));
-		}
+			
+			// if not found, add it
+		} else settings.writeSettings("volume", "0");
+		
 		
 		log.info("initialize");
 	}
@@ -206,24 +206,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void grabber_launch() {
-		
-		//TODO: moved to batteryLife.java 
-		/*
-		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
-			battery.batterypresent = true; 
-		} else { 
-			battery.batterypresent = false; 
-			motionenabled = true;
-		}
-		*/
-		
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					//String address = settings.readSetting("address") + ":"+ settings.readSetting("http_port");
 					
+					//String address = settings.readSetting("address") + ":"+ settings.readSetting("http_port");
 					String address="127.0.0.1:"+ httpPort;
-				
 					Runtime.getRuntime().exec("cmd.exe /c start http://" + address+ "/oculus/server.html");
 					// Runtime.getRuntime().exec("cmd.exe /c start /MIN http://" + address+ "/oculus/grabber.html");
 			
@@ -264,11 +252,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer(userconnected + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
 
-			//if (battery.batterypresent) {
-				// battery = BatteryLife.getReference();
-			// TODO: PLEASE see if this is best place to init!
-				battery.init(this); 	
-			//}
+			battery = BatteryLife.getReference();
+			battery.init(this); 	
 			
 			if (userconnected.equals(settings.readSetting("user0"))) {
 				admin = true;
@@ -286,7 +271,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 		state.set(State.user, userconnected);
 	}
 
-	public void playerCallServer(String fn, String str) { // distribute commands from player
+	
+	/**
+	 * distribute commands from player
+	 * 
+	 * @param fn
+	 * @param str
+	 */
+	public void playerCallServer(String fn, String str) { 
 		if (Red5.getConnectionLocal() == player) {
 			if (fn.equals("publish")) { 
 				publish(str);
@@ -1195,7 +1187,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Boolean oktoadd = true;
 		String user = null;
 		String password = null;
-		String battery = null;
+		// String battery = null;
 		String httpport = null;
 		String rtmpport = null;
 		String skipsetup = null;		
@@ -1203,7 +1195,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		for (int n=0; n<s.length; n=n+2) { // user password battery comport httpport rtmpport skipsetup
 			if (s[n].equals("user")) { user = s[n+1]; }
 			if (s[n].equals("password")) { password = s[n+1]; }
-			if (s[n].equals("battery")) { battery = s[n+1]; }
+			// if (s[n].equals("battery")) { battery = s[n+1]; }
 			if (s[n].equals("httpport")) { httpport = s[n+1]; }
 			if (s[n].equals("rtmpport")) { rtmpport = s[n+1]; }
 			if (s[n].equals("skipsetup")) { skipsetup = s[n+1]; }
@@ -1248,6 +1240,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		// battery
+		/*
 		if (battery != null) { 
 			if (battery.equals("yes")) {
 				// batterypresent = true;
@@ -1259,7 +1252,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 			// TODO: not needed?? 
 			settings.writeSettings("batterypresent", battery); 
-		}
+			*/
+		
 		// httpport
 		if (httpport != null) { settings.writeRed5Setting("http.port", httpport); }
 		// rtmpport
@@ -1290,7 +1284,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		else result += "lightport "+state.get(State.lightport)+" ";
 		
 		// battery
-		result += "battery " + settings.readSetting("batterypresent") + " ";
+		// result += "battery " + settings.readSetting("batterypresent") + " ";
+		// result += "battery"
+		
 		// http port
 		result += "httpport " + settings.readRed5Setting("http.port") + " ";
 		// rtmp port

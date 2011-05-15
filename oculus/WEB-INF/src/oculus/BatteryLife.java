@@ -18,14 +18,13 @@ public class BatteryLife {
 	private String connectStr;
 	private String query; 
 	private ActiveXComponent axWMI;
+	
 	private boolean battcharging = false;
 	private boolean batterypresent = false;
 	private static Application app = null;
 	private static BatteryLife singleton = null;
-	private static Settings settings = new Settings();
 	private State state = State.getReference();
 
-	
 	/**
 	 * @return a reference to this singleton class 
 	 */
@@ -41,11 +40,11 @@ public class BatteryLife {
 	 */
 	public void init(Application parent){
 		
-		System.out.println("battery init...");
+		// System.out.println("battery init...");
 			
 		if(app == null){
 			
-			// only init once 
+			// only initialize once 
 			app = parent;	
 			
 			// Technically you should be able to connect to other hosts, but it takes setup
@@ -54,33 +53,20 @@ public class BatteryLife {
 			query = "Select * from Win32_Battery"; 
 			axWMI = new ActiveXComponent(connectStr);
 			
-
-			if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
-				batterypresent = true; 
-				// app.motionenabled = true;
-			} else { 
-				batterypresent = false; 
-				//app.motionenabled = false;
-				state.set(State.motionenabled, "false");
-				return;
-			}
+			// test if battery avail 
+			if( batteryStatus() != 999 )
+				batterypresent = true;
 	
-		} else System.out.println("can't init BatteryLife again!");
+		} // else System.out.println("can't init BatteryLife again!");
 	}
 	
-	/** private constructor, by definition of singleton. note this function can only be called exactly once */
-	private BatteryLife() {
-		
-		/* is ok to do nothing here
-		if (((settings.readSetting("batterypresent")).toUpperCase()).equals("YES")) {
-			batterypresent = true; 
-			// app.motionenabled = true;
-		} else { 
-			batterypresent = false; 
-			app.motionenabled = false;
-			return;
-		}*/
-	}
+	/** 
+	 * private constructor, by definition of singleton. 
+	 * 
+	 * note: this function can only be called exactly once 
+	 * 
+	 */
+	private BatteryLife() {}
 	
 	public boolean batteryPresent(){
 		return batterypresent;
@@ -90,11 +76,11 @@ public class BatteryLife {
 		return battcharging;
 	}
 	
-	/** threaded update */
+	/** threaded update, will set values in application via call back */
 	public void battStats() { 
 		
 		if(app == null){
-			System.out.println("not yet configured");
+			System.out.println("batterylife not yet configured");
 			return;
 		}
 		
@@ -174,20 +160,18 @@ public class BatteryLife {
 		return result;
 	}
 	*/
+
 	
+	/**
+	 * @return the percentage of battery life, or 999 if no battery present 
+	 */
 	public int batteryStatus() {
 
-		
 		if(app == null){
 			System.out.println("not yet configured");
-			return 999;
+			return 999; //State.ERROR;
 		}
-		
-		if(batterypresent == false){
-			System.out.println("no battery found");
-			return 999;
-		}
-		
+	
 		int result = 999;
 		
 		//Execute the query
@@ -203,21 +187,27 @@ public class BatteryLife {
 			int percentLife = Dispatch.call(item,"BatteryStatus").getInt();
 			result = percentLife;
 		}
+	
 		return result;
 	}
 	
+	/**
+	 * get battery info 
+	 * 
+	 * @return the charge remaining and status if found, null if not.  
+	 */
 	public int[] battStatsCombined() {
 	
 		if(app == null){
-			System.out.println("not yet configured");
+			System.out.println("batterylife not yet configured");
 			return null;
 		}
 		
-		if(batterypresent == false){
+		if(!batterypresent){
 			System.out.println("no battery found");
 			return null;
 		}
-		
+	
 		int[] result = { 999, 999 };
 		Variant vCollection = axWMI.invoke("ExecQuery", new Variant(query));
 		EnumVariant enumVariant = new EnumVariant(vCollection.toDispatch());

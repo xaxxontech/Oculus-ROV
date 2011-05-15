@@ -23,9 +23,10 @@ public class EmailAlerts {
 	private BatteryLife life = BatteryLife.getReference();
 	
 	/** Constructor */
-	public EmailAlerts(Application app) {
-		if (alerts && life.batteryPresent()){
-			this.app = app;
+	public EmailAlerts(Application parent) {
+		app = parent;
+		
+		if (alerts){
 			timer.scheduleAtFixedRate(new Task(), 5000, DELAY);
 			if(debug) System.out.println("starting email alerts...");
 		}
@@ -35,12 +36,14 @@ public class EmailAlerts {
 	private class Task extends TimerTask {
 		@Override
 		public void run() {
+			
+			// not needed? 
 			if (life.batteryPresent()) {
 
 				int batt[] = life.battStatsCombined();
 				
-				//TODO: THIS SHOULDN'T BE NEEDED 
-				if(batt==null) {
+				//TODO: returns null is not found 
+				if(batt == null) {
 					System.out.println("batery not ready, email alerts");
 					return;
 				}

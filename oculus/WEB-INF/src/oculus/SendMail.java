@@ -118,7 +118,7 @@ public class SendMail {
 
 		if (user == null || pass == null) {
 			log.error("no email and password found in settings");
-			if(debug) System.out.println("no email and password found in settings");
+			// if(debug) System.out.println("no email and password found in settings");
 			return;
 		}
 		
@@ -143,12 +143,12 @@ public class SendMail {
 			transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
 			transport.close();
 
-			if (debug) System.out.println("... email sent");
+			// if (debug) System.out.println("... email sent");
+			
 			if(application!=null) application.message("email has been sent", null, null);
 
 		} catch (Exception e) {
-			log.error(e.getMessage());
-			if(debug) System.out.println("error sending email, check settings");
+			log.error(e.getMessage() + "\n error sending email, check settings");
 			if(application!=null) application.message("error sending email", null, null);
 		}
 	}
@@ -166,7 +166,7 @@ public class SendMail {
 		
 		try {
 
-			if (debug) System.out.println("sending email..");
+			// if (debug) System.out.println("sending email..");
 			
 			Properties props = new Properties();
 			props.put("mail.smtps.host", SMTP_HOST_NAME);
@@ -198,7 +198,8 @@ public class SendMail {
 			transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
 			transport.close();
 
-			if (debug) System.out.println("... email sent");
+			//if (debug) System.out.println("... email sent");
+			
 			if(application!=null) application.message("email has been sent", null, null);
 
 		} catch (Exception e) {

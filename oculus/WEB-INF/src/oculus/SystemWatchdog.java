@@ -38,7 +38,7 @@ public class SystemWatchdog {
 	private class Task extends TimerTask {
 		public void run() {
 			
-			if (debug) log.info("system watchdog : " + (state.getUpTime()/1000) + " sec");
+			// if (debug) log.info("system watchdog : " + (state.getUpTime()/1000) + " sec");
 
 			// only reboot is idle 
 			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ 
@@ -61,25 +61,24 @@ public class SystemWatchdog {
 					state.writeFile(temp);
 					
 					if(Util.copyfile(logfile, temp)){
-						
 						if(Util.copyfile(oculus, temp)){
 											
-						// blocking send 
-						new SendMail("Oculus Rebooting", "been awake since: " + boot, temp, true);
+							// blocking send 
+							new SendMail("Oculus Rebooting", "been awake since: " + boot, temp, true);
 						
-						// emailed it, now delete it 
-						new File(temp).delete();
+							// emailed it, now delete it 
+							new File(temp).delete();
 						
-						// does not work 
-						// new File(log).deleteOnExit();
+							// does not work 
+							// new File(log).deleteOnExit();
 					
-						} System.out.println("error on file copy: " + oculus);
-					} System.out.println("error on file copy: " + logfile);
+						} else System.out.println("error on file copy: " + oculus);
+					} else System.out.println("error on file copy: " + logfile);
 				} 
 	
-				System.exit(-1);
+				// System.exit(-1);
 				
-				// Util.systemCall("shutdown -r -f -t 01", true);				
+				Util.systemCall("shutdown -r -f -t 01", true);				
 			}
 		}
 	}

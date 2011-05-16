@@ -1,12 +1,9 @@
 var maxlogbuffer = 10000;
-// var pongtimer; // timer ; unused
 var stream = "stop";
 var reloadinterval = 600000; // 10 min
 var initialize = false;
 
 function server_loaded() {
-	// window.moveTo(0,0); //sometimes does nothing
-	// window.resizeTo(screen.width,screen.height); //sometimes does nothing
 }
 
 function initialize_loaded() {
@@ -105,15 +102,9 @@ function saveandlaunch() {
 		str += "user " + user + " password " + pass + " ";  
 	}
 	//battery
-	if (document.getElementById("battery").checked) { str += "battery yes "; }
-	else { str += "battery no "; }
-	/* //comport
-	s = document.getElementById("comport").value;
-	if (s=="") { 
-		s="nil"
-	}
-	str += "comport "+s+" ";
-	*/ 
+//	if (document.getElementById("battery").checked) { str += "battery yes "; }
+//	else { str += "battery no "; }
+
 	//httpport
 	s = document.getElementById("httpport").value;
 	if (s=="") { 
@@ -121,6 +112,7 @@ function saveandlaunch() {
 		oktosend = false; 
 	}
 	else { str += "httpport "+s+" "; }
+	
 	//rtmpport
 	s = document.getElementById("rtmpport").value;
 	if (s=="") { 
@@ -128,6 +120,7 @@ function saveandlaunch() {
 		oktosend = false; 
 	}
 	else { str += "rtmpport "+s+" "; }	
+	
 	//skipsetup
 	if (document.getElementById("skipsetup").checked) {str += "skipsetup yes "; }
 	else { str += "skipsetup no "; }
@@ -157,8 +150,9 @@ function populatevalues(values) {
 		}
 		if (splitstr[n]== "battery") {
 			var a=document.getElementById("battery");
-			a.value = splitstr[n+1];
-			if (splitstr[n+1]=="yes") { a.checked=true; }
+			var str = splitstr[n+1];
+			if (str == "nil") { a.innerHTML="not found"; }
+			else { a.innerHTML = "present"; }
 		}
 		if (splitstr[n]=="comport") {
 			a = document.getElementById("comport");

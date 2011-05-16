@@ -164,7 +164,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		httpPort = settings.readRed5Setting("http.port");
 		
-		grabberInitialize();
 		
 		// checks setting for flag before starting 
 		new SystemWatchdog();
@@ -177,9 +176,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (str != null) {
 			setSystemVolume(Integer.parseInt(str));
 			
-			// if not found, add it
+			// if not found, add it TODO: this wont' work if 'volume' isn't already there,
+			// should be similar check for ALL settings, + read value from default file.  
+			// Also required for automatic software update when changes to settings keys
 		} else settings.writeSettings("volume", "0");
 		
+		battery = BatteryLife.getReference();
+		battery.init(this); 	
+		grabberInitialize();
+
 		
 		log.info("initialize");
 	}
@@ -188,7 +193,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.readSetting("skipsetup").equals("yes")) {
 			grabber_launch();
 		} else { 
-			initialize_launch(); 
+			initialize_launch();
 		}
 	}
 	
@@ -252,8 +257,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer(userconnected + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
 
-			battery = BatteryLife.getReference();
-			battery.init(this); 	
+//			battery = BatteryLife.getReference();
+//			battery.init(this); 	
 			
 			if (userconnected.equals(settings.readSetting("user0"))) {
 				admin = true;
@@ -294,10 +299,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(String fn, String str) { 
 		
-		// TODO: WHY TEST FOR THIS?
-		// if (Red5.getConnectionLocal() == player) {
-		
-			playerCommands cmd = playerCommands.valueOf(fn);
+		// TODO: WHY TEST FOR THIS? To lock out passengers from controls
+		playerCommands cmd = playerCommands.valueOf(fn);
+		if (Red5.getConnectionLocal() == player) {
+
 			switch (cmd) {
 			
 			case publish:
@@ -383,7 +388,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case clicksteer: clickSteer(str); break;
 			case streamsettingscustom: streamSettingsCustom(str); break;
 			case streamsettingsset: streamSettingsSet(str); break;
-			case chat: chat(str); break;
 			case statuscheck: statusCheck(str); break;
 			case playerexit: appDisconnect(player); break;
 			case playerbroadcast: playerBroadCast(str); break;
@@ -400,8 +404,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case facegrab: faceGrab(str); break;
 			case autodock: docker.autoDock(str); break;
 			case autodockcalibrate: docker.autoDock("calibrate "+str);
-			case beapassenger: beAPassenger(str); break;
-			case assumecontrol: assumeControl(str); break;
 			case restart: restart(); break;
 			case softwareupdate: softwareUpdate(str); break;
 			case setsystemvolume: setSystemVolume(Integer.parseInt(str)); break;
@@ -417,7 +419,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 			// if (fn.equals("autodock")) { docker.autoDock(str); }
 			// if (fn.equals("autodockcalibrate")) { docker.autoDock("calibrate "+str); } // eliminate, combine into 'autodock
 			
-		// }
+		}	
+		
+		switch (cmd) {
+			case chat: chat(str); break;
+			case beapassenger: beAPassenger(str); break;
+			case assumecontrol: assumeControl(str); break;
+		}
+
  	}
 	
 	/** put all commands here */
@@ -993,7 +1002,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void account(String fn, String str) { 
-		if (fn.equals("pasword_update")) {
+		if (fn.equals("password_update")) {
 			passwordChange(userconnected, str);
 		}
 		if (admin) {
@@ -1301,6 +1310,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// battery
 		// result += "battery " + settings.readSetting("batterypresent") + " ";
 		// result += "battery"
+		
+		if (battery.batteryPresent()) result += "battery yes ";
+		else result += "battery nil ";
 		
 		// http port
 		result += "httpport " + settings.readRed5Setting("http.port") + " ";

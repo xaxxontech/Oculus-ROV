@@ -40,7 +40,7 @@ public class BatteryLife {
 	 */
 	public void init(Application parent){
 		
-		// System.out.println("battery init...");
+//		System.out.println("battery init...");
 			
 		if(app == null){
 			
@@ -56,6 +56,9 @@ public class BatteryLife {
 			// test if battery avail 
 			if( batteryStatus() != 999 )
 				batterypresent = true;
+			try { 
+				Thread.sleep(5000); 
+			} catch (InterruptedException e) { e.printStackTrace(); }
 	
 		} // else System.out.println("can't init BatteryLife again!");
 	}

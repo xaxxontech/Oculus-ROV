@@ -1595,7 +1595,7 @@ function account(str) { // change_password, password_update  DONE
 	if (str == "password_update") {
 		var pass = document.getElementById('userpass').value;
 		var passagain = document.getElementById('userpass_again').value;
-		if (pass != passagain || pass=="") { message("*error: passwords didn't match, try again", sentcmdcolor); }
+		if (pass != passagain || pass=="") { message("ERROR: passwords didn't match, try again", "green"); }
 		else {
 			message("sending new password", sentcmdcolor);
 			callServer("password_update", pass);

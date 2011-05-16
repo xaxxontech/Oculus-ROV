@@ -271,6 +271,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 		state.set(State.user, userconnected);
 	}
 
+	/** put all commands here */
+	public enum playerCommands { publish, move, battStats, docklineposupdate, autodock, autodockcalibrate,
+		speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate,
+		tilttest, speedset, slide, nudge, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, 
+		streamsettingsset, streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update,
+		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
+		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, facegrab, assumecontrol, 
+		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger;
+	
+		@Override 
+		public String toString() {
+			return super.toString();
+		}	
+	}
 	
 	/**
 	 * distribute commands from player
@@ -279,134 +293,135 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param str
 	 */
 	public void playerCallServer(String fn, String str) { 
-		if (Red5.getConnectionLocal() == player) {
-			if (fn.equals("publish")) { 
+		
+		// TODO: WHY TEST FOR THIS?
+		// if (Red5.getConnectionLocal() == player) {
+		
+			playerCommands cmd = playerCommands.valueOf(fn);
+			switch (cmd) {
+			
+			case publish:
 				publish(str);
 				messageplayer("command received: publish " + str, null, null);
-			}
-			if (fn.equals("move")) {
-				move(str);
-			}
-			if (fn.equals("speech")) {
-				saySpeech(str);
-			}
-			if (fn.equals("battStats")) {
-				battery.battStats();
-			}
-			if (fn.equals("getdrivingsettings")) {
-				getDrivingSettings();
-			}
-			if (fn.equals("drivingsettingsupdate")) {
-				drivingSettingsUpdate(str);
-			}
-			if (fn.equals("cameracommand")) {
-				cameraCommand(str);
-			}
-			if (fn.equals("gettiltsettings")) {
-				getTiltSettings();
-			}
-			if (fn.equals("tiltsettingsupdate")) {
-				tiltSettingsUpdate(str);
-			}
-			if (fn.equals("tilttest")) {
-				tiltTest(str);
-			}
-			if (fn.equals("speedset")) {
+				break;
+			
+			case speedset: 
 				comport.speedset(str);
 				messageplayer("speed set: " + str, "speed", str.toUpperCase());
-			}
-			if (fn.equals("nudge")) {
-				nudge(str);
-			}
+				break; 
 			
-			if (fn.equals("slide")) {
-				if (state.getBoolean(State.motionenabled)){ //(motionenabled == true) {
-					moveMacroCancel();
-					comport.slide(str);
-					messageplayer("command received: " + fn + str, null, null);
-				}
-				else {
+			case slide:
+				if (!state.getBoolean(State.motionenabled)){
 					messageplayer("motion disabled", "motion", "disabled");
+					break;
 				}
-			}
-			
-			if (fn.equals("dock")) {
-				docker.dock(str);
-			}
-			if (fn.equals("relaunchgrabber")) {
+				moveMacroCancel();
+				comport.slide(str);
+				messageplayer("command received: " + fn + str, null, null);
+				break;
+		
+			case systemcall:	
+				// System.out.println("received: " + str);
+				messageplayer("system command received", null, null); 
+				Util.systemCall(str, admin); 
+				break;
+				
+			case relaunchgrabber: 
 				if (admin) {
 					grabber_launch();
 					messageplayer("relaunching grabber", null, null);
 				}
-			}
-			if (fn.equals("statuscheck")) { statusCheck(str); }
-			if (fn.equals("streamsettingscustom")) { streamSettingsCustom(str); }
-			if (fn.equals("streamsettingsset")) { streamSettingsSet(str); } 
-			if (fn.equals("systemcall")) { 
-			
-				System.out.println("received: " + str);
-				messageplayer("system command received", null, null); 
-				Util.systemCall(str, admin); 
+				break;
 				
-			}
-			if (fn.equals("clicksteer")) { clickSteer(str); }
-			if (fn.equals("motionenabletoggle")) { motionEnableToggle(); }
-			if (fn.equals("playerexit")) { appDisconnect(player); } //  System.out.println("onunload called"); }
-			/*
-			if (fn.equals("wifisignalstrength")) {
-				String s = wifi.wifiSignalStrength();
-				messageplayer("signal: "+s, "wifi", s); 
-			}
-			*/
-			if (fn.equals("playerbroadcast")) { playerBroadCast(str); }
-			if (fn.equals("docklineposupdate") && admin) { 
-				settings.writeSettings("vidctroffset", str);
-				messageplayer("vidctroffset set to : " + str, null, null);
-			}
-			if (fn.equals("password_update")) { account("pasword_update",str); }
-			if (fn.equals("new_user_add")) { account("new_user_add",str); }
-			if (fn.equals("user_list")) { account("user_list",""); }
-			if (fn.equals("delete_user")) { account("delete_user",str); }
-			if (fn.equals("extrauser_password_update")) { account("extrauser_password_update", str); }
-			if (fn.equals("username_update")) { account("username_update",str); }
-			if (fn.equals("disconnectotherconnections")) { disconnectOtherConnections(); }
-			if (fn.equals("monitor")) { monitor(str); }
-			if (fn.equals("showlog")) { showlog(); }
-			if (fn.equals("framegrab") || fn.equals("emailgrab")) {
+			case docklineposupdate: 
+				if(admin){
+					settings.writeSettings("vidctroffset", str);
+					messageplayer("vidctroffset set to : " + str, null, null);
+				}
+				break;
+				
+			case framegrab:
 				if (grabber instanceof IServiceCapableConnection) {
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					sc.invoke("framegrab", new Object[] { });
 					messageplayer("framegrab command received", null, null);
 				}
-			} // took pic about, now email it  
-			if (fn.equals("emailgrab")) {
+				break;
+				
+			case emailgrab:	
+				if (grabber instanceof IServiceCapableConnection) {
+					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+					sc.invoke("framegrab", new Object[] { });
+					messageplayer("framegrab command received", null, null);
+				}
 				emailgrab = true;
-				// dont message unless is configured 
-				// messageplayer("sending email", null, null);
-			}
-			if (fn.equals("facegrab")) { faceGrab(str); }
-			if (fn.equals("autodockgo")) { docker.autoDock("go "+str); } // TODO: unused if autoDock("go") used w/o xy, delete
-			if (fn.equals("autodock")) { docker.autoDock(str); }
-			if (fn.equals("autodockcalibrate")) { docker.autoDock("calibrate "+str); } // eliminate, combine into 'autodock'
-			if (fn.equals("restart")) { restart(); }
-			if (fn.equals("softwareupdate")) { softwareUpdate(str); }
-			if (fn.equals("arduinoecho")){ 
-				if(str.equals("on")) comport.setEcho(true); else comport.setEcho(false);
+				break;
+				
+			case arduinoecho: 
+				if(str.equals("on")) comport.setEcho(true); 
+				else comport.setEcho(false);
 				messageplayer("echo set to: "+str, null, null);
-			}
-			if(fn.equals("arduinoreset")) {
+				break;
+			
+			case arduinoreset: 
 				comport.reset();
 				messageplayer("resetting arduino", null, null);
+				break;
+				
+			case move: move(str); break;
+			case nudge: nudge(str); break;
+			case speech: saySpeech(str); break;
+			case dock: docker.dock(str); break;
+			case battStats: battery.battStats(); break;
+			case cameracommand: cameraCommand(str); break;
+			case gettiltsettings: getTiltSettings(); break;
+			case getdrivingsettings: getDrivingSettings(); break;	
+			case motionenabletoggle: motionEnableToggle(); break;
+			case drivingsettingsupdate: drivingSettingsUpdate(str); break;
+			case tiltsettingsupdate: tiltSettingsUpdate(str); break;
+			case tilttest: tiltTest(str); break;
+			case clicksteer: clickSteer(str); break;
+			case streamsettingscustom: streamSettingsCustom(str); break;
+			case streamsettingsset: streamSettingsSet(str); break;
+			case chat: chat(str); break;
+			case statuscheck: statusCheck(str); break;
+			case playerexit: appDisconnect(player); break;
+			case playerbroadcast: playerBroadCast(str); break;
+			case password_update: account("password_update", str); break;
+			case new_user_add: account("new_user_add",str); break;
+			case pasword_update: account("pasword_update",str); break;
+			case user_list: account("user_list",""); break;
+			case delete_user: account("delete_user",str); break; 
+			case extrauser_password_update: account("extrauser_password_update", str); break;
+			case username_update: account("username_update",str); break;
+			case disconnectotherconnections: disconnectOtherConnections(); break;
+			case monitor: monitor(str); break; 
+			case showlog: showlog(); break; 
+			case facegrab: faceGrab(str); break;
+			case autodock: docker.autoDock(str); break;
+			case autodockcalibrate: docker.autoDock("calibrate "+str);
+			case beapassenger: beAPassenger(str); break;
+			case assumecontrol: assumeControl(str); break;
+			case restart: restart(); break;
+			case softwareupdate: softwareUpdate(str); break;
+			case setsystemvolume: setSystemVolume(Integer.parseInt(str)); break;
+			
+			default:
+				System.out.println("command not found: " + cmd.toString());
+				for( playerCommands command : playerCommands.values() )
+					System.out.println(command.ordinal() + " = " + command.toString());
+				break;
 			}
-			if (fn.equals("setsystemvolume")) { setSystemVolume(Integer.parseInt(str)); }
-		}
-		if (fn.equals("assumecontrol")) { assumeControl(str); }
-		if (fn.equals("beapassenger")) { beAPassenger(str); }
-		if (fn.equals("chat")) { chat(str); }
+		
+			// if (fn.equals("autodockgo")) { docker.autoDock("go "+str); } // TODO: unused if autoDock("go") used w/o xy, delete
+			// if (fn.equals("autodock")) { docker.autoDock(str); }
+			// if (fn.equals("autodockcalibrate")) { docker.autoDock("calibrate "+str); } // eliminate, combine into 'autodock
+			
+		// }
  	}
 	
 	/** put all commands here */
-	public enum GabberCommands { streammode, saveandlaunch, populatesettings, 
+	public enum gabberCommands { streammode, saveandlaunch, populatesettings, 
 		systemcall, chat, facerect, dockgrabbed, autodock, restart;
 	
 		@Override 
@@ -424,7 +439,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void grabberCallServer(/*Application.GabberCommands cmd*/ String fn, String str){
 		
 		// turn string input to id 
-		Application.GabberCommands cmd = Application.GabberCommands.valueOf(fn);
+		gabberCommands cmd = gabberCommands.valueOf(fn);
 		
 		switch (cmd) {	
 		case streammode: grabberSetStream(str);
@@ -461,7 +476,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 		default: 
 			System.out.println("command not found: " + cmd.toString());
-			for( GabberCommands command : GabberCommands.values() )
+			for( gabberCommands command : gabberCommands.values() )
 				System.out.println(command.ordinal() + " = " + command.toString());
 			break;
 		}

@@ -553,36 +553,55 @@ function mainmenu(id) {
 function rovvolumepopulate() {
 	var str = "<table><tr><td><span style='font-variant: small-caps'>rov</span> speaker volume: &nbsp;</td>";
 	for (var i=0; i<=10; i++) {
-		str+="<td  id='rvoltd"+i+"' style='width: 10px; height: 24px; text-align: center;'>" +
-				"<span style='cursor: pointer; font-size: 15px; color: #4c56fe' id='rvol"+i+"'" +
-				" onmouseover='rovvolumeover(this.id)'" +
-				" onmouseout='rovvolumeout(this.id)'" +
+		str+="<td  id='rvoltd"+i+"' style='height: 26px; width: 8px; text-align: center;" +
+		" border: 1px solid transparent; cursor: pointer;' onmouseover='rovvolumeover(&quot;"+i+"&quot;)'" +
+		" onmouseout='rovvolumeout(&quot;"+i+"&quot;)'>" +
+				"<span style='color: #4c56fe; font-size: 15px' id='rvolspan"+i+"'" +
 				" onclick='rovvolumeclick(&quot;"+i+"&quot;)'>|</span></td>";
 	}
 	str += "</tr></table>";
 	document.getElementById("rovvolumecontrol").innerHTML = str;
-	document.getElementById("rvoltd"+parseInt(rovvolume/10)).style.backgroundColor = "#999999";
+	var b=document.getElementById("rvoltd"+parseInt(rovvolume/10));
+	b.style.borderColor = "#4c56fe";
+	b.style.backgroundColor = "#222222";
+	if (rovvolume > 0) { 
+		document.getElementById("rvoltd"+parseInt((rovvolume/10)-1)).style.borderRightColor = "#4c56fe";
+	}
 }
 
-function rovvolumeover(id) {
-	var a = document.getElementById(id);
+function rovvolumeover(i) {
+	var a = document.getElementById("rvolspan"+i);
 	a.style.color = "#ffffff";
-	a.style.fontSize = "20px";
-//	a.style.fontWeight = "bold";
+//	a.style.fontSize = "20px";
+	var b = document.getElementById("rvoltd"+i);
+	b.style.backgroundColor = "#555555";
 }
 
-function rovvolumeout(id) {
-	var a = document.getElementById(id);
+function rovvolumeout(i) {
+	var a = document.getElementById("rvolspan"+i);
 	a.style.color = "#4c56fe";
-	a.style.fontSize = "15px";
-//	a.style.fontWeight = "normal";
+//	a.style.fontSize = "15px";
+	var b = document.getElementById("rvoltd"+i);
+	if (i*10 != rovvolume) {
+		b.style.backgroundColor = "transparent";
+	}
+	else { 	b.style.backgroundColor = "#222222"; }
 }
 
 function rovvolumeclick(vol) {
 	var b = document.getElementById("rvoltd"+parseInt(rovvolume/10));
+	b.style.borderColor = "transparent";
 	b.style.backgroundColor = "transparent";
+	if (rovvolume > 0) { 
+		document.getElementById("rvoltd"+parseInt((rovvolume/10)-1)).style.borderRightColor = "transparent";
+	}
+	
 	var a = document.getElementById("rvoltd"+vol);
-	a.style.backgroundColor = "#999999";
+	a.style.borderColor = "#4c56fe";
+	a.style.backgroundColor = "#222222";
+	if (vol > 0) { 
+		document.getElementById("rvoltd"+parseInt(vol-1)).style.borderRightColor = "#4c56fe";
+	}
 	message("sending system volume: "+ parseInt(vol*10)+"%", sentcmdcolor);
 	callServer("setsystemvolume", parseInt(vol*10));
 	lagtimer = new Date().getTime();

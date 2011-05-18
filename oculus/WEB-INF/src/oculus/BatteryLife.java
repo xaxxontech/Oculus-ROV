@@ -52,15 +52,8 @@ public class BatteryLife {
 			connectStr = String.format("winmgmts:\\\\%s\\root\\CIMV2", host);
 			query = "Select * from Win32_Battery"; 
 			axWMI = new ActiveXComponent(connectStr);
-			
-			// test if battery avail 
-			if( batteryStatus() != 999 )
-				batterypresent = true;
-			try { 
-				Thread.sleep(5000); 
-			} catch (InterruptedException e) { e.printStackTrace(); }
 	
-		} // else System.out.println("can't init BatteryLife again!");
+		} 
 	}
 	
 	/** 
@@ -72,6 +65,10 @@ public class BatteryLife {
 	private BatteryLife() {}
 	
 	public boolean batteryPresent(){
+
+		if( batteryStatus() == 999 ) { batterypresent = false; }
+			else { batterypresent = true; }
+			
 		return batterypresent;
 	}
 	

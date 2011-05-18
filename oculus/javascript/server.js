@@ -2,6 +2,7 @@ var maxlogbuffer = 10000;
 var stream = "stop";
 var reloadinterval = 600000; // 10 min
 var initialize = false;
+var username = false;
 
 function server_loaded() {
 }
@@ -13,6 +14,8 @@ function initialize_loaded() {
 
 function flashloaded() {
 	if (!initialize) { setTimeout("reload();", reloadinterval); }
+	setTimeout("callServer('checkforbattery','init')",2000);
+	setTimeout("callServer('checkforbattery','ispresent')",7000);
 }
 
 function reload() {
@@ -142,7 +145,6 @@ function init() {
 
 function populatevalues(values) {
 	splitstr = values.split(" ");
-	var username = false
 	for (var n=1; n<splitstr.length; n=n+2) { // username battery comport httpport rtmpport
 		if (splitstr[n] == "username") {  
 			username = true;

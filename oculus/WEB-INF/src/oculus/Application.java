@@ -50,6 +50,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean emailgrab = false;
 	private AutoDock docker = null;
 	private State state = State.getReference();
+	private static final int STREAM_CONNECT_DELAY = 2000;
 
 	public Application() { 
 		super();
@@ -167,7 +168,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// checks setting for flag before starting 
 		new SystemWatchdog();
-		new EmailAlerts(this);
+//        new EmailAlerts(this);
 		
 		//if(settings.getBoolean(State.developer))			
 			//CommandManager.getReference().init(this);
@@ -181,12 +182,43 @@ public class Application extends MultiThreadedApplicationAdapter {
 			// Also required for automatic software update when changes to settings keys
 		} else settings.writeSettings("volume", "0");
 		
-		battery = BatteryLife.getReference();
-		battery.init(this); 	
 		grabberInitialize();
-
 		
+		battery = BatteryLife.getReference();
+
+//		final Application app = this;
+//		new Thread(new Runnable() { public void run() {
+//			try {
+//				Thread.sleep(5000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			long t = System.currentTimeMillis();
+//			System.out.println("starting batt init "+System.currentTimeMillis());
+//			battery.init(app);
+//			System.out.println("batt init done "+(t-System.currentTimeMillis()));
+////			if (battery.batteryPresent()) messageGrabber("populatevalues battery yes", null);
+////			else messageGrabber("populatevalues battery nil",null);
+//		} }).start();
+
+
 		log.info("initialize");
+	}
+	
+	private void checkForBattery(String mode) {
+		// battery init steps separated here since battery has to be called after delay
+		// and delay can't be in main app, is in server.js instead
+		if (mode.equals("init")) {
+			battery.init(this);
+		}
+		else { // mode = ispresent
+			final Application app = this;
+			new Thread(new Runnable() { public void run() {
+				if (battery.batteryPresent()) messageGrabber("populatevalues battery yes", null);
+				else messageGrabber("populatevalues battery nil",null);
+			} }).start();
+		}
 	}
 	
 	private void grabberInitialize() {
@@ -431,7 +463,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	/** put all commands here */
 	public enum gabberCommands { streammode, saveandlaunch, populatesettings, 
-		systemcall, chat, facerect, dockgrabbed, autodock, restart;
+		systemcall, chat, facerect, dockgrabbed, autodock, restart, checkforbattery;
 	
 		@Override 
 		public String toString() {
@@ -483,6 +515,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			restart();
 			break;
 			
+		case checkforbattery: checkForBattery(str); break;
+			
 		default: 
 			System.out.println("command not found: " + cmd.toString());
 			for( gabberCommands command : gabberCommands.values() )
@@ -511,7 +545,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					Thread.sleep(2000);
+					Thread.sleep(STREAM_CONNECT_DELAY);
 					Collection<Set<IConnection>> concollection = getConnections();
 					for (Set<IConnection> cc : concollection) {
 						for (IConnection con : cc) {
@@ -979,7 +1013,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("publish", new Object[] { str, 160, 120, 8, 85 });
 				new Thread(new Runnable() {
 					public void run() {
-						try { Thread.sleep(2000); }
+						try { Thread.sleep(STREAM_CONNECT_DELAY); }
 						catch (Exception e) { e.printStackTrace(); }
 						grabberPlayPlayer(1);
 					}
@@ -1311,8 +1345,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// result += "battery " + settings.readSetting("batterypresent") + " ";
 		// result += "battery"
 		
-		if (battery.batteryPresent()) result += "battery yes ";
-		else result += "battery nil ";
+//		if (battery != null) {
+//			if (battery.batteryPresent()) result += "battery yes ";
+//			else result += "battery nil ";
+//		}
 		
 		// http port
 		result += "httpport " + settings.readRed5Setting("http.port") + " ";

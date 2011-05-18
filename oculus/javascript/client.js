@@ -68,6 +68,7 @@ function loaded() {
 	var b = new Image();
 	b.src = 'images/steering_icon_selected.gif';
 	bworig= document.body.clientWidth;
+	var a = document.getElementById("blorg");
 }
 
 function resized() {
@@ -544,7 +545,8 @@ function mainmenu(id) {
 		var link = document.getElementById(id);
 		var xy = findpos(link);
 		x = xy[0]+link.offsetWidth;
-		y = 70;
+		xy = findpos(video);
+		y = xy[1]+30;
 	}
 	popupmenu("menu", "show", x, y, str, null, 1, 0);
 //	resized();

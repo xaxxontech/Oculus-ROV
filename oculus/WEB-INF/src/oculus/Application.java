@@ -168,7 +168,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// checks setting for flag before starting 
 		new SystemWatchdog();
-//        new EmailAlerts(this);
+        new EmailAlerts(this);
 		
 		//if(settings.getBoolean(State.developer))			
 			//CommandManager.getReference().init(this);
@@ -177,7 +177,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (str != null) {
 			setSystemVolume(Integer.parseInt(str));
 			
-			// if not found, add it TODO: this wont' work if 'volume' isn't already there,
+			// if not found, add it 
+			// TODO: this wont' work if 'volume' isn't already there,
 			// should be similar check for ALL settings, + read value from default file.  
 			// Also required for automatic software update when changes to settings keys
 		} else settings.writeSettings("volume", "0");
@@ -185,24 +186,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		grabberInitialize();
 		
 		battery = BatteryLife.getReference();
-
-//		final Application app = this;
-//		new Thread(new Runnable() { public void run() {
-//			try {
-//				Thread.sleep(5000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			long t = System.currentTimeMillis();
-//			System.out.println("starting batt init "+System.currentTimeMillis());
-//			battery.init(app);
-//			System.out.println("batt init done "+(t-System.currentTimeMillis()));
-////			if (battery.batteryPresent()) messageGrabber("populatevalues battery yes", null);
-////			else messageGrabber("populatevalues battery nil",null);
-//		} }).start();
-
-
+ 
 		log.info("initialize");
 	}
 	
@@ -213,7 +197,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			battery.init(this);
 		}
 		else { // mode = ispresent
-			final Application app = this;
+//			final Application app = this;
 			new Thread(new Runnable() { public void run() {
 				if (battery.batteryPresent()) messageGrabber("populatevalues battery yes", null);
 				else messageGrabber("populatevalues battery nil",null);

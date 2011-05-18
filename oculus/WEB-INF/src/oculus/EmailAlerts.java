@@ -27,7 +27,7 @@ public class EmailAlerts {
 		app = parent;
 		
 		if (alerts){
-			timer.scheduleAtFixedRate(new Task(), 5000, DELAY);
+			timer.scheduleAtFixedRate(new Task(), State.ONE_MINUTE, DELAY);
 			if(debug) System.out.println("starting email alerts...");
 		}
 	}

@@ -419,8 +419,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case showlog: showlog(); break; 
 			case facegrab: faceGrab(str); break;
 			case autodock: docker.autoDock(str); break;
-			case autodockcalibrate: docker.autoDock("calibrate "+str);
-			case restart: restart(); break;
+			case autodockcalibrate: docker.autoDock("calibrate "+str); break;
+			case restart: 
+				restart(); 
+				System.out.println("restart command received from player");
+				break;
 			case softwareupdate: softwareUpdate(str); break;
 			case setsystemvolume: setSystemVolume(Integer.parseInt(str)); break;
 			
@@ -488,16 +491,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 			//
 			// TODO: GET RID of string literals 
 			//
+		case restart: 
+			admin=true;
+			System.out.println("restart command received from grabber");
+			restart();
+			break;
+			
 		case dockgrabbed: docker.autoDock("dockgrabbed "+str);
 			break;
 			
-		case autodock: docker.autoDock(str);
-			break;
-			
-		case restart: 
-			admin=true;
-			restart();
-			break;
+		case autodock: docker.autoDock(str); break;
 			
 		case checkforbattery: checkForBattery(str); break;
 			

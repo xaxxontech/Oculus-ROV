@@ -198,7 +198,7 @@ function publish(str) {
 		callServer("playerbroadcast","off"); 
 		broadcasting = false;
 		message ("sending: playerbroadcast off",sentcmdcolor);
-		clicksteer("on");
+		clicksteer("on"); 
 	}
 	else {
 		message("sending command: publish " + str, sentcmdcolor);
@@ -514,25 +514,6 @@ function speech() {
 	lagtimer = new Date().getTime();
 }
 
-//function advancedmenu() {
-//	document.getElementById("overlaydefault").style.display = "none";
-//	document.getElementById("login").style.display = "none";
-//	document.getElementById("someonealreadydrivingbox").style.display = "none";
-//	document.getElementById("hiddenmessageboxcontainer").style.display = "none";
-//	document.getElementById("extrastuffcontainer").style.display = "none";
-//	document.getElementById("advancedmenubox").style.display = "";
-//	var a= document.getElementById("videosettingsmenu");
-//	if (admin) { 
-//		document.getElementById("admin_menu").style.display = "";
-//		document.getElementById("regular_menu").style.display = "none";
-//		document.getElementById("admin_vidmenu").innerHTML = a.innerHTML;
-//	}
-//	else { document.getElementById("regular_vidmenu").innerHTML = a.innerHTML; }
-//	overlay("on");
-//	streamdetailspopulate();
-//	resized();
-//}
-
 function mainmenu(id) {
 	streamdetailspopulate();
 	rovvolumepopulate();
@@ -545,7 +526,7 @@ function mainmenu(id) {
 		var link = document.getElementById(id);
 		var xy = findpos(link);
 		x = xy[0]+link.offsetWidth;
-		xy = findpos(video);
+		xy = findpos(document.getElementById("video"));
 		y = xy[1]+30;
 	}
 	popupmenu("menu", "show", x, y, str, null, 1, 0);
@@ -757,7 +738,8 @@ function autodock(str) {
 	if (str=="start" &! autodocking && streammode != "stop") {
  		overlay("off");
 		clicksteeron = false;
-		document.getElementById("video").style.zIndex = "-1";
+//		document.getElementById("video").style.zIndex = "0";
+		clicksteer("off");
 		
 	    var str = "Dock with charger: <table><tr><td style='height: 7px'></td></tr></table>";
 	    str+="Get the dock in view, within 2 meters"
@@ -788,7 +770,7 @@ function autodock(str) {
 //		overlay("off");
 		popupmenu("menu","close");
 		clicksteeron = false;
-		document.getElementById("video").style.zIndex = "-1";
+		document.getElementById("video").style.zIndex = "0";
 		videooverlayposition();
 		var a =document.getElementById("videooverlay");
 	    a.onclick = autodockcalibrate;
@@ -845,7 +827,7 @@ function autodockclick(ev) { // TODO: unused if autodock("go") used above, inste
 }
 
 function autodocklock(str) {
-	// clicksteer("on");
+	 clicksteer("on");
 	splitstr = str.split(" ");
 	//x,y,width,height
 	videooverlayposition();
@@ -1171,7 +1153,7 @@ function clicksteer(str) {
 	if (str=="") { sendmsg = true; }
 	if (str=="" && !clicksteeron) { str = "on"; }
 	if (str == "on") { 
-		document.getElementById("video").style.zIndex = "-1";
+		document.getElementById("video").style.zIndex = "0";
 		clicksteeron = true;
 		videooverlayposition();
 		var a =document.getElementById("videooverlay");
@@ -1545,7 +1527,7 @@ function docklinecalibrate(str) {
 //		overlay("off");
 		popupmenu("menu","close");
 		clicksteeron = false;
-		document.getElementById("video").style.zIndex = "-1";
+		document.getElementById("video").style.zIndex = "0";
 		videooverlayposition();
 		var a =document.getElementById("videooverlay");
 	    a.onclick = docklineclick;

@@ -19,9 +19,6 @@ public class Util {
 
 	private static final int PRECISION = 2;
 	
-//	private static Speech speech = new Speech("kevin16");
-
-
 	/**
 	 * Delays program execution for the specified delay.
 	 * 
@@ -294,7 +291,6 @@ public class Util {
 	 * 
 	 */
 	public static void saySpeech(String str) {
-		/*new Speech("kevin16")*/
 		Speech speech = new Speech("kevin16");
 		speech.mluv(str);
 		Logger log = Red5LoggerFactory.getLogger(Util.class, "oculus");
@@ -311,7 +307,6 @@ public class Util {
 	 * 				call back to the user's screen 
 	 */
 	public static void saySpeech(String str, Application app) {
-		
 		saySpeech(str);
 		app.message("synth voice: "+str, null, null);
 	}	

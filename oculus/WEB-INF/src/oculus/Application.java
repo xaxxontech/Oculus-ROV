@@ -957,12 +957,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 		state.set(State.userisconnected, "true");
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);
+		Util.announce("hijacked by " + userconnected);
 	}
 	
 	private void beAPassenger(String user) {
 		pendingplayerisnull = true;
 		String str = user+ " added as passenger";
 		messageplayer(str, null, null);
+		Util.announce(str);
 		log.info(str); messageGrabber(str,null);
 		if (!stream.equals("stop")) {
 			Collection<Set<IConnection>> concollection = getConnections();

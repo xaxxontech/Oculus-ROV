@@ -8,11 +8,13 @@ public class Settings {
 	
 	// String filename = System.getenv("RED5_HOME")+"\\webapps\\oculus\\settings.txt";
 	private static String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
-	
-	public static String volume = "volume";
-	public static String notify = "notify";
-	public static String skipsetup = "skipsetup";
-	public static String developer = "developer";
+
+	// put all constants here
+	public static final String emailalerts = "emailalerts";
+	public static final String volume = "volume";
+	public static final String notify = "notify";
+	public static final String skipsetup = "skipsetup";
+	public static final String developer = "developer";
 	
 	
 	/** put all settings here 

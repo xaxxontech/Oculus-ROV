@@ -19,7 +19,7 @@ public class EmailAlerts {
 	// configuration 
 	private Settings settings = new Settings();
 	private final boolean debug = settings.getBoolean(Settings.developer);
-	private final boolean alerts = settings.getBoolean("emailalerts");
+	private final boolean alerts = settings.getBoolean(Settings.emailalerts);
 	private BatteryLife life = BatteryLife.getReference();
 	
 	/** Constructor */
@@ -65,12 +65,16 @@ public class EmailAlerts {
 						String msg = "The battery " + Integer.toString(life) 
 						+ "% and is draining!"; 
 						
+						// say it out loud 
 						Util.announce(msg);
 						
-						msg += "\n\nPlease find the dock, log in here: " + Util.getExternalIPAddress() 
+						// add the link back to the user screen 
+						msg += "\n\nPlease find the dock, log in here: http://" 
+							+ Util.getExternalIPAddress() 
 							+ ":" + settings.readRed5Setting("http.port") 
-							+ "/oculus/index.html";
+							+ "/oculus/";
 						
+						// send email 
 						new SendMail("Oculus Message", msg, app); 
 
 						// TODO: trigger auto dock

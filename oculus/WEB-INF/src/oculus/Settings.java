@@ -4,10 +4,27 @@ import java.io.*;
 
 public class Settings {
 	
-	private static final int ERROR = -1;
+	private static final int ERROR = -1; //Integer.MIN_VALUE;
 	
 	// String filename = System.getenv("RED5_HOME")+"\\webapps\\oculus\\settings.txt";
 	private static String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
+	
+	public static String volume = "volume";
+	public static String notify = "notify";
+	public static String skipsetup = "skipsetup";
+	public static String developer = "developer";
+	
+	
+	/** put all settings here 
+	public static enum consants { 
+		
+		volume, notify, skipsetup, ;
+	
+		@Override 
+		public String toString() {
+			return super.toString();
+		}	
+	} */
 	
 	/**
 	 * lookup values from props file
@@ -16,19 +33,13 @@ public class Settings {
 	 *            is the lookup value
 	 * @return the matching value from properties file (or false if not found)
 	 */
-	public boolean getBoolean(String key) {
-
-		boolean value = false;
-
-		try {
-
-			value = Boolean.parseBoolean(readSetting((key)));
-
-		} catch (Exception e) {
-			return false;
-		}
-
-		return value;
+	public boolean getBoolean(String key){
+		
+		String str = readSetting(key);
+		if(str.toUpperCase().equals("YES")) return true;
+		else if(str.toUpperCase().equals("TRUE")) return true;		
+			
+		return false;
 	}
 
 	/**
@@ -97,6 +108,28 @@ public class Settings {
 		}
 		catch (Exception e) { e.printStackTrace(); }
 		return result;
+	}
+	
+	/**
+	 * modify value of existing settings file 
+	 * 
+	 * @param setting 
+	 * 				is the key to be written to file  
+	 * @param value
+	 * 				is the integer to parse into a string before being written to file
+	 */
+	public void writeSettings(String setting, int value) {
+	
+		String str = null; 
+		
+		try {
+			str = Integer.toString(value);
+		} catch (Exception e) {
+			return;
+		}
+	
+		if(str != null)
+			writeSettings(setting, str);
 	}
 	
 	public void writeSettings(String setting, String value) { // modify value of existing setting

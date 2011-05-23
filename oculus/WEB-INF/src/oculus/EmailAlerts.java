@@ -18,7 +18,7 @@ public class EmailAlerts {
 
 	// configuration 
 	private Settings settings = new Settings();
-	private final boolean debug = settings.getBoolean("developer");
+	private final boolean debug = settings.getBoolean(Settings.developer);
 	private final boolean alerts = settings.getBoolean("emailalerts");
 	private BatteryLife life = BatteryLife.getReference();
 	
@@ -61,8 +61,17 @@ public class EmailAlerts {
 					if (life < WARN_LEVEL) {
 		
 						app.message("battery low, sending email", null, null);
-						new SendMail("Oculus Message", "battery " + Integer.toString(life) 
-								+ "% and is draining!", app); 
+						
+						String msg = "The battery " + Integer.toString(life) 
+						+ "% and is draining!"; 
+						
+						Util.announce(msg);
+						
+						msg += "\n\nPlease find the dock, log in here: " + Util.getExternalIPAddress() 
+							+ ":" + settings.readRed5Setting("http.port") 
+							+ "/oculus/index.html";
+						
+						new SendMail("Oculus Message", msg, app); 
 
 						// TODO: trigger auto dock
 						// app.autodock();

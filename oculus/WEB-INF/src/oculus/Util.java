@@ -1,5 +1,6 @@
 package oculus;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,11 +8,19 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
+
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
 
 public class Util {
 
 	private static final int PRECISION = 2;
+	
+//	private static Speech speech = new Speech("kevin16");
+
 
 	/**
 	 * Delays program execution for the specified delay.
@@ -241,5 +250,120 @@ public class Util {
 		}).start();
 	}
 
+
+	/**
+	 * @return this device's external IP address is via http lookup, or null if fails 
+	 */ 
+	public static String getExternalIPAddress(){
+
+		String address = null;
+		URL url = null;
+
+		try {
+			
+			url = new URL("http://checkip.dyndns.org/");
+
+			// read in file from the encoded url
+			URLConnection connection = (URLConnection) url.openConnection();
+			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+
+			int i;
+			while ((i = in.read()) != -1) {
+				address = address + (char) i;
+			}
+			in.close();
+
+			// parse html file
+			address = address.substring(address.indexOf(": ") + 2);
+			address = address.substring(0, address.indexOf("</body>"));
+			
+		} catch (Exception e) {
+			return null;
+		}
+		
+		// all good 
+		return address;
+	}
 	
+
+	/**
+	 * text to speech 
+	 * 
+	 * @param str
+	 * 				the phrase to turn into sound via host computer's speakers 
+	 * 
+	 */
+	public static void saySpeech(String str) {
+		/*new Speech("kevin16")*/
+		Speech speech = new Speech("kevin16");
+		speech.mluv(str);
+		Logger log = Red5LoggerFactory.getLogger(Util.class, "oculus");
+		log.info("voice synth: '"+str+"'");
+	}
+	
+
+	/**
+	 * text to speech with user screen echo
+	 * 
+	 * @param str
+	 * 				the phrase to turn into sound via host computer's speakers 
+	 * @param 
+	 * 				call back to the user's screen 
+	 */
+	public static void saySpeech(String str, Application app) {
+		
+		saySpeech(str);
+		app.message("synth voice: "+str, null, null);
+	}	
+	
+	/**
+	 * write new value to user's screen and set it 
+	 */
+	public static void setSystemVolume(int percent, Application app){
+		setSystemVolume(percent);
+		app.message("ROV volume set to "+Integer.toString(percent)+"%", null, null);
+	}
+	
+	/**
+	 * 
+	 * change the host computer's volume 
+	 * 
+	 * @param percent
+	 */
+	public static void setSystemVolume(int percent) {
+		new Settings().writeSettings(Settings.volume, percent);
+		float vol = (float) percent / 100 * 65535;
+		String str = "nircmdc.exe setsysvolume "+ (int) vol;
+		Util.systemCall(str, true);
+	}
+
+	/**
+	 * If enabled in settings with "notify", this method will turn up volume to max,
+	 * say the string, and then restore the volume to the original setting. 
+	 * 
+	 * 
+	 * @param str
+	 * 				is the phrase to turn from text to speech 
+	 */
+	public static void announce(final String str) {
+
+		final Settings settings = new Settings();
+		if(settings.getBoolean(Settings.notify)){
+			
+			//new Thread(new Runnable() {
+				//public void run() {
+		
+					// remember current value 
+					int volume = settings.getInteger(Settings.volume);
+					
+					// set to max 
+					Util.setSystemVolume(100);
+					saySpeech(str);
+					
+					// put it back 
+					Util.setSystemVolume(volume);
+				}	
+		//	});
+		//}
+	}
 }

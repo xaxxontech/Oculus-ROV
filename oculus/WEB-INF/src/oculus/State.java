@@ -234,6 +234,11 @@ public class State {
 	public long getLoginSince(){
 		return System.currentTimeMillis() - getLong(logintime);
 	}
+
+	public void set(String key, boolean b) {
+		if(b) set(key, "true");
+		else set(key, "false");
+	}
 	
 	
 	/*

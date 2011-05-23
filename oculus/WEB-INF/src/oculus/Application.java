@@ -29,8 +29,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private ArduinoCommDC comport = null; 
 	private LightsComm light = null;
 	
-	protected Speech sayit = new Speech("kevin16");
-	private BatteryLife battery = null; // BatteryLife.getReference();
+	// protected Speech sayit = new Speech("kevin16");
+	private BatteryLife battery = null;
 	private Settings settings= new Settings();
 	protected boolean initialstatuscalled = false;
 	private static String salt = "PSDLkfkljsdfas345usdofi";
@@ -101,7 +101,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				admin = false;
 			}
 			userconnected = null;
-			state.set(State.userisconnected, "false");
+			state.set(State.userisconnected, false);
 			
 			player = null;
 			facegrabon = false;
@@ -173,15 +173,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//if(settings.getBoolean(State.developer))			
 			//CommandManager.getReference().init(this);
 		
-		String str = settings.readSetting("volume");
+		String str = settings.readSetting(Settings.volume);
 		if (str != null) {
-			setSystemVolume(Integer.parseInt(str));
+			Util.setSystemVolume(Integer.parseInt(str));
 			
 			// if not found, add it 
 			// TODO: this wont' work if 'volume' isn't already there,
 			// should be similar check for ALL settings, + read value from default file.  
 			// Also required for automatic software update when changes to settings keys
-		} else settings.writeSettings("volume", "0");
+		} else settings.writeSettings(Settings.volume, "0");
 		
 		grabberInitialize();
 		
@@ -190,23 +190,29 @@ public class Application extends MultiThreadedApplicationAdapter {
 		log.info("initialize");
 	}
 	
+	/**
+	 * battery init steps separated here since battery has to be called after delay 
+	 * and delay can't be in main app, is in server.js instead
+	 * 
+	 * @param mode is this required, not really used? 
+	 */
 	private void checkForBattery(String mode) {
-		// battery init steps separated here since battery has to be called after delay
-		// and delay can't be in main app, is in server.js instead
 		if (mode.equals("init")) {
 			battery.init(this);
-		}
-		else { // mode = ispresent
-//			final Application app = this;
-			new Thread(new Runnable() { public void run() {
-				if (battery.batteryPresent()) messageGrabber("populatevalues battery yes", null);
-				else messageGrabber("populatevalues battery nil",null);
-			} }).start();
+		} else {
+			new Thread(new Runnable() { 
+				public void run() {
+					if (battery.batteryPresent())
+						messageGrabber("populatevalues battery yes", null);
+					else 
+						messageGrabber("populatevalues battery nil",null);
+				}
+			}).start();
 		}
 	}
 	
 	private void grabberInitialize() {
-		if (settings.readSetting("skipsetup").equals("yes")) {
+		if (settings.getBoolean(Settings.skipsetup)) {
 			grabber_launch();
 		} else { 
 			initialize_launch();
@@ -272,10 +278,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str += " streamsettings "+streamSettings();
 			messageplayer(userconnected + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
-
-//			battery = BatteryLife.getReference();
-//			battery.init(this); 	
-			
+		
 			if (userconnected.equals(settings.readSetting("user0"))) {
 				admin = true;
 			}
@@ -290,6 +293,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		state.set(State.userisconnected, "true");
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);
+		Util.announce(state.get(State.user) + " has logged in");
 	}
 
 	/** put all commands here */
@@ -311,11 +315,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * distribute commands from player
 	 * 
 	 * @param fn
+	 * 				is the function to call
+	 * 
 	 * @param str
+	 * 				is the parameter to pass onto the function
 	 */
 	public void playerCallServer(String fn, String str) { 
 		
-		// TODO: WHY TEST FOR THIS? To lock out passengers from controls
 		playerCommands cmd = playerCommands.valueOf(fn);
 		if (Red5.getConnectionLocal() == player) {
 
@@ -391,7 +397,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				
 			case move: move(str); break;
 			case nudge: nudge(str); break;
-			case speech: saySpeech(str); break;
+			case speech: Util.saySpeech(str); break;
 			case dock: docker.dock(str); break;
 			case battStats: battery.battStats(); break;
 			case cameracommand: cameraCommand(str); break;
@@ -425,7 +431,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				System.out.println("restart command received from player");
 				break;
 			case softwareupdate: softwareUpdate(str); break;
-			case setsystemvolume: setSystemVolume(Integer.parseInt(str)); break;
+			case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
 			
 			default:
 				System.out.println("command not found: " + cmd.toString());
@@ -510,18 +516,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				System.out.println(command.ordinal() + " = " + command.toString());
 			break;
 		}
-		
-		/*
-		if (fn.equals("streammode")) grabberSetStream(str); 
-        else if (fn.equals("saveandlaunch")) saveAndLaunch(str); 
-        else if (fn.equals("populatesettings")) populateSettings(); 
-        else if (fn.equals("systemcall")) Util.systemCall(str, admin);
-        else if (fn.equals("chat")) chat(str); 
-        else if (fn.equals("facerect")) messageplayer(null, "facefound", str); 
-        else if (fn.equals("dockgrabbed"))  docker.autoDock("dockgrabbed "+str); 
-        else if (fn.equals("autodock")) docker.autoDock(str); 
-        else if (fn.equals("restart")) { admin=true; restart(); }
-        */
 	}
 	
 	private void grabberSetStream(String str) {
@@ -611,13 +605,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	private void saySpeech(String str) {
-		messageplayer("synth voice: "+str, null, null);
-		messageGrabber("synth voice: "+str,null);
-		sayit.mluv(str);
-		//Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
-		log.info("voice synth: '"+str+"'");
-	}
+	/** 
+	private void saySpeech(final String str) {
+		new Thread(new Runnable() { 
+			public void run() {					
+				
+				messageplayer("synth voice: "+str, null, null);
+				messageGrabber("synth voice: "+str,null);
+				Speech sayit = new Speech("kevin16");
+				sayit.mluv(str);
+				//Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
+				log.info("voice synth: '"+str+"'");
+				
+			}
+		});
+	}*/
 
 	private void getDrivingSettings() {
 		if (admin) {
@@ -853,12 +855,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void nudge(String str) {
-		if (state.getBoolean(State.motionenabled)){ //motionenabled == true) {
+		if (state.getBoolean(State.motionenabled)){ 
 			comport.nudge(str);
 			messageplayer("command received: nudge" + str, null, null);
 			
-			// TODO: don't nudge if autodocking too?
-			if (/*docker.isDocking()*/ state.getBoolean(State.docking)
+			if (state.getBoolean(State.docking)
 					|| state.getBoolean(State.autodocking)) moveMacroCancel(); 
 		}
 		else {
@@ -867,21 +868,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void motionEnableToggle() {
-		if (state.getBoolean(State.motionenabled)) { //motionenabled == true) {
-			//motionenabled = false;
+		if (state.getBoolean(State.motionenabled)) { 
 			state.set(State.motionenabled, "false");
 			messageplayer("motion disabled", "motion", "disabled");
 		}
 		else {
-			
 			state.set(State.motionenabled, "true");
-			//motionenabled = true;
 			messageplayer("motion enabled", "motion", "enabled");
 		}
 	}
 	
 	private void clickSteer(String str) {
-		if (state.getBoolean(State.motionenabled)){ // motionenabled == true) {
+		if (state.getBoolean(State.motionenabled)){
 			int n = comport.clickSteer(str);
 			if (n != 999) {
 				messageplayer("received: clicksteer " + str, "cameratilt", camTiltPos());
@@ -1232,15 +1230,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Boolean oktoadd = true;
 		String user = null;
 		String password = null;
-		// String battery = null;
 		String httpport = null;
 		String rtmpport = null;
 		String skipsetup = null;		
 		String s[] = str.split(" ");
-		for (int n=0; n<s.length; n=n+2) { // user password battery comport httpport rtmpport skipsetup
+		for (int n=0; n<s.length; n=n+2) { 
+			// user password comport httpport rtmpport skipsetup
 			if (s[n].equals("user")) { user = s[n+1]; }
 			if (s[n].equals("password")) { password = s[n+1]; }
-			// if (s[n].equals("battery")) { battery = s[n+1]; }
 			if (s[n].equals("httpport")) { httpport = s[n+1]; }
 			if (s[n].equals("rtmpport")) { rtmpport = s[n+1]; }
 			if (s[n].equals("skipsetup")) { skipsetup = s[n+1]; }
@@ -1284,20 +1281,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				message += "Error: admin user not defined ";
 			}
 		}
-		// battery
-		/*
-		if (battery != null) { 
-			if (battery.equals("yes")) {
-				// batterypresent = true;
-			} else { 
-				// batterypresent = false;
-				// motionenabled = true;
-				state.set(State.motionenabled, "true");
-			}	
-			
-			// TODO: not needed?? 
-			settings.writeSettings("batterypresent", battery); 
-			*/
 		
 		// httpport
 		if (httpport != null) { settings.writeRed5Setting("http.port", httpport); }
@@ -1423,11 +1406,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
+	/*
 	private void setSystemVolume(int percent) {
 		settings.writeSettings("volume", Integer.toString(percent));
 		float vol = (float) percent / 100 * 65535;
 		String str = "nircmdc.exe setsysvolume "+ (int) vol;
 		Util.systemCall(str, true);
 		messageplayer("ROV volume set to "+Integer.toString(percent)+"%", null, null);
-	}
+	}*/
 }

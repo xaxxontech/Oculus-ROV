@@ -739,7 +739,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (comport.speed == comport.speedmed) { spd = "MED"; }
 				if (comport.speed== comport.speedslow) { spd = "SLOW"; }
 				String mov = "STOPPED";
-				if (state.getBoolean(State.motionenabled))/*(!motionenabled)*/ { mov = "DISABLED"; }
+				if (!state.getBoolean(State.motionenabled))/*(!motionenabled)*/ { mov = "DISABLED"; }
 				if (comport.moving == true) { mov = "MOVING"; }
 				str += " speed "+spd+" cameratilt "+camTiltPos()+" motion "+mov;
 			}

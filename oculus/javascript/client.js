@@ -1212,6 +1212,7 @@ function videoOverlayMouseOver() {
 			a.style.display = "";
 
 		}
+		videoOverlayGetMousePos(); // ie fix
 	}
 }
 

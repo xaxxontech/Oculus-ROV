@@ -404,7 +404,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case move: move(str); break;
 			case nudge: nudge(str); break;
 			case speech: Util.saySpeech(str); break;
-			case dock: docker.dock(str); break;
+			case dock: moves.append("docking"); docker.dock(str); break;
 			case battStats: battery.battStats(); break;
 			case cameracommand: cameraCommand(str); break;
 			case gettiltsettings: getTiltSettings(); break;
@@ -430,7 +430,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case monitor: monitor(str); break; 
 			case showlog: showlog(); break; 
 			case facegrab: faceGrab(str); break;
-			case autodock: docker.autoDock(str); break;
+			case autodock: moves.append("autodock " + str); docker.autoDock(str); break;
 			case autodockcalibrate: docker.autoDock("calibrate "+str); break;
 			case restart: 
 				restart(); 
@@ -855,6 +855,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			s = "DISABLED";
 		}
 		messageplayer(msg, "motion", s);
+		
+		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+		sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
+		
 		moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
 	}
 	
@@ -966,14 +970,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		state.set(State.userisconnected, "true");
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);
-		Util.announce("hijacked by " + userconnected);
+		
+		// Util.announce("hijacked by " + userconnected);
 	}
 	
 	private void beAPassenger(String user) {
 		pendingplayerisnull = true;
 		String str = user+ " added as passenger";
 		messageplayer(str, null, null);
-		Util.announce(str);
+		// Util.announce(str);
 		log.info(str); messageGrabber(str,null);
 		if (!stream.equals("stop")) {
 			Collection<Set<IConnection>> concollection = getConnections();

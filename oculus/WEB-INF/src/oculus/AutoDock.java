@@ -91,9 +91,6 @@ public class AutoDock {
 				//int x = Integer.parseInt(cmd[1])/2; //assuming 320x240
 				//int y = Integer.parseInt(cmd[2])/2; //assuming 320x240
 				
-				state.set(State.dockx, cmd[1]);
-				state.set(State.docky, cmd[2]);
-				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
@@ -111,8 +108,8 @@ public class AutoDock {
 			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.autodocking)) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 			
-				state.set(State.dockx, cmd[1]);
-				state.set(State.docky, cmd[2]);
+				//state.set(State.dockx, cmd[1]);
+				//state.set(State.docky, cmd[2]);
 			
 				if (cmd[4].equals("0")) { // width==0, failed to find target
 					if (autodockgrabattempts < 0) { // TODO: remove this condition if unused
@@ -129,6 +126,10 @@ public class AutoDock {
 				}
 				else {
 					app.message(null,"autodocklock",s);
+
+					state.set(State.dockx, cmd[2]);
+					state.set(State.docky, cmd[3]);
+					
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
 						Integer.parseInt(cmd[5]),new Float(cmd[6]));
 					autodockgrabattempts ++;

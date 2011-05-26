@@ -49,7 +49,7 @@ public class State {
 	
 	// comand line interface 
 	// MulticastChannel channel = MulticastChannel.getReference();
-	
+
 	/** reference to this singleton class */
 	private static State singleton = null;
 	
@@ -146,7 +146,7 @@ public class State {
 
 		// if(key==null || value==null) return;
 	
-		System.out.println("refreshing property for: " + key + " = " + value);
+//		System.out.println("refreshing property for: " + key + " = " + value);
 		props.put(key.trim(), value.trim());
 	}
 
@@ -160,7 +160,7 @@ public class State {
 
 		// if(key==null) return;
 		
-		System.out.println("refreshing property for: " + key + " = " + value);
+//		System.out.println("refreshing property for: " + key + " = " + value);
     
 		props.put(key.trim(), Long.toString(value));
 	}

@@ -22,7 +22,7 @@ public class Util {
 	private static Settings settings = new Settings();
 	// private final boolean debug = settings.getBoolean(Settings.developer);
 	// private final boolean alerts = settings.getBoolean(Settings.emailalerts);
-	private static final boolean notify = settings.getBoolean(Settings.loginnotify);
+//	private static final boolean notify = settings.getBoolean(Settings.loginnotify);
 	
 	/**
 	 * Delays program execution for the specified delay.
@@ -345,19 +345,20 @@ public class Util {
 	 * @param str
 	 * 				is the phrase to turn from text to speech 
 	 */
-	public static void announce(final String str) {
+	public static void beep() {
 
 		// final Settings settings = new Settings();
 		// if(settings.getBoolean(Settings.notify)){
 			
-		if(notify){
+//		if(notify){
+		if (settings.getBoolean(Settings.loginnotify)) { // read setting every time in case settings changed by client
 			
 			//new Thread(new Runnable() {
 				//public void run() {
 		
 					// remember current value 
-					int volume = settings.getInteger(Settings.volume);
-					Util.setSystemVolume(100);
+//					int volume = settings.getInteger(Settings.volume);
+//					Util.setSystemVolume(100);
 					
 					// beep only
 					systemCall("nircmdc.exe beep 500 1000", true);
@@ -367,7 +368,7 @@ public class Util {
 					// saySpeech(str);
 					
 					// put it back 
-					Util.setSystemVolume(volume);
+//					Util.setSystemVolume(volume);
 				}	
 		//	});
 		//}

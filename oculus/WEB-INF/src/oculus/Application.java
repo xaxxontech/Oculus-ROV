@@ -294,12 +294,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str = userconnected + " connected from: "+player.getRemoteAddress();
 			log.info(str); 
 			messageGrabber(str,"connection "+userconnected+"&nbsp;connected");
+			Util.beep();
 		}
 		
 		state.set(State.userisconnected, "true");
 		state.set(State.logintime, System.currentTimeMillis());
 		state.set(State.user, userconnected);
-		Util.announce(state.get(State.user) + " has logged in");
 	}
 
 	/** put all commands here */
@@ -856,9 +856,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		messageplayer(msg, "motion", s);
 		
-	//	IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-	//	sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
-		
 		moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
 	}
 	
@@ -972,6 +969,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		state.set(State.user, userconnected);
 		
 		// Util.announce("hijacked by " + userconnected);
+		Util.beep();
 	}
 	
 	private void beAPassenger(String user) {
@@ -992,6 +990,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		}
+		Util.beep();
 	}
 	
 	/*// causes slowness => JNI conflicts with OS?

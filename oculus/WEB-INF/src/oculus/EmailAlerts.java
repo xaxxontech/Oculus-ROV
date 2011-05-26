@@ -66,7 +66,7 @@ public class EmailAlerts {
 						+ "% and is draining!"; 
 						
 						// say it out loud 
-						Util.announce(msg);
+//						Util.announce(msg);
 						
 						// add the link back to the user screen 
 						msg += "\n\nPlease find the dock, log in here: http://" 

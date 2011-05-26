@@ -75,7 +75,7 @@ public class AutoDock {
 	public void autoDock(String str) {
 		
 		log.debug("autodock: " + str);
-		System.out.println("autodock: " + str);
+		//System.out.println("autodock: " + str);
 		
 		String cmd[] = str.split(" ");
 		if (cmd[0].equals("cancel")) {
@@ -379,7 +379,7 @@ public class AutoDock {
 			}
 			else {
 				if (Math.abs(slopedeg-dockslopedeg) > 1.6 || autodockctrattempts >10) { // backup and try again
-					System.out.println("backup "+dockslopedeg+" "+slopedeg+" ctrattempts:"+autodockctrattempts);
+//					System.out.println("backup "+dockslopedeg+" "+slopedeg+" ctrattempts:"+autodockctrattempts);
 					autodockctrattempts = 0; 
 					int comp = 80;
 					if (slope < dockslope) { comp = -80; }
@@ -398,7 +398,7 @@ public class AutoDock {
 					log.info("autodock backup");
 				}
 				else { 
-					System.out.println("dock "+dockslopedeg+" "+slopedeg);
+//					System.out.println("dock "+dockslopedeg+" "+slopedeg);
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(100);
 						dock("dock"); 

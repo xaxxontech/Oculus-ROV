@@ -856,8 +856,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		messageplayer(msg, "motion", s);
 		
-		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-		sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
+	//	IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+	//	sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
 		
 		moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
 	}

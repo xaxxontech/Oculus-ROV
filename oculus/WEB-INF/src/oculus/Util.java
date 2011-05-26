@@ -18,6 +18,11 @@ import org.slf4j.Logger;
 public class Util {
 
 	private static final int PRECISION = 2;
+
+	private static Settings settings = new Settings();
+	// private final boolean debug = settings.getBoolean(Settings.developer);
+	// private final boolean alerts = settings.getBoolean(Settings.emailalerts);
+	private static final boolean notify = settings.getBoolean(Settings.loginnotify);
 	
 	/**
 	 * Delays program execution for the specified delay.
@@ -27,7 +32,6 @@ public class Util {
 	 *            (milliseconds).
 	 */
 	public static void delay(long delay) {
-
 		try {
 			Thread.sleep(delay);
 		} catch (Exception e) {
@@ -216,6 +220,7 @@ public class Util {
 	public static void systemCall(String str, boolean admin) {
 		
 		final String args = str.trim();
+		
 		System.out.println("application calling system: " + args);
 	
 		// only test for admin if flag not set 
@@ -306,10 +311,10 @@ public class Util {
 	 * @param 
 	 * 				call back to the user's screen 
 	 */
-	public static void saySpeech(String str, Application app) {
-		saySpeech(str);
-		app.message("synth voice: "+str, null, null);
-	}	
+	//public static void saySpeech(String str, Application app) {
+	//	saySpeech(str);
+	//	app.message("synth voice: "+str, null, null);
+	//}	
 	
 	/**
 	 * write new value to user's screen and set it 
@@ -342,18 +347,24 @@ public class Util {
 	 */
 	public static void announce(final String str) {
 
-		final Settings settings = new Settings();
-		if(settings.getBoolean(Settings.notify)){
+		// final Settings settings = new Settings();
+		// if(settings.getBoolean(Settings.notify)){
+			
+		if(notify){
 			
 			//new Thread(new Runnable() {
 				//public void run() {
 		
 					// remember current value 
 					int volume = settings.getInteger(Settings.volume);
-					
-					// set to max 
 					Util.setSystemVolume(100);
-					saySpeech(str);
+					
+					// beep only
+					systemCall("nircmdc.exe beep 500 1000", true);
+					
+					
+					
+					// saySpeech(str);
 					
 					// put it back 
 					Util.setSystemVolume(volume);

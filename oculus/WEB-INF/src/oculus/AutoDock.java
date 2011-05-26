@@ -78,24 +78,25 @@ public class AutoDock {
 		System.out.println("autodock: " + str);
 		
 		String cmd[] = str.split(" ");
-		
 		if (cmd[0].equals("cancel")) {
-			
-			// app.autodocking = false;
 			state.set(State.autodocking, "false");
-			
 			app.message("auto-dock ended","multiple","cameratilt " +app.camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("dockgrab", new Object[] {0,0,"cancel"});
 		}
 		if (cmd[0].equals("go")) {
-			if (state.getBoolean(State.motionenabled)) { //app.motionenabled == true) {
+			if (state.getBoolean(State.motionenabled)) { 
+				
 				//int x = Integer.parseInt(cmd[1])/2; //assuming 320x240
 				//int y = Integer.parseInt(cmd[2])/2; //assuming 320x240
+				
+				state.set(State.dockx, cmd[1]);
+				state.set(State.docky, cmd[2]);
+				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
-				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unused
+				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
 				
 				state.set(State.autodocking, "true");
 				autodockingcamctr = false;
@@ -109,6 +110,10 @@ public class AutoDock {
 		if (cmd[0].equals("dockgrabbed")) { // RESULTS FROM GRABBER: calibrate, findfromxy, find
 			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.autodocking)) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
+			
+				state.set(State.dockx, cmd[1]);
+				state.set(State.docky, cmd[2]);
+			
 				if (cmd[4].equals("0")) { // width==0, failed to find target
 					if (autodockgrabattempts < 0) { // TODO: remove this condition if unused
 						autodockgrabattempts ++;
@@ -117,8 +122,7 @@ public class AutoDock {
 					}
 					else { 
 						//failed, give up
-						state.set(State.autodocking, "false");
-						
+						state.set(State.autodocking, "false");		
 						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
 					}
@@ -149,8 +153,7 @@ public class AutoDock {
 		if (cmd[0].equals("getdocktarget")) {
 			docktarget = settings.readSetting("docktarget");
 			app.messageGrabber("docksettings", docktarget);
-			
-			log.info("got dock target: " + docktarget);
+			// log.info("got dock target: " + docktarget);
 		}
 	}
 	
@@ -158,22 +161,16 @@ public class AutoDock {
 
 	void dock(String str) {
 		if (str.equals("dock") && !state.getBoolean(State.docking)) {
-			if (state.getBoolean(State.motionenabled)){ //app.motionenabled == true) {
+			if (state.getBoolean(State.motionenabled)){
 				if (!life.batteryCharging()) {
 					
 					app.message("docking initiated", "multiple", "speed slow motion moving dock docking");
 
 					// need to set this because speedset calls goForward also if true
 					comport.movingforward = false; 
-					
 					comport.speedset("slow");
-					//comport.goForward();
-					// docking = true;
 					state.set(State.docking, "true");
 					app.dockstatus = "docking";
-					
-					//Date d = new Date();
-					//dockstarttime = d.getTime();
 					
 					new Thread(new Runnable() {
 						public void run() {

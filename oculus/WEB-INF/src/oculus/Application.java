@@ -23,15 +23,19 @@ import org.slf4j.Logger;
 
 public class Application extends MultiThreadedApplicationAdapter {
 	
-	IConnection grabber = null;
-	IConnection player = null;
+	private static final int STREAM_CONNECT_DELAY = 2000;
+	
+	private IConnection grabber = null;
+	private IConnection player = null;
 
 	private ArduinoCommDC comport = null; 
 	private LightsComm light = null;
 	
-	// protected Speech sayit = new Speech("kevin16");
+	// optionally log all moves if a developer 
+	private LogManager moves = new LogManager();
+	
 	private BatteryLife battery = null;
-	private Settings settings= new Settings();
+	private Settings settings = new Settings();
 	protected boolean initialstatuscalled = false;
 	private static String salt = "PSDLkfkljsdfas345usdofi";
 	ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
@@ -50,7 +54,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean emailgrab = false;
 	private AutoDock docker = null;
 	private State state = State.getReference();
-	private static final int STREAM_CONNECT_DELAY = 2000;
 
 	public Application() { 
 		super();
@@ -186,7 +189,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		grabberInitialize();
 		
 		battery = BatteryLife.getReference();
- 
+		
+		if(settings.getBoolean(Settings.developer))
+			moves.open(System.getenv("RED5_HOME")+"\\log\\moves.log");
+
 		log.info("initialize");
 	}
 	
@@ -692,16 +698,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void moveMacroCancel() {
-		if (/*docker.isDocking()*/ state.getBoolean(State.docking) == true) {
+		if (state.getBoolean(State.docking) == true) {
 			String str = "";
 			if (!dockstatus.equals("docked")) {
 				dockstatus = "un-docked";
 				str += "dock un-docked";
 			}
-			// if (!comport.moving) { str += " motion stopped"; }
 			messageplayer("docking cancelled by movement", "multiple", str);
 			docker.cancel();
-			// docking = false; 
 		}
 		if (comport.sliding == true) {
 			comport.slidecancel();
@@ -838,27 +842,29 @@ public class Application extends MultiThreadedApplicationAdapter {
 			s = "STOPPED"; 
 			msg = "command received: "+str;
 		}
-		if (state.getBoolean(State.motionenabled)){ // (motionenabled == true) {
-			if (str.equals("forward")) { comport.goForward(); }
-			if (str.equals("backward")) { comport.goBackward(); }
-			if (str.equals("right")) { comport.turnRight(); }
-			if (str.equals("left")) { comport.turnLeft(); }
+		if (state.getBoolean(State.motionenabled)){ 
+			if (str.equals("forward")) { comport.goForward(); }//  moves.append("forward"); }
+			if (str.equals("backward")) { comport.goBackward();}// moves.append("backward"); }
+			if (str.equals("right")) { comport.turnRight();}// moves.append("right"); }
+			if (str.equals("left")) { comport.turnLeft();}// moves.append("left"); }
 			moveMacroCancel();
 			if (s.equals("")) { s = "MOVING"; }
 			msg = "command received: "+str;
 		}
 		else {
 			s = "DISABLED";
-			// msg set above
 		}
 		messageplayer(msg, "motion", s);
+		moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
 	}
 	
 	private void nudge(String str) {
 		if (state.getBoolean(State.motionenabled)){ 
 			comport.nudge(str);
-			messageplayer("command received: nudge" + str, null, null);
 			
+			// TODO: LOG DIFFERENTLY? 
+			messageplayer("command received: nudge" + str, null, null);
+			moves.append(str + " " + State.dockx + " " + state.get(State.docky));
 			if (state.getBoolean(State.docking)
 					|| state.getBoolean(State.autodocking)) moveMacroCancel(); 
 		}
@@ -881,12 +887,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void clickSteer(String str) {
 		if (state.getBoolean(State.motionenabled)){
 			int n = comport.clickSteer(str);
+			
+			moves.append("clicksteer " + str);
+			
 			if (n != 999) {
 				messageplayer("received: clicksteer " + str, "cameratilt", camTiltPos());
-			}
-			else {
+			} else {
 				messageplayer("received: clicksteer " + str, null, null);
 			}
+			
 			moveMacroCancel();
 		}
 		else { messageplayer("motion disabled", "motion", "disabled"); }

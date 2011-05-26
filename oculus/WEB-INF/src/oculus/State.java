@@ -29,6 +29,17 @@ public class State {
 	public static final String docking = "docking";
 	public static final String motionenabled = "motionenabled";
 	
+	//blic static final String notify = "notify";
+	
+	//public static final String emailalerts = "emailalerts";
+	
+
+	// public static final String developer = "developer";
+
+	public static final String dockx = "dockx";
+	public static final String docky = "docky";
+
+	
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
@@ -41,7 +52,7 @@ public class State {
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
-
+	
 	/** properties object to hold configuration */
 	private Properties props = new Properties();
 	

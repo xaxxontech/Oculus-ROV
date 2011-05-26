@@ -12,7 +12,7 @@ public class Settings {
 	// put all constants here
 	public static final String emailalerts = "emailalerts";
 	public static final String volume = "volume";
-	public static final String notify = "notify";
+	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
 	public static final String developer = "developer";
 	
@@ -156,8 +156,7 @@ public class Settings {
 		catch (Exception e) { e.printStackTrace(); }
 		
 		FileOutputStream fileout;
-		try
-		{
+		try{
 			fileout = new FileOutputStream (filename);
 			for (int n=0; n<lines.length; n++) {
 				if (lines[n] != null) {
@@ -165,14 +164,19 @@ public class Settings {
 				}
 			}
 		    fileout.close();		
-		}
-		catch (Exception e) { e.printStackTrace(); }
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 	
+	/**
+	 * read whole file, add single line, write whole file
+	 * 
+	 * @param setting
+	 * @param value
+	 */
 	public void newSetting(String setting, String value) {
-		//read whole file, add single line, write whole file
-		setting = setting.replaceAll("\\s+$", ""); // remove trailing whitespace
-		value = value.replaceAll("\\s+$", ""); 
+
+		setting = value.trim();// setting.replaceAll("\\s+$", ""); // remove trailing whitespace
+		value = value.trim();  // value.replaceAll("\\s+$", ""); 
 		
 		FileInputStream filein;
 		String[] lines = new String[999];
@@ -203,7 +207,7 @@ public class Settings {
 		}
 		catch (Exception e) { e.printStackTrace(); }
 	}
-	
+
 	public void deleteSetting(String setting) {
 		//read whole file, remove offending line, write whole file
 		setting = setting.replaceAll("\\s+$", ""); // remove trailing whitespace

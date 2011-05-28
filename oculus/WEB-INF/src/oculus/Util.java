@@ -23,6 +23,7 @@ public class Util {
 	// private final boolean debug = settings.getBoolean(Settings.developer);
 	// private final boolean alerts = settings.getBoolean(Settings.emailalerts);
 //	private static final boolean notify = settings.getBoolean(Settings.loginnotify);
+
 	
 	/**
 	 * Delays program execution for the specified delay.
@@ -295,12 +296,7 @@ public class Util {
 	 * 				the phrase to turn into sound via host computer's speakers 
 	 * 
 	 */
-	public static void saySpeech(String str) {
-		Speech speech = new Speech("kevin16");
-		speech.mluv(str);
-		Logger log = Red5LoggerFactory.getLogger(Util.class, "oculus");
-		log.info("voice synth: '"+str+"'");
-	}
+
 	
 
 	/**

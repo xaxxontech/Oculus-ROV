@@ -9,8 +9,7 @@ public class Speech {
 	VoiceManager voiceManager;
 	Voice voice;
 
-	Speech(String name) {
-		voiceName = name;
+	Speech() {
 		this.setup();
 	}
 
@@ -38,4 +37,5 @@ public class Speech {
 	void exit() {
 		voice.deallocate();
 	}
+
 }

@@ -54,6 +54,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean emailgrab = false;
 	private AutoDock docker = null;
 	private State state = State.getReference();
+	private Speech speech = new Speech();
 
 	public Application() { 
 		super();
@@ -403,7 +404,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				
 			case move: move(str); break;
 			case nudge: nudge(str); break;
-			case speech: Util.saySpeech(str); break;
+			case speech: saySpeech(str); break;
 			case dock: moves.append("docking"); docker.dock(str); break;
 			case battStats: battery.battStats(); break;
 			case cameracommand: cameraCommand(str); break;
@@ -611,22 +612,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	/** 
-	private void saySpeech(final String str) {
-		new Thread(new Runnable() { 
-			public void run() {					
-				
-				messageplayer("synth voice: "+str, null, null);
-				messageGrabber("synth voice: "+str,null);
-				Speech sayit = new Speech("kevin16");
-				sayit.mluv(str);
-				//Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
-				log.info("voice synth: '"+str+"'");
-				
-			}
-		});
-	}*/
-
+	private void saySpeech(String str) {
+		messageplayer("synth voice: "+str, null, null);
+		messageGrabber("synth voice: "+str,null);
+		speech.mluv(str);
+		//Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
+		log.info("voice synth: '"+str+"'");				
+	}
+	
 	private void getDrivingSettings() {
 		if (admin) {
 			String str = comport.speedslow + " " + comport.speedmed + " " 

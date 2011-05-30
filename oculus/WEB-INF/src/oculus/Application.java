@@ -441,9 +441,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
 			
 			default:
-				System.out.println("command not found: " + cmd.toString());
-				for( playerCommands command : playerCommands.values() )
-					System.out.println(command.ordinal() + " = " + command.toString());
+			//	System.out.println("command not found: " + cmd.toString());
+			//	for( playerCommands command : playerCommands.values() )
+			//		System.out.println(command.ordinal() + " = " + command.toString());
 				break;
 			}
 		
@@ -500,27 +500,24 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 		case facerect: messageplayer(null, "facefound", str);
 			break; 
-			
-			//
-			// TODO: GET RID of string literals 
-			//
+	
 		case restart: 
 			admin=true;
 			System.out.println("restart command received from grabber");
 			restart();
 			break;
 			
-		case dockgrabbed: docker.autoDock("dockgrabbed "+str);
-			break;
+		case dockgrabbed: docker.autoDock("dockgrabbed "+str); break;
 			
 		case autodock: docker.autoDock(str); break;
 			
 		case checkforbattery: checkForBattery(str); break;
 			
+		
 		default: 
-			System.out.println("command not found: " + cmd.toString());
-			for( gabberCommands command : gabberCommands.values() )
-				System.out.println(command.ordinal() + " = " + command.toString());
+		//	System.out.println("command not found: " + cmd.toString());
+		//	for( gabberCommands command : gabberCommands.values() )
+		//		System.out.println(command.ordinal() + " = " + command.toString());
 			break;
 		}
 	}
@@ -595,7 +592,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			} catch(IOException e) {log.info("Save_ScreenShot: Writing of screenshot failed " + e); 
 			System.out.println("IO Error " + e);}
 		}
-
 	}
 		
 	private void messageplayer(String str, String status, String value) {
@@ -836,10 +832,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			msg = "command received: "+str;
 		}
 		if (state.getBoolean(State.motionenabled)){ 
-			if (str.equals("forward")) { comport.goForward(); }//  moves.append("forward"); }
-			if (str.equals("backward")) { comport.goBackward();}// moves.append("backward"); }
-			if (str.equals("right")) { comport.turnRight();}// moves.append("right"); }
-			if (str.equals("left")) { comport.turnLeft();}// moves.append("left"); }
+			if (str.equals("forward")) { comport.goForward();}
+			if (str.equals("backward")) { comport.goBackward();}
+			if (str.equals("right")) { comport.turnRight();}
+			if (str.equals("left")) { comport.turnLeft();}
 			moveMacroCancel();
 			if (s.equals("")) { s = "MOVING"; }
 			msg = "command received: "+str;
@@ -849,16 +845,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		messageplayer(msg, "motion", s);
 		
-		moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
+		if(state.get(State.dockx) == null) moves.append(str);
+		else moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
 	}
 	
 	private void nudge(String str) {
 		if (state.getBoolean(State.motionenabled)){ 
 			comport.nudge(str);
 			
-			// TODO: LOG DIFFERENTLY? 
 			messageplayer("command received: nudge" + str, null, null);
-			moves.append(str + " " + State.dockx + " " + state.get(State.docky));
+			
+			if(state.get(State.dockx) == null) moves.append(str);
+			else moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
+	
 			if (state.getBoolean(State.docking)
 					|| state.getBoolean(State.autodocking)) moveMacroCancel(); 
 		}

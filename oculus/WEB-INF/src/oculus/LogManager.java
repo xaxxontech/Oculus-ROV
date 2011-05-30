@@ -1,7 +1,6 @@
 package oculus;
 
 import java.io.RandomAccessFile;
-import java.util.Date;
 
 /**
  * Manage a log file on local storage
@@ -12,8 +11,7 @@ public class LogManager {
     
     private RandomAccessFile logfile = null;
 
-    public LogManager() {
-    }
+    public LogManager() {}
 
     /**
      * Opens the specified logfile with read/write access.

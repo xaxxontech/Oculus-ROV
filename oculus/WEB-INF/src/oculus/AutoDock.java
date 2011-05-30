@@ -42,14 +42,12 @@ public class AutoDock {
 	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
 	private State state = State.getReference();
 	private BatteryLife life = BatteryLife.getReference();
+	private LogManager moves = null; 
 	private Settings settings = new Settings();
 	private IConnection grabber = null;
 	private String docktarget = null;
 	private ArduinoCommDC comport = null; 
 	private Application app = null;
-	
-	// private boolean docking = false;
-	
 	
 	private boolean autodockingcamctr = false;
 	private int autodockgrabattempts;
@@ -59,24 +57,20 @@ public class AutoDock {
 		this.app = theapp;
 		this.grabber = thegrab;
 		this.comport = com;
-	}
-	
-	// TODO: Move to state! 
-	// public boolean isDocking(){
-	//	return docking;
-	//}
-	
-	public void cancel(){
 		
+		if(settings.getBoolean(Settings.developer)){
+			moves = new LogManager();
+			moves.open(System.getenv("RED5_HOME")+"\\log\\moves.log");
+		}
+	}
+		
+	public void cancel(){
 		state.set(State.docking, "false");
-		//docking = false;
 	}
 
 	public void autoDock(String str) {
 		
 		log.debug("autodock: " + str);
-		//System.out.println("autodock: " + str);
-		
 		String cmd[] = str.split(" ");
 		if (cmd[0].equals("cancel")) {
 			state.set(State.autodocking, "false");
@@ -108,9 +102,7 @@ public class AutoDock {
 			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.autodocking)) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 			
-				//state.set(State.dockx, cmd[1]);
-				//state.set(State.docky, cmd[2]);
-			
+
 				if (cmd[4].equals("0")) { // width==0, failed to find target
 					if (autodockgrabattempts < 0) { // TODO: remove this condition if unused
 						autodockgrabattempts ++;
@@ -127,12 +119,14 @@ public class AutoDock {
 				else {
 					app.message(null,"autodocklock",s);
 
+					// TODO: testing 
 					state.set(State.dockx, cmd[2]);
 					state.set(State.docky, cmd[3]);
+					moves.append("docking " + cmd[2] + " " + cmd[3]);
 					
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
 						Integer.parseInt(cmd[5]),new Float(cmd[6]));
-					autodockgrabattempts ++;
+					autodockgrabattempts++;
 				}
 			}
 			if (cmd[1].equals("calibrate")) { // x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
@@ -158,8 +152,7 @@ public class AutoDock {
 		}
 	}
 	
-	
-
+	/** */
 	void dock(String str) {
 		if (str.equals("dock") && !state.getBoolean(State.docking)) {
 			if (state.getBoolean(State.motionenabled)){
@@ -191,7 +184,6 @@ public class AutoDock {
 								app.message(null,"motion","stopped");
 								if (life.batteryStatus() == 2) {
 									state.set(State.docking, "false");
-									//docking = false;
 									String str = "";
 									if (state.getBoolean(State.autodocking)) {
 										state.set(State.autodocking, "false");
@@ -204,7 +196,6 @@ public class AutoDock {
 									log.info(app.userconnected +" docked successfully");
 									
 									state.set(State.motionenabled, "false");
-									//app.motionenabled = false;
 									app.dockstatus = "docked"; // needs to be before battStats()
 									life.battStats(); 
 									break;
@@ -235,7 +226,6 @@ public class AutoDock {
 											sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 										} catch (Exception e) { e.printStackTrace(); } } }).start();
 									}
-									
 									break;
 								}
 							}
@@ -250,7 +240,6 @@ public class AutoDock {
 			comport.speedset("slow");
 			comport.goBackward();
 			state.set(State.motionenabled, "true");
-			// app.motionenabled = true;
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
 			app.dockstatus = "un-docked";
 			new Thread(new Runnable() {

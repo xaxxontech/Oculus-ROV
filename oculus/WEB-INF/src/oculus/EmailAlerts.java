@@ -7,7 +7,9 @@ import java.util.TimerTask;
 public class EmailAlerts {
 
 	// how low of battery to warm user with email
-	public static final int WARN_LEVEL = 30;
+	// any lower and my dell will go into 
+	// low power mode, need time to park it   
+	public static final int WARN_LEVEL = 35;
 
 	// how often to check, ten minutes 
 	public static final long DELAY = State.FIVE_MINUTES;
@@ -64,10 +66,7 @@ public class EmailAlerts {
 						
 						String msg = "The battery " + Integer.toString(life) 
 						+ "% and is draining!"; 
-						
-						// say it out loud 
-//						Util.announce(msg);
-						
+										
 						// add the link back to the user screen 
 						msg += "\n\nPlease find the dock, log in here: http://" 
 							+ Util.getExternalIPAddress() 

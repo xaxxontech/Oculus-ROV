@@ -58,7 +58,7 @@ public class Discovery {
 		try {
 
 			/* construct the serial port */
-			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(address).open("FindPort", TIMEOUT);
+			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(address).open("Discovery", TIMEOUT);
 
 			/* configure the serial port */
 			serialPort.setSerialPortParams(BAUD_RATE, DATABITS, STOPBITS, PARITY);

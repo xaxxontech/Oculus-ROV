@@ -70,7 +70,7 @@ public class AutoDock {
 
 	public void autoDock(String str) {
 		
-		log.debug("autodock: " + str);
+		// log.debug("autodock: " + str);
 		String cmd[] = str.split(" ");
 		if (cmd[0].equals("cancel")) {
 			state.set(State.autodocking, "false");

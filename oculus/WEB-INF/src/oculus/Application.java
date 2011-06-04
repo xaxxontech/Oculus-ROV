@@ -830,9 +830,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			comport.stopGoing(); 
 			s = "STOPPED"; 
 			msg = "command received: "+str;
+			
+			// update ranger if have a second ?
+			// comport.getDistance(true);
 		}
 		if (state.getBoolean(State.motionenabled)){ 
-			if (str.equals("forward")) { comport.goForward();}
+			if (str.equals("forward")) { comport.goForward(); }
 			if (str.equals("backward")) { comport.goBackward();}
 			if (str.equals("right")) { comport.turnRight();}
 			if (str.equals("left")) { comport.turnLeft();}
@@ -962,6 +965,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// Util.announce("hijacked by " + userconnected);
 		Util.beep();
+	
 	}
 	
 	private void beAPassenger(String user) {

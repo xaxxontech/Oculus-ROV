@@ -15,15 +15,15 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	private Logger log = Red5LoggerFactory.getLogger(ArduinoCommDC.class, "oculus");
 
-	// shared state variables 
+	// shared state variables
 	private State state = State.getReference();
-	
-	// if watchdog'n, re-connect if not seen input since this long ago 
-	public static final long DEAD_TIME_OUT = 10000;
+
+	// if watchdog'n, re-connect if not seen input since this long ago
+	public static final long DEAD_TIME_OUT = 3000;
 	public static final int SETUP = 3000;
 	public static final int WATCHDOG_DELAY = 1500;
 
-	// this commands require arguments from current state 
+	// this commands require arguments from current state
 	public static final byte FORWARD = 'f';
 	public static final byte BACKWARD = 'b';
 	public static final byte LEFT = 'l';
@@ -31,20 +31,21 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public static final byte COMP = 'c';
 	public static final byte CAM = 'v';
 	public static final byte ECHO = 'e';
-	
-	// ready to be sent 
-	public static final byte[] STOP = {'s'};
-	public static final byte[] GET_VERSION = {'y'};
-	public static final byte[] CAMRELEASE = {'w'};
-	private static final byte[] ECHO_ON = {'e', '1'};
-	private static final byte[] ECHO_OFF = {'e', '0'};
-	
-	// comm cannel 
+
+	// ready to be sent
+	public static final byte[] SONAR = { 'd' };
+	public static final byte[] STOP = { 's' };
+	public static final byte[] GET_VERSION = { 'y' };
+	public static final byte[] CAMRELEASE = { 'w' };
+	private static final byte[] ECHO_ON = { 'e', '1' };
+	private static final byte[] ECHO_OFF = { 'e', '0' };
+
+	// comm cannel
 	private SerialPort serialPort = null;
 	private InputStream in;
 	private OutputStream out;
-	
-	// will be discovered from the device 
+
+	// will be discovered from the device
 	protected String version = null;
 
 	// input buffer
@@ -55,8 +56,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private long lastSent = System.currentTimeMillis();
 	private long lastRead = System.currentTimeMillis();
 
-	Settings settings = new Settings(); 
-	protected int speedslow = settings.getInteger("speedslow"); 
+	Settings settings = new Settings();
+	protected int speedslow = settings.getInteger("speedslow");
 	protected int speedmed = settings.getInteger("speedmed");
 	protected int camservohoriz = settings.getInteger("camservohoriz");
 	protected int camposmax = settings.getInteger("camposmax");
@@ -66,7 +67,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int maxclickcam = settings.getInteger("maxclickcam");
 	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	protected int steeringcomp = settings.getInteger("steeringcomp");
-
+	private boolean sonar = settings.getBoolean("sonar");
+	
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
 	protected int camwait = 400;
@@ -74,6 +76,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int speedfast = 255;
 	protected int turnspeed = 255;
 	protected int speed = speedfast; // set default to max
+	private int range = 0; // if have sonar
 
 	protected String direction = null;
 	protected boolean moving = false;
@@ -83,48 +86,50 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	int clicknudgedelay = 0;
 	String tempstring = null;
 	int tempint = 0;
-	
-	// make sure all threads know if connected 
+
+	// make sure all threads know if connected
 	private volatile boolean isconnected = false;
-	
+
 	// call back
 	private Application application = null;
 
 	/**
 	 * Constructor but call connect to configure
 	 * 
-	 * @param app 
-	 * 			  is the main oculus application, we need to call it on
-	 * 			Serial events like restet            
+	 * @param app
+	 *            is the main oculus application, we need to call it on Serial
+	 *            events like restet
 	 */
 	public ArduinoCommDC(Application app) {
-		
+
 		// call back to notify on reset events etc
-		application = app; 
-		
-		if( state.get(State.serialport) != null ){
+		application = app;
+
+		if (state.get(State.serialport) != null) {
 			new Thread(new Runnable() {
 				public void run() {
-					
-					connect();				
+
+					connect();
 					Util.delay(SETUP);
 					camHoriz();
-				
+
 					// check for lost connection
 					new WatchDog().start();
-					
+
 				}
 			}).start();
 		}
 	}
-	
+
 	/** open port, enable read and write, enable events */
 	public void connect() {
 		try {
 
-			serialPort = (SerialPort)CommPortIdentifier.getPortIdentifier(
-					state.get(State.serialport)).open(ArduinoCommDC.class.getName(), SETUP);
-			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
+					state.get(State.serialport)).open(
+					ArduinoCommDC.class.getName(), SETUP);
+			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8,
+					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
 			// open streams
 			out = serialPort.getOutputStream();
@@ -133,7 +138,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			// register for serial events
 			serialPort.addEventListener(this);
 			serialPort.notifyOnDataAvailable(true);
-			
+
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			return;
@@ -141,10 +146,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 
 	/** @return True if the serial port is open */
-	public boolean isConnected(){
+	public boolean isConnected() {
 		return isconnected;
 	}
-	
+
 	@Override
 	/** buffer input on event and trigger parse on '>' charter  
 	 * 
@@ -157,9 +162,11 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				int read = in.read(input);
 				for (int j = 0; j < read; j++) {
 					// print() or println() from arduino code
-					if ((input[j] == '>') || (input[j] == 13) || (input[j] == 10)) {
-						// do what ever is in buffer 
-						if(buffSize > 0) execute();
+					if ((input[j] == '>') || (input[j] == 13)
+							|| (input[j] == 10)) {
+						// do what ever is in buffer
+						if (buffSize > 0)
+							execute();
 						// reset
 						buffSize = 0;
 						// track input from arduino
@@ -178,35 +185,47 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}
 	}
 
-	// act on feedback from arduino  
+	// act on feedback from arduino
 	private void execute() {
 		String response = "";
-		for(int i = 0 ; i < buffSize ; i++)
-			response += (char)buffer[i];
-		
-		// take action as arduino has just turned on 
-		if(response.equals("reset")){
-			
-			// might have new firmware after reseting 
+		for (int i = 0; i < buffSize; i++)
+			response += (char) buffer[i];
+
+		// take action as arduino has just turned on
+		if (response.equals("reset")) {
+
+			// might have new firmware after reseting
 			version = null;
 			new Sender(GET_VERSION);
 			isconnected = true;
 			updateSteeringComp();
-		
-		} else if(response.startsWith("version:")){
-			
-			// NOTE: watchdog will send a get version command if idle comm port  
-			if(version == null){
-				// get just the number 
-				version = response.substring( 
-						response.indexOf("version:")+8, response.length());
-	
+
+		} else if (response.startsWith("version:")) {
+
+			// NOTE: watchdog will send a get version command if idle comm port
+			if (version == null) {
+				// get just the number
+				version = response.substring(response.indexOf("version:") + 8,
+						response.length());
+
 				application.message("firmware version: " + version, null, null);
-				
+
 			} else return;
-			// don't bother showing watchdog pings to user screen 
-		} else if(response.charAt(0) != GET_VERSION[0])		
-			application.message("arduino: " + response, null, null);
+			
+			// don't bother showing watchdog pings to user screen
+		} else if (response.charAt(0) != GET_VERSION[0]) {
+		
+			// application.message("arduino: " + response, null, null);
+
+			if (response.startsWith("cm")) {
+				String val = response.substring(response.indexOf(' ')+1, response.length());
+				state.set(State.sonar, val);
+				
+				// System.out.println("range port = " + state.get(State.sonar));
+				
+				// must be a command echo then 
+			} else application.message("arduino: " + response, null, null);
+		}
 	}
 
 	/** @return the time since last write() operation */
@@ -215,10 +234,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 
 	/** @return this device's firmware version */
-	public String getVersion(){
+	public String getVersion() {
 		return version;
 	}
-	
+
 	/** @return the time since last read operation */
 	public long getReadDelta() {
 		return System.currentTimeMillis() - lastRead;
@@ -227,54 +246,67 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/** inner class to send commands */
 	private class Sender extends Thread {
 		private byte[] command = null;
+
 		public Sender(final byte[] cmd) {
 			command = cmd;
 			start();
 		}
+
 		public void run() {
 			sendCommand(command);
 		}
 	}
 
-	/** @param update is set to true to turn on echo'ing of serial commands */
-	public void setEcho(boolean update){
-		if(update) 
+	/**
+	 * @param update
+	 *            is set to true to turn on echo'ing of serial commands
+	 */
+	public void setEcho(boolean update) {
+		if (update)
 			new Sender(ECHO_ON);
-		else 
+		else
 			new Sender(ECHO_OFF);
 	}
-	
+
 	/** inner class to check if getting responses in timely manor */
 	private class WatchDog extends Thread {
 		public WatchDog() {
 			this.setDaemon(true);
 		}
+
 		public void run() {
 			Util.delay(SETUP);
 			// application.message("starting watchdog thread", null, null);
 			while (true) {
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					//
-					// TODO: this happens alots... should do something? means cable up plugged, email?
+					// TODO: this happens alots... should do something? means
+					// cable up plugged, email?
 					//
-					//if (isconnected) {
-						application.message("arduino watchdog time out", null, null);
-						reset(); 
-					//}
+					// if (isconnected) {
+					application.message("arduino watchdog time out", null, null);
+					reset();
+					// }
 				}
 
-				// send ping to keep connection alive 
-				if(getReadDelta() > (DEAD_TIME_OUT / 3))
-					if(isconnected) new Sender(GET_VERSION);
-			
+				// send ping to keep connection alive
+				if (getReadDelta() > (DEAD_TIME_OUT / 3)){
+					if (isconnected){
+						if(sonar){
+							new Sender(SONAR);
+						} else {
+							new Sender(GET_VERSION);
+						}
+					}
+				}
 				Util.delay(WATCHDOG_DELAY);
 			}
 		}
 	}
-	
-	public void reset(){
+
+	public void reset() {
 		if (isconnected) {
-			new Thread(new Runnable() { 
+			new Thread(new Runnable() {
 				public void run() {
 					disconnect();
 					connect();
@@ -296,23 +328,24 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 
 	/**
-	 * Send a multi byte command to send the arduino 
+	 * Send a multi byte command to send the arduino
 	 * 
 	 * @param command
 	 *            is a byte array of messages to send
 	 */
 	private synchronized void sendCommand(final byte[] command) {
-		
-		if(!isconnected) return;
-		
+
+		if (!isconnected)
+			return;
+
 		try {
-				
-			// send 
+
+			// send
 			out.write(command);
-		
-			// end of command 
+
+			// end of command
 			out.write(13);
-			
+
 		} catch (Exception e) {
 			reset();
 			log.error(e.getMessage());
@@ -325,8 +358,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/** */
 	public void stopGoing() {
 		// TODO: only send if really going?
-		// if (moving)	
-		
+		// if (moving)
+
 		new Sender(STOP);
 		moving = false;
 		movingforward = false;
@@ -334,14 +367,32 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	/** */
 	public void goForward() {
-		new Sender(new byte[]{ FORWARD, (byte) speed });
+		new Sender(new byte[] { FORWARD, (byte) speed });
 		moving = true;
 		movingforward = true;
 	}
 
+	/**
+	 * Get the sonar reading
+	 * 
+	 * @param fresh
+	 *            is set to true if want the most current value
+	 * @return the distance the nearest object is in front of the bot in cm
+	 * 
+	 */
+	public int getDistance(boolean fresh) {
+		
+		if(!sonar) return 0;
+		
+		// force a read, but reply with whatever is current 
+		if(fresh) new Sender(SONAR);
+
+		return range;
+	}
+
 	/** */
 	public void goBackward() {
-		new Sender(new byte[]{ BACKWARD, (byte) speed });
+		new Sender(new byte[] { BACKWARD, (byte) speed });
 		moving = true;
 		movingforward = false;
 	}
@@ -353,7 +404,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		if (speed < turnspeed && (speed + boost) < speedfast)
 			tmpspeed = speed + boost;
 
-		new Sender(new byte[]{ RIGHT, (byte) tmpspeed });
+		new Sender(new byte[] { RIGHT, (byte) tmpspeed });
 		moving = true;
 	}
 
@@ -363,13 +414,13 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		int boost = 10;
 		if (speed < turnspeed && (speed + boost) < speedfast)
 			tmpspeed = speed + boost;
-		
+
 		new Sender(new byte[] { LEFT, (byte) tmpspeed });
 		moving = true;
 	}
 
 	public void camGo() {
-		new Thread(new Runnable() { 
+		new Thread(new Runnable() {
 			public void run() {
 				while (camservodirection != 0) {
 					sendCommand(new byte[] { CAM, (byte) camservopos });
@@ -386,7 +437,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				}
 				Util.delay(250);
 				sendCommand(CAMRELEASE);
-		}}).start();
+			}
+		}).start();
 	}
 
 	public void camCommand(String str) {
@@ -405,52 +457,61 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			if (camservopos < camposmin) {
 				camservopos = camposmin;
 			}
-			new Thread(new Runnable() { public void run() {
-					sendCommand(new byte[]{ CAM, (byte) camservopos });
+			new Thread(new Runnable() {
+				public void run() {
+					sendCommand(new byte[] { CAM, (byte) camservopos });
 					Util.delay(camdelay);
 					sendCommand(CAMRELEASE);
-			} }).start();
-		} else  if (str.equals("upabit")) {
+				}
+			}).start();
+		} else if (str.equals("upabit")) {
 			camservopos += 5;
 			if (camservopos > camposmax) {
 				camservopos = camposmax;
 			}
-			new Thread(new Runnable() { public void run() {
-					sendCommand(new byte[]{ CAM, (byte) camservopos });
+			new Thread(new Runnable() {
+				public void run() {
+					sendCommand(new byte[] { CAM, (byte) camservopos });
 					Util.delay(camwait);
 					sendCommand(CAMRELEASE);
-			} }).start();
+				}
+			}).start();
 		}
 	}
 
 	/** level the camera servo */
 	public void camHoriz() {
 		camservopos = camservohoriz;
-		new Thread(new Runnable() { public void run() {
-			try {
-				byte[] cam = { CAM, (byte) camservopos };
-	            sendCommand(cam);
-	            Thread.sleep(camwait);
-	            sendCommand(CAMRELEASE);
-	            	
-			} catch (Exception e) {e.printStackTrace(); }
-		} }).start();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					byte[] cam = { CAM, (byte) camservopos };
+					sendCommand(cam);
+					Thread.sleep(camwait);
+					sendCommand(CAMRELEASE);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
 
-	
 	public void camToPos(Integer n) {
-        camservopos = n;
-        new Thread(new Runnable() {public void run() {
-            try {    	
-            	sendCommand( new byte[]{ CAM, (byte) camservopos });
-            	Thread.sleep(camwait);
-            	sendCommand(CAMRELEASE);
-            } catch (Exception e) {
-            	e.printStackTrace();
-            }
-        } }).start();
+		camservopos = n;
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					sendCommand(new byte[] { CAM, (byte) camservopos });
+					Thread.sleep(camwait);
+					sendCommand(CAMRELEASE);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
-    
+
 	/** Set the speed on the bot */
 	public void speedset(String str) {
 		if (str.equals("slow")) {
@@ -487,7 +548,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}
 
 		Util.delay(n);
-		
+
 		if (movingforward == true) {
 			goForward();
 		} else {
@@ -627,14 +688,18 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			camservopos = camposmin;
 		}
 
-		new Thread(new Runnable() { public void run() {
-			try {
-				byte[] command = { CAM, (byte) camservopos };
-				sendCommand(command);
-				Thread.sleep(camwait + clicknudgedelay);
-				sendCommand(CAMRELEASE);
-			} catch (Exception e) {e.printStackTrace(); }
-		} }).start();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					byte[] command = { CAM, (byte) camservopos };
+					sendCommand(command);
+					Thread.sleep(camwait + clicknudgedelay);
+					sendCommand(CAMRELEASE);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 		return camservopos;
 	}
 

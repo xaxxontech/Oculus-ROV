@@ -29,15 +29,14 @@ public class State {
 	public static final String docking = "docking";
 	public static final String motionenabled = "motionenabled";
 	
+	// these in settings now, don't change often 
 	//blic static final String notify = "notify";
-	
 	//public static final String emailalerts = "emailalerts";
-	
-
 	// public static final String developer = "developer";
 
 	public static final String dockx = "dockx";
 	public static final String docky = "docky";
+	public static final String sonar = "sonar";
 
 	
 	public static final long ONE_DAY = 86400000;

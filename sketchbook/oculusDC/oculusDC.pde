@@ -1,7 +1,7 @@
 #include <Servo.h>
 
 // pins
-// const int analogInPin = 0;  
+const int pingPin = 7;       // Range finder  
 const int motorA1Pin = 4;    // H-bridge pin 2         LEFT motor
 const int motorA2Pin = 2;    // H-bridge pin 7         LEFT motor
 const int motorB1Pin = 7;    // H-bridge pin 10        RIGHT motor
@@ -16,12 +16,11 @@ Servo camservo; // tilt
 int acomp = 0;
 int bcomp = 0;
 
-boolean echo = false;
-
 // buffer the command in byte buffer 
 const int MAX_BUFFER = 8;
 int buffer[MAX_BUFFER];
 int commandSize = 0;
+boolean echo = false;
 
 void setup() { 
   pinMode(motorA1Pin, OUTPUT); 
@@ -47,9 +46,31 @@ void loop() {
     // commands take priority 
     manageCommand(); 
   } 
+}
 
-  // if not busy doing a command  
-  // pollSensors();
+void sonar(){
+  // establish variables for duration of the ping, 
+  // and the distance result in inches and centimeters:
+  long duration, cm;
+
+  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  pinMode(pingPin, OUTPUT);
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW);
+
+  // The same pin is used to read the signal from the PING))): a HIGH
+  // pulse whose duration is the time (in microseconds) from the sending
+  // of the ping to the reception of its echo off of an object.
+  pinMode(pingPin, INPUT);
+  duration = pulseIn(pingPin, HIGH);
+
+  // convert the time into a distance
+  cm = duration / 29 / 2;
+  Serial.println("<cm " + (String)cm + ">");
 }
 
 // buffer and/or execute commands from host controller 
@@ -63,7 +84,8 @@ void manageCommand(){
       parseCommand();
       commandSize = 0; 
     }
-  } else {
+  } 
+  else {
 
     // buffer it 
     buffer[commandSize++] = input;
@@ -91,34 +113,34 @@ void parseCommand(){
     digitalWrite(motorA2Pin, LOW);  
     digitalWrite(motorB1Pin, HIGH); 
     digitalWrite(motorB2Pin, LOW);
-//    Serial.println("<forward>");  
+    //    Serial.println("<forward>");  
   }
   else if (buffer[0] == 'b') {
     digitalWrite(motorA1Pin, LOW);  
     digitalWrite(motorA2Pin, HIGH); 
     digitalWrite(motorB1Pin, LOW);  
     digitalWrite(motorB2Pin, HIGH);
- //   Serial.println("<backward>"); 
+    //   Serial.println("<backward>"); 
   }
   else if (buffer[0] == 'r') {
     digitalWrite(motorA1Pin, HIGH);   
     digitalWrite(motorA2Pin, LOW); 
     digitalWrite(motorB1Pin, LOW);  
     digitalWrite(motorB2Pin, HIGH);
-   // Serial.println("<right>"); 
+    // Serial.println("<right>"); 
   }
   else if (buffer[0] == 'l') {
     digitalWrite(motorA1Pin, LOW);  
     digitalWrite(motorA2Pin, HIGH); 
     digitalWrite(motorB1Pin, HIGH); 
     digitalWrite(motorB2Pin, LOW);
-   // Serial.println("<left>");
+    // Serial.println("<left>");
   } 
   if(buffer[0] == 'x'){
     Serial.println("<id:oculusDC>");
   }   
   else if(buffer[0] == 'y'){
-    Serial.println("<version:0.5.2>"); 
+    Serial.println("<version:2>"); 
   }   
   else if (buffer[0] == 's') {
     OCR2A = 0;
@@ -128,11 +150,11 @@ void parseCommand(){
   else if(buffer[0] == 'v'){
     camservo.attach(camservopin);
     camservo.write(buffer[1]);
-   // Serial.println("<camTilt " + (String)buffer[1] + ">");
+    // Serial.println("<camTilt " + (String)buffer[1] + ">");
   }
   else if(buffer[0]== 'w'){
     camservo.detach();
-   // Serial.println("<camRelease>");
+    // Serial.println("<camRelease>");
   }
   else if(buffer[0] == 'c'){
     // 128 = 0, > 128 = acomp, < 128 = bcomp
@@ -156,6 +178,13 @@ void parseCommand(){
     if(buffer[1] == '0')
       echo = false ;
   } 
+  else if(buffer[0] == 'd'){
+    sonar();
+  } 
+  //else {
+    // do in echo mode only ?
+    //Serial.println("<error>");
+  //}
 
   // echo the command back 
   if(echo) { 
@@ -171,5 +200,9 @@ void parseCommand(){
         Serial.print(',');    
     } 
     Serial.println(">");
- }
+  }
 }
+
+
+
+

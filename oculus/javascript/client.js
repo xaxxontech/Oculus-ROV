@@ -212,7 +212,6 @@ function message(message, colour, status, value) {
 		var tempmessage = message;
 		var d = new Date();
 		
-
 		if (message == "status check received") { 
 			statuscheckreceived=true;
 			if (officiallagtimer != 0) {

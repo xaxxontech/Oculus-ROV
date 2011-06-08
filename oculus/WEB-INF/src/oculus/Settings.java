@@ -175,7 +175,7 @@ public class Settings {
 	 */
 	public void newSetting(String setting, String value) {
 
-		setting = value.trim();// setting.replaceAll("\\s+$", ""); // remove trailing whitespace
+		setting = setting.trim();// setting.replaceAll("\\s+$", ""); // remove trailing whitespace
 		value = value.trim();  // value.replaceAll("\\s+$", ""); 
 		
 		FileInputStream filein;

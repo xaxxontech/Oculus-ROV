@@ -67,7 +67,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int maxclickcam = settings.getInteger("maxclickcam");
 	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	protected int steeringcomp = settings.getInteger("steeringcomp");
-	private boolean sonar = settings.getBoolean("sonar");
+	private boolean sonar;
 	
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
@@ -119,6 +119,11 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				}
 			}).start();
 		}
+		
+		// sonar not included in stock hardware, so can be not present in oculus_settings.conf
+		try { sonar = settings.getBoolean("sonar"); }
+		catch (Exception e) { sonar = false; }
+		
 	}
 
 	/** open port, enable read and write, enable events */

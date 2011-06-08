@@ -122,7 +122,7 @@ public class AutoDock {
 					// TODO: testing 
 					state.set(State.dockx, cmd[2]);
 					state.set(State.docky, cmd[3]);
-					moves.append("docking " + cmd[2] + " " + cmd[3]);
+//					moves.append("docking " + cmd[2] + " " + cmd[3]); // throwing null pointer
 					
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
 						Integer.parseInt(cmd[5]),new Float(cmd[6]));

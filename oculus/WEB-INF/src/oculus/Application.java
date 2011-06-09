@@ -988,20 +988,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		Util.beep();
 	}
-	
-	/*// causes slowness => JNI conflicts with OS?
-	private void signalStrength() {
-		if (((settings.readSetting("wifienabled")).toUpperCase()).equals("YES")) {
-			new Thread(new Runnable() {
-				public void run() {
-					String str = wifi.wifiSignalStrength();
-					messageplayer(null, "wifi", str);
-				}
-			}).start();
-		}
-	}
-	*/
-	
+
 	private void playerBroadCast(String str) {
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
@@ -1239,6 +1226,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//System.out.println(str);
 		String message = "";
 		Boolean oktoadd = true;
+		Boolean restartrequired = false;
 		String user = null;
 		String password = null;
 		String httpport = null;
@@ -1294,14 +1282,26 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		// httpport
-		if (httpport != null) { settings.writeRed5Setting("http.port", httpport); }
+		if (httpport != null) { 
+			if (!(settings.readRed5Setting("http.port")).equals(httpport)) { restartrequired = true; }
+			settings.writeRed5Setting("http.port", httpport); 
+		}
 		// rtmpport
-		if (rtmpport != null) { settings.writeRed5Setting("rtmp.port", rtmpport); }
+		if (rtmpport != null) { 
+			if (!(settings.readRed5Setting("rtmp.port")).equals(rtmpport)) { restartrequired = true; }
+			settings.writeRed5Setting("rtmp.port", rtmpport); 
+		}
+		
 		// skipsetup
 		if (skipsetup != null) { settings.writeSettings("skipsetup", skipsetup); }
 		
 		if (oktoadd) {
 			message = "launch server";
+			if (restartrequired) { 
+				message = "shutdown";
+				admin= true;
+				restart();
+			}
 		}		
 		messageGrabber(message,null);
 	}
@@ -1416,13 +1416,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 	}
-	
-	/*
-	private void setSystemVolume(int percent) {
-		settings.writeSettings("volume", Integer.toString(percent));
-		float vol = (float) percent / 100 * 65535;
-		String str = "nircmdc.exe setsysvolume "+ (int) vol;
-		Util.systemCall(str, true);
-		messageplayer("ROV volume set to "+Integer.toString(percent)+"%", null, null);
-	}*/
+
+
 }

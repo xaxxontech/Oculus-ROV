@@ -1,3 +1,7 @@
+/* 
+ * unused, was causing lockup over time
+ */
+
 package oculus;
 
 import com.jacob.activeX.ActiveXComponent;

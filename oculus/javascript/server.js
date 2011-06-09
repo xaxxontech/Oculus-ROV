@@ -16,7 +16,35 @@ function flashloaded() {
 	if (!initialize) { setTimeout("reload();", reloadinterval); }
 	setTimeout("callServer('checkforbattery','init')",2000);
 	setTimeout("callServer('checkforbattery','ispresent')",7000);
+	openxmlhttp("rtmpPortRequest",rtmpPortReturned);
 }
+
+function openxmlhttp(theurl, functionname) {
+	  if (window.XMLHttpRequest) {// code for all new browsers
+	    xmlhttp=new XMLHttpRequest();}
+	  else if (window.ActiveXObject) {// code for IE5 and IE6
+	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP"); 
+	    theurl += "?" + new Date().getTime();
+	  }
+	  if (xmlhttp!=null) {
+	    xmlhttp.onreadystatechange=functionname; // event handler function call;
+	    xmlhttp.open("GET",theurl,true);
+	    xmlhttp.send(null);
+	  }
+	  else {
+	    alert("Your browser does not support XMLHTTP.");
+	  }
+}
+
+function rtmpPortReturned() { //xmlhttp event handler
+	if (xmlhttp.readyState==4) {// 4 = "loaded"
+		if (xmlhttp.status==200) {// 200 = OK
+			getFlashMovie("oculus_grabber").setRtmpPort(xmlhttp.responseText);
+			getFlashMovie("oculus_grabber").connect();
+		}
+	}
+}
+
 
 function reload() {
 	if (stream == "stop") {

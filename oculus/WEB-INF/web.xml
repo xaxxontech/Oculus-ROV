@@ -19,7 +19,22 @@
 		</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-
+	
+	<!-- start of added by colin adamson -->
+	<servlet>
+		<servlet-name>rtmpPortRequest</servlet-name>
+		<servlet-class>
+			oculus.RtmpPortRequest
+		</servlet-class>
+		<load-on-startup>3</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>rtmpPortRequest</servlet-name>
+		<url-pattern>/rtmpPortRequest</url-pattern>
+	</servlet-mapping>
+	<!-- end of added by colin adamson-->
+	
 	<servlet-mapping>
 		<servlet-name>gateway</servlet-name>
 		<url-pattern>/gateway</url-pattern>

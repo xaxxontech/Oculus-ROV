@@ -5,9 +5,10 @@ var logintimer; // timer
 var username;
 var streammode = "stop";
 var steeringmode;
+var xmlhttp=null;
 
 function loaded() {
-
+	
 }
 
 function resized() {
@@ -16,9 +17,37 @@ function resized() {
 
 function flashloaded() {
 	//getFlashMovie("oculus_player").connect("colin asdfds"); //loginsend
-	var user = window.OCULUSANDROID.getUser();
-	var pass = window.OCULUSANDROID.getPass();
-	loginsend(user,pass);
+//	var rtmpPort = window.OCULUSANDROID.getRtmpPort();
+	//setTimeout("loginsend("+user+","+pass+","+rtmpPort+")",50);
+	openxmlhttp("rtmpPortRequest",rtmpPortReturned);
+}
+
+function openxmlhttp(theurl, functionname) {
+	  if (window.XMLHttpRequest) {// code for all new browsers
+	    xmlhttp=new XMLHttpRequest();}
+	  else if (window.ActiveXObject) {// code for IE5 and IE6
+	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP"); 
+	    theurl += "?" + new Date().getTime();
+	  }
+	  if (xmlhttp!=null) {
+	    xmlhttp.onreadystatechange=functionname; // event handler function call;
+	    xmlhttp.open("GET",theurl,true);
+	    xmlhttp.send(null);
+	  }
+	  else {
+	    alert("Your browser does not support XMLHTTP.");
+	  }
+}
+
+function rtmpPortReturned() { //xmlhttp event handler
+	if (xmlhttp.readyState==4) {// 4 = "loaded"
+		if (xmlhttp.status==200) {// 200 = OK
+			getFlashMovie("oculus_android").setRtmpPort(xmlhttp.responseText);
+			var user = window.OCULUSANDROID.getUser();
+			var pass = window.OCULUSANDROID.getPass();
+			loginsend(user, pass);
+		}
+	}
 }
 
 function callServer(fn, str) {
@@ -70,6 +99,7 @@ function setstatus(status, value) {
 	if (status == "hijacked") { window.location.reload(); }
 	if (status == "stream" && (value.toUpperCase() != streammode.toUpperCase())) { play(value); }
 	if (status == "address") { document.title = "Cyclops "+value; }
+	if (status == "connection" && value == "closed") { window.OCULUSANDROID.connectionClosed(); }
 }
 
 function setstatusmultiple(value) {
@@ -80,7 +110,7 @@ function setstatusmultiple(value) {
 	}
 }
 
-function loginsend(str1, str2) {
+function loginsend(user, pass) {
 	/*
 	var str1= document.getElementById("user").value;
 	var str2= document.getElementById("pass").value;
@@ -88,7 +118,7 @@ function loginsend(str1, str2) {
 	if (str3 == true) { str3="remember"; }
 	else { eraseCookie("auth"); }
 	*/
-	getFlashMovie("oculus_android").connect(str1+" "+str2+" false");
+	getFlashMovie("oculus_android").connect(user+" "+pass+" false"); // false is for cookie param, not applicable here
 	// logintimer = setTimeout("window.location.reload()", logintimeout);
 }
 

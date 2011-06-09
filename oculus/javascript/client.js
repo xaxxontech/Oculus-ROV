@@ -60,6 +60,7 @@ var popupmenu_xoffset = null;
 var popupmenu_yoffset = null;
 var bworig;
 var rovvolume = 0;
+var xmlhttp=null;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -69,6 +70,41 @@ function loaded() {
 	b.src = 'images/steering_icon_selected.gif';
 	bworig= document.body.clientWidth;
 	var a = document.getElementById("blorg");
+	
+//	openxmlhttp("xmlhttpHandler",xmlhttpreturned);
+//	debug("request sent");
+}
+
+function flashloaded() {
+	videologo("on");
+	openxmlhttp("rtmpPortRequest",rtmpPortReturned);
+}
+
+function openxmlhttp(theurl, functionname) {
+	  if (window.XMLHttpRequest) {// code for all new browsers
+	    xmlhttp=new XMLHttpRequest();}
+	  else if (window.ActiveXObject) {// code for IE5 and IE6
+	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP"); 
+	    theurl += "?" + new Date().getTime();
+	  }
+	  if (xmlhttp!=null) {
+	    xmlhttp.onreadystatechange=functionname; // event handler function call;
+	    xmlhttp.open("GET",theurl,true);
+	    xmlhttp.send(null);
+	  }
+	  else {
+	    alert("Your browser does not support XMLHTTP.");
+	  }
+}
+
+function rtmpPortReturned() { //xmlhttp event handler
+	if (xmlhttp.readyState==4) {// 4 = "loaded"
+		if (xmlhttp.status==200) {// 200 = OK
+			getFlashMovie("oculus_player").setRtmpPort(xmlhttp.responseText);
+			if (/auth=/.test(document.cookie)) { loginfromcookie(); }
+			else { login(); }
+		}
+	}
 }
 
 function resized() {
@@ -89,12 +125,6 @@ function browserwindowresized() {
 	overlay("");
 	videologo("");	
 	bworig= document.body.clientWidth;
-}
-
-function flashloaded() {
-	if (/auth=/.test(document.cookie)) { loginfromcookie(); }
-	else { login(); }
-	videologo("on");
 }
 
 function countdowntostatuscheck() {

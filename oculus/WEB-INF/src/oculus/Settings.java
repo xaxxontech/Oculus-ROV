@@ -36,20 +36,11 @@ public class Settings {
 	 * @return the matching value from properties file (or false if not found)
 	 */
 	public boolean getBoolean(String key){
-		
-		//if(key == null) return false;
-		String str = null;
-		
-		try {
-			str = readSetting(key);
-			if(str==null) return false;
-			if(str.toUpperCase().equals("YES")) return true;
-			else if(str.toUpperCase().equals("TRUE")) return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}		
-			
+		if(key==null) return false;
+		String str = readSetting(key);
+		if(str==null) return false;
+		if(str.toUpperCase().equals("YES")) return true;
+		else if(str.toUpperCase().equals("TRUE")) return true;		
 		return false;
 	}
 

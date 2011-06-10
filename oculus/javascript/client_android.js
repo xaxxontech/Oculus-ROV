@@ -1,7 +1,5 @@
 var ctroffset = 0; //295
 var connected = false;
-var logintimeout = 10000; 
-var logintimer; // timer
 var username;
 var streammode = "stop";
 var steeringmode;
@@ -11,14 +9,7 @@ function loaded() {
 	
 }
 
-function resized() {
-	
-}
-
 function flashloaded() {
-	//getFlashMovie("oculus_player").connect("colin asdfds"); //loginsend
-//	var rtmpPort = window.OCULUSANDROID.getRtmpPort();
-	//setTimeout("loginsend("+user+","+pass+","+rtmpPort+")",50);
 	openxmlhttp("rtmpPortRequest",rtmpPortReturned);
 }
 
@@ -75,31 +66,27 @@ function message(message, colour, status, value) {
 		if (status == "multiple") { setstatusmultiple(value); }
 		else { setstatus(status, value); }
 	}
-	
-	/*
-	var msgwin = document.getElementById("messagewindow");
-	var str = msgwin.innerHTML;
-	msgwin.innerHTML = message + " " + status + " " + value + "<br>"+str;
-	*/
+	//window.OCULUSANDROID.message(message);
 }
 
 function setstatus(status, value) {
-	if (status=="vidctroffset") { ctroffset = parseInt(value); }
-	//if (status=="motion" && value=="disabled") { motionenabled = false; }
 	if (value.toUpperCase() == "CONNECTED" && !connected) { // initialize
 		// countdowntostatuscheck(); 
 		connected = true;
+		window.OCULUSANDROID.message("Connected to Oculus");
 		publish("camera");
 	}
-	if (status.toUpperCase() == "STORECOOKIE") {
-		createCookie("auth",value,30); 
-	}
-	if (status == "someonealreadydriving") { someonealreadydriving(value); }
-	if (status == "user") { username = value; }
-	if (status == "hijacked") { window.location.reload(); }
 	if (status == "stream" && (value.toUpperCase() != streammode.toUpperCase())) { play(value); }
-	if (status == "address") { document.title = "Cyclops "+value; }
 	if (status == "connection" && value == "closed") { window.OCULUSANDROID.connectionClosed(); }
+	/*
+	 * below unused for now
+	 */
+	if (status == "someonealreadydriving") { someonealreadydriving(value); }
+	if (status == "user") { 
+		username = value; 
+		window.OCULUSANDROID.message(username+ " signed in");
+	}
+	if (status == "hijacked") { window.location.reload(); }
 }
 
 function setstatusmultiple(value) {
@@ -111,20 +98,12 @@ function setstatusmultiple(value) {
 }
 
 function loginsend(user, pass) {
-	/*
-	var str1= document.getElementById("user").value;
-	var str2= document.getElementById("pass").value;
-	var str3= document.getElementById("user_remember").checked;
-	if (str3 == true) { str3="remember"; }
-	else { eraseCookie("auth"); }
-	*/
 	getFlashMovie("oculus_android").connect(user+" "+pass+" false"); // false is for cookie param, not applicable here
-	// logintimer = setTimeout("window.location.reload()", logintimeout);
 }
 
-function logout() {
-	window.location.reload();
-}
+/*
+ * ALL FUNCTIONS BELOW HERE MAY OR MAY NOT END UP BEING USED, FOR REF ONLY FOR NOW
+ */
 
 function motionenabletoggle() {
 	callServer("motionenabletoggle", "");
@@ -142,15 +121,12 @@ function slide(direction) {
 	callServer("slide", direction);
 }
 
-
-
 function speech() {
 	var a = document.getElementById('speechbox');
 	var str = a.value;
 	a.value = "";
 	callServer("speech", str);
 }
-
 
 function camera(fn) {
 	callServer("cameracommand", fn);
@@ -219,11 +195,3 @@ function steeringmousedown(id) {
 	}
 }
 
-function menu() {
-	overlay("on");
-	document.getElementById("overlaydefault").style.display="none";   
-	document.getElementById("login").style.display="none";
-	document.getElementById("someonealreadydrivingbox").style.display="none";
-	document.getElementById("menubox").style.display="";
-	
-}

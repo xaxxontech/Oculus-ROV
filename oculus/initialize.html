@@ -70,7 +70,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	// if we've detected an acceptable version
 	// embed the Flash Content SWF when all tests are passed
 	AC_FL_RunContent(
-			"src", "flash/oculus_grabber",
+			"src", "flash/oculus_grabber?="+ new Date().getTime(),
 			"width", "400",
 			"height", "300",
 			"id", "oculus_grabber",

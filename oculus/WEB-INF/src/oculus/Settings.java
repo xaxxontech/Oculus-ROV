@@ -4,7 +4,7 @@ import java.io.*;
 
 public class Settings {
 	
-	private static final int ERROR = -1; //Integer.MIN_VALUE;
+	public static final int ERROR = -1; //Integer.MIN_VALUE;
 	
 	// String filename = System.getenv("RED5_HOME")+"\\webapps\\oculus\\settings.txt";
 	private static String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
@@ -93,8 +93,15 @@ public class Settings {
 	}
 
 	
+	/**
+	 *
+	 * read through whole file line by line, extract result
+	 * 
+	 * @param str this parameter we are looking for 
+	 * @return a String value for this given parameter, or
+	 *  null if not found
+	 */
 	public String readSetting(String str) {
-		// read through whole file line by line, extract result
 		FileInputStream filein;	
 		String result=null;
 		try{

@@ -19,8 +19,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private State state = State.getReference();
 
 	// if watchdog'n, re-connect if not seen input since this long ago
-	public static final long DEAD_TIME_OUT = 3000;
-	public static final int SETUP = 3000;
+	public static final long DEAD_TIME_OUT = 7000;
+	public static final long MOD = 3;
+	public static final int SETUP = 2000;
 	public static final int WATCHDOG_DELAY = 1500;
 
 	// this commands require arguments from current state
@@ -67,8 +68,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int maxclickcam = settings.getInteger("maxclickcam");
 	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	protected int steeringcomp = settings.getInteger("steeringcomp");
-	private boolean sonar = settings.getBoolean("sonar");
-	
+	protected final boolean sonar = settings.getBoolean("sonar");
+
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
 	protected int camwait = 400;
@@ -82,6 +83,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected boolean moving = false;
 	volatile boolean sliding = false;
 	volatile boolean movingforward = false;
+	
+	// TODO: what are these ?? can't be in methods instead? 
 	int tempspeed = 999;
 	int clicknudgedelay = 0;
 	String tempstring = null;
@@ -119,11 +122,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				}
 			}).start();
 		}
-		
-		// sonar not included in stock hardware, so can be not present in oculus_settings.conf
-		// try { sonar = settings.getBoolean("sonar"); }
-		// catch (Exception e) { sonar = false; }
-		
 	}
 
 	/** open port, enable read and write, enable events */
@@ -216,19 +214,25 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				application.message("firmware version: " + version, null, null);
 
 			} else return;
-			
+
 			// don't bother showing watchdog pings to user screen
 		} else if (response.charAt(0) != GET_VERSION[0]) {
-		
-			// application.message("arduino: " + response, null, null);
 
+			// if sonar enabled
 			if (response.startsWith("cm")) {
-				String val = response.substring(response.indexOf(' ')+1, response.length());
-				state.set(State.sonar, val);
+				String val = response.substring(response.indexOf(' ') + 1, response.length());
+
+				range = Integer.parseInt(val);
+				int current = state.getInteger(State.sonar);
 				
-				// System.out.println("range port = " + state.get(State.sonar));
+				// update on threshold
+				if (Math.abs(range - current) > 1) {
+					state.set(State.sonar, val);
+					range = current;
+					application.message("range: " + response, String.valueOf(getReadDelta()), null);
+				}
 				
-				// must be a command echo then 
+				// must be an echo 
 			} else application.message("arduino: " + response, null, null);
 		}
 	}
@@ -285,24 +289,21 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			while (true) {
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					//
-					// TODO: this happens alots... should do something? means
+					// TODO: this happens a lot... should do something? means
 					// cable up plugged, email?
-					//
-					// if (isconnected) {
 					application.message("arduino watchdog time out", null, null);
-					reset();
-					// }
+					application.restart();
 				}
 
 				// send ping to keep connection alive
-				if (getReadDelta() > (DEAD_TIME_OUT / 3)){
-					if (isconnected){
-						if(sonar){
+				if (getReadDelta() > (DEAD_TIME_OUT / MOD)) {
+					if (isconnected) {
+						if (sonar) {
 							new Sender(SONAR);
 						} else {
 							new Sender(GET_VERSION);
 						}
-					}
+					} else connect();
 				}
 				Util.delay(WATCHDOG_DELAY);
 			}
@@ -368,6 +369,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		new Sender(STOP);
 		moving = false;
 		movingforward = false;
+		
+		// TODO: TESTING 
+		// if(sonar) new Sender(SONAR);
+
 	}
 
 	/** */
@@ -386,11 +391,13 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	 * 
 	 */
 	public int getDistance(boolean fresh) {
-		
-		if(!sonar) return 0;
-		
-		// force a read, but reply with whatever is current 
-		if(fresh) new Sender(SONAR);
+
+		if (!sonar)
+			return 0;
+
+		// force a read, but reply with whatever is current
+		if (fresh)
+			new Sender(SONAR);
 
 		return range;
 	}

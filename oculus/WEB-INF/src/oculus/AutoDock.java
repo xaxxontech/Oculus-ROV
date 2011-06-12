@@ -39,11 +39,12 @@ public class AutoDock {
 	 * 
 	 */
 
-	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(AutoDock.class, "oculus");
 	private State state = State.getReference();
+	private Settings settings = new Settings();
+	private final boolean debug = settings.getBoolean(Settings.developer);
 	private BatteryLife life = BatteryLife.getReference();
 	private LogManager moves = null; 
-	private Settings settings = new Settings();
 	private IConnection grabber = null;
 	private String docktarget = null;
 	private ArduinoCommDC comport = null; 
@@ -104,25 +105,30 @@ public class AutoDock {
 			
 
 				if (cmd[4].equals("0")) { // width==0, failed to find target
-					if (autodockgrabattempts < 0) { // TODO: remove this condition if unused
+					if (autodockgrabattempts < 0) { // TODO: remove this condition if unuseTODO: remove thisd
+						System.out.println("line 109... auto dock");
 						autodockgrabattempts ++;
 						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 					}
 					else { 
-						//failed, give up
+						//failed, give up... send email??
+						if(debug) new SendMail("Oculus Message", "auto dock failed, target lost"); 
 						state.set(State.autodocking, "false");		
 						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
 					}
 				}
 				else {
+					
 					app.message(null,"autodocklock",s);
 
 					// TODO: testing 
 					state.set(State.dockx, cmd[2]);
 					state.set(State.docky, cmd[3]);
-//					moves.append("docking " + cmd[2] + " " + cmd[3]); // throwing null pointer
+					String d = state.get(State.sonar);
+					if(( d != null )) moves.append("docking sonar " + d);
+					// TODO: TESTING
 					
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
 						Integer.parseInt(cmd[5]),new Float(cmd[6]));

@@ -162,7 +162,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// must be blocking search of all ports, but only once!  
 		new Discovery().search();
-		System.out.println("discovery done...");
+		
+		// System.out.println("discovery done...");
 		 
 		comport = new ArduinoCommDC(this);
 		light = new LightsComm(this);
@@ -176,16 +177,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		//if(settings.getBoolean(State.developer))			
 			//CommandManager.getReference().init(this);
-		
-		String str = settings.readSetting(Settings.volume);
-		if (str != null) {
-			Util.setSystemVolume(Integer.parseInt(str));
+
+		int volume = settings.getInteger(Settings.volume);
+		if (volume == Settings.ERROR) {
+			settings.newSetting(Settings.volume, "0");
+			Util.setSystemVolume(0);	
 			
+			// THIS SHOULD BE FIXED NOW ? 
 			// if not found, add it 
 			// TODO: this wont' work if 'volume' isn't already there,
 			// should be similar check for ALL settings, + read value from default file.  
 			// Also required for automatic software update when changes to settings keys
-		} else settings.writeSettings(Settings.volume, "0");
+		
+		} else {
+			Util.setSystemVolume(volume);	
+		}
 		
 		grabberInitialize();
 		
@@ -735,9 +741,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (!state.getBoolean(State.motionenabled))/*(!motionenabled)*/ { mov = "DISABLED"; }
 				if (comport.moving == true) { mov = "MOVING"; }
 				str += " speed "+spd+" cameratilt "+camTiltPos()+" motion "+mov;
-			}
+			}//TODO.. SETTINGS
 			str += " vidctroffset "+Integer.parseInt(settings.readSetting("vidctroffset"));
-			str += " rovvolume "+Integer.parseInt(settings.readSetting("volume"));
+			// str += " rovvolume "+Integer.parseInt(settings.readSetting(Settings.volume));
+			str += " rovvolume "+Integer.parseInt(settings.readSetting(Settings.volume));
 			str += " stream "+stream+" selfstream stop";
 			//str += " address "+settings.readSetting("address");
 			//str += " wifi "+wifi.wifiSignalStrength();
@@ -823,6 +830,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param str
+	 */
 	private void move(String str) {
 		String s = "";
 		String msg = "motion disabled (try un-dock)";
@@ -830,9 +841,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			comport.stopGoing(); 
 			s = "STOPPED"; 
 			msg = "command received: "+str;
-			
-			// update ranger if have a second ?
-			// comport.getDistance(true);
 		}
 		if (state.getBoolean(State.motionenabled)){ 
 			if (str.equals("forward")) { comport.goForward(); }
@@ -847,20 +855,38 @@ public class Application extends MultiThreadedApplicationAdapter {
 			s = "DISABLED";
 		}
 		messageplayer(msg, "motion", s);
-		
-		if(state.get(State.dockx) == null) moves.append(str);
-		else moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
+
+		String x = state.get(State.dockx); 
+		String y = state.get(State.docky);
+		String d = state.get(State.sonar);
+		if(( x != null ) && ( y !=null ) && ( d != null ))
+			moves.append(str + " " + x + " " + y + " " + d);
+		if(( d != null ))
+			moves.append(str + " " + d);
+		else 
+			moves.append(str);
 	}
 	
+	/** 
+	 * 
+	 * @param str
+	 */
 	private void nudge(String str) {
 		if (state.getBoolean(State.motionenabled)){ 
 			comport.nudge(str);
 			
 			messageplayer("command received: nudge" + str, null, null);
-			
-			if(state.get(State.dockx) == null) moves.append(str);
-			else moves.append(str + " " + state.get(State.dockx) + " " + state.get(State.docky));
-	
+
+			String x = state.get(State.dockx); 
+			String y = state.get(State.docky);
+			String d = state.get(State.sonar);
+			if(( x != null ) && ( y !=null ) && ( d != null ))
+				moves.append(str + " " + x + " " + y + " " + d);
+			if(( d != null ))
+				moves.append(str + " " + d);
+			else 
+				moves.append(str);
+		
 			if (state.getBoolean(State.docking)
 					|| state.getBoolean(State.autodocking)) moveMacroCancel(); 
 		}
@@ -880,12 +906,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param str
+	 */
 	private void clickSteer(String str) {
-		if (state.getBoolean(State.motionenabled)){
+		if (state.getBoolean(State.motionenabled)){			
+			
+			String d = state.get(State.sonar);
+			if(( d != null ))
+				moves.append("clicksteer " + str + " " + d);
+			else moves.append("clicksteer " + str);
+			
 			int n = comport.clickSteer(str);
-			
-			moves.append("clicksteer " + str);
-			
 			if (n != 999) {
 				messageplayer("received: clicksteer " + str, "cameratilt", camTiltPos());
 			} else {

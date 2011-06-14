@@ -162,14 +162,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// must be blocking search of all ports, but only once!  
 		new Discovery().search();
-		
-		// System.out.println("discovery done...");
-		 
 		comport = new ArduinoCommDC(this);
 		light = new LightsComm(this);
 		
 		httpPort = settings.readRed5Setting("http.port");
-		
 		
 		// checks setting for flag before starting 
 		new SystemWatchdog();

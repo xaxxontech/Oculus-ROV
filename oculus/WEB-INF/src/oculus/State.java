@@ -246,8 +246,8 @@ public class State {
 	}
 
 	public void set(String key, boolean b) {
-		if(b) set(key, "true");
-		else set(key, "false");
+		if(b) props.put(key, "true");
+		else props.put(key, "false");
 	}
 	
 	

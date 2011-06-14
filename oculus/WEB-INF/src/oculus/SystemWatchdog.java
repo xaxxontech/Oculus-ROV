@@ -37,9 +37,7 @@ public class SystemWatchdog {
 	
 	private class Task extends TimerTask {
 		public void run() {
-			
-			// if (debug) log.info("system watchdog : " + (state.getUpTime()/1000) + " sec");
-
+		
 			// only reboot is idle 
 			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ 
 				
@@ -75,9 +73,6 @@ public class SystemWatchdog {
 						} else System.out.println("error on file copy: " + oculus);
 					} else System.out.println("error on file copy: " + logfile);
 				} 
-	
-				// System.exit(-1);
-				
 				Util.systemCall("shutdown -r -f -t 01", true);				
 			}
 		}

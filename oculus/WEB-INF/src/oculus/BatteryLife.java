@@ -66,8 +66,10 @@ public class BatteryLife {
 	
 	public boolean batteryPresent(){
 
-		if( batteryStatus() == 999 ) { batterypresent = false; }
-			else { batterypresent = true; }
+		if( batteryStatus() == 999 )  
+			batterypresent = false; 
+		else 
+			batterypresent = true; 
 			
 		return batterypresent;
 	}
@@ -91,10 +93,10 @@ public class BatteryLife {
 		
 		new Thread(new Runnable() {
 			public void run() {
-				
-				// TODO: put dock state in State! 
+
+				// TODO: put dock state in State!
 				if (batterypresent == true && !app.dockstatus.equals("docking")) {
-					
+
 					int batt[] = battStatsCombined();
 					String life = Integer.toString(batt[0]);
 					int s = batt[1];
@@ -102,10 +104,8 @@ public class BatteryLife {
 					String str;
 					if (s == 1) {
 						status = "draining";
-						str = "battery "+life+"%,"+status;
-						//if (app.motionenabled== false) {
-						if( ! state.getBoolean(State.motionenabled)) {
-							//app.motionenabled = true;
+						str = "battery " + life + "%," + status;
+						if (!state.getBoolean(State.motionenabled)) {
 							state.set(State.motionenabled, "true");
 							str += " motion enabled";
 						}
@@ -118,18 +118,17 @@ public class BatteryLife {
 					}
 					if (s == 2) {
 						status = "CHARGING";
-						// app.motionenabled = false ;
 						if (life.equals("99") || life.equals("100")) {
 							status = "CHARGED";
 						}
 						battcharging = true;
-						str="battery "+life+"%,"+status;
+						str = "battery " + life + "%," + status;
 						if (app.dockstatus.equals("")) {
 							app.dockstatus = "docked";
 							str += " dock docked";
 						}
 						app.message(null, "multiple", str);
-					}			
+					}
 				}
 			}
 		}).start();

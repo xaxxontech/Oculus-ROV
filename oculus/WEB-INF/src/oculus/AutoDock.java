@@ -66,7 +66,7 @@ public class AutoDock {
 	}
 		
 	public void cancel(){
-		state.set(State.docking, "false");
+		state.set(State.docking, false);
 	}
 
 	public void autoDock(String str) {
@@ -74,7 +74,7 @@ public class AutoDock {
 		// log.debug("autodock: " + str);
 		String cmd[] = str.split(" ");
 		if (cmd[0].equals("cancel")) {
-			state.set(State.autodocking, "false");
+			state.set(State.autodocking, false);
 			app.message("auto-dock ended","multiple","cameratilt " +app.camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -90,7 +90,7 @@ public class AutoDock {
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
 				
-				state.set(State.autodocking, "true");
+				state.set(State.autodocking, true);
 				autodockingcamctr = false;
 				autodockgrabattempts = 0;
 				autodockctrattempts = 0;
@@ -114,7 +114,7 @@ public class AutoDock {
 					else { 
 						//failed, give up... send email??
 						if(debug) new SendMail("Oculus Message", "auto dock failed, target lost"); 
-						state.set(State.autodocking, "false");		
+						state.set(State.autodocking, false);		
 						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
 					}
@@ -169,7 +169,7 @@ public class AutoDock {
 					// need to set this because speedset calls goForward also if true
 					comport.movingforward = false; 
 					comport.speedset("slow");
-					state.set(State.docking, "true");
+					state.set(State.docking, true);
 					app.dockstatus = "docking";
 					
 					new Thread(new Runnable() {
@@ -189,7 +189,7 @@ public class AutoDock {
 								comport.stopGoing();
 								app.message(null,"motion","stopped");
 								if (life.batteryStatus() == 2) {
-									state.set(State.docking, "false");
+									state.set(State.docking, false);
 									String str = "";
 									if (state.getBoolean(State.autodocking)) {
 										state.set(State.autodocking, "false");
@@ -201,7 +201,7 @@ public class AutoDock {
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
 									log.info(app.userconnected +" docked successfully");
 									
-									state.set(State.motionenabled, "false");
+									state.set(State.motionenabled, false);
 									app.dockstatus = "docked"; // needs to be before battStats()
 									life.battStats(); 
 									break;
@@ -209,8 +209,11 @@ public class AutoDock {
 								counter += 1;
 								if (counter >12) { // failed
 									
-									state.set(State.docking, "false");
-									//docking = false;
+									//failed, give up... send email??
+									if(debug) 
+										new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
+									
+									state.set(State.docking, false);
 									String s = "dock un-docked";
 									if (comport.moving) { 
 										comport.stopGoing();
@@ -245,7 +248,7 @@ public class AutoDock {
 		if (str.equals("undock")) {
 			comport.speedset("slow");
 			comport.goBackward();
-			state.set(State.motionenabled, "true");
+			state.set(State.motionenabled, true);
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
 			app.dockstatus = "un-docked";
 			new Thread(new Runnable() {

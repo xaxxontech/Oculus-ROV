@@ -43,22 +43,20 @@ public class EmailAlerts {
 			if (life.batteryPresent()) {
 
 				int batt[] = life.battStatsCombined();
-				
-				//TODO: returns null is not found 
 				if(batt == null) {
 					System.out.println("batery not ready, email alerts");
 					return;
 				}
 				
-				String lifestr = Integer.toString(batt[0]);
+				// String lifestr = Integer.toString(batt[0]);
 				int life = batt[0];
 				int status = batt[1];
 				
 				// if draining only
 				if (status == 1) {
 
-					if (debug)
-						app.message("checking battery: " + "battery " + lifestr + "%", null, null);
+					//if (debug)
+						//app.message("checking battery: " + "battery " + lifestr + "%", null, null);
 
 					if (life < WARN_LEVEL) {
 		

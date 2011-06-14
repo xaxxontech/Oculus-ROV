@@ -19,8 +19,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private State state = State.getReference();
 
 	// if watchdog'n, re-connect if not seen input since this long ago
-	public static final long DEAD_TIME_OUT = 7000;
-	public static final long MOD = 3;
+	public static final long DEAD_TIME_OUT = 10000;
+	public static final long MOD = 5;
 	public static final int SETUP = 2000;
 	public static final int WATCHDOG_DELAY = 1500;
 
@@ -292,7 +292,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					// TODO: this happens a lot... should do something? means
 					// cable up plugged, email?
 					application.message("arduino watchdog time out", null, null);
-					application.restart();
+					
+					// application.restart();
 				}
 
 				// send ping to keep connection alive

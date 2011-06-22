@@ -74,9 +74,12 @@ function setstatus(status, value) {
 		// countdowntostatuscheck(); 
 		connected = true;
 		window.OCULUSANDROID.message("Connected to Oculus");
-		publish("camera");
+		//publish("camera");
 	}
-	if (status == "stream" && (value.toUpperCase() != streammode.toUpperCase())) { play(value); }
+	if (status == "stream" && (value.toUpperCase() != streammode.toUpperCase())) { 
+		play(value); 
+		window.OCULUSANDROID.message("stream: "+value);
+	}
 	if (status == "connection" && value == "closed") { window.OCULUSANDROID.connectionClosed(); }
 	/*
 	 * below unused for now

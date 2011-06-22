@@ -168,7 +168,7 @@ public class AutoDock {
 
 					// need to set this because speedset calls goForward also if true
 					comport.movingforward = false; 
-					comport.speedset("slow");
+					comport.speedset("med"); 
 					state.set(State.docking, true);
 					app.dockstatus = "docking";
 					
@@ -177,8 +177,16 @@ public class AutoDock {
 							int counter = 0;
 							int n;
 							while (state.getBoolean(State.docking) == true) {
-								n = 500;
-								if (counter <= 3) { n += 500; }
+
+//								n = 500; // when speed=slow
+//								if (counter <= 3) { n += 500; } // when speed=slow
+
+								n = 350; // when speed=med
+								if (counter <= 3) { n += 350; } // when speed=med
+
+//								n = 200; // when speed=fast
+//								if (counter <= 3) { n += 200; } // when speed=fast
+								
 								if (counter > 0) { app.message(null,"motion","moving"); }
 								comport.goForward();
 								try {
@@ -246,7 +254,7 @@ public class AutoDock {
 			else { app.message("motion disabled", null, null); }
 		}
 		if (str.equals("undock")) {
-			comport.speedset("slow");
+			comport.speedset("fast");
 			comport.goBackward();
 			state.set(State.motionenabled, true);
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
@@ -255,9 +263,9 @@ public class AutoDock {
 				public void run() {
 					try {
 						Thread.sleep(2000);
-						comport.speedset("fast");
-						comport.goBackward();
-						Thread.sleep(750);
+//						comport.speedset("fast");
+//						comport.goBackward();
+//						Thread.sleep(750);
 						comport.stopGoing();
 						app.message("disengaged from dock", "motion", "stopped");
 						log.info(app.userconnected + " un-docked");
@@ -289,7 +297,7 @@ public class AutoDock {
 		int s2 = (int) (dockw*dockh * 65.5/100 * w/h);   // was 92/100 w/ taller marker
 		// System.out.println(dockslopedeg+" "+slopedeg);
 		if (w*h < s1) { 
-			if (Math.abs(x-160) > 10 || Math.abs(y-120) > 50) { // clicksteer and go
+			if (Math.abs(x-160) > 10 || Math.abs(y-120) > 25) { // clicksteer and go (y was >50)
 				comport.clickSteer((x-160)*rescomp+" "+(y-120)*rescomp);
 				new Thread(new Runnable() { public void run() { try {
 					Thread.sleep(1500); // was 1500 w/ dockgrab following
@@ -324,7 +332,7 @@ public class AutoDock {
 				if (slope > dockslope) { autodockcompdir *= -1; } // approaching from left
 				autodockcompdir += x + (dockx - 160);
 				//System.out.println("comp: "+autodockcompdir);
-				if (Math.abs(autodockcompdir-dockx) > 10 || Math.abs(y-120) > 30) { // steer and go
+				if (Math.abs(autodockcompdir-dockx) > 10 || Math.abs(y-120) > 30) { // steer and go 
 					comport.clickSteer((autodockcompdir-dockx)*rescomp+" "+(y-120)*rescomp); 
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500); 
@@ -351,7 +359,7 @@ public class AutoDock {
 			}
 			else { // !autodockingcamctr
 				autodockingcamctr = true;
-				if (Math.abs(x-dockx) > 10 || Math.abs(y-120) > 30) {
+				if (Math.abs(x-dockx) > 10 || Math.abs(y-120) > 15) { // (y was >30)
 					comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);

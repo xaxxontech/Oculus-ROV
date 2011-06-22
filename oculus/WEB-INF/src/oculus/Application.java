@@ -601,6 +601,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			sc.invoke("message", new Object[] { str, "green", status, value });
 		}
+//		System.out.println(str);
 	}
 
 	private void sendplayerfunction(String fn, String params) {

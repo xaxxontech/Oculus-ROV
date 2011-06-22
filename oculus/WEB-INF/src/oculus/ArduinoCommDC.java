@@ -292,8 +292,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					// TODO: this happens a lot... should do something? means
 					// cable up plugged, email?
 					application.message("arduino watchdog time out", null, null);
-					
-					// application.restart();
+
 				}
 
 				// send ping to keep connection alive

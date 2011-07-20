@@ -19,10 +19,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private State state = State.getReference();
 
 	// if watchdog'n, re-connect if not seen input since this long ago
-	public static final long DEAD_TIME_OUT = 10000;
+	public static final long DEAD_TIME_OUT = 15000; // was 10000
 	public static final long MOD = 5;
 	public static final int SETUP = 2000;
-	public static final int WATCHDOG_DELAY = 1500;
+	public static final int WATCHDOG_DELAY = 5000; // was 1500
 
 	// this commands require arguments from current state
 	public static final byte FORWARD = 'f';

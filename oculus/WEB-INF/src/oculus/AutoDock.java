@@ -232,12 +232,12 @@ public class AutoDock {
 									app.dockstatus = "un-docked";
 									if (state.getBoolean(State.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
-											comport.speedset("slow");
-											comport.goBackward();
-											Thread.sleep(2000);
 											comport.speedset("fast");
 											comport.goBackward();
-											Thread.sleep(750);
+											Thread.sleep(2000);
+//											comport.speedset("fast");
+//											comport.goBackward();
+//											Thread.sleep(750);
 											comport.stopGoing();
 											IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 											sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused

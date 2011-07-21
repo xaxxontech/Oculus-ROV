@@ -55,6 +55,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private AutoDock docker = null;
 	private State state = State.getReference();
 	private Speech speech = new Speech();
+	boolean muteROVonMove = false;
 
 	public Application() { 
 		super();
@@ -195,6 +196,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		if(settings.getBoolean(Settings.developer))
 			moves.open(System.getenv("RED5_HOME")+"\\log\\moves.log");
+		
+		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
 		log.info("initialize");
 	}
@@ -312,7 +315,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		streamsettingsset, streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update,
 		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
 		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, facegrab, assumecontrol, 
-		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger;
+		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle;
 	
 		@Override 
 		public String toString() {
@@ -441,6 +444,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				break;
 			case softwareupdate: softwareUpdate(str); break;
 			case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
+			case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
 			
 			default:
 			//	System.out.println("command not found: " + cmd.toString());
@@ -561,6 +565,35 @@ public class Application extends MultiThreadedApplicationAdapter {
 			int quality = Integer.parseInt(vals[3]);
 			sc.invoke("publish", new Object[] { str, width, height, fps, quality });
 			//messageGrabber("stream "+str);
+		}
+	}
+	
+	public void muteROVMic() {
+		if (grabber instanceof IServiceCapableConnection && !stream.equals("stop")) {
+			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+			sc.invoke("muteROVMic", new Object[] { });
+			//messageplayer("rov mic muted",null,null);
+		}
+	}
+	
+	public void unmuteROVMic() {
+		if (grabber instanceof IServiceCapableConnection && !stream.equals("stop")) {
+			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+			sc.invoke("unmuteROVMic", new Object[] { });
+			//messageplayer("rov mic un-muted",null,null);
+		}
+	}
+	
+	private void muteROVMicOnMoveToggle() {
+		if (muteROVonMove) { 
+			muteROVonMove = false;
+			settings.writeSettings("mute_rov_on_move", "no");
+			messageplayer("mute ROV onmove off", null, null);
+		}
+		else { 
+			muteROVonMove = true;
+			settings.writeSettings("mute_rov_on_move", "yes");
+			messageplayer("mute ROV onmove on", null, null);
 		}
 	}
 	

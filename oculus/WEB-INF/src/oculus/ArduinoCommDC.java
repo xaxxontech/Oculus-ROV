@@ -366,13 +366,15 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		// TODO: only send if really going?
 		// if (moving)
 
+		if (application.muteROVonMove && moving) { application.unmuteROVMic(); }
+		
 		new Sender(STOP);
 		moving = false;
 		movingforward = false;
 		
 		// TODO: TESTING 
 		// if(sonar) new Sender(SONAR);
-
+			
 	}
 
 	/** */
@@ -380,6 +382,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		new Sender(new byte[] { FORWARD, (byte) speed });
 		moving = true;
 		movingforward = true;
+		
+		if (application.muteROVonMove) { application.muteROVMic(); }
 	}
 
 	/**
@@ -407,6 +411,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		new Sender(new byte[] { BACKWARD, (byte) speed });
 		moving = true;
 		movingforward = false;
+		
+		if (application.muteROVonMove) { application.muteROVMic(); }
 	}
 
 	/** */
@@ -418,6 +424,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 		new Sender(new byte[] { RIGHT, (byte) tmpspeed });
 		moving = true;
+		
+		if (application.muteROVonMove) { application.muteROVMic(); }
 	}
 
 	/** */
@@ -429,6 +437,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 		new Sender(new byte[] { LEFT, (byte) tmpspeed });
 		moving = true;
+		
+		if (application.muteROVonMove) { application.muteROVMic(); }
 	}
 
 	public void camGo() {
@@ -542,30 +552,34 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	public void nudge(String dir) {
 		direction = dir;
-		int n = nudgedelay;
-		if (direction.equals("right")) {
-			turnRight();
-		}
-		if (direction.equals("left")) {
-			turnLeft();
-		}
-		if (direction.equals("forward")) {
-			goForward();
-			movingforward = false;
-			n *= 4;
-		}
-		if (direction.equals("backward")) {
-			goBackward();
-			n *= 4;
-		}
-
-		Util.delay(n);
-
-		if (movingforward == true) {
-			goForward();
-		} else {
-			stopGoing();
-		}
+		new Thread(new Runnable() {
+			public void run() {
+				int n = nudgedelay;
+				if (direction.equals("right")) {
+					turnRight();
+				}
+				if (direction.equals("left")) {
+					turnLeft();
+				}
+				if (direction.equals("forward")) {
+					goForward();
+					movingforward = false;
+					n *= 4;
+				}
+				if (direction.equals("backward")) {
+					goBackward();
+					n *= 4;
+				}
+		
+				Util.delay(n);
+		
+				if (movingforward == true) {
+					goForward();
+				} else {
+					stopGoing();
+				}
+			}
+		}).start();
 	}
 
 	public void slide(String dir) {

@@ -453,9 +453,15 @@ function motionenabletoggle() {
 	message("sending: motion enable/disable", sentcmdcolor);
 	callServer("motionenabletoggle", "");
 	lagtimer = new Date().getTime(); // has to be *after* message()
-	overlay("off");
+	// overlay("off");
 }
 
+function muteROVonmovetoggle() {
+	message("sending: mute ROV mic onmove toggle", sentcmdcolor);
+	callServer("muterovmiconmovetoggle", "");
+	lagtimer = new Date().getTime(); // has to be *after* message()
+	// overlay("off");
+}
 function move(str) {
 	message("sending command: "+str, sentcmdcolor);
 	callServer("move", str);

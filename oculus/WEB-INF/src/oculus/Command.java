@@ -26,10 +26,12 @@ public class Command {
 	private static final int LENGTH = 1024;
 
 	/** holds the outer most tags, not part of the command */
-	private String type = "oculus";
+	private String type = CommandGUI.oculus;
 
 	/** the command holds each element in the command */
 	private Hashtable<String, String> command = null;
+	
+	private MulticastChannel channel = null;
 
 
 	/**
@@ -194,6 +196,11 @@ public class Command {
 	 */
 	public String list() {
 		return command.toString();
+	}
+
+	public void send() {
+		if(channel==null) channel = new MulticastChannel();
+		channel.write(command.toString());
 	}
 
 	/**

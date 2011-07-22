@@ -102,6 +102,8 @@ public class LightsComm implements SerialPortEventListener {
 			log.error(e.getMessage());
 			return;
 		}
+		
+		//isconnected = true;
 	}
 
 	/** @return True if the serial port is open */
@@ -156,8 +158,6 @@ public class LightsComm implements SerialPortEventListener {
 			new Sender(GET_VERSION);
 			isconnected = true;
 			
-			// updateSteeringComp();
-		
 		} else if(response.startsWith("version:")){
 			
 			// NOTE: watchdog will send a get version command if idle comm port  
@@ -190,11 +190,11 @@ public class LightsComm implements SerialPortEventListener {
 	}
 
 	/** inner class to send commands */
-	private class Sender extends Thread {
+	private class Sender extends Thread {		
 		private byte[] command = null;
 		public Sender(final byte[] cmd) {
 			command = cmd;
-			start();
+			if(isConnected())start();
 		}
 		public void run() {
 			sendCommand(command);

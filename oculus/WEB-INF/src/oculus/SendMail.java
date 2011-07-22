@@ -95,7 +95,7 @@ public class SendMail {
 	
 
 	/** blocking send */
-	SendMail(final String sub, final String text, final String file, boolean block) {
+	public SendMail(final String sub, final String text, final String file, boolean block) {
 
 		subject = sub;
 		body = text;

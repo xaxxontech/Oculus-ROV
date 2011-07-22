@@ -4,9 +4,6 @@ import java.io.*;
 
 public class Settings {
 	
-	public static final int ERROR = -1; //Integer.MIN_VALUE;
-	
-	// String filename = System.getenv("RED5_HOME")+"\\webapps\\oculus\\settings.txt";
 	private static String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
 
 	// put all constants here
@@ -15,18 +12,8 @@ public class Settings {
 	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
 	public static final String developer = "developer";
-	
-	
-	/** put all settings here 
-	public static enum consants { 
-		
-		volume, notify, skipsetup, ;
-	
-		@Override 
-		public String toString() {
-			return super.toString();
-		}	
-	} */
+	public static final int ERROR = -1; //Integer.MIN_VALUE;
+
 	
 	/**
 	 * lookup values from props file

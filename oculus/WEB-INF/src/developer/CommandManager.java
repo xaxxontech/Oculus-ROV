@@ -8,6 +8,8 @@ import oculus.State;
 import oculus.Util;
 
 import org.red5.logging.Red5LoggerFactory;
+import org.red5.server.api.IConnection;
+import org.red5.server.api.service.IServiceCapableConnection;
 import org.slf4j.Logger;
 
 
@@ -22,13 +24,16 @@ public class CommandManager {
 	private State state = State.getReference();
 	private static Application app = null;
 	private MulticastChannel channel = null;
+	private IConnection grabber = null;
+
 
 	/** */
-	public CommandManager(Application a) {
+	public CommandManager(Application a, IConnection g) {
+		grabber = g;
 		app = a;
 		channel = new MulticastChannel(this);
 		log.debug("command manager ready");
-		System.out.println("_command manager ready_");
+		System.out.println("command manager ready");
 	}
 
 	/** send a command to the group */
@@ -82,12 +87,12 @@ public class CommandManager {
 				state.writeFile(temp);			
 										
 				// blocking send 
-				new SendMail("Oculus State Dump", "debug dump attached", temp, true);
-				new SendMail("Oculus Move Log", "debug dump attached", move, true);
+				// new SendMail("Oculus State Dump", "debug dump attached", temp, true);
+				// new SendMail("Oculus Move Log", "debug dump attached", move, true);
 
 				// email'ed it, now delete it 
 				new File(temp).delete();	
-				new File(move).delete();	
+				// new File(move).delete();	
 
 			}
 		}.start();
@@ -132,21 +137,26 @@ public class CommandManager {
 							state.set(State.sonarDebug, false);
 					
 					}
-				} else if (fn.equalsIgnoreCase("forward")) {
+				} else if (fn.equalsIgnoreCase("sample")) {
 
 					System.out.println("forward.. to do, merge with exp");
 					
+
+					// app.playerCallServer(Application.playerCommands.autodock, "go");
+					// Util.delay(2000);
+					// app.playerCallServer(Application.playerCommands.autodock, "cancel");
+					
+					//IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+					//sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+			
+					
 				} else {
-				
 					// must be an application primitive
-					// if(arg != null)// arg = "null";
 					try {
 						app.playerCallServer(fn, arg);
 					} catch (Exception e) {
 						System.out.println("app call error");
-						// e.printStackTrace();
 					}
-
 				}
 			}
 		}

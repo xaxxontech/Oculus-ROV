@@ -19,9 +19,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private State state = State.getReference();
 
 	// if watchdog'n, re-connect if not seen input since this long ago
-	public static final long DEAD_TIME_OUT = 5000;
-	public static final long MOD = 2;
+	public static final long DEAD_TIME_OUT = 20000;
 	public static final int SETUP = 2000;
+	public static final int SONAR_DELAY = 1000; 
 	public static final int WATCHDOG_DELAY = 1000;
 
 	// this commands require arguments from current state
@@ -114,6 +114,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 					connect();
 					Util.delay(SETUP);
+					new Sender(GET_VERSION);
 					camHoriz();
 
 					// check for lost connection
@@ -154,7 +155,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 
 	@Override
-	/** buffer input on event and trigger parse on '>' charter  
+	/** 
+	 * buffer input on event and trigger parse on '>' charter  
 	 * 
 	 * Note, all feedback must be in single xml tags like: <feedback 123>
 	 */
@@ -193,23 +195,23 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		String response = "";
 		for (int i = 0; i < buffSize; i++)
 			response += (char) buffer[i];
+		
+		// System.out.println("in: " + response);
 
 		// take action as arduino has just turned on
 		if (response.equals("reset")) {
 
 			// might have new firmware after reseting
+			isconnected = true;
 			version = null;
 			new Sender(GET_VERSION);
-			isconnected = true;
 			updateSteeringComp();
 
 		} else if (response.startsWith("version:")) {
 			if (version == null) {
 				// get just the number
-				version = response.trim();
-				//.substring(response.indexOf("version:") + 8, response.length());
+				version = response.substring(response.indexOf("version:") + 8, response.length());
 				application.message("firmware version: " + version, null, null);
-
 			} else return;
 
 			// don't bother showing watch dog pings to user screen
@@ -217,17 +219,12 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 			// if sonar enabled will get <cm xxx> as watchdog
 			if (response.startsWith("cm")) {
-				String val = response.substring(response.indexOf(' ') + 1, response.length());
-
-				range = Integer.parseInt(val);
-				int current = state.getInteger(State.sonar);
-				
-				// update on threshold
-				if (Math.abs(range - current) > 1) {
+				final String val = response.substring(response.indexOf(' ') + 1, response.length());
+				final int range = Integer.parseInt(val);				
+				if (Math.abs(range - state.getInteger(State.sonar)) > 1) {
 					state.set(State.sonar, val);
-					range = current;
 					if(state.getBoolean(State.sonarDebug))
-						application.message("sonar range: " + response, null, null); 
+						application.message("sonar range: " + range, null, null);
 				}
 				
 				// must be an echo 
@@ -250,13 +247,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		return System.currentTimeMillis() - lastRead;
 	}
 
-	/** inner class to send commands */
+	/** inner class to send commands as a seperate thread each */
 	private class Sender extends Thread {
 		private byte[] command = null;
 		public Sender(final byte[] cmd) {
-			command = cmd;
-			if(isConnected())
-				start();
+			// do connection check
+			if(!isconnected) log.error("not connected");
+			else {
+				command = cmd;
+				this.start();
+			}
 		}
 		public void run() {
 			sendCommand(command);
@@ -280,25 +280,25 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		public void run() {
 			Util.delay(SETUP);
 			while (true) {
+				
 				if (getReadDelta() > DEAD_TIME_OUT) {
-					// inform them once, then die 
-					log.error("ardunio watchdog time out");
-					return;
+					log.error("arduino watchdog time out");
+					return; // die, no point living 
 				}
-
-				// send ping to keep connection alive
-				if (getReadDelta() > (DEAD_TIME_OUT / MOD)) {
-					if (isconnected) {
-						if (sonar) {
-							new Sender(SONAR);
-						} else {
-							new Sender(GET_VERSION);
-						}
-						
-						// TODO: COLIN,  watch dog should fail and die.. or keep trying? or reboot? 
-					} else connect();
+				
+				// if ( !isconnected) { connect(); return; }
+				
+				if (sonar){ //  && state.getBoolean())) {
+					if (getReadDelta() > SONAR_DELAY){ 
+						new Sender(SONAR);
+						Util.delay(SONAR_DELAY);						
+					}
+				} else {
+					if (getReadDelta() > WATCHDOG_DELAY){
+						new Sender(GET_VERSION);
+						Util.delay(WATCHDOG_DELAY);
+					}
 				}
-				Util.delay(WATCHDOG_DELAY);
 			}
 		}
 	}
@@ -320,8 +320,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			in.close();
 			out.close();
 			isconnected = false;
+			version = null;
 		} catch (Exception e) {
-			System.out.println("close(): " + e.getMessage());
+			log.error("disconnect(): " + e.getMessage());
 		}
 		serialPort.close();
 	}
@@ -356,18 +357,13 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	/** */
 	public void stopGoing() {
-		// TODO: only send if really going?
-		// if (moving)
-
+		
 		if (application.muteROVonMove && moving) { application.unmuteROVMic(); }
 		
 		new Sender(STOP);
 		moving = false;
 		movingforward = false;
-		
-		// TODO: TESTING 
-		// if(sonar) new Sender(SONAR);
-			
+					
 	}
 
 	/** */
@@ -379,24 +375,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		if (application.muteROVonMove) { application.muteROVMic(); }
 	}
 
-	/**
-	 * Get the sonar reading
-	 * 
-	 * @param fresh
-	 *            is set to true if want the most current value
-	 * @return the distance the nearest object is in front of the bot in cm
-	 * 
-	 */
-	public int getDistance(boolean fresh) {
-
-		if (!sonar)
-			return 0;
-
-		// force a read, but reply with whatever is current
-		if (fresh)
-			new Sender(SONAR);
-
-		return range;
+	/** */
+	public void pollSensor() {
+		if (sonar) new Sender(SONAR);
 	}
 
 	/** */

@@ -187,7 +187,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new EmailAlerts(this);
 
 		if (settings.getBoolean(State.developer))
-			new CommandManager(this);
+			new CommandManager(this, grabber);
 
 		int volume = settings.getInteger(Settings.volume);
 		if (volume == Settings.ERROR) {
@@ -346,7 +346,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
 		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, facegrab, assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-		lightson, lightsoff;
+		lighton, lightoff;
 	
 		@Override 
 		public String toString() {
@@ -385,7 +385,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final playerCommands fn, final String str) {
 
-	//	if(!fn.equals(playerCommands.statuscheck))
+		if(!fn.equals(playerCommands.statuscheck))
 			if(state.getBoolean(State.developer))
 				System.out.println("playerCallServer(): " + fn + " " + str);
 		
@@ -394,21 +394,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case chat: chat(str); return;
 		case beapassenger: beAPassenger(str); return;
 		case assumecontrol: assumeControl(str); return;
-		case lightsoff: light.off(); return;
-		case lightson: light.on(); return;
+		case lightoff: light.off(); return;
+		case lighton: light.on(); return;
 		}
 
 		//--------------------------------------------------------//
 		//  TODO: security check mandatory 
 		//--------------------------------------------------------//
 		if (Red5.getConnectionLocal() != player) {
-			
 			System.out.println("error... security issue");
-			
-			// open hole is developing? 
-			// if(!state.getBoolean(State.developer))	
-			
 			return;
+			
+			// System.out.println("playerCallServer(): " + fn + " " + str);
+			// open hole is developing? 
+			// if(!state.getBoolean(State.developer)) return;
 		}
 		
 		// X-rated.. must be logged in  
@@ -517,14 +516,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case restart: restart(); break;
 		case softwareupdate: softwareUpdate(str); break;
 		case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
-
-		// default:
-		// System.out.println("command not found: " + cmd.toString());
-		// for( playerCommands command : playerCommands.values() )
-		// System.out.println(command.ordinal() + " = " +
-		// command.toString());
-		// / break;
-
+        case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
+	
 		}
 	}
 

@@ -22,7 +22,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public static final long DEAD_TIME_OUT = 20000;
 	public static final int SETUP = 2000;
 	public static final int SONAR_DELAY = 1000; 
-	public static final int WATCHDOG_DELAY = 1000;
+	public static final int WATCHDOG_DELAY = 5000;
 
 	// this commands require arguments from current state
 	public static final byte FORWARD = 'f';

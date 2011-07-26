@@ -516,8 +516,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case restart: restart(); break;
 		case softwareupdate: softwareUpdate(str); break;
 		case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
-        case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
-	
+		case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
 		}
 	}
 
@@ -608,6 +607,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void publish(String str) {
+		// commands: camandmic camera mic stop
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			String current = settings.readSetting("vset");
@@ -623,7 +623,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void muteROVMic() {
-		if (grabber instanceof IServiceCapableConnection && !stream.equals("stop")) {
+		if (grabber instanceof IServiceCapableConnection && 
+				 (stream.equals("camandmic") || stream.equals("mic"))) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("muteROVMic", new Object[] { });
 			//messageplayer("rov mic muted",null,null);
@@ -631,7 +632,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void unmuteROVMic() {
-		if (grabber instanceof IServiceCapableConnection && !stream.equals("stop")) {
+		if (grabber instanceof IServiceCapableConnection && 
+				 (stream.equals("camandmic") || stream.equals("mic"))) {
+		
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("unmuteROVMic", new Object[] { });
 			//messageplayer("rov mic un-muted",null,null);

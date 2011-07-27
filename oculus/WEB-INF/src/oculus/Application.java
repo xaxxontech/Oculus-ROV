@@ -24,8 +24,9 @@ import org.red5.io.amf3.ByteArray;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
+import developer.FTPObserver;
+
 import developer.CommandManager;
-import ftp.FTPManager;
 
 public class Application extends MultiThreadedApplicationAdapter {
 
@@ -211,7 +212,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Util.setSystemVolume(volume);
 	
 		// TODO: Brad added, removeable with single comment line here 
-		new FTPManager(this);
+		new FTPObserver(this);
 		new EmailAlerts(this);
 		new SystemWatchdog();
 		

@@ -25,7 +25,7 @@ import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
 import developer.CommandManager;
-import developer.ftp.FTPManager;
+import ftp.FTPManager;
 
 public class Application extends MultiThreadedApplicationAdapter {
 
@@ -197,6 +197,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		comport = new ArduinoCommDC(this);
 		light = new LightsComm(this);
 
+		// TODO: wrong order ??? 
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 

@@ -68,7 +68,7 @@ public class State {
 	private State() {
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
 		props.put(userisconnected, false);	
-		props.put(State.dockstatus, "un-known");
+		// props.put(State.dockstatus, unknown);
 	}
 
 	/** */

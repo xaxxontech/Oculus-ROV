@@ -38,13 +38,15 @@ public class State {
 	public static final String undocked = "undocked";
 	public static final String guest_start = "guest_start";
 	public static final String guest_end = "guest_end";
+	public static final String unknown = "unknown";
 
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
 	public static final long FIVE_MINUTES = 300000;
 	public static final long TEN_MINUTES = 600000;
-	public static final int ERROR = -1;
+	public static final int ERROR = -1;	
+	
 
 	/** notify these on change events */
 	public Vector<Observer> observers = new Vector<Observer>();

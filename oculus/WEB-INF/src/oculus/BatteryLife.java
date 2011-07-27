@@ -96,7 +96,7 @@ public class BatteryLife {
 				
 				if(state.get(State.dockstatus) == null){
 					System.out.println("no dockstatus in batterylife");
-					state.set(State.dockstatus, "un-known");
+					state.set(State.dockstatus, State.unknown);
 				}
 				
 				if (batterypresent == false) {
@@ -135,7 +135,7 @@ public class BatteryLife {
 						}
 						battcharging = true;
 						str = "battery " + life + "%," + status;
-						if (state.equals(State.dockstatus, "")) {
+						if (state.get(State.dockstatus) == null) {
 							// app.dockstatus = "docked";
 							state.set(State.dockstatus, State.docked);
 							str += " dock docked";

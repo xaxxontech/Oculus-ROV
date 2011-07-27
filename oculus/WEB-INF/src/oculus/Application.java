@@ -206,17 +206,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		int volume = settings.getInteger(Settings.volume);
-		if (volume == Settings.ERROR) {
-			settings.newSetting(Settings.volume, "0");
-			Util.setSystemVolume(0);
-		} else {
-			Util.setSystemVolume(volume);
-		}
-		
-		// TODO: brad added, removes with single line here 
+		if (volume == Settings.ERROR) settings.newSetting(Settings.volume, "0");
+		Util.setSystemVolume(volume);
+	
+		// TODO: Brad added, removeable with single comment line here 
 		new FTPManager(this);
-		new SystemWatchdog();
 		new EmailAlerts(this);
+		new SystemWatchdog();
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();

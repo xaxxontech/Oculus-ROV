@@ -97,7 +97,7 @@ public class CommandManager {
 	public void execute(Command command) {
 		if (app == null) {
 			System.out.println("execute(): not configured");
-			log.error("not configured");
+			log.error("execute(): not configured");
 			return;
 		}
 
@@ -106,8 +106,8 @@ public class CommandManager {
 		// only listen to <oculus> xml </oculus> messages
 		if (command.getType().equalsIgnoreCase(oculus)) {
 			
-			String fn = command.get(function);
-			String arg = command.get(argument);
+			final String fn = command.get(function);
+			final String arg = command.get(argument);
 
 			if (fn != null) {
 				if (fn.equalsIgnoreCase("home")) {
@@ -120,11 +120,8 @@ public class CommandManager {
 					
 				} else if (fn.equalsIgnoreCase("sonar")) {
 					if( arg != null ){
-						if(arg.equals("debug"))
-							state.set(State.sonarDebug, true);
-					
-						if(arg.equals("reset"))
-							state.set(State.sonarDebug, false);
+						if(arg.equals("debug")) state.set(State.sonarDebug, true);
+						if(arg.equals("reset")) state.set(State.sonarDebug, false);
 					}
 				} else if (fn.equalsIgnoreCase("find")) {
 

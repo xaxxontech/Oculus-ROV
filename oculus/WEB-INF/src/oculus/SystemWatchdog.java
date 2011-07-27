@@ -31,7 +31,7 @@ public class SystemWatchdog {
 		if (reboot){
 			Timer timer = new Timer();
 			timer.scheduleAtFixedRate(new Task(), State.ONE_MINUTE, DELAY);
-			if(debug) log.info("system watchdog starting...");
+			if(debug) log.info("system watchdog starting");
 		}	
 	}
 	
@@ -64,16 +64,18 @@ public class SystemWatchdog {
 							// blocking send 
 							new SendMail("Oculus Rebooting", "been awake since: " + boot, temp);
 						
-							// emailed it, now delete it 
-							Util.delay(State.ONE_MINUTE);
-							new File(temp).delete();
+							// now delete it 
+							// Util.delay(State.ONE_MINUTE);
+							// new File(temp).delete();
 						
 							// does not work 
 							// new File(log).deleteOnExit();
 					
-						} else System.out.println("error on file copy: " + oculus);
-					} else System.out.println("error on file copy: " + logfile);
+						} else log.error("error on file copy: " + oculus);
+					} else log.error("error on file copy: " + logfile);
 				} 
+				
+				// reboot  
 				Util.systemCall("shutdown -r -f -t 01", true);				
 			}
 		}

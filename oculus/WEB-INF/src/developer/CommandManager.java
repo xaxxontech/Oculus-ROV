@@ -3,7 +3,7 @@ package developer;
 import java.io.File;
 
 import oculus.Application;
-import oculus.SendMail;
+//import oculus.SendMail;
 import oculus.State;
 import oculus.Util;
 
@@ -38,14 +38,13 @@ public class CommandManager {
 
 	/** try to find dock by turning in a circle and scanning */
 	public void home() {
-		new Thread() {
-			public void run() {
+		
+		//new Thread() {
+			//public void run() {
 
 				System.out.println("...starting to find home....");
 				
-				
-				//state.set(State.sona, State.timeout);
-				while (!state.get("status").equalsIgnoreCase("docked")) {
+				while( !state.equals(State.status, State.docked)) {
 
 					if (! state.getBoolean("motionenabled")){
 						System.out.println("motion enabled.. ");
@@ -63,8 +62,10 @@ public class CommandManager {
 					app.playerCallServer(Application.playerCommands.autodock, "go");
 				
 				}
-			}
-		}.start();
+				
+		//	}
+//}.start();
+	
 	}
 
 	/** send email to admin account */
@@ -112,8 +113,12 @@ public class CommandManager {
 			if (fn != null) {
 				if (fn.equalsIgnoreCase("home")) {
 
-					home();
-
+					new Thread() {
+						public void run() {
+							home();
+						}
+					}.start();
+					
 				} else if (fn.equalsIgnoreCase("dump")) {
 
 					dump();

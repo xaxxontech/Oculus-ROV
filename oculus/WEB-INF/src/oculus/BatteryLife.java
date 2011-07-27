@@ -1,5 +1,8 @@
 package oculus;
 
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
+
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Dispatch;
 import com.jacob.com.EnumVariant;
@@ -13,7 +16,9 @@ public class BatteryLife {
 	 * 
 	 * [CA] originally found here: http://www.dreamincode.net/code/snippet3300.htm
 	 */
-	
+
+	private static Logger log = Red5LoggerFactory.getLogger(BatteryLife.class, "oculus");
+
 	private String host;
 	private String connectStr;
 	private String query; 
@@ -24,6 +29,7 @@ public class BatteryLife {
 	private static Application app = null;
 	private static BatteryLife singleton = null;
 	private State state = State.getReference();
+
 
 	/**
 	 * @return a reference to this singleton class 
@@ -40,7 +46,7 @@ public class BatteryLife {
 	 */
 	public void init(Application parent){
 		
-//		System.out.println("battery init...");
+		System.out.println("battery init...");
 			
 		if(app == null){
 			
@@ -57,19 +63,13 @@ public class BatteryLife {
 	}
 	
 	/** 
-	 * private constructor, by definition of singleton. 
-	 * 
-	 * note: this function can only be called exactly once 
-	 * 
+	 * private constructor, definition of singleton. 	  
 	 */
 	private BatteryLife() {}
 	
 	public boolean batteryPresent(){
-
-		if( batteryStatus() == 999 )  
-			batterypresent = false; 
-		else 
-			batterypresent = true; 
+		if( batteryStatus() == 999 ) batterypresent = false; 
+		else batterypresent = true; 
 			
 		return batterypresent;
 	}
@@ -82,32 +82,25 @@ public class BatteryLife {
 	public void battStats() { 
 		
 		if(app == null){
-			System.out.println("batterylife, not yet configured");
+			log.error("app not yet configured");
 			return;
 		}
 		
 		if(batterypresent == false){
-			System.out.println("batterylife, no battery found");
+			log.error("no battery found");
 			return;
 		}
 		
 		new Thread(new Runnable() {
 			public void run() {
-				
-				if(state.get(State.dockstatus) == null){
-					System.out.println("no dockstatus in batterylife");
-					state.set(State.dockstatus, State.unknown);
-				}
-				
+			
 				if (batterypresent == false) {
-					System.out.println("no batery found in batterylife");
+					log.error("no batery found in thread");
 					return;
 				}
 				
-				if ( state.equals(State.dockstatus, State.docking)){
+				if ( ! state.equals(State.dockstatus, State.docking)){
 								
-				//if ( ! state.get(State.docstatus).equals("docking")) {
-
 					int batt[] = battStatsCombined();
 					String life = Integer.toString(batt[0]);
 					int s = batt[1];
@@ -117,12 +110,11 @@ public class BatteryLife {
 						status = "draining";
 						str = "battery " + life + "%," + status;
 						if (!state.getBoolean(State.motionenabled)) {
-							state.set(State.motionenabled, "true");
+							state.set(State.motionenabled, true);
 							str += " motion enabled";
 						}
-						if (! state.equals(State.dockstatus, "un-docked")) {
-							//app.dockstatus = "un-docked";
-							state.set(State.dockstatus, "un-docked");
+						if (! state.equals(State.dockstatus, State.undocked)) {
+							state.set(State.dockstatus, State.undocked);
 							str += " dock un-docked";
 						}
 						battcharging = false;
@@ -136,7 +128,6 @@ public class BatteryLife {
 						battcharging = true;
 						str = "battery " + life + "%," + status;
 						if (state.get(State.dockstatus) == null) {
-							// app.dockstatus = "docked";
 							state.set(State.dockstatus, State.docked);
 							str += " dock docked";
 						}
@@ -178,8 +169,8 @@ public class BatteryLife {
 	public int batteryStatus() {
 
 		if(app == null){
-			System.out.println("batteryStatus(), not yet configured");
-			return 999; //State.ERROR;
+			log.debug("app not yet configured");
+			return 999;
 		}
 	
 		int result = 999;
@@ -207,14 +198,14 @@ public class BatteryLife {
 	 * @return the charge remaining and status if found, null if not.  
 	 */
 	public int[] battStatsCombined() {
-	
+
 		if(app == null){
-			System.out.println("batterylife, not yet configured");
+			log.debug("app not yet configured");
 			return null;
 		}
 		
 		if(!batterypresent){
-			System.out.println("batterylife, no battery found");
+			log.debug("no battery found");
 			return null;
 		}
 	

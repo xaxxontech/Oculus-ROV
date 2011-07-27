@@ -67,8 +67,7 @@ public class State {
 	/** private constructor for this singleton class */
 	private State() {
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
-		props.put(userisconnected, false);	
-		// props.put(State.dockstatus, unknown);
+		props.put(userisconnected, false);
 	}
 
 	/** */
@@ -79,8 +78,11 @@ public class State {
 	/** test for string equality. any nulls will return false */ 
 	public boolean equals(final String a, final String b){
 		String aa = get(a);
-		if(aa==null) { System.out.println("state.equal... null"); return false; }
-		if(b==null)  { System.out.println("state.equal... null"); return false; }
+		if(aa==null) { System.out.println("state.equal... null:" + a); return false; }
+		if(b==null)  { System.out.println("state.equal... null:" + b); return false; }
+		
+		if(aa.equals("")) return false;
+		if(b.equals("")) return false;
 		
 		return aa.equalsIgnoreCase(b);
 	}
@@ -89,11 +91,13 @@ public class State {
 	public boolean equalsSetting(final String a, final String b){
 		String aa = get(a);
 		if(aa==null) return false; 
+		if(aa.equals("")) return false;
 		
 		//{ System.out.println("state.equalSetting... a=" + a); return false; }
 		
 		String bb = settings.readSetting(b);
 		if(bb==null) return false;
+		if(bb.equals("")) return false;
 		
 		//{ System.out.println("state.equalSetting... b=" + b); return false; }
 		//System.out.println("equalsSetting: " + aa + " ?? " + bb);
@@ -163,27 +167,29 @@ public class State {
 	public synchronized void set(final String key, final String value) {
 		try {
 			props.put(key.trim(), value.trim());
-			notifyObservers(key.trim());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		for(int i = 0 ; i < observers.size() ; i++)
+			observers.get(i).updated(key.trim());	
 	}
 
-	/** */
+	/** 
 	private void notifyObservers(String updated) {
 		for(int i = 0 ; i < observers.size() ; i++)
 			observers.get(i).updated(updated);
-	}
+	}*/
 
 	/** Put a name/value pair into the config */
 	public /* synchronized */ void set(final String key, final long value) {
-		try {
+		//try {
 			set(key, Long.toString(value));
 			// props.put(key.trim(), Long.toString(value));
 			// notifyObservers(key.trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	//	} catch (Exception e) {
+	//		e.printStackTrace();
+	//	}
 	}
 	
 	/** */

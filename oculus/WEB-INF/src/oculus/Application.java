@@ -869,7 +869,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (state.getBoolean(State.docking)) {
 			String str = "";
 			if( ! state.equals(State.dockstatus, State.docked)){
-				state.set(State.dockstatus, "un-docked");
+				state.set(State.dockstatus, State.undocked);
 				str += "dock un-docked";
 			}
 			messageplayer("docking cancelled by movement", "multiple", str);

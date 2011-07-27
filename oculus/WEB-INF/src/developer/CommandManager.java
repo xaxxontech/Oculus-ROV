@@ -8,8 +8,6 @@ import oculus.State;
 import oculus.Util;
 
 import org.red5.logging.Red5LoggerFactory;
-import org.red5.server.api.IConnection;
-import org.red5.server.api.service.IServiceCapableConnection;
 import org.slf4j.Logger;
 
 
@@ -24,12 +22,9 @@ public class CommandManager {
 	private State state = State.getReference();
 	private static Application app = null;
 	private MulticastChannel channel = null;
-	private IConnection grabber = null;
-
 
 	/** */
-	public CommandManager(Application a, IConnection g) {
-		grabber = g;
+	public CommandManager(Application a){ 
 		app = a;
 		channel = new MulticastChannel(this);
 		log.debug("command manager ready");
@@ -63,7 +58,7 @@ public class CommandManager {
 					}
 					
 					app.playerCallServer(Application.playerCommands.nudge, "left");
-					Util.delay(1000);
+					Util.delay(3000);
 					app.playerCallServer(Application.playerCommands.move, "stop");
 					app.playerCallServer(Application.playerCommands.autodock, "go");
 				
@@ -101,9 +96,8 @@ public class CommandManager {
 	/** take any message on this channel, look for an action */
 	public void execute(Command command) {
 		if (app == null) {
-			System.out.println("not configured, channel closing");
-			log.error("not configured, channel closing");
-			channel.close();
+			System.out.println("execute(): not configured");
+			log.error("not configured");
 			return;
 		}
 
@@ -126,36 +120,28 @@ public class CommandManager {
 					
 				} else if (fn.equalsIgnoreCase("sonar")) {
 					if( arg != null ){
-					
-						//if(arg.equals("debug"))
-						//	state.set(State.sonarDebug, true);
-					
 						if(arg.equals("debug"))
 							state.set(State.sonarDebug, true);
 					
 						if(arg.equals("reset"))
 							state.set(State.sonarDebug, false);
-					
 					}
-				} else if (fn.equalsIgnoreCase("sample")) {
+				} else if (fn.equalsIgnoreCase("find")) {
 
-					System.out.println("forward.. to do, merge with exp");
+					// System.out.println("forward.. to do, merge with exp");
 					
-
-					// app.playerCallServer(Application.playerCommands.autodock, "go");
-					// Util.delay(2000);
-					// app.playerCallServer(Application.playerCommands.autodock, "cancel");
-					
-					//IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					//sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+					try {
+						app.playerCallServer(Application.playerCommands.dockgrab, null);
+					} catch (Exception e) {
+						System.out.println("_app call error");
+					}
 			
 					
-				} else {
-					// must be an application primitive
+				} else { // must be an application primitive
 					try {
 						app.playerCallServer(fn, arg);
 					} catch (Exception e) {
-						System.out.println("app call error");
+						System.out.println("_app call error");
 					}
 				}
 			}

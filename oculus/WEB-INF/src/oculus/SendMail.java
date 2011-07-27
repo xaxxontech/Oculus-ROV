@@ -27,13 +27,13 @@ public class SendMail {
 	private Settings settings = new Settings();
 	private final String user = settings.readSetting("email");
 	private final String pass = settings.readSetting("email_password");
-	private final boolean debug = settings.getBoolean("developer");
+	//private final boolean debug = settings.getBoolean("developer");
 
 	private String subject = null;
 	private String body = null;
 	private String fileName = null;
 	
-	// if set, send error messages to user screen 
+	// if set, send error messages to user's screen 
 	private Application application = null;
 
 	/** */
@@ -94,7 +94,7 @@ public class SendMail {
 	}
 	
 
-	/** blocking send */
+	/** blocking send
 	public SendMail(final String sub, final String text, final String file, boolean block) {
 
 		subject = sub;
@@ -102,16 +102,16 @@ public class SendMail {
 		fileName = file;
 			
 		sendAttachment();	
-	}
+	}*/
 
-	/**	blocking send */
+	/**	blocking send 
 	SendMail(final String sub, final String text, boolean block) {
 
 		subject = sub;
 		body = text;
 
 		sendMessage();
-	}
+	}*/
 	
 	/** */
 	private void sendMessage() {
@@ -160,7 +160,7 @@ public class SendMail {
 
 		if (user == null || pass == null) {
 			log.error("no email and password found in settings");
-			if(debug) System.out.println("no email and password found in settings");
+			// if(debug) System.out.println("no email and password found in settings");
 			return;
 		}
 		
@@ -204,7 +204,7 @@ public class SendMail {
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			if(debug) System.out.println("error sending email, check settings");
+			// if(debug) System.out.println("error sending email, check settings");
 			if(application!=null) application.message("error sending email", null, null);
 		}
 	}

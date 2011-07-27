@@ -4,12 +4,15 @@ import java.io.FileWriter;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Vector;
 
 public class State {
 
+	private Settings settings = new Settings();
+
 	//  public static final String enable = "enable";
     //	public static final String disable = "disable";
-	//  private boolean locked = false;
+	//  private boolean locked = false
 	
 	public static final String user = "user";
 	public static final String logintime = "logintime";
@@ -28,11 +31,14 @@ public class State {
 	public static final String sonar = "sonar";
 	public static final String sonarDebug = "sonarDebug";
 	public static final String status = "status";
+	public static final String dockstatus = "dockstatus";
 	public static final String timeout = "timeout";
 	public static final String losttarget = "losttarget";
 	public static final String docked = "docked";
 	public static final String undocked = "undocked";
-	
+	public static final String guest_start = "guest_start";
+	public static final String guest_end = "guest_end";
+
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
@@ -40,9 +46,12 @@ public class State {
 	public static final long TEN_MINUTES = 600000;
 	public static final int ERROR = -1;
 
+	/** notify these on change events */
+	public Vector<Observer> observers = new Vector<Observer>();
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
+	
 	/** properties object to hold configuration */
 	private Properties props = new Properties();
 	
@@ -56,9 +65,41 @@ public class State {
 	/** private constructor for this singleton class */
 	private State() {
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
-		props.put(userisconnected, "false");		
+		props.put(userisconnected, false);	
+		props.put(State.dockstatus, "un-known");
 	}
 
+	/** */
+	public void addObserver(Observer obs){
+		observers.add(obs);
+	}
+	
+	/** test for string equality. any nulls will return false */ 
+	public boolean equals(final String a, final String b){
+		String aa = get(a);
+		if(aa==null) { System.out.println("state.equal... null"); return false; }
+		if(b==null)  { System.out.println("state.equal... null"); return false; }
+		
+		return aa.equalsIgnoreCase(b);
+	}
+	
+	/** test for string equality against config file. any nulls will return false */ 
+	public boolean equalsSetting(final String a, final String b){
+		String aa = get(a);
+		if(aa==null) return false; 
+		
+		//{ System.out.println("state.equalSetting... a=" + a); return false; }
+		
+		String bb = settings.readSetting(b);
+		if(bb==null) return false;
+		
+		//{ System.out.println("state.equalSetting... b=" + b); return false; }
+		//System.out.println("equalsSetting: " + aa + " ?? " + bb);
+		
+		return aa.equalsIgnoreCase(bb);
+	}
+	
+	
 	/** @param file is the properties file to configure the framework
 	public void parseFile(final String path) {
 
@@ -120,15 +161,24 @@ public class State {
 	public synchronized void set(final String key, final String value) {
 		try {
 			props.put(key.trim(), value.trim());
+			notifyObservers(key.trim());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	/** */
+	private void notifyObservers(String updated) {
+		for(int i = 0 ; i < observers.size() ; i++)
+			observers.get(i).updated(updated);
+	}
+
 	/** Put a name/value pair into the config */
-	public synchronized void set(final String key, final long value) {
+	public /* synchronized */ void set(final String key, final long value) {
 		try {
-			props.put(key.trim(), Long.toString(value));
+			set(key, Long.toString(value));
+			// props.put(key.trim(), Long.toString(value));
+			// notifyObservers(key.trim());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -217,6 +267,11 @@ public class State {
 	public synchronized void set(String key, boolean b) {
 		if(b) props.put(key, "true");
 		else props.put(key, "false");
+	}
+
+	/** */ 
+	public synchronized void delete(String key) {
+		props.remove(key);
 	}
 	
 	

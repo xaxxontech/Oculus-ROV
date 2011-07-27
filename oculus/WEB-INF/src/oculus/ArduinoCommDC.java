@@ -19,9 +19,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private State state = State.getReference();
 
 	// if watchdog'n, re-connect if not seen input since this long ago
-	public static final long DEAD_TIME_OUT = 20000;
+	public static final long DEAD_TIME_OUT = 30000;
 	public static final int SETUP = 2000;
-	public static final int SONAR_DELAY = 1000; 
+	public static final int SONAR_DELAY = 5000; 
 	public static final int WATCHDOG_DELAY = 5000;
 
 	// this commands require arguments from current state
@@ -77,8 +77,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int speedfast = 255;
 	protected int turnspeed = 255;
 	protected int speed = speedfast; // set default to max
-	private int range = 0; // if have sonar
-
+	
 	protected String direction = null;
 	protected boolean moving = false;
 	volatile boolean sliding = false;
@@ -286,9 +285,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					return; // die, no point living 
 				}
 				
+				// TODO: COLIN ... should we re-connect? 
 				// if ( !isconnected) { connect(); return; }
 				
-				if (sonar){ //  && state.getBoolean())) {
+				if (sonar){ 
 					if (getReadDelta() > SONAR_DELAY){ 
 						new Sender(SONAR);
 						Util.delay(SONAR_DELAY);						

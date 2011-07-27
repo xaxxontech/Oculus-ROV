@@ -77,7 +77,8 @@ public class AutoDock {
 	 */
 	public void autoDock(String str) {
 		
-		// System.out.println("__autodock: " + str);
+		//if(state.getBoolean(State.developer))
+		//	System.out.println("__autodock: " + str);
 		
 		String cmd[] = str.split(" ");
 		if (cmd[0].equals("cancel")) {
@@ -113,21 +114,24 @@ public class AutoDock {
 				if (cmd[4].equals("0")) { // width==0, failed to find target
 					if (autodockgrabattempts < 0) { 
 						
-						// TODO: remove this condition if unuse
+						// TODO: remove this condition if unused
 						// TODO: remove this??
 						
 						if(debug) new SendMail("Oculus Message", "auto dock fail, line 109 is being used!"); 
 						System.out.println("line 109... auto dock");
 						autodockgrabattempts ++;
-						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+						
+						app.playerCallServer(Application.playerCommands.dockgrab, null);
+
+//						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+//						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 						
 					} else { 
 						
 						//TODO: testing 
-						//failed, give up... send email??
+						// failed, give up... send email??
+						// if(debug) new SendMail("Oculus Message", "auto dock failed, target lost"); 
 						
-						if(debug) new SendMail("Oculus Message", "auto dock failed, target lost"); 
 						state.set(State.autodocking, false);	
 						state.set(State.status, State.losttarget);
 						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
@@ -139,10 +143,11 @@ public class AutoDock {
 					app.message(null,"autodocklock",s);
 
 					// TODO: testing 
-					state.set(State.dockx, cmd[2]);
-					state.set(State.docky, cmd[3]);
-					String d = state.get(State.sonar);
-					if(( d != null )) moves.append("docking sonar " + d);
+					
+					///state.set(State.dockx, cmd[2]);
+					///state.set(State.docky, cmd[3]);
+					// String d = state.get(State.sonar);
+					// if(( d != null )) moves.append("docking sonar " + d);
 					// TODO: TESTING
 					
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
@@ -179,14 +184,15 @@ public class AutoDock {
 			if (state.getBoolean(State.motionenabled)){
 				if (!life.batteryCharging()) {
 					
+					moves.append("docking");
 					app.message("docking initiated", "multiple", "speed fast motion moving dock docking");
 
 					// need to set this because speedset calls goForward also if true
 					comport.movingforward = false; 
 					comport.speedset("fast"); 
 					state.set(State.docking, true);
-					app.dockstatus = "docking";
-					
+					//app.dockstatus = "docking";
+					state.set(State.dockstatus, "docking");
 					new Thread(new Runnable() {
 						public void run() {
 							int counter = 0;
@@ -207,15 +213,17 @@ public class AutoDock {
 									if (state.getBoolean(State.autodocking)) {
 										state.set(State.autodocking, "false");
 										str += " cameratilt "+app.camTiltPos()+" autodockcancelled blank";
-										if (!app.stream.equals("stop") && app.userconnected==null) { 
+										if (!app.stream.equals("stop") && state.get(State.user)==null) { 
 											app.publish("stop"); 
 										}
 									}
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
-									log.info(app.userconnected +" docked successfully");
+									log.info(state.get(State.user) +" docked successfully");
 									state.set(State.status, State.docked);
 									state.set(State.motionenabled, false);
-									app.dockstatus = "docked"; // needs to be before battStats()
+									state.set(State.dockstatus, "docked");
+									// app.dockstatus = "docked"; // needs to be before battStats()
+									moves.append("docked");
 									life.battStats(); 
 									break;
 								}
@@ -223,8 +231,8 @@ public class AutoDock {
 								if (counter >12) { // failed
 									
 									//TODO: failed, give up... send email??
-									if(debug) 
-										new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
+									///if(debug) 
+									///new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
 									
 									state.set(State.docking, false);
 									state.set(State.status, State.timeout);
@@ -235,19 +243,23 @@ public class AutoDock {
 										s += " motion stopped";
 									} 
 									app.message("docking timed out", "multiple", s);
-									log.info(app.userconnected +" docking timed out");
-									app.dockstatus = "un-docked";
-									// TODO: TESTING
+									log.info(state.get(State.user) +" docking timed out");
+									state.set(State.dockstatus, "un-docked");
+
+									// TODO: TESTING			
+									// state.set(State.status, State.undocked);
 									
-									state.set(State.status, State.undocked);
 									if (state.getBoolean(State.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
 											comport.speedset("fast");
 											comport.goBackward();
 											Thread.sleep(2000);
 											comport.stopGoing();
-											IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-											sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+										
+											app.playerCallServer(Application.playerCommands.dockgrab, null);
+
+									//		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+								//			sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 										} catch (Exception e) { e.printStackTrace(); } } }).start();
 									}
 									break;
@@ -265,14 +277,16 @@ public class AutoDock {
 			comport.goBackward();
 			state.set(State.motionenabled, true);
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
-			app.dockstatus = "un-docked";
+			
+			//app.dockstatus = "un-docked";
+			state.set(State.dockstatus, "un-docked");
 			new Thread(new Runnable() {
 				public void run() {
 					try {
 						Thread.sleep(2000);
 						comport.stopGoing();
 						app.message("disengaged from dock", "motion", "stopped");
-						log.info(app.userconnected + " un-docked");
+						log.info(state.get(State.user) + " un-docked");
 						life.battStats();
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -310,8 +324,12 @@ public class AutoDock {
 					Thread.sleep(1500);
 					comport.stopGoing();
 					Thread.sleep(500); // let deaccelerate
-					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+
+					app.playerCallServer(Application.playerCommands.dockgrab, null);
+
+		//				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+		//			sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+			
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else { // go only 
@@ -321,8 +339,12 @@ public class AutoDock {
 					Thread.sleep(1500);
 					comport.stopGoing();
 					Thread.sleep(500); // let deaccelerate
-					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+
+					app.playerCallServer(Application.playerCommands.dockgrab, null);
+
+					//IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+					//sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 		} // end of S1 check
@@ -345,8 +367,9 @@ public class AutoDock {
 						Thread.sleep(450);
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
-						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+						
+						app.playerCallServer(Application.playerCommands.dockgrab, null);
+
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 				else { // go only 
@@ -356,8 +379,9 @@ public class AutoDock {
 						Thread.sleep(500);
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
-						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+				
+						app.playerCallServer(Application.playerCommands.dockgrab, null);
+
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 			}
@@ -367,13 +391,15 @@ public class AutoDock {
 					comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);
-						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+
+						app.playerCallServer(Application.playerCommands.dockgrab, null);
+
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 				else {
-					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+
+					app.playerCallServer(Application.playerCommands.dockgrab, null);
+
 				}
 			}
 		}
@@ -383,8 +409,7 @@ public class AutoDock {
 				comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 				new Thread(new Runnable() { public void run() { try {
 					Thread.sleep(1500);
-					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+					app.playerCallServer(Application.playerCommands.dockgrab, null);
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else {
@@ -402,8 +427,8 @@ public class AutoDock {
 						Thread.sleep(1500); 
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
-						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+						app.playerCallServer(Application.playerCommands.dockgrab, null);
+
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 					log.info("autodock backup");
 				}

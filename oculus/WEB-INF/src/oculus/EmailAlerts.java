@@ -20,7 +20,7 @@ public class EmailAlerts {
 
 	// configuration 
 	private Settings settings = new Settings();
-	private final boolean debug = settings.getBoolean(Settings.developer);
+	// private final boolean debug = settings.getBoolean(Settings.developer);
 	private final boolean alerts = settings.getBoolean(Settings.emailalerts);
 	private BatteryLife life = BatteryLife.getReference();
 	
@@ -30,7 +30,8 @@ public class EmailAlerts {
 		
 		if (alerts){
 			timer.scheduleAtFixedRate(new Task(), State.ONE_MINUTE, DELAY);
-			if(debug) System.out.println("starting email alerts...");
+			
+			// if(debug) System.out.println("starting email alerts...");
 		}
 	}
 

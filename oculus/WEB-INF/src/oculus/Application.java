@@ -7,7 +7,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -22,43 +25,42 @@ import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
 import developer.CommandManager;
+import developer.ftp.FTPManager;
 
 public class Application extends MultiThreadedApplicationAdapter {
 
 	private static final int STREAM_CONNECT_DELAY = 2000;
-
+	
+	private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
+	private Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
+	private static String salt = "PSDLkfkljsdfas345usdofi";
 	private IConnection grabber = null;
 	private IConnection player = null;
-
 	private ArduinoCommDC comport = null;
 	private LightsComm light = null;
-
-	// optionally log all moves if a developer
 	private LogManager moves = new LogManager();
-
 	private BatteryLife battery = null;
 	private Settings settings = new Settings();
-	protected boolean initialstatuscalled = false;
-	private static String salt = "PSDLkfkljsdfas345usdofi";
-	ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
-	String userconnected = null;
-	String pendinguserconnected = null;
-	String remember = null;
-	IConnection pendingplayer = null;
-	boolean pendingplayerisnull = true;
-	protected String stream = "stop";
-	// WifiConnection wifi; // = new WifiConnection();
-	boolean admin = false;
-	private static Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
-	String dockstatus = "";
-	String httpPort;
-	boolean facegrabon = false;
-	private boolean emailgrab = false;
+	private String pendinguserconnected = null;
+	private String remember = null;
+	private IConnection pendingplayer = null;
+	private	String httpPort;
 	private AutoDock docker = null;
 	private State state = State.getReference();
 	private Speech speech = new Speech();
-	boolean muteROVonMove = false;
+	private boolean initialstatuscalled = false;
+	private boolean pendingplayerisnull = true;
+	private boolean facegrabon = false;
+	private boolean emailgrab = false;
 
+	// TODO:  best not to have publics 
+	public boolean muteROVonMove = false;
+	public boolean admin = false;
+	protected String stream = "stop";
+	
+	// WifiConnection wifi; // = new WifiConnection();
+
+	/** */
 	public Application() {
 		super();
 		passwordEncryptor.setAlgorithm("SHA-1");
@@ -68,15 +70,28 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	@Override
 	public boolean appConnect(IConnection connection, Object[] params) {
-
+		
 		String logininfo[] = ((String) params[0]).split(" ");
 
 		// always accept local grabber
 		if ((connection.getRemoteAddress()).equals("127.0.0.1")
-				&& logininfo[0].equals("")) {
-			return true;
-		}
-
+				&& logininfo[0].equals("")) 
+					return true;
+	
+		// TODO: new feature testing. Use 24 hour clock 
+		// if a guest, test if permitted hour 
+		if ( ! logininfo[0].equals(settings.readSetting("user0"))){
+			if(!guestHours()){
+				// TODO: COLIN ... plz send this message to login screen 
+				log.error("Not permitted hours for: " + logininfo[0].toString());	
+				// System.out.println("Not permitted hours for: " + logininfo[0].toString() + 
+				//	" start: " + settings.readSetting("guest_start") + " end: " +
+				//		settings.readSetting("guest_end"));
+				return false;
+		
+			} // else System.out.println("_guest hours login: " + logininfo[0]);
+		} // else System.out.println("_admin login: " + logininfo[0]);
+		
 		if (logininfo.length == 1) { // test for cookie auth
 			String username = logintest("", logininfo[0]);
 			if (username != null) {
@@ -86,8 +101,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		if (logininfo.length > 1) { // test for user/pass/remember
 			String encryptedPassword = (passwordEncryptor
-					.encryptPassword(logininfo[0] + salt + logininfo[1]))
-					.trim();
+					.encryptPassword(logininfo[0] + salt + logininfo[1])).trim();
 			if (logintest(logininfo[0], encryptedPassword) != null) {
 				if (logininfo[2].equals("remember")) {
 					remember = encryptedPassword;
@@ -105,18 +119,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 	@Override
 	public void appDisconnect(IConnection connection) {
 		if (connection.equals(player)) {
-			String str = userconnected + " disconnected";
+			String str = state.get(State.user) + " disconnected";
 			log.info(str);
 			messageGrabber(str, "connection awaiting&nbsp;connection");
-			if (userconnected.equals(settings.readSetting("user0"))) {
+			if (state.get(State.user).equals(settings.readSetting("user0"))) {
 				admin = false;
 			}
-			userconnected = null;
+			
+			state.delete(State.user);
 			state.set(State.userisconnected, false);
-
 			player = null;
 			facegrabon = false;
+			
 			if (!state.getBoolean(State.autodocking)) {
+				state.set(State.userisconnected, false);
 				if (!stream.equals("stop")) {
 					publish("stop");
 				}
@@ -147,8 +163,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void grabbersignin() {
 		grabber = Red5.getConnectionLocal();
 		String str = "awaiting&nbsp;connection";
-		if (userconnected != null) {
-			str = userconnected + "&nbsp;connected";
+		if (state.get(State.user) != null) {
+			str = state.get(State.user) + "&nbsp;connected";
 		}
 		str += " stream " + stream;
 		messageGrabber("connected to subsystem", "connection " + str);
@@ -173,6 +189,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		docker = new AutoDock(this, grabber, comport);
 	}
 
+	/** */ 
 	public void initialize() {
 
 		// must be blocking search of all ports, but only once!
@@ -181,14 +198,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		light = new LightsComm(this);
 
 		httpPort = settings.readRed5Setting("http.port");
+		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
-		// checks setting for flag before starting
-		new SystemWatchdog();
-		new EmailAlerts(this);
-
-		if (settings.getBoolean(State.developer))
-			new CommandManager(this, grabber);
-
+		if (settings.getBoolean(State.developer)){
+			new CommandManager(this);
+			moves.open(System.getenv("RED5_HOME") + "\\log\\moves.log");
+		}
+		
 		int volume = settings.getInteger(Settings.volume);
 		if (volume == Settings.ERROR) {
 			settings.newSetting(Settings.volume, "0");
@@ -196,16 +212,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 		} else {
 			Util.setSystemVolume(volume);
 		}
-
-		grabberInitialize();
-
-		battery = BatteryLife.getReference();
 		
-		muteROVonMove = settings.getBoolean("mute_rov_on_move");
-
-		if (settings.getBoolean(Settings.developer))
-			moves.open(System.getenv("RED5_HOME") + "\\log\\moves.log");
-
+		// TODO: brad added, removes with single line here 
+		new FTPManager(this);
+		new SystemWatchdog();
+		new EmailAlerts(this);
+		
+		grabberInitialize();
+		battery = BatteryLife.getReference();
 		log.info("initialize");
 	}
 
@@ -275,7 +289,41 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}).start();
 	}
 
+
+	/** @return true if within range in settings. Will return false if not configured */
+	public boolean guestHours(){
+	
+		final int start = settings.getInteger(State.guest_start);
+		final int end = settings.getInteger(State.guest_end);
+		
+		// if doesn't exist, don't enforce 
+		if(start==Settings.ERROR) return true;
+		if(end==Settings.ERROR) return true;
+		
+		final Date now = new Date();
+		final DateFormat dfm = new SimpleDateFormat("HH");
+		final int current = Integer.parseInt(dfm.format(now));
+		
+		// System.out.println("start : " + start); 
+		// System.out.println("now   : " + dfm.format(now));
+		// System.out.println("end   : " + end);
+		
+		// don't bother with minutes
+		if( current < start ) return false;
+		if( current > end ) return false;
+	
+		return true;
+	}
+	
+	/** */
 	public void playersignin() {
+		
+		/*
+		if(guestHours()){
+			// TODO: test if guest here too??
+			
+		}*/
+		
 		if (player != null) {
 			pendingplayer = Red5.getConnectionLocal();
 			pendingplayerisnull = false;
@@ -288,16 +336,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 					str += " storecookie " + remember;
 					remember = null;
 				}
-				str += " someonealreadydriving " + userconnected; // this has to
-																	// be last
-																	// to above
-																	// variables
-																	// are
-																	// already
-																	// set in
-																	// javascript
-				sc.invoke("message", new Object[] { null, "green", "multiple",
-						str });
+				str += " someonealreadydriving " + state.get(State.user);  
+				
+				// this has to be last to above variables are already set in java script
+				sc.invoke("message", new Object[] { null, "green", "multiple", str });
 				str = pendinguserconnected + " pending connection from: "
 						+ pendingplayer.getRemoteAddress();
 				log.info(str);
@@ -305,35 +347,34 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		} else {
 			player = Red5.getConnectionLocal();
-			userconnected = pendinguserconnected;
-			String str = "connection connected user " + userconnected;
+			state.set(State.user, pendinguserconnected); 
+			String str = "connection connected user " + state.get(State.user);
 			if (remember != null) {
 				str += " storecookie " + remember;
 				remember = null;
 			}
 			str += " streamsettings " + streamSettings();
-			messageplayer(userconnected + " connected to OCULUS", "multiple",
-					str);
+			messageplayer( state.get(State.user) + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
 
-			if (userconnected.equals(settings.readSetting("user0"))) {
+			if(state.equalsSetting(State.user, "user0")){
+				// TODO: COLIN -- EXAMPLE USE
+				// This is too brutal below 
+				// if ( state.get(State.user).equals(settings.readSetting("user0"))) {
 				admin = true;
 			} else {
 				admin = false;
 			}
 			// System.out.println(userconnected+" connected");
 			// log.info(userconnected+" connected");
-			str = userconnected + " connected from: "
-					+ player.getRemoteAddress();
+			str =  state.get(State.user) + " connected from: " + player.getRemoteAddress();
 			log.info(str);
-			messageGrabber(str, "connection " + userconnected
-					+ "&nbsp;connected");
+			messageGrabber(str, "connection " +  state.get(State.user) + "&nbsp;connected");
 			Util.beep();
 		}
-
-		state.set(State.userisconnected, "true");
+		
+		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
-		state.set(State.user, userconnected);
 	}
 
 	/** put all commands here */
@@ -346,7 +387,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
 		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, facegrab, assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-		lighton, lightoff;
+		lighton, lightoff, ligthdim, ligthbright, dockgrab;
 	
 		@Override 
 		public String toString() {
@@ -389,13 +430,22 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if(state.getBoolean(State.developer))
 				System.out.println("playerCallServer(): " + fn + " " + str);
 		
-		// G-rated... return, not breaks, we don't do lower statement 
+		// G-rated commands 
+		// return after command, don't do lower case statement 
 		switch (fn) {
 		case chat: chat(str); return;
 		case beapassenger: beAPassenger(str); return;
 		case assumecontrol: assumeControl(str); return;
 		case lightoff: light.off(); return;
 		case lighton: light.on(); return;
+
+		case dockgrab:
+			if (grabber instanceof IServiceCapableConnection) {
+				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+				// messageplayer("dockgrab command received", null, null);
+			}
+			break;
 		}
 
 		//--------------------------------------------------------//
@@ -404,10 +454,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (Red5.getConnectionLocal() != player) {
 			System.out.println("error... security issue");
 			return;
-			
-			// System.out.println("playerCallServer(): " + fn + " " + str);
-			// open hole is developing? 
-			// if(!state.getBoolean(State.developer)) return;
 		}
 		
 		// X-rated.. must be logged in  
@@ -459,7 +505,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 				messageplayer("framegrab command received", null, null);
 			}
 			break;
-
+/*
+		case dockgrab:
+			if (grabber instanceof IServiceCapableConnection) {
+				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
+				// messageplayer("dockgrab command received", null, null);
+			}
+			break;
+*/
 		case emailgrab:
 			if (grabber instanceof IServiceCapableConnection) {
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -554,7 +608,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * distribute commands from grabber
 	 * 
 	 * @param fn
-	 *            is the funct ion to call
+	 *            is the function to call in xxxxxx.swf ???
 	 * @param str
 	 *            is the parameters to pass on to the function.
 	 */
@@ -566,7 +620,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case systemcall: Util.systemCall(str, true); break;
 		case chat: chat(str); break;
 		case facerect: messageplayer(null, "facefound", str); break;
-		case dockgrabbed: docker.autoDock("dockgrabbed " + str); break;
+		case dockgrabbed: {
+			//TODO: BRAD
+			docker.autoDock("dockgrabbed " + str); 
+			System.out.println("grabberCallServer(): " + str);
+			String[] arg = str.split(" ");
+			state.set(State.dockx, arg[2]);
+			state.set(State.docky, arg[3]);
+			break;
+		}
 		case autodock: docker.autoDock(str); break;
 		case checkforbattery: checkForBattery(str); break;
 		case restart:
@@ -616,8 +678,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			int height = Integer.parseInt(vals[1]);
 			int fps = Integer.parseInt(vals[2]);
 			int quality = Integer.parseInt(vals[3]);
-			sc.invoke("publish", new Object[] { str, width, height, fps,
-					quality });
+			sc.invoke("publish", new Object[] { str, width, height, fps, quality });
 			// messageGrabber("stream "+str);
 		}
 	}
@@ -627,7 +688,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				 (stream.equals("camandmic") || stream.equals("mic"))) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("muteROVMic", new Object[] { });
-			//messageplayer("rov mic muted",null,null);
+			messageplayer("rov mic muted",null,null);
 		}
 	}
 	
@@ -637,7 +698,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("unmuteROVMic", new Object[] { });
-			//messageplayer("rov mic un-muted",null,null);
+			messageplayer("rov mic un-muted",null,null);
 		}
 	}
 	
@@ -654,7 +715,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
-	public void frameGrabbed(ByteArray _RAWBitmapImage) {
+	
+	/** */ 
+	public void frameGrabbed(ByteArray _RAWBitmapImage){ // , final String filename) {
 		// String str=
 		// "frame grabbed <a href='images/framegrab.png' target='_blank'>view</a>";
 		// String str=
@@ -679,16 +742,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 			try {
 				BufferedImage JavaImage = ImageIO.read(db);
 				// Now lets try and write the buffered image out to a file
-				String file = System.getenv("RED5_HOME")
-						+ "\\webapps\\oculus\\images\\framegrab.png";
+				String file = System.getenv("RED5_HOME")              
+						+ "\\webapps\\oculus\\images\\framegrab.png"; 
 				if (JavaImage != null) {
 					// If you sent a jpeg to the server, just change PNG to JPEG
 					// and Red5ScreenShot.png to .jpeg
 					ImageIO.write(JavaImage, "PNG", new File(file));
 					if (emailgrab) {
 						emailgrab = false;
-						new SendMail("Oculus Screen Shot", "image attached",
-								file, this);
+						new SendMail("Oculus Screen Shot", "image attached", file, this);
 					}
 				}
 			} catch (IOException e) {
@@ -807,21 +869,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void moveMacroCancel() {
-		if (state.getBoolean(State.docking) == true) {
+		if (state.getBoolean(State.docking)) {
 			String str = "";
-			if (!dockstatus.equals("docked")) {
-				dockstatus = "un-docked";
+			if( ! state.equals(State.dockstatus, State.docked)){
+				state.set(State.dockstatus, "un-docked");
 				str += "dock un-docked";
 			}
 			messageplayer("docking cancelled by movement", "multiple", str);
 			docker.cancel();
 		}
-		if (comport.sliding == true) {
+		if (comport.sliding == true) 
 			comport.slidecancel();
-		}
-		if (state.getBoolean(State.autodocking)) {
+		
+		if (state.getBoolean(State.autodocking)) 
 			docker.autoDock("cancel");
-		}
 	}
 
 	private void cameraCommand(String str) {
@@ -849,50 +910,34 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (initialstatuscalled == false) {
 			initialstatuscalled = true;
 			battery.battStats();
-			// signalStrength();
+			
+			// build string 
 			String str = "";
 			if (comport != null) {
 				String spd = "FAST";
-				if (comport.speed == comport.speedmed) {
-					spd = "MED";
-				}
-				if (comport.speed == comport.speedslow) {
-					spd = "SLOW";
-				}
+				if (comport.speed == comport.speedmed) spd = "MED";
+				if (comport.speed == comport.speedslow) spd = "SLOW";
+				
 				String mov = "STOPPED";
-				if (!state.getBoolean(State.motionenabled)){
-					mov = "DISABLED";
-				}
-				if (comport.moving == true) {
-					mov = "MOVING";
-				}
-				str += " speed " + spd + " cameratilt " + camTiltPos()
-						+ " motion " + mov;
+				if (!state.getBoolean(State.motionenabled)) mov = "DISABLED";
+				if (comport.moving == true) mov = "MOVING";
+				str += " speed " + spd + " cameratilt " + camTiltPos() + " motion " + mov;
 			}
-			str += " vidctroffset "
-					+ Integer.parseInt(settings.readSetting("vidctroffset"));
-			// str +=
-			// " rovvolume "+Integer.parseInt(settings.readSetting(Settings.volume));
-			str += " rovvolume "
-					+ Integer.parseInt(settings.readSetting(Settings.volume));
+			
+			str += " vidctroffset " + settings.readSetting("vidctroffset");
+			str += " rovvolume " + settings.readSetting(Settings.volume); 
 			str += " stream " + stream + " selfstream stop";
-			// str += " address "+settings.readSetting("address");
-			// str += " wifi "+wifi.wifiSignalStrength();
-			if (admin) {
-				str += " admin true";
-			}
-			if (!dockstatus.equals("")) {
-				str += " dock " + dockstatus;
-			}
+			if (admin) str += " admin true";
+			if(state.get(State.dockstatus) != null)
+				str += " dock " + state.get(State.dockstatus); 
+			
 			messageplayer("status check received", "multiple", str.trim());
+		
 		} else {
-			// String str = " stream "+stream;
-			// messageplayer("status check received","multiple",str.trim());
 			messageplayer("status check received", null, null);
 		}
-		if (s.equals("battcheck")) {
-			battery.battStats();
-		}
+		
+		if (s.equals("battcheck")) battery.battStats();
 	}
 
 	private void streamSettingsCustom(String str) {
@@ -949,9 +994,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void monitor(String str) {
 		// uses nircmd.exe from http://www.nirsoft.net/utils/nircmd.html
 		messageplayer("monitor " + str, null, null);
-		// String rfh = System.getenv("RED5_HOME");
-		// str = rfh +"\\webapps\\oculus\\nircmdc.exe monitor "+str;
-		// str = "nircmdc.exe monitor "+str;
 		str = str.trim();
 		if (str.equals("on")) {
 			str = "cmd.exe /c start monitoron.bat";
@@ -966,8 +1008,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	/**
+	 * Move the bot 
 	 * 
-	 * @param str
+	 * @param str parameter is the direction 
 	 */
 	private void move(String str) {
 		String s = "";
@@ -978,63 +1021,51 @@ public class Application extends MultiThreadedApplicationAdapter {
 			msg = "command received: " + str;
 		}
 		if (state.getBoolean(State.motionenabled)) {
-			if (str.equals("forward")) {
-				comport.goForward();
-			}
-			if (str.equals("backward")) {
-				comport.goBackward();
-			}
-			if (str.equals("right")) {
-				comport.turnRight();
-			}
-			if (str.equals("left")) {
-				comport.turnLeft();
-			}
+			if (str.equals("forward")) comport.goForward();
+			else if (str.equals("backward")) comport.goBackward();
+			else if (str.equals("right")) comport.turnRight();
+			else if (str.equals("left")) comport.turnLeft();
+			
 			moveMacroCancel();
-			if (s.equals("")) {
-				s = "MOVING";
-			}
+			if (s.equals("")) s = "MOVING";
 			msg = "command received: " + str;
-		} else {
-			s = "DISABLED";
-		}
+		
+		} else s = "DISABLED";
+		
 		messageplayer(msg, "motion", s);
-
+		
+		// TODO: BRAD..... used still? 
 		String x = state.get(State.dockx);
 		String y = state.get(State.docky);
 		String d = state.get(State.sonar);
 		if ((x != null) && (y != null) && (d != null))
 			moves.append(str + " " + x + " " + y + " " + d);
-		if ((d != null))
-			moves.append(str + " " + d);
-		else
-			moves.append(str);
+		if ((d != null)) moves.append(str + " " + d);
+		else moves.append(str);
 	}
 
 	/** @param str is the direction to move. Valid choices are: "right", "left", "backward", "forward" */
 	private void nudge(String str) {
 		if (str == null) return;
-		
-		if (state.getBoolean(State.motionenabled)) {
-			comport.nudge(str);
-			messageplayer("command received: nudge" + str, null, null);
-
-			String x = state.get(State.dockx);
-			String y = state.get(State.docky);
-			String d = state.get(State.sonar);
-			if ((x != null) && (y != null) && (d != null))
-				moves.append(str + " " + x + " " + y + " " + d);
-			if ((d != null))
-				moves.append(str + " " + d);
-			else
-				moves.append(str);
-
-			if (state.getBoolean(State.docking)
-					|| state.getBoolean(State.autodocking))
-				moveMacroCancel();
-		} else {
+		if ( ! state.getBoolean(State.motionenabled)) {
 			messageplayer("motion disabled", "motion", "disabled");
+			return;
 		}
+	
+		comport.nudge(str);
+		messageplayer("command received: nudge" + str, null, null);
+
+		// TODO: BRAD.. still used ?
+		String x = state.get(State.dockx);
+		String y = state.get(State.docky);
+		String d = state.get(State.sonar);
+		if ((x != null) && (y != null) && (d != null))
+			moves.append(str + " " + x + " " + y + " " + d);
+		if ((d != null)) moves.append(str + " " + d);
+		else moves.append(str);
+
+		if (state.getBoolean(State.docking)
+				|| state.getBoolean(State.autodocking)) moveMacroCancel();
 	}
 
 	private void motionEnableToggle() {
@@ -1052,35 +1083,35 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param str
 	 */
 	private void clickSteer(String str) {
-		if (state.getBoolean(State.motionenabled)) {
 
-			String d = state.get(State.sonar);
-			if ((d != null))
-				moves.append("clicksteer " + str + " " + d);
-			else
-				moves.append("clicksteer " + str);
-
-			int n = comport.clickSteer(str);
-			if (n != 999) {
-				messageplayer("received: clicksteer " + str, "cameratilt",
-						camTiltPos());
-			} else {
-				messageplayer("received: clicksteer " + str, null, null);
-			}
-
-			moveMacroCancel();
-		} else {
+		if (str == null) return;
+		if ( ! state.getBoolean(State.motionenabled)) {
 			messageplayer("motion disabled", "motion", "disabled");
+			return;
 		}
+
+		String d = state.get(State.sonar);
+		if ((d != null)) moves.append("clicksteer " + str + " " + d);
+		else moves.append("clicksteer " + str);
+
+		int n = comport.clickSteer(str);
+		if (n != 999) {
+			messageplayer("received: clicksteer " + str, "cameratilt",
+					camTiltPos());
+		} else {
+			messageplayer("received: clicksteer " + str, null, null);
+		}
+
+		moveMacroCancel();
 	}
 
+	/** */ 
 	public void messageGrabber(String str, String status) {
 		// System.out.println(str);
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("message", new Object[] { str, status });
 		}
-		// else { System.out.println("not iservicecapableconnection"); }
 	}
 
 	private String logintest(String user, String pass) {
@@ -1122,33 +1153,57 @@ public class Application extends MultiThreadedApplicationAdapter {
 		return returnvalue;
 	}
 
+	/** */ 
 	private void assumeControl(String user) {
+		
+		//TODO:  BRAD testing 
+		/*
+		if(( ! admin ) || ( ! guestHours())){
+			log.debug("user can't log in at this time");
+			System.out.println("user can't log in at this time");
+			
+			// TODO: COLIN .. js screen 
+			return;
+		}*/
+	
 		messageplayer("controls hijacked", "hijacked", user);
 		IConnection tmp = player;
 		player = pendingplayer;
 		pendingplayer = tmp;
-		userconnected = user;
+		state.set(State.user, user);
 		String str = "connection connected streamsettings " + streamSettings();
-		messageplayer(userconnected + " connected to OCULUS", "multiple", str);
-		str = userconnected + " connected from: " + player.getRemoteAddress();
+		messageplayer( state.get(State.user) + " connected to OCULUS", "multiple", str);
+		str =  state.get(State.user) + " connected from: " + player.getRemoteAddress();
 		log.info(str);
 		messageGrabber(str, null);
 		initialstatuscalled = false;
 		pendingplayerisnull = true;
-		if (userconnected.equals(settings.readSetting("user0")))admin = true;
+		
+		if (state.equalsSetting(State.user, "user0")) admin = true;
 		else admin = false;
 
-		state.set(State.userisconnected, "true");
+		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
-		state.set(State.user, userconnected);
 		Util.beep();
 	}
 
+	/** */ 
 	private void beAPassenger(String user) {
+
+		/*
+		//TODO:  BRAD testing 
+		if(( ! admin ) || ( ! guestHours())){
+			log.debug("user can't log in at this time");
+			System.out.println("user can't log in at this time");
+			
+			// TODO: COLIN .. js screen 
+			return;
+		}
+		*/
+		
 		pendingplayerisnull = true;
 		String str = user + " added as passenger";
 		messageplayer(str, null, null);
-		// Util.announce(str);
 		log.info(str);
 		messageGrabber(str, null);
 		if (!stream.equals("stop")) {
@@ -1203,7 +1258,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private void account(String fn, String str) {
 		if (fn.equals("password_update")) {
-			passwordChange(userconnected, str);
+			passwordChange( state.get(State.user), str);
 		}
 		if (admin) {
 			if (fn.equals("new_user_add")) {
@@ -1323,8 +1378,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 					i++;
 				}
 				String encryptedPassword = (passwordEncryptor
-						.encryptPassword(userconnected + salt + u[1])).trim();
-				if (logintest(userconnected, encryptedPassword) == null) {
+						.encryptPassword( state.get(State.user) + salt + u[1])).trim();
+				if (logintest( state.get(State.user), encryptedPassword) == null) {
 					message += "error: wrong password";
 					oktoadd = false;
 				}
@@ -1332,7 +1387,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					message += "username changed to: " + u[0];
 					messageplayer("username changed to: " + u[0], "user", u[0]);
 					settings.writeSettings("user0", u[0]);
-					userconnected = u[0];
+					state.set(State.user, u[0]);
 					String p = u[0] + salt + u[1];
 					encryptedPassword = passwordEncryptor.encryptPassword(p);
 					settings.writeSettings("pass0", encryptedPassword);

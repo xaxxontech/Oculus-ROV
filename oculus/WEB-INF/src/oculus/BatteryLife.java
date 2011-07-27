@@ -82,20 +82,31 @@ public class BatteryLife {
 	public void battStats() { 
 		
 		if(app == null){
-			System.out.println("batterylife not yet configured");
+			System.out.println("batterylife, not yet configured");
 			return;
 		}
 		
 		if(batterypresent == false){
-			System.out.println("no battery found");
+			System.out.println("batterylife, no battery found");
 			return;
 		}
 		
 		new Thread(new Runnable() {
 			public void run() {
-
-				// TODO: put dock state in State!
-				if (batterypresent == true && !app.dockstatus.equals("docking")) {
+				
+				if(state.get(State.dockstatus) == null){
+					System.out.println("no dockstatus in batterylife");
+					state.set(State.dockstatus, "un-known");
+				}
+				
+				if (batterypresent == false) {
+					System.out.println("no batery found in batterylife");
+					return;
+				}
+				
+				if ( state.equals(State.dockstatus, State.docking)){
+								
+				//if ( ! state.get(State.docstatus).equals("docking")) {
 
 					int batt[] = battStatsCombined();
 					String life = Integer.toString(batt[0]);
@@ -109,8 +120,9 @@ public class BatteryLife {
 							state.set(State.motionenabled, "true");
 							str += " motion enabled";
 						}
-						if (!app.dockstatus.equals("un-docked")) {
-							app.dockstatus = "un-docked";
+						if (! state.equals(State.dockstatus, "un-docked")) {
+							//app.dockstatus = "un-docked";
+							state.set(State.dockstatus, "un-docked");
 							str += " dock un-docked";
 						}
 						battcharging = false;
@@ -123,8 +135,9 @@ public class BatteryLife {
 						}
 						battcharging = true;
 						str = "battery " + life + "%," + status;
-						if (app.dockstatus.equals("")) {
-							app.dockstatus = "docked";
+						if (state.equals(State.dockstatus, "")) {
+							// app.dockstatus = "docked";
+							state.set(State.dockstatus, State.docked);
 							str += " dock docked";
 						}
 						app.message(null, "multiple", str);
@@ -161,13 +174,11 @@ public class BatteryLife {
 	*/
 
 	
-	/**
-	 * @return the percentage of battery life, or 999 if no battery present 
-	 */
+	/** @return the percentage of battery life, or 999 if no battery present */
 	public int batteryStatus() {
 
 		if(app == null){
-			System.out.println("not yet configured");
+			System.out.println("batteryStatus(), not yet configured");
 			return 999; //State.ERROR;
 		}
 	
@@ -198,12 +209,12 @@ public class BatteryLife {
 	public int[] battStatsCombined() {
 	
 		if(app == null){
-			System.out.println("batterylife not yet configured");
+			System.out.println("batterylife, not yet configured");
 			return null;
 		}
 		
 		if(!batterypresent){
-			System.out.println("no battery found");
+			System.out.println("batterylife, no battery found");
 			return null;
 		}
 	

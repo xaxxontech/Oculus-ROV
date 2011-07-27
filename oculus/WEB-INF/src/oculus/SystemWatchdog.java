@@ -62,9 +62,10 @@ public class SystemWatchdog {
 						if(Util.copyfile(oculus, temp)){
 											
 							// blocking send 
-							new SendMail("Oculus Rebooting", "been awake since: " + boot, temp, true);
+							new SendMail("Oculus Rebooting", "been awake since: " + boot, temp);
 						
 							// emailed it, now delete it 
+							Util.delay(State.ONE_MINUTE);
 							new File(temp).delete();
 						
 							// does not work 

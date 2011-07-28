@@ -385,7 +385,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
 		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, facegrab, assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-		lighton, lightoff, ligthdim, ligthbright, dockgrab;
+		lightsetlevel, dockgrab;
 	
 		@Override 
 		public String toString() {
@@ -434,8 +434,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case chat: chat(str); return;
 		case beapassenger: beAPassenger(str); return;
 		case assumecontrol: assumeControl(str); return;
-		case lightoff: light.off(); return;
-		case lighton: light.on(); return;
 
 		case dockgrab:
 			if (grabber instanceof IServiceCapableConnection) {
@@ -569,6 +567,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case softwareupdate: softwareUpdate(str); break;
 		case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
 		case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
+		case lightsetlevel: light.setLevel(Integer.parseInt(str)); return;
 		}
 	}
 
@@ -928,6 +927,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (admin) str += " admin true";
 			if(state.get(State.dockstatus) != null)
 				str += " dock " + state.get(State.dockstatus); 
+			if (light.isConnected()) { str += " light "+light.lightLevel; }
 			
 			messageplayer("status check received", "multiple", str.trim());
 		

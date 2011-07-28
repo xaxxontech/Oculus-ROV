@@ -49,6 +49,8 @@ public class LightsComm implements SerialPortEventListener {
 	// make sure all threads know if connected 
 	private volatile boolean isconnected = false;
 	
+	public int lightLevel = 0;
+	
 	// call back
 	private Application application = null;
 
@@ -286,14 +288,15 @@ public class LightsComm implements SerialPortEventListener {
 
 	/** set default level */
 	public void on() {
-		new Sender(new byte[]{SET_PWM, 100});
+		new Sender(new byte[]{SET_PWM, (byte) 255});
 	}
 	
 	public void off(){
 		new Sender(new byte[]{SET_PWM, 0});
 	}
 	
-	public void setBrigthness(int target){
+	public void setLevel(int target){
 		new Sender(new byte[]{SET_PWM, (byte) target});
+		application.message("light level set to "+target, null, null);
 	}
 }

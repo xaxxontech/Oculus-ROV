@@ -61,6 +61,7 @@ var popupmenu_yoffset = null;
 var bworig;
 var rovvolume = 0;
 var xmlhttp=null;
+var lightlevel = -1;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -373,6 +374,7 @@ function setstatus(status, value) {
 	}
 	if (status == "framegrabbed") { framegrabbed(); }
 	if (status == "rovvolume") { rovvolume = parseInt(value); }
+	if (status == "light") { lightlevel = parseInt(value); }
 
 }
 
@@ -552,6 +554,7 @@ function speech() {
 function mainmenu(id) {
 	streamdetailspopulate();
 	rovvolumepopulate();
+	lightpopulate();
 	str = document.getElementById("main_menu").innerHTML;
 	if (admin) { str += document.getElementById("main_menu_admin").innerHTML; }
 	else { str += document.getElementById("main_menu_nonadmin").innerHTML; }
@@ -624,6 +627,67 @@ function rovvolumeclick(vol) {
 	callServer("setsystemvolume", parseInt(vol*10));
 	lagtimer = new Date().getTime();
 	rovvolume = vol*10;
+}
+
+function lightpopulate() {
+	var a = document.getElementById("lightcontrol");
+	if (lightlevel != -1) {
+		var str = "<table><tr><td>headlight level: &nbsp;</td>";
+		for (var i=0; i<=10; i++) {
+			str+="<td  id='lighttd"+i+"' style='height: 26px; width: 8px; text-align: center;" +
+			" border: 1px solid transparent; cursor: pointer;' onmouseover='lightover(&quot;"+i+"&quot;)'" +
+			" onmouseout='lightout(&quot;"+i+"&quot;)'>" +
+					"<span style='color: #4c56fe; font-size: 15px' id='lightspan"+i+"'" +
+					" onclick='lightclick(&quot;"+i+"&quot;)'>|</span></td>";
+		}
+		str += "</tr></table>";
+		a.style.display = "";
+		a.innerHTML = str;
+		var b=document.getElementById("lighttd"+parseInt(lightlevel/10));
+		b.style.borderColor = "#4c56fe";
+		b.style.backgroundColor = "#222222";
+		if (lightlevel > 0) { 
+			document.getElementById("lighttd"+parseInt((lightlevel/10)-1)).style.borderRightColor = "#4c56fe";
+		}
+	}
+	else { a.style.display = "none"; }
+}
+
+function lightover(i) {
+	var a = document.getElementById("lightspan"+i);
+	a.style.color = "#ffffff";
+	var b = document.getElementById("lighttd"+i);
+	b.style.backgroundColor = "#555555";
+}
+
+function lightout(i) {
+	var a = document.getElementById("lightspan"+i);
+	a.style.color = "#4c56fe";
+	var b = document.getElementById("lighttd"+i);
+	if (i*10 != lightlevel) {
+		b.style.backgroundColor = "transparent";
+	}
+	else { 	b.style.backgroundColor = "#222222"; }
+}
+
+function lightclick(level) {
+	var b = document.getElementById("lighttd"+parseInt(lightlevel/10));
+	b.style.borderColor = "transparent";
+	b.style.backgroundColor = "transparent";
+	if (lightlevel > 0) { 
+		document.getElementById("lighttd"+parseInt((lightlevel/10)-1)).style.borderRightColor = "transparent";
+	}
+	
+	var a = document.getElementById("lighttd"+level);
+	a.style.borderColor = "#4c56fe";
+	a.style.backgroundColor = "#222222";
+	if (level > 0) { 
+		document.getElementById("lighttd"+parseInt(level-1)).style.borderRightColor = "#4c56fe";
+	}
+	message("sending light level: "+ parseInt(level*10)+"%", sentcmdcolor);
+	callServer("lightsetlevel", parseInt(level*255/10));
+	lagtimer = new Date().getTime();
+	lightlevel = level*10;
 }
 
 function streamdetailspopulate() {

@@ -86,36 +86,10 @@ background-position: center center; ">  <!---->
 <div id="video" style="position: relative; z-index: 0">
 <script language="JavaScript" type="text/javascript">
 
-// Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
-var hasProductInstall = DetectFlashVer(6, 0, 65);
-
 // Version check based upon the values defined in globals
 var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
 
-if ( hasProductInstall && !hasRequestedVersion ) {
-	// DO NOT MODIFY THE FOLLOWING FOUR LINES
-	// Location visited after installation is complete if installation is required
-	var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
-	var MMredirectURL = window.location;
-    document.title = document.title.slice(0, 47) + " - Flash Player Installation";
-    var MMdoctitle = document.title;
-
-	AC_FL_RunContent(
-		"src", "playerProductInstall",
-		"FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
-		"width", "640",
-		"height", "480",
-		"align", "left",
-		"wmode","transparent",
-		"id", "oculus_player",
-		"quality", "high",
-		"bgcolor", "#869ca7",
-		"name", "oculus_player",
-		"allowScriptAccess","sameDomain",
-		"type", "application/x-shockwave-flash",
-		"pluginspage", "http://www.adobe.com/go/getflashplayer"
-	);
-} else if (hasRequestedVersion) {
+if (hasRequestedVersion) {
 	// if we've detected an acceptable version
 	// embed the Flash Content SWF when all tests are passed
 	AC_FL_RunContent(
@@ -127,7 +101,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			"quality", "high",
 			"bgcolor", "#869ca7",
 			"name", "oculus_player",
-			"allowScriptAccess","sameDomain",
+			"allowScriptAccess","always",
 			"type", "application/x-shockwave-flash",
 			"pluginspage", "http://www.adobe.com/go/getflashplayer"
 	);
@@ -544,8 +518,8 @@ class="blackbg" href="javascript: streamset('setcustom');">change</a>
 <table><tr><td style="height: 5px"></td></tr></table>
 
 <div id="rovvolumecontrol"></div>
-
-<table><tr><td style="height: 11px"></td></tr></table>
+<div id="lightcontrol" style="display: none"></div>
+<table><tr><td style='height: 11px'></td></tr></table>
 
 <a class="blackbg" href="javascript: battStats();">battery status refresh</a><br>
 <a class="blackbg" href="javascript: clicksteer('');">click steer on/off</a><br>

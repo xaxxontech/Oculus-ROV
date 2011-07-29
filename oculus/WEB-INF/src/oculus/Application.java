@@ -688,7 +688,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				 (stream.equals("camandmic") || stream.equals("mic"))) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("muteROVMic", new Object[] { });
-			messageplayer("rov mic muted",null,null);
 		}
 	}
 	
@@ -698,7 +697,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("unmuteROVMic", new Object[] { });
-			messageplayer("rov mic un-muted",null,null);
 		}
 	}
 	

@@ -296,7 +296,9 @@ public class LightsComm implements SerialPortEventListener {
 	}
 	
 	public void setLevel(int target){
-		new Sender(new byte[]{SET_PWM, (byte) target});
-		application.message("light level set to "+target, null, null);
+		int n = target*255/100;
+		new Sender(new byte[]{SET_PWM, (byte) n});
+		application.message("light level set to "+target+"%", null, null);
+		lightLevel = target;
 	}
 }

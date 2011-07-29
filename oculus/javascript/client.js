@@ -685,7 +685,7 @@ function lightclick(level) {
 		document.getElementById("lighttd"+parseInt(level-1)).style.borderRightColor = "#4c56fe";
 	}
 	message("sending light level: "+ parseInt(level*10)+"%", sentcmdcolor);
-	callServer("lightsetlevel", parseInt(level*255/10));
+	callServer("lightsetlevel", parseInt(level*10)); // parseInt(level*255/10));
 	lagtimer = new Date().getTime();
 	lightlevel = level*10;
 }

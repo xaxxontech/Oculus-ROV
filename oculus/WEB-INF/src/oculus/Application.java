@@ -123,9 +123,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			String str = state.get(State.user) + " disconnected";
 			log.info(str);
 			messageGrabber(str, "connection awaiting&nbsp;connection");
-			if (state.get(State.user).equals(settings.readSetting("user0"))) {
+//			if (state.get(State.user).equals(settings.readSetting("user0"))) {
 				admin = false;
-			}
+//			}
 			
 			state.delete(State.user);
 			state.set(State.userisconnected, false);
@@ -141,6 +141,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 					comport.stopGoing();
 				}
 			}
+			
+			if (light.isConnected() && light.lightLevel != 0) { light.setLevel(0); }
+			
 		}
 		if (connection.equals(grabber)) {
 			grabber = null;

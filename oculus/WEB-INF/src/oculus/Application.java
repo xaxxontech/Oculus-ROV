@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
-
 import javax.imageio.ImageIO;
 
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
@@ -24,41 +23,36 @@ import org.red5.io.amf3.ByteArray;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
-import developer.FTPObserver;
-
-import developer.CommandManager;
-
+/** red5 application */
 public class Application extends MultiThreadedApplicationAdapter {
 
-	private static final int STREAM_CONNECT_DELAY = 2000;
-	
-	private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
-	private Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
-	private static String salt = "PSDLkfkljsdfas345usdofi";
-	private IConnection grabber = null;
-	private IConnection player = null;
-	private ArduinoCommDC comport = null;
-	private LightsComm light = null;
-	private LogManager moves = new LogManager();
-	private BatteryLife battery = null;
-	private Settings settings = new Settings();
-	private String pendinguserconnected = null;
-	private String remember = null;
-	private IConnection pendingplayer = null;
-	private	String httpPort;
-	private AutoDock docker = null;
-	private State state = State.getReference();
-	private Speech speech = new Speech();
-	private boolean initialstatuscalled = false;
-	private boolean pendingplayerisnull = true;
-	private boolean facegrabon = false;
-	private boolean emailgrab = false;
-
+    private static final int STREAM_CONNECT_DELAY = 2000;
+    private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
+    private Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
+    private static String salt = "PSDLkfkljsdfas345usdofi";
+    private IConnection grabber = null;
+    private IConnection player = null;
+    private ArduinoCommDC comport = null;
+    private LightsComm light = null;
+    private LogManager moves = new LogManager();
+    private BatteryLife battery = null;
+    private Settings settings = new Settings();
+    private String pendinguserconnected = null;
+    private String remember = null;
+    private IConnection pendingplayer = null;
+    private String httpPort;
+    private Docker docker = null;
+    private State state = State.getReference();
+    private Speech speech = new Speech();
+    private boolean initialstatuscalled = false;
+    private boolean pendingplayerisnull = true;
+    private boolean facegrabon = false;
+    private boolean emailgrab = false;
+    
 	// TODO:  best not to have publics 
 	public boolean muteROVonMove = false;
 	public boolean admin = false;
-	protected String stream = "stop";
-	
+	public String stream = "stop";
 	// WifiConnection wifi; // = new WifiConnection();
 
 	/** */
@@ -123,23 +117,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 			String str = state.get(State.user) + " disconnected";
 			log.info(str);
 			messageGrabber(str, "connection awaiting&nbsp;connection");
-//			if (state.get(State.user).equals(settings.readSetting("user0"))) {
-				admin = false;
-//			}
-			
+			admin = false;			
 			state.delete(State.user);
 			state.set(State.userisconnected, false);
 			player = null;
 			facegrabon = false;
 			
 			if (!state.getBoolean(State.autodocking)) {
-				state.set(State.userisconnected, false);
-				if (!stream.equals("stop")) {
-					publish("stop");
-				}
-				if (comport.moving) {
-					comport.stopGoing();
-				}
+				if (!stream.equals("stop")) { publish("stop"); }
+				if (comport.moving) { comport.stopGoing(); }
 			}
 			
 			if (light.isConnected() && light.lightLevel != 0) { light.setLevel(0); }
@@ -190,7 +176,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 
-		docker = new AutoDock(this, grabber, comport);
+		// do it differently if sonar on board 
+		// if(settings.getBoolean(State.sonarenabled)) docker = new BradzAutoDock(this, grabber, comport);
+		//else
+			// TODO: BRAD
+			docker = new AutoDock(this, grabber, comport);
 	}
 
 	/** */ 
@@ -201,12 +191,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		comport = new ArduinoCommDC(this);
 		light = new LightsComm(this);
 
-		// TODO: wrong order ??? 
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
 		if (settings.getBoolean(State.developer)){
-			new CommandManager(this);
+			new developer.CommandManager(this);
 			moves.open(System.getenv("RED5_HOME") + "\\log\\moves.log");
 		}
 		
@@ -214,8 +203,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (volume == Settings.ERROR) settings.newSetting(Settings.volume, "0");
 		Util.setSystemVolume(volume);
 	
-		// TODO: Brad added, removeable with single comment line here 
-		new FTPObserver(this);
+		// TODO: Brad added, removable with single comment line here 
+		new developer.sonar.SonarSteeringObserver(this, comport);
+		new developer.ftp.FTPObserver(this);
 		new EmailAlerts(this);
 		new SystemWatchdog();
 		
@@ -294,8 +284,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/** @return true if within range in settings. Will return false if not configured */
 	public boolean guestHours(){
 	
-		final int start = settings.getInteger(State.guest_start);
-		final int end = settings.getInteger(State.guest_end);
+		final int start = settings.getInteger(State.gueststart);
+		final int end = settings.getInteger(State.guestend);
 		
 		// if doesn't exist, don't enforce 
 		if(start==Settings.ERROR) return true;
@@ -305,9 +295,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		final DateFormat dfm = new SimpleDateFormat("HH");
 		final int current = Integer.parseInt(dfm.format(now));
 		
-		// System.out.println("start : " + start); 
-		// System.out.println("now   : " + dfm.format(now));
-		// System.out.println("end   : " + end);
+		System.out.println("start : " + start); 
+		System.out.println("now   : " + dfm.format(now));
+		System.out.println("end   : " + end);
 		
 		// don't bother with minutes
 		if( current < start ) return false;
@@ -358,19 +348,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer( state.get(State.user) + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
 
-			if(state.equalsSetting(State.user, "user0")){
-				// TODO: COLIN -- EXAMPLE USE
-				// This is too brutal below 
-				// if ( state.get(State.user).equals(settings.readSetting("user0"))) {
-				admin = true;
-			} else {
-				admin = false;
-			}
-			// System.out.println(userconnected+" connected");
-			// log.info(userconnected+" connected");
+			if(state.equalsSetting(State.user, "user0")) admin = true;
+			else admin = false;
+			
 			str =  state.get(State.user) + " connected from: " + player.getRemoteAddress();
-			log.info(str);
 			messageGrabber(str, "connection " +  state.get(State.user) + "&nbsp;connected");
+			System.out.println(str);
+			log.info(str);
 			Util.beep();
 		}
 		
@@ -452,7 +436,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//--------------------------------------------------------//
 		if (Red5.getConnectionLocal() != player) {
 			System.out.println("error... security issue");
-			return;
+			//return;
 		}
 		
 		// X-rated.. must be logged in  
@@ -621,12 +605,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case chat: chat(str); break;
 		case facerect: messageplayer(null, "facefound", str); break;
 		case dockgrabbed: {
-			//TODO: BRAD
 			docker.autoDock("dockgrabbed " + str); 
-			System.out.println("grabberCallServer(): " + str);
+			// System.out.println("grabberCallServer(): " + str);
+			// find xx yy xSize ySize, 0.xxxx 
 			String[] arg = str.split(" ");
-			state.set(State.dockx, arg[2]);
-			state.set(State.docky, arg[3]);
+			state.set(State.dockxpos, arg[1]);
+			state.set(State.dockypos, arg[2]);
+			state.set(State.dockxsize, arg[3]);
+			state.set(State.dockysize, arg[4]);
+			state.set(State.dockdensity, arg[5]);
 			break;
 		}
 		case autodock: docker.autoDock(str); break;
@@ -894,7 +881,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	protected String camTiltPos() {
+	public String camTiltPos() {
 		int n = comport.camservohoriz - comport.camservopos;
 		n *= -1;
 		String s = "";
@@ -1032,15 +1019,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		} else s = "DISABLED";
 		
 		messageplayer(msg, "motion", s);
-		
-		// TODO: BRAD..... used still? 
-		String x = state.get(State.dockx);
-		String y = state.get(State.docky);
-		String d = state.get(State.sonar);
-		if ((x != null) && (y != null) && (d != null))
-			moves.append(str + " " + x + " " + y + " " + d);
-		if ((d != null)) moves.append(str + " " + d);
-		else moves.append(str);
 	}
 
 	/** @param str is the direction to move. Valid choices are: "right", "left", "backward", "forward" */
@@ -1053,15 +1031,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		comport.nudge(str);
 		messageplayer("command received: nudge" + str, null, null);
-
-		// TODO: BRAD.. still used ?
-		String x = state.get(State.dockx);
-		String y = state.get(State.docky);
-		String d = state.get(State.sonar);
-		if ((x != null) && (y != null) && (d != null))
-			moves.append(str + " " + x + " " + y + " " + d);
-		if ((d != null)) moves.append(str + " " + d);
-		else moves.append(str);
 
 		if (state.getBoolean(State.docking)
 				|| state.getBoolean(State.autodocking)) moveMacroCancel();
@@ -1088,15 +1057,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("motion disabled", "motion", "disabled");
 			return;
 		}
-
-		String d = state.get(State.sonar);
-		if ((d != null)) moves.append("clicksteer " + str + " " + d);
-		else moves.append("clicksteer " + str);
+		
+		moves.append("clicksteer " + str);
 
 		int n = comport.clickSteer(str);
 		if (n != 999) {
-			messageplayer("received: clicksteer " + str, "cameratilt",
-					camTiltPos());
+			messageplayer("received: clicksteer " + str, "cameratilt", camTiltPos());
 		} else {
 			messageplayer("received: clicksteer " + str, null, null);
 		}

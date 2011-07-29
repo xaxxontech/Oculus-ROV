@@ -992,7 +992,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	private void monitor(String str) {
+	public void monitor(String str) {
 		// uses nircmd.exe from http://www.nirsoft.net/utils/nircmd.html
 		messageplayer("monitor " + str, null, null);
 		str = str.trim();

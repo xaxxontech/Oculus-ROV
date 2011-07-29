@@ -85,8 +85,8 @@ public class AutoDock {
 			state.set(State.autodocking, false);
 			app.message("auto-dock ended","multiple","cameratilt " +app.camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
-			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-			sc.invoke("dockgrab", new Object[] {0,0,"cancel"});
+//			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+//			sc.invoke("dockgrab", new Object[] {0,0,"cancel"});
 		}
 		if (cmd[0].equals("go")) {
 			if (state.getBoolean(State.motionenabled)) { 
@@ -96,6 +96,7 @@ public class AutoDock {
 				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
+				app.monitor("on");
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
 				
 				state.set(State.autodocking, true);
@@ -225,6 +226,7 @@ public class AutoDock {
 									// app.dockstatus = "docked"; // needs to be before battStats()
 									moves.append("docked");
 									life.battStats(); 
+									app.monitor("off");
 									break;
 								}
 								counter += 1;

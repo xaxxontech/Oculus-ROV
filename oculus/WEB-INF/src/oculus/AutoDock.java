@@ -5,7 +5,7 @@ import org.red5.server.api.IConnection;
 import org.red5.server.api.service.IServiceCapableConnection;
 import org.slf4j.Logger;
 
-public class AutoDock {
+public class AutoDock implements Docker {
 
 	/* notes 
 	 * 
@@ -64,17 +64,13 @@ public class AutoDock {
 			moves.open(System.getenv("RED5_HOME")+"\\log\\moves.log");
 		}
 	}
-		
+	
+	@Override
 	public void cancel(){
 		state.set(State.docking, false);
 	}
 
-	/** 
-	 * 
-	 * 
-	 * 
-	 * @param str
-	 */
+	@Override
 	public void autoDock(String str) {
 		
 		//if(state.getBoolean(State.developer))
@@ -134,7 +130,7 @@ public class AutoDock {
 						// if(debug) new SendMail("Oculus Message", "auto dock failed, target lost"); 
 						
 						state.set(State.autodocking, false);	
-						state.set(State.status, State.losttarget);
+						//.set(State.status, State.losttarget);
 						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
 					}
@@ -180,7 +176,7 @@ public class AutoDock {
 	}
 	
 	/** */
-	void dock(String str) {
+	public void dock(String str) {
 		if (str.equals("dock") && !state.getBoolean(State.docking)) {
 			if (state.getBoolean(State.motionenabled)){
 				if (!life.batteryCharging()) {
@@ -220,7 +216,7 @@ public class AutoDock {
 									}
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
 									log.info(state.get(State.user) +" docked successfully");
-									state.set(State.status, State.docked);
+							//		state.set(State.status, State.docked);
 									state.set(State.motionenabled, false);
 									state.set(State.dockstatus, "docked");
 									// app.dockstatus = "docked"; // needs to be before battStats()
@@ -237,7 +233,7 @@ public class AutoDock {
 									///new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
 									
 									state.set(State.docking, false);
-									state.set(State.status, State.timeout);
+								//	state.set(State.status, State.timeout);
 
 									String s = "dock un-docked";
 									if (comport.moving) { 

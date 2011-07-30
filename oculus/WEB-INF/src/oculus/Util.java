@@ -238,11 +238,11 @@ public class Util {
 							new InputStreamReader(proc.getInputStream()));
 
 					String line = null;
-					while ((line = procReader.readLine()) != null){
+					while ((line = procReader.readLine()) != null)
 						System.out.println("systemCall() : " + line);
-					}
 					
-					System.out.println("process exit value = " + proc.exitValue());
+					
+					// System.out.println("process exit value = " + proc.exitValue());
 				
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -288,29 +288,6 @@ public class Util {
 	
 
 	/**
-	 * text to speech 
-	 * 
-	 * @param str
-	 * 				the phrase to turn into sound via host computer's speakers 
-	 * 
-	 */
-
-	
-
-	/**
-	 * text to speech with user screen echo
-	 * 
-	 * @param str
-	 * 				the phrase to turn into sound via host computer's speakers 
-	 * @param 
-	 * 				call back to the user's screen 
-	 */
-	//public static void saySpeech(String str, Application app) {
-	//	saySpeech(str);
-	//	app.message("synth voice: "+str, null, null);
-	//}	
-	
-	/**
 	 * write new value to user's screen and set it 
 	 */
 	public static void setSystemVolume(int percent, Application app){
@@ -340,13 +317,8 @@ public class Util {
 	 * 				is the phrase to turn from text to speech 
 	 */
 	public static void beep() {
-
 		// read setting every time in case settings changed by client
-		if (settings.getBoolean(Settings.loginnotify)) { 
-						
-			// beep only
+		if (settings.getBoolean(Settings.loginnotify)) 
 			systemCall("nircmdc.exe beep 500 1000", true);
-					
-		}
 	}
 }

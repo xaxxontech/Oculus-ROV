@@ -23,36 +23,50 @@ public class State {
 	public static final String lightport = "lightport";
 	public static final String target = "target";
 	public static final String boottime = "boottime";
+	public static final String sonarenabled = "sonarenabled";
+	public static final String sonardistance = "sonardistance";
+	public static final String sonardebug = "sonardebug";
+	public static final String sonar = "sonar";
+
+	// bad var name!
+	// public static final String status = "status";
+	
+	public static final String motionenabled = "motionenabled";
+	public static final String dockdensity = "dockdensity";
+	public static final String dockxpos = "dockxpos";
+	public static final String dockypos = "dockypos";
+	public static final String autodocktimeout = "autodocktimeout";
 	public static final String autodocking = "autodocking";
 	public static final String docking = "docking";
-	public static final String motionenabled = "motionenabled";
-	public static final String dockx = "dockx";
-	public static final String docky = "docky";
-	public static final String sonar = "sonar";
-	public static final String sonarDebug = "sonarDebug";
-	public static final String status = "status";
+	//public static final String dockx = "dockx";
+	//public static final String docky = "docky";
+	public static final String dockxsize = "dockxsize";	
+	public static final String dockysize = "dockysize";
 	public static final String dockstatus = "dockstatus";
 	public static final String timeout = "timeout";
 	public static final String losttarget = "losttarget";
 	public static final String docked = "docked";
 	public static final String undocked = "undocked";
-	public static final String guest_start = "guest_start";
-	public static final String guest_end = "guest_end";
-	public static final String unknown = "unknown";
+	public static final String undock = "undock";
+	public static final String gueststart = "gueststart";
+	public static final String guestend = "guestend";
+	public static final String unknown = "unknown";	
 
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
 	public static final long FIVE_MINUTES = 300000;
 	public static final long TEN_MINUTES = 600000;
-	public static final int ERROR = -1;	
-	
+	public static final int ERROR = -1;
+
+		
 
 	/** notify these on change events */
 	public Vector<Observer> observers = new Vector<Observer>();
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
+
 	
 	/** properties object to hold configuration */
 	private Properties props = new Properties();

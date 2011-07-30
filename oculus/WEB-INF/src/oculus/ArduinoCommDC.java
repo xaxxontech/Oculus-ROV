@@ -21,7 +21,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	// if watchdog'n, re-connect if not seen input since this long ago
 	public static final long DEAD_TIME_OUT = 30000;
 	public static final int SETUP = 2000;
-	public static final int SONAR_DELAY = 5000; 
+	public static final int SONAR_DELAY = 3000; 
 	public static final int WATCHDOG_DELAY = 5000;
 
 	// this commands require arguments from current state
@@ -68,7 +68,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int maxclickcam = settings.getInteger("maxclickcam");
 	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	protected int steeringcomp = settings.getInteger("steeringcomp");
-	protected final boolean sonar = settings.getBoolean("sonar");
+	protected final boolean sonar = settings.getBoolean(State.sonarenabled);
 
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
@@ -79,9 +79,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int speed = speedfast; // set default to max
 	
 	protected String direction = null;
-	protected boolean moving = false;
+	public boolean moving = false;
 	volatile boolean sliding = false;
-	volatile boolean movingforward = false;
+	public volatile boolean movingforward = false;
 	
 	// TODO: what are these ?? can't be in methods instead? 
 	int tempspeed = 999;
@@ -220,9 +220,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			if (response.startsWith("cm")) {
 				final String val = response.substring(response.indexOf(' ') + 1, response.length());
 				final int range = Integer.parseInt(val);				
-				if (Math.abs(range - state.getInteger(State.sonar)) > 1) {
-					state.set(State.sonar, val);
-					if(state.getBoolean(State.sonarDebug))
+				if (Math.abs(range - state.getInteger(State.sonardistance)) > 1) {
+					state.set(State.sonardistance, val);
+					if(state.getBoolean(State.sonardebug))
 						application.message("sonar range: " + range, null, null);
 				}
 				
@@ -358,6 +358,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/** */
 	public void stopGoing() {
 		
+		if(state.getBoolean(State.developer))
 		if (application.muteROVonMove && moving) { application.unmuteROVMic(); }
 		
 		new Sender(STOP);
@@ -372,6 +373,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		moving = true;
 		movingforward = true;
 		
+		if(state.getBoolean(State.developer))
 		if (application.muteROVonMove) { application.muteROVMic(); }
 	}
 

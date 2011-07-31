@@ -437,7 +437,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//--------------------------------------------------------//
 		if (Red5.getConnectionLocal() != player) {
 			System.out.println("error... security issue");
-			//return;
+			return;
 		}
 		
 		// X-rated.. must be logged in  

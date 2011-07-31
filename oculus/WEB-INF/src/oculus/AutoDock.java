@@ -120,9 +120,6 @@ public class AutoDock implements Docker {
 						
 						app.playerCallServer(Application.playerCommands.dockgrab, null);
 
-//						IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-//						sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
-						
 					} else { 
 						
 						//TODO: testing 
@@ -139,14 +136,6 @@ public class AutoDock implements Docker {
 					
 					app.message(null,"autodocklock",s);
 
-					// TODO: testing 
-					
-					///state.set(State.dockx, cmd[2]);
-					///state.set(State.docky, cmd[3]);
-					// String d = state.get(State.sonar);
-					// if(( d != null )) moves.append("docking sonar " + d);
-					// TODO: TESTING
-					
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
 						Integer.parseInt(cmd[5]),new Float(cmd[6]));
 					autodockgrabattempts++;
@@ -188,8 +177,7 @@ public class AutoDock implements Docker {
 					comport.movingforward = false; 
 					comport.speedset("fast"); 
 					state.set(State.docking, true);
-					//app.dockstatus = "docking";
-					state.set(State.dockstatus, "docking");
+					state.set(State.dockstatus, State.docking);
 					new Thread(new Runnable() {
 						public void run() {
 							int counter = 0;
@@ -198,7 +186,6 @@ public class AutoDock implements Docker {
 								
 								n = 200; // when speed=fast
 								if (counter <= 3) n += 200;  // when speed=fast
-								
 								if (counter > 0) app.message(null,"motion","moving"); 
 								comport.goForward();
 								Util.delay(n);
@@ -216,10 +203,9 @@ public class AutoDock implements Docker {
 									}
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
 									log.info(state.get(State.user) +" docked successfully");
-							//		state.set(State.status, State.docked);
 									state.set(State.motionenabled, false);
-									state.set(State.dockstatus, "docked");
-									// app.dockstatus = "docked"; // needs to be before battStats()
+									state.set(State.dockstatus, State.docked);
+									// needs to be before battStats()
 									moves.append("docked");
 									life.battStats(); 
 									app.monitor("off");
@@ -229,11 +215,10 @@ public class AutoDock implements Docker {
 								if (counter >12) { // failed
 									
 									//TODO: failed, give up... send email??
-									///if(debug) 
-									///new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
+									///if(debug) new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
 									
 									state.set(State.docking, false);
-								//	state.set(State.status, State.timeout);
+									// state.set(State.status, State.timeout);
 
 									String s = "dock un-docked";
 									if (comport.moving) { 
@@ -242,22 +227,14 @@ public class AutoDock implements Docker {
 									} 
 									app.message("docking timed out", "multiple", s);
 									log.info(state.get(State.user) +" docking timed out");
-									state.set(State.dockstatus, "un-docked");
-
-									// TODO: TESTING			
-									// state.set(State.status, State.undocked);
-									
+									state.set(State.dockstatus, State.undocked);
 									if (state.getBoolean(State.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
 											comport.speedset("fast");
 											comport.goBackward();
 											Thread.sleep(2000);
 											comport.stopGoing();
-										
 											app.playerCallServer(Application.playerCommands.dockgrab, null);
-
-									//		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-								//			sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 										} catch (Exception e) { e.printStackTrace(); } } }).start();
 									}
 									break;
@@ -275,9 +252,7 @@ public class AutoDock implements Docker {
 			comport.goBackward();
 			state.set(State.motionenabled, true);
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
-			
-			//app.dockstatus = "un-docked";
-			state.set(State.dockstatus, "un-docked");
+			state.set(State.dockstatus, State.undocked);
 			new Thread(new Runnable() {
 				public void run() {
 					try {
@@ -322,12 +297,8 @@ public class AutoDock implements Docker {
 					Thread.sleep(1500);
 					comport.stopGoing();
 					Thread.sleep(500); // let deaccelerate
-
 					app.playerCallServer(Application.playerCommands.dockgrab, null);
-
-		//				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-		//			sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
-			
+					
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else { // go only 
@@ -337,11 +308,7 @@ public class AutoDock implements Docker {
 					Thread.sleep(1500);
 					comport.stopGoing();
 					Thread.sleep(500); // let deaccelerate
-
 					app.playerCallServer(Application.playerCommands.dockgrab, null);
-
-					//IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					//sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}

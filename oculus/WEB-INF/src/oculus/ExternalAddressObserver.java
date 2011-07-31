@@ -26,7 +26,7 @@ public class ExternalAddressObserver implements Observer {
 
 		app = a;
 
-		// System.out.println("external address observer started");
+		System.out.println("external address observer started");
 
 		// register for state changes
 		state.addObserver(this);
@@ -38,7 +38,7 @@ public class ExternalAddressObserver implements Observer {
 
 		if (!key.equals(State.externaladdress)) return;
 		
-		//System.out.println("ip: " + state.get(State.externaladdress));
+		System.out.println("ip: " + state.get(State.externaladdress));
 		app.message("wan: " + state.get(State.externaladdress), null, null);
 		app.populateSettings();
 

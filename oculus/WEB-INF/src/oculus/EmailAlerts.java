@@ -68,7 +68,7 @@ public class EmailAlerts {
 										
 						// add the link back to the user screen 
 						msg += "\n\nPlease find the dock, log in here: http://" 
-							+ Util.getExternalIPAddress() 
+							+ State.getReference().get(State.externaladdress) 
 							+ ":" + settings.readRed5Setting("http.port") 
 							+ "/oculus/";
 						

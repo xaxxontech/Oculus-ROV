@@ -1000,13 +1000,23 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param str parameter is the direction 
 	 */
 	private void move(String str) {
+		
 		String s = "";
 		String msg = "motion disabled (try un-dock)";
 		if (str.equals("stop")) {
 			comport.stopGoing();
 			s = "STOPPED";
 			msg = "command received: " + str;
+			docker.cancel();
+			//state.set(State.autodocking, false);
 		}
+		
+		// TODO: issue#4 
+		if(state.getBoolean(State.autodocking)){
+			messageplayer("autodock in progress", null, null);
+			return;
+		}
+		
 		if (state.getBoolean(State.motionenabled)) {
 			if (str.equals("forward")) comport.goForward();
 			else if (str.equals("backward")) comport.goBackward();
@@ -1016,6 +1026,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			moveMacroCancel();
 			if (s.equals("")) s = "MOVING";
 			msg = "command received: " + str;
+			
+			// log it 
+			moves.append(str);
 		
 		} else s = "DISABLED";
 		
@@ -1030,8 +1043,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 			return;
 		}
 	
+		// TODO: issue#4 
+		if(state.getBoolean(State.autodocking)){
+			messageplayer("autodock in progress", null, null);
+			return;
+		}
+		
 		comport.nudge(str);
 		messageplayer("command received: nudge" + str, null, null);
+		
+		moves.append(str);
 
 		if (state.getBoolean(State.docking)
 				|| state.getBoolean(State.autodocking)) moveMacroCancel();

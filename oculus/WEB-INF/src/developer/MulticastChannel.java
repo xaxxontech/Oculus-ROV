@@ -49,6 +49,7 @@ public class MulticastChannel implements Runnable {
 
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
+			return;
 		}
 
 		/** start thread, block wait on input from socket */
@@ -122,7 +123,8 @@ public class MulticastChannel implements Runnable {
 
 				/** test the input */
 				if (valid(input, sendersIp)) {
-					// System.out.println("multicast: " + input);
+					
+					System.out.println("_multicast: " + input);
 					Command cmd = parse.parse(input);
 
 					/** dispatch the command */
@@ -161,10 +163,8 @@ public class MulticastChannel implements Runnable {
 		}
 
 		/** sanity test */
-		if (data == null)
-			return false;
-		if (data.equals(""))
-			return false;
+		if (data == null) return false;
+		if (data.equals("")) return false;
 
 		return true;
 	}

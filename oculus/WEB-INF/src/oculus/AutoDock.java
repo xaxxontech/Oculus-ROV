@@ -247,7 +247,7 @@ public class AutoDock implements Docker {
 			}
 			else { app.message("motion disabled", null, null); }
 		}
-		if (str.equals("undock")) {
+		if (str.equals(State.undock)) {
 			comport.speedset("fast");
 			comport.goBackward();
 			state.set(State.motionenabled, true);
@@ -393,7 +393,6 @@ public class AutoDock implements Docker {
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
 						app.playerCallServer(Application.playerCommands.dockgrab, null);
-
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 					log.info("autodock backup");
 				}

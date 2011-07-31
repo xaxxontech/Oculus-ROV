@@ -8,8 +8,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 //import org.red5.logging.Red5LoggerFactory;
@@ -286,6 +288,16 @@ public class Util {
 		return address;
 	}
 	
+	/**
+	 * @return the local host's IP, null on error
+	 */
+	public static String getLocalAddress(){
+		try {
+			return (InetAddress.getLocalHost()).getHostAddress();
+		} catch (UnknownHostException e) {
+			return null;
+		}
+	}
 
 	/**
 	 * write new value to user's screen and set it 

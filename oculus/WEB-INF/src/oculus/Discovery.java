@@ -27,7 +27,7 @@ public class Discovery {
 	public static final String OCULUS_SERVO = "<id:oculusServo>";
 	public static final String OCULUS_DC = "<id:oculusDC>";
 	public static final String LIGHTS = "<id:oculusLights>";
-	private static final long RESPONCE_DELAY = 300;
+	public static final long RESPONCE_DELAY = 300;
 
 	/* reference to the underlying serial port */
 	private SerialPort serialPort = null;
@@ -123,7 +123,9 @@ public class Discovery {
 					state.set(State.serialport, ports.get(i));
 					
 				} 				
+			
 				// other devices here if grows 
+			
 			}
 			
 			// close on each loop

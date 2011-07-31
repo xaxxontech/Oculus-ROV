@@ -208,6 +208,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new developer.ftp.FTPObserver(this);
 		new EmailAlerts(this);
 		new SystemWatchdog();
+		new ExternalAddressObserver(this);
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -1544,28 +1545,25 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageGrabber(message, null);
 	}
 
-	private void populateSettings() {
+	/** */ 
+	
+	public void populateSettings() {
 		settings.writeSettings("skipsetup", "no");
 		String result = "populatevalues ";
 
 		// username
 		String str = settings.readSetting("user0");
-		if (str != null) {
-			result += "username " + str + " ";
-		}
-
+		if (str != null) result += "username " + str + " ";
+		
 		// comport
-		if (state.get(State.serialport) == null)
-			result += "comport nil ";
-		else
-			result += "comport " + state.get(State.serialport) + " ";
+		if (state.get(State.serialport) == null) result += "comport nil ";
+		else result += "comport " + state.get(State.serialport) + " ";
 
 		// lights
-		if (state.get(State.lightport) == null)
-			result += "lightport nil ";
-		else
-			result += "lightport " + state.get(State.lightport) + " ";
+		if (state.get(State.lightport) == null) result += "lightport nil ";
+		else result += "lightport " + state.get(State.lightport) + " ";
 
+		// TODO: COLIN... was this commented out on purpose? or me?
 		// battery
 		// result += "battery " + settings.readSetting("batterypresent") + " ";
 		// result += "battery"
@@ -1574,11 +1572,23 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// if (battery.batteryPresent()) result += "battery yes ";
 		// else result += "battery nil ";
 		// }
+		
+		// law and wan 
+		String lan = state.get(State.localaddress);;
+		if(lan==null) result += "lanaddress error ";
+		else result += "lanaddress " + lan + " ";
 
+		String wan = state.get(State.externaladdress);;
+		if(wan==null) result += "wanaddress error ";
+		else result += "wanaddress " + wan + " ";
+		
 		// http port
 		result += "httpport " + settings.readRed5Setting("http.port") + " ";
+		
 		// rtmp port
 		result += "rtmpport " + settings.readRed5Setting("rtmp.port") + " ";
+		
+		// System.out.println("__str:" + result);
 		messageGrabber(result, null);
 	}
 

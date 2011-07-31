@@ -196,6 +196,18 @@ function populatevalues(values) {
 			if (str == "nil") { a.innerHTML="not found"; }
 			else { a.innerHTML = "found on "+str; }
 		}
+		if (splitstr[n]=="lanaddress") {
+			a = document.getElementById("lanaddress");
+			var str = splitstr[n+1];
+			if (str == "nil") { a.innerHTML="not found"; }
+			else { a.innerHTML = str; }
+		}
+		if (splitstr[n]=="wanaddress") {
+			a = document.getElementById("wanaddress");
+			var str = splitstr[n+1];
+			if (str == "nil") { a.innerHTML="not found"; }
+			else { a.innerHTML = str; }
+		}
 		if (splitstr[n]=="httpport") { document.getElementById("httpport").value = splitstr[n+1]; }
 		if (splitstr[n]=="rtmpport") { document.getElementById("rtmpport").value = splitstr[n+1]; }
 	}

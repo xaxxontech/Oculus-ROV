@@ -45,17 +45,16 @@ public class SonarSteeringObserver implements Observer {
 
 		if (!key.equals(State.sonardistance)) return;
 		if (state.getBoolean(State.autodocking)) return;
-		//if (!comm.moving) return;
+		if (!comm.movingforward) return;
 
+		//final String value = state.get(key);
+		//if (value != null) {
 
-		final String value = state.get(key);
-		if (value != null) {
-
-			System.out.println("___sonar: " + key + " = " + value);	
-			if (state.getInteger(State.sonardistance) < 85)
+		//	System.out.println("___sonar: " + key + " = " + value);	
+			if (state.getInteger(State.sonardistance) < 95)
 				app.playerCallServer(Application.playerCommands.move, "stop");
 			
-		}
+		//}
 	}
 
 	/**

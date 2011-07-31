@@ -30,16 +30,18 @@ public class State {
 
 	// bad var name!
 	// public static final String status = "status";
+	//public static final String dockx = "dockx";
+	//public static final String docky = "docky";
 	
 	public static final String motionenabled = "motionenabled";
 	public static final String dockdensity = "dockdensity";
 	public static final String dockxpos = "dockxpos";
 	public static final String dockypos = "dockypos";
+	public static final String externaladdress = "externaladdress";
+	public static final String localaddress = "localaddress";
 	public static final String autodocktimeout = "autodocktimeout";
 	public static final String autodocking = "autodocking";
 	public static final String docking = "docking";
-	//public static final String dockx = "dockx";
-	//public static final String docky = "docky";
 	public static final String dockxsize = "dockxsize";	
 	public static final String dockysize = "dockysize";
 	public static final String dockstatus = "dockstatus";
@@ -58,8 +60,6 @@ public class State {
 	public static final long FIVE_MINUTES = 300000;
 	public static final long TEN_MINUTES = 600000;
 	public static final int ERROR = -1;
-
-		
 
 	/** notify these on change events */
 	public Vector<Observer> observers = new Vector<Observer>();
@@ -82,6 +82,7 @@ public class State {
 	private State() {
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
 		props.put(userisconnected, false);
+		props.put(localaddress, Util.getLocalAddress());
 	}
 
 	/** */
@@ -92,8 +93,10 @@ public class State {
 	/** test for string equality. any nulls will return false */ 
 	public boolean equals(final String a, final String b){
 		String aa = get(a);
-		if(aa==null) { System.out.println("state.equal... null:" + a); return false; }
-		if(b==null)  { System.out.println("state.equal... null:" + b); return false; }
+		if(aa==null) //{ System.out.println("state.equal... null:" + a); 
+			return false; 
+		if(b==null) // { System.out.println("state.equal... null:" + b); 
+			return false; 
 		
 		if(aa.equals("")) return false;
 		if(b.equals("")) return false;

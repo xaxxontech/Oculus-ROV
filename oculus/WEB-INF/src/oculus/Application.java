@@ -75,17 +75,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		// TODO: new feature testing. Use 24 hour clock 
 		// if a guest, test if permitted hour 
-		if ( ! logininfo[0].equals(settings.readSetting("user0"))){
-			if(!guestHours()){
+		//if ( ! logininfo[0].equals(settings.readSetting("user0"))){
+			//if(!guestHours()){
 				// TODO: COLIN ... plz send this message to login screen 
-				log.error("Not permitted hours for: " + logininfo[0].toString());	
+				//log.error("Not permitted hours for: " + logininfo[0].toString());	
 				// System.out.println("Not permitted hours for: " + logininfo[0].toString() + 
 				//	" start: " + settings.readSetting("guest_start") + " end: " +
 				//		settings.readSetting("guest_end"));
-				return false;
+				//return false;
 		
-			} // else System.out.println("_guest hours login: " + logininfo[0]);
-		} // else System.out.println("_admin login: " + logininfo[0]);
+	//		} // else System.out.println("_guest hours login: " + logininfo[0]);
+	//	} // else System.out.println("_admin login: " + logininfo[0]);
 		
 		if (logininfo.length == 1) { // test for cookie auth
 			String username = logintest("", logininfo[0]);
@@ -282,7 +282,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 
-	/** @return true if within range in settings. Will return false if not configured */
+	/** @return true if within range in settings. Will return false if not configured 
 	public boolean guestHours(){
 	
 		final int start = settings.getInteger(State.gueststart);
@@ -305,7 +305,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if( current > end ) return false;
 	
 		return true;
-	}
+	}*/
 	
 	/** */
 	public void playersignin() {
@@ -429,15 +429,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 				// messageplayer("dockgrab command received", null, null);
 			}
-			break;
+			return;
 		}
 
 		//--------------------------------------------------------//
 		//  TODO: security check mandatory 
 		//--------------------------------------------------------//
 		if (Red5.getConnectionLocal() != player) {
-			System.out.println("error... security issue");
-			return;
+			System.out.println("error... security issue: " + fn.toString());
+			//return;
 		}
 		
 		// X-rated.. must be logged in  
@@ -454,6 +454,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		case slide:
 			if (!state.getBoolean(State.motionenabled)) {
+				if(state.getBoolean(State.autodocking)){
+					messageplayer("autodock in progress", null, null);
+					return;
+				}
+				
 				messageplayer("motion disabled", "motion", "disabled");
 				break;
 			}
@@ -1077,6 +1082,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (str == null) return;
 		if ( ! state.getBoolean(State.motionenabled)) {
 			messageplayer("motion disabled", "motion", "disabled");
+			return;
+		}
+		
+		if(state.getBoolean(State.autodocking)){
+			messageplayer("autodock in progress", null, null);
 			return;
 		}
 		

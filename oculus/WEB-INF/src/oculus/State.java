@@ -45,14 +45,13 @@ public class State {
 	public static final String dockxsize = "dockxsize";	
 	public static final String dockysize = "dockysize";
 	public static final String dockstatus = "dockstatus";
-//	public static final String dockerror = "dockerror";
 	public static final String timeout = "timeout";
 	public static final String losttarget = "losttarget";
 	public static final String docked = "docked";
 	public static final String undocked = "undocked";
 	public static final String undock = "undock";
-	public static final String gueststart = "gueststart";
-	public static final String guestend = "guestend";
+//	public static final String gueststart = "gueststart";
+//	public static final String guestend = "guestend";
 	public static final String unknown = "unknown";	
 
 	public static final long ONE_DAY = 86400000;
@@ -310,6 +309,10 @@ public class State {
 
 	/** */ 
 	public synchronized void delete(String key) {
+		System.out.println("removed: " + key);
+		for(int i = 0 ; i < observers.size() ; i++)
+			observers.get(i).updated(key.trim());	
+		
 		props.remove(key);
 	}
 	

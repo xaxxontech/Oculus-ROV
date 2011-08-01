@@ -50,6 +50,12 @@ public class SonarSteeringObserver implements Observer {
 		//}
 	}
 
+	@Override
+	public void removed(String key) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	/**
 	 * run on timer private class SonarTask extends TimerTask {
 	 * 

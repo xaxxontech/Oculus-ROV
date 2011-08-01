@@ -1,7 +1,5 @@
 package developer.ftp;
 
-
-//import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,15 +7,14 @@ import oculus.Application;
 import oculus.Observer;
 import oculus.Settings;
 import oculus.State;
-import oculus.Util;
 
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * Manage FTP configuration and connections. Start new threads for each FTP transaction
+ * Manage FTP configuration and connections. Start new threads for each FTP transaction. 
  * 
- * @author <a href="mailto:brad.zdanivsky@gmail.com">Brad Zdanivsky</a>
+ * Uses observer interface to be informed of updates in state.
  */
 public class FTPObserver implements Observer {
 	
@@ -62,14 +59,14 @@ public class FTPObserver implements Observer {
 	@Override
 	public void updated(final String key) {
 		
-		if(key.equalsIgnoreCase(State.sonar)) return;
-		if(key.equalsIgnoreCase(State.sonardistance)) return;
+		//if( ! (key.equals(State.sonardistance) || key.equals(State.user) 
+			//	|| key.equals(State.userisconnected))) return;
 
 		
 		final String value = state.get(key);
-		// if(value!=null){
+		if(value == null) return;
 
-		System.out.println("... ftp, updated in state: " + key + " = " + value);
+		System.out.println("..ftp observer: " + key + " = " + value);
 
 		//app.message("ftp update to: " + ftpURL, null, null);
 
@@ -154,5 +151,11 @@ public class FTPObserver implements Observer {
 */
 			
 		}
+	}
+
+	@Override
+	public void removed(String key) {
+		System.out.println("...ftp removed: " + key);
+		state.dump();
 	}
 }

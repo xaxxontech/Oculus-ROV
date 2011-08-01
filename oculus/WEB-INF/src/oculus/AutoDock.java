@@ -80,6 +80,12 @@ public class AutoDock implements Docker {
 		if (cmd[0].equals("go")) {
 			if (state.getBoolean(State.motionenabled)) { 
 				
+				// TODO: ISSUE#6
+				if(state.getBoolean(State.autodocking)){
+					app.message("auto-dock in progress", null, null);
+					return;
+				}
+				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				app.monitor("on");
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); 

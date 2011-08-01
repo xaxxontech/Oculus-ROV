@@ -46,7 +46,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     private Speech speech = new Speech();
     private boolean initialstatuscalled = false;
     private boolean pendingplayerisnull = true;
-    private boolean facegrabon = false;
+    //private boolean facegrabon = false;
     private boolean emailgrab = false;
     
 	// TODO:  best not to have publics 
@@ -120,8 +120,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			admin = false;			
 			state.delete(State.user);
 			state.set(State.userisconnected, false);
+			state.delete(State.userisconnected); //, false);
 			player = null;
-			facegrabon = false;
+			
+			//facegrabon = false;
 			
 			if (!state.getBoolean(State.autodocking)) {
 				if (!stream.equals("stop")) { publish("stop"); }
@@ -372,7 +374,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		tilttest, speedset, slide, nudge, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, 
 		streamsettingsset, streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update,
 		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
-		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, facegrab, assumecontrol, 
+		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, /*facegrab,*/ assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
 		lightsetlevel, dockgrab;
 	
@@ -413,9 +415,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final playerCommands fn, final String str) {
 
-		if(!fn.equals(playerCommands.statuscheck))
-			if(state.getBoolean(State.developer))
-				System.out.println("playerCallServer(): " + fn + " " + str);
+		//if(!fn.equals(playerCommands.statuscheck))
+		//	if(state.getBoolean(State.developer))
+		
+		System.out.println("playerCallServer(): " + fn + " " + str);
 		
 		// G-rated commands 
 		// return after command, don't do lower case statement 
@@ -530,7 +533,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case move:move(str);break;
 		case nudge:nudge(str);break;
 		case speech: saySpeech(str);break;
-		case dock: moves.append("docking"); docker.dock(str); break;
+		case dock: docker.dock(str); break;
 		case battStats: battery.battStats(); break;
 		case cameracommand: cameraCommand(str); break;
 		case gettiltsettings: getTiltSettings(); break;
@@ -555,7 +558,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case disconnectotherconnections: disconnectOtherConnections(); break;
 		case monitor: monitor(str); break;
 		case showlog: showlog(); break;
-		case facegrab: faceGrab(str); break;
+		//case facegrab: faceGrab(str); break;
 		case autodock: docker.autoDock(str); break;
 		case autodockcalibrate: docker.autoDock("calibrate " + str); break;
 		case restart: restart(); break;
@@ -568,7 +571,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** put all commands here */
 	public enum gabberCommands {
-		streammode, saveandlaunch, populatesettings, systemcall, chat, facerect, 
+		streammode, saveandlaunch, populatesettings, systemcall, chat, /*facerect,*/ 
 			dockgrabbed, autodock, restart, checkforbattery;
 		@Override
 		public String toString() {
@@ -611,7 +614,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case populatesettings: populateSettings(); break;
 		case systemcall: Util.systemCall(str, true); break;
 		case chat: chat(str); break;
-		case facerect: messageplayer(null, "facefound", str); break;
+		///case facerect: messageplayer(null, "facefound", str); break;
 		case dockgrabbed: {
 			docker.autoDock("dockgrabbed " + str); 
 			// System.out.println("grabberCallServer(): " + str);
@@ -1007,17 +1010,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	/**
-	 * Move the bot 
+	 * Move the bot in given direction if available
 	 * 
 	 * @param str parameter is the direction 
 	 */
 	private void move(String str) {
+		
+		if(str==null) return;
 	
-		// TODO: Issue#4 
+		// TODO: Issue#4 - use autodock cancel if needed 
 		if(state.getBoolean(State.autodocking)){
 			messageplayer("autodock in progress", null, null);
 			return;
 		}
+		
 		// TODO: if want to block motion, stops are sent after 'move' commands
 		if (str.equals("stop")) {
 			docker.autoDock("cancel");
@@ -1623,6 +1629,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageGrabber(result, null);
 	}
 
+	/*
 	private void faceGrab(String str) {
 		messageplayer("facegrab " + str + " received", null, null);
 		if (str.equals("off")) {
@@ -1645,7 +1652,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}).start();
 		}
-	}
+	}*/
 
 	private void softwareUpdate(String str) {
 		if (admin) {

@@ -22,29 +22,25 @@ public class DockingObserver implements Observer {
 	@Override
 	public void updated(final String key) {
 		
-		if( state.getBoolean(State.dockstatus) || state.getBoolean(State.losttarget) 
-				|| state.getBoolean(State.timeout)){
+		if (key.equals(State.dockstatus) || 
+		    key.equals(State.timeout) || 
+		    key.equals(State.autodocktimeout) ||
+		    key.equals(State.losttarget)){
 				
-		final String status = state.get(key);
-		System.out.println("dk: " + key + " " + status);
+			final String status = state.get(key);
+			System.out.println("..dock observer: " + key + " " + status);
+	
+			if (key.equals(State.autodocktimeout)){
+				app.message("_timeout has been managed?", null, null);
+				state.delete(State.autodocktimeout);
+				state.dump();
+			}
+			
+		}
+	}
 
-		if (state.getBoolean(State.autodocktimeout)){
-			state.delete(State.autodocktimeout);
-			state.dump();
-		}
-		
-		}
-		
-	/*	if(status.equals(State.timeout)){
-			
-			app.playerCallServer(playerCommands.nudge, "left");
-			Util.delay(3000);
-			app.playerCallServer(playerCommands.autodock, "go");
-			
-		}
-		*/
-		
-		
-		//}
+	@Override
+	public void removed(String key) {
+		System.out.println("__dock observer remove: " + key);
 	}
 }

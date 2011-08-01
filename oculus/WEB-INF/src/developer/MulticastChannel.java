@@ -4,9 +4,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-/**
- * @author Brad Zdanivsky
- */
+/** @author Brad Zdanivsky */
 public class MulticastChannel implements Runnable {
 
 	public static final String DEFAULT_PORT = "4444";
@@ -22,21 +20,19 @@ public class MulticastChannel implements Runnable {
 
 	private XMLParser parse = new XMLParser();
 	private boolean running = true;
-	private/* static */CommandManager manager = null;
+	private CommandManager manager = null;
 
 	/** Constructor */
 	MulticastChannel(CommandManager cm) {
 
 		manager = cm;
-		String address = DEFAULT_ADDRESS;
-		String port = DEFAULT_PORT;
 
 		try {
 
-			groupPort = Integer.parseInt(port);
+			groupPort = Integer.parseInt(DEFAULT_PORT);
 
 			/** get group IP */
-			groupAddress = InetAddress.getByName(address);
+			groupAddress = InetAddress.getByName(DEFAULT_ADDRESS);
 
 			/** construct the server socket */
 			serverSocket = new MulticastSocket(groupPort);
@@ -61,15 +57,12 @@ public class MulticastChannel implements Runnable {
 	/** Constructor, use where not needing a call back hook */
 	MulticastChannel() {
 
-		String address = DEFAULT_ADDRESS;
-		String port = DEFAULT_PORT;
-
 		try {
 
-			groupPort = Integer.parseInt(port);
+			groupPort = Integer.parseInt(DEFAULT_PORT);
 
 			/** get group IP */
-			groupAddress = InetAddress.getByName(address);
+			groupAddress = InetAddress.getByName(DEFAULT_ADDRESS);
 
 			/** construct the server socket */
 			serverSocket = new MulticastSocket(groupPort);
@@ -101,7 +94,7 @@ public class MulticastChannel implements Runnable {
 
 	public void close() {
 		running = false;
-		System.out.println("....closing multicast channel");
+		System.out.println("closing multicast channel");
 	}
 
 	/** Executes this thread */
@@ -119,12 +112,11 @@ public class MulticastChannel implements Runnable {
 				String input = new String(packet.getData()).trim();
 
 				/** get sending node's addr */
-				String sendersIp = ((InetAddress) packet.getAddress()).getHostAddress();
+				// String sendersIp = ((InetAddress) packet.getAddress()).getHostAddress();
 
 				/** test the input */
-				if (valid(input, sendersIp)) {
-					
-					System.out.println("_multicast: " + input);
+				///if (valid(input, sendersIp)) {
+				
 					Command cmd = parse.parse(input);
 
 					/** dispatch the command */
@@ -138,7 +130,6 @@ public class MulticastChannel implements Runnable {
 						}
 					}
 				}
-			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

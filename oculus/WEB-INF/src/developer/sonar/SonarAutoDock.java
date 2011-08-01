@@ -239,7 +239,7 @@ public class SonarAutoDock implements Docker {
 									///new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
 									
 									state.set(State.docking, false);
-									state.set(State.autodocktimeout, true);
+									///state.set(State.dockerror, State.autodocktimeout);
 
 									String s = "dock un-docked";
 									if (comport.moving) { 
@@ -250,20 +250,13 @@ public class SonarAutoDock implements Docker {
 									log.info(state.get(State.user) +" docking timed out");
 									state.set(State.dockstatus, State.undocked);
 
-									// TODO: TESTING			
-									// state.set(State.status, State.undocked);
-									
 									if (state.getBoolean(State.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
 											comport.speedset("fast");
 											comport.goBackward();
 											Thread.sleep(2000);
 											comport.stopGoing();
-										
 											app.playerCallServer(Application.playerCommands.dockgrab, null);
-
-									//		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-								//			sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
 										} catch (Exception e) { e.printStackTrace(); } } }).start();
 									}
 									break;

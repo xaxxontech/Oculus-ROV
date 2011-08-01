@@ -67,10 +67,8 @@ public class CommandManager {
 		new Thread() {
 			public void run() {
 
-				final String temp = System.getenv("RED5_HOME")
-						+ "\\log\\debug.txt";
-				final String move = System.getenv("RED5_HOME")
-						+ "\\log\\moves.log";
+				final String temp = System.getenv("RED5_HOME") + "\\log\\debug.txt";
+				//final String move = System.getenv("RED5_HOME") + "\\log\\moves.log";
 
 				// delete if exists from before
 				new File(temp).delete();
@@ -100,8 +98,7 @@ public class CommandManager {
 			return;
 		}
 
-		System.out.println("type: " + command.getType() + " cmd: "
-				+ command.list());
+		System.out.println("type: " + command.getType() + " cmd: " + command.list());
 
 		// only listen to <oculus> xml </oculus> messages
 		if (command.getType().equalsIgnoreCase(oculus)) {

@@ -358,7 +358,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	/** */
 	public void stopGoing() {
 		
-		if(state.getBoolean(State.developer))
 		if (application.muteROVonMove && moving) { application.unmuteROVMic(); }
 		
 		new Sender(STOP);
@@ -373,7 +372,6 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		moving = true;
 		movingforward = true;
 		
-		if(state.getBoolean(State.developer))
 		if (application.muteROVonMove) { application.muteROVMic(); }
 	}
 

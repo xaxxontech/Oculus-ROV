@@ -209,6 +209,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new EmailAlerts(this);
 		new SystemWatchdog();
 		new ExternalAddressObserver(this);
+		new DockingObserver(this);
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -453,17 +454,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 
 		case slide:
-			if (!state.getBoolean(State.motionenabled)) {
-				if(state.getBoolean(State.autodocking)){
-					messageplayer("autodock in progress", null, null);
-					return;
-				}
-				
+			if (!state.getBoolean(State.motionenabled)) {	
 				messageplayer("motion disabled", "motion", "disabled");
 				break;
 			}
+			
+			if(state.getBoolean(State.autodocking)){
+				messageplayer("autodock in progress", null, null);
+				return;
+			}
 			moveMacroCancel();
 			comport.slide(str);
+			if(moves != null) moves.append("slide " + str);
 			messageplayer("command received: " + fn + str, null, null);
 			break;
 
@@ -867,16 +869,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str += "dock un-docked";
 			}
 			messageplayer("docking cancelled by movement", "multiple", str);
-			docker.cancel();
+			docker.autoDock("cancel");
 		}
 		if (comport.sliding == true) 
 			comport.slidecancel();
 		
-		if (state.getBoolean(State.autodocking)) 
-			docker.autoDock("cancel");
 	}
 
 	private void cameraCommand(String str) {
+		
+		// TODO: Issue#4 
+		if(state.getBoolean(State.autodocking)){
+			messageplayer("autodock in progress", null, null);
+			return;
+		}
+		
 		comport.camCommand(str);
 		messageplayer("tilt command received: " + str, null, null);
 		if (!str.equals("up") && !str.equals("down") && !str.equals("horiz")) {
@@ -1005,39 +1012,33 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param str parameter is the direction 
 	 */
 	private void move(String str) {
-		
-		String s = "";
-		String msg = "motion disabled (try un-dock)";
-		if (str.equals("stop")) {
-			comport.stopGoing();
-			s = "STOPPED";
-			msg = "command received: " + str;
-			docker.cancel();
-			//state.set(State.autodocking, false);
-		}
-		
-		// TODO: issue#4 
+	
+		// TODO: Issue#4 
 		if(state.getBoolean(State.autodocking)){
 			messageplayer("autodock in progress", null, null);
 			return;
 		}
+		// TODO: if want to block motion, stops are sent after 'move' commands
+		if (str.equals("stop")) {
+			docker.autoDock("cancel");
+			comport.stopGoing();
+			message("command received: " + str, "motion", "STOPPED");
+			return; 
+		}
 		
-		if (state.getBoolean(State.motionenabled)) {
-			if (str.equals("forward")) comport.goForward();
-			else if (str.equals("backward")) comport.goBackward();
-			else if (str.equals("right")) comport.turnRight();
-			else if (str.equals("left")) comport.turnLeft();
+		if (!state.getBoolean(State.motionenabled)) {
+			messageplayer("motion disabled (try un-dock)", "motion", "DISABLED");
+			return;
+		}
+		
+		if (str.equals("forward")) comport.goForward();
+		else if (str.equals("backward")) comport.goBackward();
+		else if (str.equals("right")) comport.turnRight();
+		else if (str.equals("left")) comport.turnLeft();
 			
-			moveMacroCancel();
-			if (s.equals("")) s = "MOVING";
-			msg = "command received: " + str;
-			
-			// log it 
-			moves.append(str);
-		
-		} else s = "DISABLED";
-		
-		messageplayer(msg, "motion", s);
+		moveMacroCancel();
+		messageplayer("command received: " + str, "motion", "MOVING");
+		if(moves!=null) moves.append("move " + str);
 	}
 
 	/** @param str is the direction to move. Valid choices are: "right", "left", "backward", "forward" */
@@ -1056,9 +1057,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		comport.nudge(str);
 		messageplayer("command received: nudge" + str, null, null);
-		
-		moves.append(str);
-
+		moves.append("nudge " + str);
 		if (state.getBoolean(State.docking)
 				|| state.getBoolean(State.autodocking)) moveMacroCancel();
 	}
@@ -1078,7 +1077,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param str
 	 */
 	private void clickSteer(String str) {
-
+	
 		if (str == null) return;
 		if ( ! state.getBoolean(State.motionenabled)) {
 			messageplayer("motion disabled", "motion", "disabled");
@@ -1090,8 +1089,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			return;
 		}
 		
-		moves.append("clicksteer " + str);
-
+		if(moves!=null) moves.append("clicksteer " + str);
+		
 		int n = comport.clickSteer(str);
 		if (n != 999) {
 			messageplayer("received: clicksteer " + str, "cameratilt", camTiltPos());
@@ -1100,6 +1099,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 
 		moveMacroCancel();
+
 	}
 
 	/** */ 

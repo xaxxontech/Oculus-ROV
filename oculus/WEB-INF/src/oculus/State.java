@@ -45,6 +45,7 @@ public class State {
 	public static final String dockxsize = "dockxsize";	
 	public static final String dockysize = "dockysize";
 	public static final String dockstatus = "dockstatus";
+//	public static final String dockerror = "dockerror";
 	public static final String timeout = "timeout";
 	public static final String losttarget = "losttarget";
 	public static final String docked = "docked";
@@ -60,6 +61,7 @@ public class State {
 	public static final long FIVE_MINUTES = 300000;
 	public static final long TEN_MINUTES = 600000;
 	public static final int ERROR = -1;
+
 
 	/** notify these on change events */
 	public Vector<Observer> observers = new Vector<Observer>();
@@ -149,6 +151,18 @@ public class State {
 			return;
 		}
 	}*/
+	
+	/**
+	 * debug
+	 */
+	public void dump(){
+		Enumeration<Object> keys = props.keys();
+		while(keys.hasMoreElements()){
+			String key = (String) keys.nextElement();
+			String value = (String) props.getProperty(key);			
+			System.out.println(key + " = " + value);
+		}
+	}
 	
 	/**
 	 * @param path, is the file to write the state value pairs too

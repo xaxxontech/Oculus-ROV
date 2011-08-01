@@ -42,7 +42,7 @@ public class AutoDock implements Docker {
 	private static Logger log = Red5LoggerFactory.getLogger(AutoDock.class, "oculus");
 	private State state = State.getReference();
 	private Settings settings = new Settings();
-	private final boolean debug = settings.getBoolean(Settings.developer);
+///	private final boolean debug = settings.getBoolean(Settings.developer);
 	private BatteryLife life = BatteryLife.getReference();
 	private LogManager moves = null; 
 	private IConnection grabber = null;
@@ -65,42 +65,32 @@ public class AutoDock implements Docker {
 		}
 	}
 	
-	@Override
-	public void cancel(){
-		state.set(State.docking, false);
-	}
 
 	@Override
 	public void autoDock(String str) {
 		
-		//if(state.getBoolean(State.developer))
-		//	System.out.println("__autodock: " + str);
+		if(moves != null) moves.append("autodock " + str);
 		
 		String cmd[] = str.split(" ");
 		if (cmd[0].equals("cancel")) {
 			state.set(State.autodocking, false);
 			app.message("auto-dock ended","multiple","cameratilt " +app.camTiltPos()+" autodockcancelled blank motion stopped");
 			log.info("autodock cancelled");
-//			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-//			sc.invoke("dockgrab", new Object[] {0,0,"cancel"});
 		}
 		if (cmd[0].equals("go")) {
 			if (state.getBoolean(State.motionenabled)) { 
 				
-				//int x = Integer.parseInt(cmd[1])/2; //assuming 320x240
-				//int y = Integer.parseInt(cmd[2])/2; //assuming 320x240
-				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				//sc.invoke("dockgrab", new Object[] {x,y,"findfromxy"});
 				app.monitor("on");
-				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
-				
+				sc.invoke("dockgrab", new Object[] {0,0,"start"}); 
+				// sends xy, but they're unuseds
 				state.set(State.autodocking, true);
 				autodockingcamctr = false;
 				autodockgrabattempts = 0;
 				autodockctrattempts = 0;
-				app.message("auto-dock in progress","motion", "moving");
+				app.message("auto-dock in progress", "motion", "moving");
 				log.info("autodock started");
+				
 			}
 			else { app.message("motion disabled","autodockcancelled", null); }
 		}
@@ -114,34 +104,30 @@ public class AutoDock implements Docker {
 						// TODO: remove this condition if unused
 						// TODO: remove this??
 						
-						if(debug) new SendMail("Oculus Message", "auto dock fail, line 109 is being used!"); 
-						System.out.println("line 109... auto dock");
-						autodockgrabattempts ++;
-						
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						// if(debug) new SendMail("Oculus Message", "auto dock fail, line 109 is being used!"); 
+						 System.out.println("line 109... auto dock");
+						// autodockgrabattempts ++;						
+						// app.playerCallServer(Application.playerCommands.dockgrab, null);
 
 					} else { 
 						
-						//TODO: testing 
-						// failed, give up... send email??
-						// if(debug) new SendMail("Oculus Message", "auto dock failed, target lost"); 
-						
 						state.set(State.autodocking, false);	
-						//.set(State.status, State.losttarget);
-						app.message("auto-dock target not found, try again","multiple", /*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
+						state.set(State.docking, false);	
+						state.set(State.losttarget, true);	
+						app.message("auto-dock target not found, try again","multiple", 
+								/*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
 					}
 				}
 				else {
-					
+					autodockgrabattempts++;
 					app.message(null,"autodocklock",s);
-
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
 						Integer.parseInt(cmd[5]),new Float(cmd[6]));
-					autodockgrabattempts++;
 				}
 			}
-			if (cmd[1].equals("calibrate")) { // x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
+			if (cmd[1].equals("calibrate")) { 
+				// x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
 				docktarget = cmd[7]+"_"+cmd[8]+"_"+cmd[9]+"_"+cmd[10]+"_"+cmd[2]+"_"+cmd[3]+"_"+cmd[4]+"_"+cmd[5]+"_"+cmd[6];
 				settings.writeSettings("docktarget", docktarget); 
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
@@ -170,7 +156,7 @@ public class AutoDock implements Docker {
 			if (state.getBoolean(State.motionenabled)){
 				if (!life.batteryCharging()) {
 					
-					moves.append("docking");
+					moves.append("docking " + str);
 					app.message("docking initiated", "multiple", "speed fast motion moving dock docking");
 
 					// need to set this because speedset calls goForward also if true
@@ -206,7 +192,7 @@ public class AutoDock implements Docker {
 									state.set(State.motionenabled, false);
 									state.set(State.dockstatus, State.docked);
 									// needs to be before battStats()
-									moves.append("docked");
+									moves.append("docked successfully");
 									life.battStats(); 
 									app.monitor("off");
 									break;
@@ -218,7 +204,7 @@ public class AutoDock implements Docker {
 									///if(debug) new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
 									
 									state.set(State.docking, false);
-									// state.set(State.status, State.timeout);
+									state.set(State.timeout, true);
 
 									String s = "dock un-docked";
 									if (comport.moving) { 

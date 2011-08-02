@@ -365,7 +365,7 @@ function setstatus(status, value) {
 	if (status == "streamsettings") {
 		streamdetails = value.split("_");
 	}
-	if (status=="facefound") { facefound(value); }
+//	if (status=="facefound") { facefound(value); }
 	if (status=="autodocklock") { autodocklock(value)}
 	if (status=="autodockcancelled") { autodocking=false; autodock("cancel"); }
 	if (status=="softwareupdate") {
@@ -563,7 +563,7 @@ function mainmenu(id) {
 	if (id) {
 		var link = document.getElementById(id);
 		var xy = findpos(link);
-		x = xy[0]+link.offsetWidth;
+		x = xy[0]+link.offsetWidth+150;
 		xy = findpos(document.getElementById("video"));
 		y = xy[1]+30;
 	}
@@ -641,6 +641,8 @@ function lightpopulate() {
 					" onclick='lightclick(&quot;"+i+"&quot;)'>|</span></td>";
 		}
 		str += "</tr></table>";
+		str += "dock light <a class='blackbg' href ='javascript: docklight(&quot;on&quot;)'";
+		str += ">on</a> / <a class='blackbg' href ='javascript: javascript: docklight(&quot;off&quot;)'>off</a>";
 		a.style.display = "";
 		a.innerHTML = str;
 		var b=document.getElementById("lighttd"+parseInt(lightlevel/10));
@@ -688,6 +690,13 @@ function lightclick(level) {
 	callServer("lightsetlevel", parseInt(level*10)); // parseInt(level*255/10));
 	lagtimer = new Date().getTime();
 	lightlevel = level*10;
+}
+
+function docklight(str) {
+	message("sending docklight: "+ str, sentcmdcolor);
+	callServer("docklight", str);
+	lagtimer = new Date().getTime();
+
 }
 
 function streamdetailspopulate() {
@@ -2009,17 +2018,17 @@ function streamset(str) {
 	}
 }
 
-function facegrab() {
-	var str;
-	if (facegrabon) { 
-		str="off"; 
-		facegrabon=false; }
-	else {
-		facegrabon = true;
-		str="on"; }
-	callServer("facegrab",str);
-	overlay("off");
-}
+//function facegrab() {
+//	var str;
+//	if (facegrabon) { 
+//		str="off"; 
+//		facegrabon=false; }
+//	else {
+//		facegrabon = true;
+//		str="on"; }
+//	callServer("facegrab",str);
+//	overlay("off");
+//}
 
 
 function emailgrab() {
@@ -2028,22 +2037,22 @@ function emailgrab() {
 }
 
 
-function facefound(str) {
-	if (clicksteeron) {
-		clearTimeout(faceboxtimer);
-		videooverlayposition();
-		var scale =2;
-		var video = document.getElementById("video");
-		var box = document.getElementById("facebox");
-		splitstr = str.split(" "); // left top width height
-		box.style.width = (splitstr[2]*scale)+"px";
-		box.style.height = (splitstr[3]*scale)+"px";
-		box.style.left = (video.offsetLeft + (splitstr[0]*scale)) + "px";
-		box.style.top = (video.offsetTop + (splitstr[1]*scale)) + "px";
-		box.style.display = "";
-		faceboxtimer = setTimeout("document.getElementById('facebox').style.display='none';",1000);
-	}
-}
+//function facefound(str) {
+//	if (clicksteeron) {
+//		clearTimeout(faceboxtimer);
+//		videooverlayposition();
+//		var scale =2;
+//		var video = document.getElementById("video");
+//		var box = document.getElementById("facebox");
+//		splitstr = str.split(" "); // left top width height
+//		box.style.width = (splitstr[2]*scale)+"px";
+//		box.style.height = (splitstr[3]*scale)+"px";
+//		box.style.left = (video.offsetLeft + (splitstr[0]*scale)) + "px";
+//		box.style.top = (video.offsetTop + (splitstr[1]*scale)) + "px";
+//		box.style.display = "";
+//		faceboxtimer = setTimeout("document.getElementById('facebox').style.display='none';",1000);
+//	}
+//}
 
 function framegrabbed() {
 	document.getElementById("framegrabbox").style.display = "";

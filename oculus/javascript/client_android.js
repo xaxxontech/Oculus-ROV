@@ -90,6 +90,7 @@ function setstatus(status, value) {
 		window.OCULUSANDROID.message(username+ " signed in");
 	}
 	if (status == "hijacked") { window.location.reload(); }
+	if (status == "light") { window.OCULUSANDROID.lightPresent(); }
 }
 
 function setstatusmultiple(value) {

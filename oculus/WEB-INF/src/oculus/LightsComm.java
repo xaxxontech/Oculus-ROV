@@ -27,6 +27,7 @@ public class LightsComm implements SerialPortEventListener {
 	public static final byte[] GET_VERSION = {'y'};
 	private static final byte[] ECHO_ON = {'e', '1'};
 	private static final byte[] ECHO_OFF = {'e', '0'};
+	public static final byte DOCKLIGHT = 'd';
 	
 	// comm cannel 
 	private SerialPort serialPort = null;
@@ -287,7 +288,7 @@ public class LightsComm implements SerialPortEventListener {
 	public synchronized void setLevel(int target){
 		
 		if( !isConnected()){
-			System.out.println("lights not found: " + target);
+			System.out.println("lights not found");
 			application.message("lights not found", null, null);
 			return;
 		}
@@ -296,5 +297,17 @@ public class LightsComm implements SerialPortEventListener {
 		new Sender(new byte[]{SET_PWM, (byte) n});
 		application.message("light level set to "+target+"%", null, null);
 		lightLevel = target;
+	}
+	
+	public synchronized void dockLight(String str){
+		if( !isConnected()){
+			System.out.println("lights not found");
+			application.message("lights not found", null, null);
+			return;
+		}
+		byte n = 0;
+		if (str.equals("on")) { n = 1; }
+		new Sender(new byte[]{DOCKLIGHT, n});
+		application.message("docklight "+str, null, null);
 	}
 }

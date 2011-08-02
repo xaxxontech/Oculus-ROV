@@ -525,7 +525,6 @@ class="blackbg" href="javascript: streamset('setcustom');">change</a>
 <a class="blackbg" href="javascript: clicksteer('');">click steer on/off</a><br>
 <a class="blackbg" href="javascript: hiddenmessageboxShow();">command log full</a><br>
 <a class="blackbg" href="javascript: motionenabletoggle();">motion enable/disable</a><br>
-<a class="blackbg" href="javascript: muteROVonmovetoggle();">mute ROV when moving on/off</a><br>
 monitor <a class="blackbg" href ="javascript: monitor('on');">on</a> /
 <a class="blackbg" href ="javascript: javascript: monitor('off');">off</a><br>
 
@@ -536,7 +535,7 @@ monitor <a class="blackbg" href ="javascript: monitor('on');">on</a> /
 <table><tr><td style="height: 7px"></td></tr></table>
 <a class="blackbg" 
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;calibration_settings&quot;).innerHTML);">
-calibration</a><br>
+calibration/settings</a><br>
 <a class="blackbg" 
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;account_settings&quot;).innerHTML);">
 accounts</a><br>
@@ -591,6 +590,8 @@ Calibration:
 <a class="blackbg" href="javascript: tiltcontrols('on');">camera tilt settings</a><br>
 <a class="blackbg" href="javascript: docklinecalibrate('start');">calibrate dock line</a><br>
 <a class="blackbg" href="javascript: autodock('calibrate');">calibrate auto-dock</a><br>
+<a class="blackbg" href="javascript: muteROVonmovetoggle();">mute 
+<span style="font-variant: smallcaps;">ROV</span> when moving on/off</a><br>
 </div>
 
 <!-- driving settings -->
@@ -822,9 +823,8 @@ onKeyPress="if (keypress(event)==13) { systemcall('',''); }">
 <a class="cancelbox" href="javascript: systemcall('','');" onmousedown="systemcall('','');">&radic;</a>
 </span><br/>
 
-<a class="blackbg" href="javascript: callServer('framegrab',''); overlay('off');">frame grab</a><br> 
-<a class="blackbg" href="javascript: callServer('emailgrab',''); overlay('off');">email frame grab</a><br>
-<a class="blackbg" href="javascript: callServer('dockgrab',''); overlay('off');">grab dock</a><br>
+<a class="blackbg" href="javascript: callServer('framegrab',''); ">frame grab</a><br> 
+<a class="blackbg" href="javascript: callServer('emailgrab',''); ">email frame grab</a><br>
 
 </div>
 

@@ -371,7 +371,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
 		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, /*facegrab,*/ assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-		lightsetlevel, dockgrab;
+		lightsetlevel, docklight, dockgrab;
 	
 		@Override 
 		public String toString() {
@@ -559,7 +559,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case softwareupdate: softwareUpdate(str); break;
 		case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
 		case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
-		case lightsetlevel: light.setLevel(Integer.parseInt(str)); return;
+		case lightsetlevel: light.setLevel(Integer.parseInt(str)); break;
+		case docklight: light.dockLight(str); return;
 		}
 	}
 

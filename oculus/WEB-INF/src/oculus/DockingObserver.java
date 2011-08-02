@@ -3,6 +3,7 @@ package oculus;
 import oculus.Observer;
 import oculus.State;
 
+/** Manage autodocking events like timeout and losttarget */
 public class DockingObserver implements Observer {
 
 	// private static Logger log = Red5LoggerFactory.getLogger(SonarObserver.class, "oculus");
@@ -12,15 +13,15 @@ public class DockingObserver implements Observer {
 	/** register for state changes */
 	public DockingObserver(Application a){
 		app = a;	
-		System.out.println("docking observer started");
+		// System.out.println("docking observer started");
 		state.addObserver(this);
 	}
 
 	@Override
 	public void updated(final String key) {
 		
-		if (key.equals(State.dockstatus) || key.equals(State.timeout) || 
-		    key.equals(State.autodocktimeout) || key.equals(State.losttarget)){
+	//	if (key.equals(State.dockstatus) || key.equals(State.timeout) || 
+		//    key.equals(State.autodocktimeout) || key.equals(State.losttarget)){
 				
 			final String status = state.get(key);
 			System.out.println("..dock observer: " + key + " " + status);
@@ -31,7 +32,7 @@ public class DockingObserver implements Observer {
 				state.dump();
 			}
 	
-		}
+		//}
 	}
 
 	@Override

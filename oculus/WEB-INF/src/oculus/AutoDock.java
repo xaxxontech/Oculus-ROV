@@ -88,7 +88,7 @@ public class AutoDock implements Docker {
 				}
 				
 				// TODO: COLIN, take level from settings?
-				if(lights.isConnected()) lights.setLevel(3);
+				lights.setLevel(3);
 				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				app.monitor("on");

@@ -89,6 +89,9 @@ public class State {
 	/** */
 	public void addObserver(Observer obs){
 		observers.add(obs);
+		
+		for(int i = 0 ; i < observers.size() ; i++)
+			System.out.println("_+__[" + i + "] " + observers.get(i).getClass().getName());
 	}
 	
 	/** test for string equality. any nulls will return false */ 
@@ -110,15 +113,10 @@ public class State {
 		String aa = get(a);
 		if(aa==null) return false; 
 		if(aa.equals("")) return false;
-		
-		//{ System.out.println("state.equalSetting... a=" + a); return false; }
-		
+				
 		String bb = settings.readSetting(b);
 		if(bb==null) return false;
 		if(bb.equals("")) return false;
-		
-		//{ System.out.println("state.equalSetting... b=" + b); return false; }
-		//System.out.println("equalsSetting: " + aa + " ?? " + bb);
 		
 		return aa.equalsIgnoreCase(bb);
 	}
@@ -309,7 +307,7 @@ public class State {
 
 	/** */ 
 	public synchronized void delete(String key) {
-		System.out.println("__+__state.delete(): " + key);
+		System.out.println("_+___state.delete(): " + key);
 		for(int i = 0 ; i < observers.size() ; i++)
 			observers.get(i).updated(key.trim());	
 		

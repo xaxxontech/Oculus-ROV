@@ -47,7 +47,7 @@ public class LightsComm implements SerialPortEventListener {
 	// Settings settings = new Settings(); 
 	
 	// make sure all threads know if connected 
-	private volatile boolean isconnected = false;
+	private boolean isconnected = false;
 	
 	public int lightLevel = 0;
 	
@@ -62,8 +62,6 @@ public class LightsComm implements SerialPortEventListener {
 	 * 			Serial events like restet            
 	 */
 	public LightsComm(Application app) {
-		
-		// call back to notify on reset events etc
 		application = app; 
 		
 		if( state.get(State.lightport) != null ){
@@ -71,14 +69,8 @@ public class LightsComm implements SerialPortEventListener {
 				public void run() {
 					connect();				
 					Util.delay(SETUP);
-						
-						// start with them off ??
-						off();
-						
-						// setEcho(true);
-						
-						// check for lost connection
-						// new WatchDog().start();	
+					// start with them off 
+					setLevel(0);	
 				}	
 			}).start();
 		}	
@@ -104,8 +96,6 @@ public class LightsComm implements SerialPortEventListener {
 			log.error(e.getMessage());
 			return;
 		}
-		
-		//isconnected = true;
 	}
 
 	/** @return True if the serial port is open */
@@ -205,10 +195,8 @@ public class LightsComm implements SerialPortEventListener {
 
 	/** @param update is set to true to turn on echo'ing of serial commands */
 	public void setEcho(boolean update){
-		if(update) 
-			new Sender(ECHO_ON);
-		else 
-			new Sender(ECHO_OFF);
+		if(update) new Sender(ECHO_ON);
+		else new Sender(ECHO_OFF);
 	}
 	
 	/** inner class to check if getting responses in timely manor 
@@ -286,7 +274,7 @@ public class LightsComm implements SerialPortEventListener {
 		lastSent = System.currentTimeMillis();
 	}
 
-	/** set default level */
+	/*
 	public void on() {
 		new Sender(new byte[]{SET_PWM, (byte) 255});
 	}
@@ -294,8 +282,16 @@ public class LightsComm implements SerialPortEventListener {
 	public void off(){
 		new Sender(new byte[]{SET_PWM, 0});
 	}
+	*/
 	
-	public void setLevel(int target){
+	public synchronized void setLevel(int target){
+		
+		if( !isConnected()){
+			System.out.println("lights not found: " + target);
+			application.message("lights not found", null, null);
+			return;
+		}
+		
 		int n = target*255/100;
 		new Sender(new byte[]{SET_PWM, (byte) n});
 		application.message("light level set to "+target+"%", null, null);

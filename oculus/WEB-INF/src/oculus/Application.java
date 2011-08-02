@@ -434,7 +434,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//  TODO: security check mandatory 
 		//--------------------------------------------------------//
 		if (Red5.getConnectionLocal() != player) {
-			// System.out.println("error... security issue: " + fn.toString());
+			System.out.println("error... security issue: " + fn.toString());
 			return;
 		}
 		

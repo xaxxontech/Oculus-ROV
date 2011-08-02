@@ -47,18 +47,19 @@ public class AutoDock implements Docker {
 	private LogManager moves = null; 
 	private IConnection grabber = null;
 	private String docktarget = null;
-	private ArduinoCommDC comport = null; 
+	private ArduinoCommDC comport = null;
+	private LightsComm lights = null;
 	private Application app = null;
 	
 	private boolean autodockingcamctr = false;
 	private int autodockgrabattempts;
 	private int autodockctrattempts;
 	
-	public AutoDock(Application theapp, IConnection thegrab, ArduinoCommDC com){
+	public AutoDock(Application theapp, IConnection thegrab, ArduinoCommDC com, LightsComm lights){
 		this.app = theapp;
 		this.grabber = thegrab;
 		this.comport = com;
-		
+		this.lights = lights;
 		if(settings.getBoolean(Settings.developer)){
 			moves = new LogManager();
 			moves.open(System.getenv("RED5_HOME")+"\\log\\moves.log");
@@ -86,10 +87,12 @@ public class AutoDock implements Docker {
 					return;
 				}
 				
+				// TODO: COLIN, take level from settings?
+				if(lights.isConnected()) lights.setLevel(3);
+				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				app.monitor("on");
-				sc.invoke("dockgrab", new Object[] {0,0,"start"}); 
-				// sends xy, but they're unuseds
+				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
 				state.set(State.autodocking, true);
 				autodockingcamctr = false;
 				autodockgrabattempts = 0;
@@ -162,7 +165,7 @@ public class AutoDock implements Docker {
 			if (state.getBoolean(State.motionenabled)){
 				if (!life.batteryCharging()) {
 					
-					moves.append("docking " + str);
+					// moves.append("dock " + str);
 					app.message("docking initiated", "multiple", "speed fast motion moving dock docking");
 
 					// need to set this because speedset calls goForward also if true

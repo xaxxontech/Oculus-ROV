@@ -7,10 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Set;
 import javax.imageio.ImageIO;
 
@@ -46,7 +43,6 @@ public class Application extends MultiThreadedApplicationAdapter {
     private Speech speech = new Speech();
     private boolean initialstatuscalled = false;
     private boolean pendingplayerisnull = true;
-    //private boolean facegrabon = false;
     private boolean emailgrab = false;
     
 	// TODO:  best not to have publics 
@@ -115,18 +111,23 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void appDisconnect(IConnection connection) {
 		if (connection.equals(player)) {
 			String str = state.get(State.user) + " disconnected";
-			log.info(str);
+			// log.info(str);
+			System.out.println(str); // never see this in log!
 			messageGrabber(str, "connection awaiting&nbsp;connection");
 			admin = false;			
 			state.delete(State.user);
-			state.set(State.userisconnected, false);
-			state.delete(State.userisconnected); //, false);
+			state.delete(State.userisconnected); 
 			player = null;
 			
-			//facegrabon = false;
+			// TODO: testing only 
+			state.dump();
 			
 			if (!state.getBoolean(State.autodocking)) {
-				if (!stream.equals("stop")) { publish("stop"); }
+				if(stream!=null){
+					if (!stream.equals("stop")) { 
+						publish("stop"); 		
+					}
+				}
 				if (comport.moving) { comport.stopGoing(); }
 			}
 			
@@ -172,8 +173,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (con instanceof IServiceCapableConnection && con != grabber
 						&& con != player
 						&& (con.getRemoteAddress()).equals("127.0.0.1")) {
-					con.close();
-					i++;
+							con.close();
+							i++;
 				}
 			}
 		}
@@ -181,8 +182,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// do it differently if sonar on board 
 		// if(settings.getBoolean(State.sonarenabled)) docker = new BradzAutoDock(this, grabber, comport);
 		//else
-			// TODO: BRAD
-			docker = new AutoDock(this, grabber, comport);
+		// TODO: BRAD
+		docker = new AutoDock(this, grabber, comport, light);
 	}
 
 	/** */ 
@@ -313,12 +314,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/** */
 	public void playersignin() {
 		
-		/*
-		if(guestHours()){
-			// TODO: test if guest here too??
-			
-		}*/
-		
 		if (player != null) {
 			pendingplayer = Red5.getConnectionLocal();
 			pendingplayerisnull = false;
@@ -415,10 +410,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final playerCommands fn, final String str) {
 
-		//if(!fn.equals(playerCommands.statuscheck))
-		//	if(state.getBoolean(State.developer))
-		
-		System.out.println("playerCallServer(): " + fn + " " + str);
+		if(!fn.equals(playerCommands.statuscheck))
+			if(state.getBoolean(State.developer))
+				System.out.println("playerCallServer(): " + fn + " " + str);
 		
 		// G-rated commands 
 		// return after command, don't do lower case statement 
@@ -440,8 +434,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//  TODO: security check mandatory 
 		//--------------------------------------------------------//
 		if (Red5.getConnectionLocal() != player) {
-			System.out.println("error... security issue: " + fn.toString());
-			//return;
+			// System.out.println("error... security issue: " + fn.toString());
+			return;
 		}
 		
 		// X-rated.. must be logged in  
@@ -667,17 +661,22 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void publish(String str) {
-		// commands: camandmic camera mic stop
-		if (grabber instanceof IServiceCapableConnection) {
-			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-			String current = settings.readSetting("vset");
-			String vals[] = (settings.readSetting(current)).split("_");
-			int width = Integer.parseInt(vals[0]);
-			int height = Integer.parseInt(vals[1]);
-			int fps = Integer.parseInt(vals[2]);
-			int quality = Integer.parseInt(vals[3]);
-			sc.invoke("publish", new Object[] { str, width, height, fps, quality });
-			// messageGrabber("stream "+str);
+		try {
+			// commands: camandmic camera mic stop
+			if (grabber instanceof IServiceCapableConnection) {
+				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+				String current = settings.readSetting("vset");
+				String vals[] = (settings.readSetting(current)).split("_");
+				int width = Integer.parseInt(vals[0]);
+				int height = Integer.parseInt(vals[1]);
+				int fps = Integer.parseInt(vals[2]);
+				int quality = Integer.parseInt(vals[3]);
+				sc.invoke("publish", new Object[] { str, width, height, fps, quality });
+				// messageGrabber("stream "+str);
+			}
+		} catch (NumberFormatException e) {
+			System.out.println("publish() " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -842,17 +841,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (admin) {
 			String comps[] = str.split(" ");
 			comport.camservohoriz = Integer.parseInt(comps[0]);
-			settings.writeSettings("camservohoriz",
-					Integer.toString(comport.camservohoriz));
+			settings.writeSettings("camservohoriz", Integer.toString(comport.camservohoriz));
 			comport.camposmax = Integer.parseInt(comps[1]);
-			settings.writeSettings("camposmax",
-					Integer.toString(comport.camposmax));
+			settings.writeSettings("camposmax", Integer.toString(comport.camposmax));
 			comport.camposmin = Integer.parseInt(comps[2]);
-			settings.writeSettings("camposmin",
-					Integer.toString(comport.camposmin));
+			settings.writeSettings("camposmin", Integer.toString(comport.camposmin));
 			comport.maxclickcam = Integer.parseInt(comps[3]);
-			settings.writeSettings("maxclickcam",
-					Integer.toString(comport.maxclickcam));
+			settings.writeSettings("maxclickcam", Integer.toString(comport.maxclickcam));
 			String s = comport.camservohoriz + " " + comport.camposmax + " "
 					+ comport.camposmin + " " + comport.maxclickcam;
 			messageplayer("cam tilt set to: " + s, null, null);
@@ -876,7 +871,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		if (comport.sliding == true) 
 			comport.slidecancel();
-		
 	}
 
 	private void cameraCommand(String str) {
@@ -931,6 +925,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (admin) str += " admin true";
 			if(state.get(State.dockstatus) != null)
 				str += " dock " + state.get(State.dockstatus); 
+			
+			
 			if (light.isConnected()) { str += " light "+light.lightLevel; }
 			
 			messageplayer("status check received", "multiple", str.trim());
@@ -1018,18 +1014,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		if(str==null) return;
 	
-		// TODO: Issue#4 - use autodock cancel if needed 
-		if(state.getBoolean(State.autodocking)){
-			messageplayer("autodock in progress", null, null);
-			return;
-		}
-		
 		// TODO: if want to block motion, stops are sent after 'move' commands
 		if (str.equals("stop")) {
 			docker.autoDock("cancel");
 			comport.stopGoing();
 			message("command received: " + str, "motion", "STOPPED");
 			return; 
+		}
+		
+		// TODO: Issue#4 - use autodock cancel if needed 
+		if(state.getBoolean(State.autodocking)){
+			messageplayer("autodock in progress", null, null);
+			return;
 		}
 		
 		if (!state.getBoolean(State.motionenabled)) {
@@ -1047,7 +1043,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if(moves!=null) moves.append("move " + str);
 	}
 
-	/** @param str is the direction to move. Valid choices are: "right", "left", "backward", "forward" */
+	/** 
+	 * 
+	 * @param str is the direction to move. 
+	 * 
+	 * Valid choices are: "right", "left", "backward", "forward" 
+	 * 
+	 */
 	private void nudge(String str) {
 		if (str == null) return;
 		if ( ! state.getBoolean(State.motionenabled)) {

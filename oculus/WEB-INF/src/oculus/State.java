@@ -309,7 +309,7 @@ public class State {
 
 	/** */ 
 	public synchronized void delete(String key) {
-		System.out.println("removed: " + key);
+		System.out.println("__+__state.delete(): " + key);
 		for(int i = 0 ; i < observers.size() ; i++)
 			observers.get(i).updated(key.trim());	
 		

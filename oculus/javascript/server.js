@@ -187,13 +187,13 @@ function populatevalues(values) {
 		if (splitstr[n]=="comport") {
 			a = document.getElementById("comport");
 			var str = splitstr[n+1];
-			if (str == "nil") { a.innerHTML="not found"; }
+			if (str == "nil") { a.innerHTML="<a href=\"http://www.xaxxon.com/xaxxon/shop\" target=\"_blank\">buy now</a>"; }
 			else { a.innerHTML = "found on "+str; }
 		}
 		if (splitstr[n]=="lightport") {
 			a = document.getElementById("lightport");
 			var str = splitstr[n+1];
-			if (str == "nil") { a.innerHTML="not found"; }
+			if (str == "nil") { a.innerHTML="<a href=\"http://www.xaxxon.com/xaxxon/shop\" target=\"_blank\">buy now</a>"; }
 			else { a.innerHTML = "found on "+str; }
 		}
 		if (splitstr[n]=="lanaddress") {

@@ -9,33 +9,28 @@ public class DockingObserver implements Observer {
 	private State state = State.getReference();
 	private Application app = null;
 	
-	/** try to configure FTP parameters */
+	/** register for state changes */
 	public DockingObserver(Application a){
-		app = a;
-		
+		app = a;	
 		System.out.println("docking observer started");
-
-		// register for state changes
 		state.addObserver(this);
 	}
 
 	@Override
 	public void updated(final String key) {
 		
-		if (key.equals(State.dockstatus) || 
-		    key.equals(State.timeout) || 
-		    key.equals(State.autodocktimeout) ||
-		    key.equals(State.losttarget)){
+		if (key.equals(State.dockstatus) || key.equals(State.timeout) || 
+		    key.equals(State.autodocktimeout) || key.equals(State.losttarget)){
 				
 			final String status = state.get(key);
 			System.out.println("..dock observer: " + key + " " + status);
 	
-			if (key.equals(State.autodocktimeout)){
-				app.message("_timeout has been managed?", null, null);
-				state.delete(State.autodocktimeout);
+			if (key.equals(State.losttarget)){
+				app.message("__losttarget has been managed?", null, null);
+				state.delete(State.losttarget);
 				state.dump();
 			}
-			
+	
 		}
 	}
 

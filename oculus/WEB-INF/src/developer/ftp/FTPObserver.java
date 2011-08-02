@@ -66,19 +66,19 @@ public class FTPObserver implements Observer {
 		final String value = state.get(key);
 		if(value == null) return;
 
-		System.out.println("..ftp observer: " + key + " = " + value);
+		System.out.println("_ ftp, updated in state: " + key + " = " + value);
 
+		
 		//app.message("ftp update to: " + ftpURL, null, null);
 
 		//ftpFile("dockstatus.php", state.get(State.dockstatus));
 		//ftpFile("currentuser.php", state.get(State.user));
 		
-		
-			//if(value.equalsIgnoreCase(State.user))
-				//ftpFile("currentuser.php", state.get(State.user).toUpperCase());
+		//if(value.equalsIgnoreCase(State.user))
+		//ftpFile("currentuser.php", state.get(State.user).toUpperCase());
 			
-			//if(value.equalsIgnoreCase(State.status))
-				//ftpFile("status.php", state.get(State.status).toUpperCase());
+		//if(value.equalsIgnoreCase(State.status))
+		//ftpFile("status.php", state.get(State.status).toUpperCase());
 		
 	}
 	

@@ -48,18 +48,18 @@ public class AutoDock implements Docker {
 	private IConnection grabber = null;
 	private String docktarget = null;
 	private ArduinoCommDC comport = null;
-	private LightsComm lights = null;
+	private LightsComm light = null;
 	private Application app = null;
 	
 	private boolean autodockingcamctr = false;
-	private int autodockgrabattempts;
+	//private int autodockgrabattempts;
 	private int autodockctrattempts;
 	
-	public AutoDock(Application theapp, IConnection thegrab, ArduinoCommDC com, LightsComm lights){
+	public AutoDock(Application theapp, IConnection thegrab, ArduinoCommDC com, LightsComm light){
 		this.app = theapp;
 		this.grabber = thegrab;
 		this.comport = com;
-		this.lights = lights;
+		this.light = light;
 		if(settings.getBoolean(Settings.developer)){
 			moves = new LogManager();
 			moves.open(System.getenv("RED5_HOME")+"\\log\\moves.log");
@@ -87,15 +87,16 @@ public class AutoDock implements Docker {
 					return;
 				}
 				
-				// TODO: COLIN, take level from settings?
-				lights.setLevel(3);
-				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				app.monitor("on");
+				if (light.isConnected()) {
+					light.setLevel(0);
+					light.dockLight("on");
+				}
+				else { app.monitor("on"); }
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
 				state.set(State.autodocking, true);
 				autodockingcamctr = false;
-				autodockgrabattempts = 0;
+				//autodockgrabattempts = 0;
 				autodockctrattempts = 0;
 				app.message("auto-dock in progress", "motion", "moving");
 				log.info("autodock started");
@@ -108,6 +109,8 @@ public class AutoDock implements Docker {
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 			
 				if (cmd[4].equals("0")) { // width==0, failed to find target
+					
+				/*
 					if (autodockgrabattempts < 0) { 
 						
 						// TODO: remove this condition if unused
@@ -119,17 +122,17 @@ public class AutoDock implements Docker {
 						// app.playerCallServer(Application.playerCommands.dockgrab, null);
 
 					} else { 
-						
+					*/	
 						state.set(State.autodocking, false);	
 						state.set(State.docking, false);	
 						state.set(State.losttarget, true);	
 						app.message("auto-dock target not found, try again","multiple", 
 								/*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 						log.info("target lost");
-					}
+//					}
 				}
 				else {
-					autodockgrabattempts++;
+					//autodockgrabattempts++;
 					app.message(null,"autodocklock",s);
 					autoDockNav(Integer.parseInt(cmd[2]),Integer.parseInt(cmd[3]),Integer.parseInt(cmd[4]),
 						Integer.parseInt(cmd[5]),new Float(cmd[6]));
@@ -203,7 +206,10 @@ public class AutoDock implements Docker {
 									// needs to be before battStats()
 									moves.append("docked successfully");
 									life.battStats(); 
-									app.monitor("off");
+									if (light.isConnected()) {
+										light.dockLight("off");
+									}
+									else { app.monitor("off"); }
 									break;
 								}
 								counter += 1;

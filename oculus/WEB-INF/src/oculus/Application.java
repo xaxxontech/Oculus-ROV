@@ -131,7 +131,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (comport.moving) { comport.stopGoing(); }
 			}
 			
-			if (light.isConnected() && light.lightLevel != 0) { light.setLevel(0); }
+			if (light.isConnected()) { // && light.lightLevel != 0) { 
+				 light.setLevel(0);
+				 light.dockLight("off");
+			 }
 			
 		}
 		if (connection.equals(grabber)) {
@@ -1603,16 +1606,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (state.get(State.lightport) == null) result += "lightport nil ";
 		else result += "lightport " + state.get(State.lightport) + " ";
 
-		// TODO: COLIN... was this commented out on purpose? or me?
-		// battery
-		// result += "battery " + settings.readSetting("batterypresent") + " ";
-		// result += "battery"
-
-		// if (battery != null) {
-		// if (battery.batteryPresent()) result += "battery yes ";
-		// else result += "battery nil ";
-		// }
-		
 		// law and wan 
 		String lan = state.get(State.localaddress);;
 		if(lan==null) result += "lanaddress error ";

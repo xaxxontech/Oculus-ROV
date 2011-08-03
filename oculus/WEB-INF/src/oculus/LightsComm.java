@@ -295,7 +295,7 @@ public class LightsComm implements SerialPortEventListener {
 		
 		int n = target*255/100;
 		new Sender(new byte[]{SET_PWM, (byte) n});
-		application.message("light level set to "+target+"%", null, null);
+		application.message("spotlight level set to "+target+"%", null, null);
 		lightLevel = target;
 	}
 	
@@ -308,6 +308,6 @@ public class LightsComm implements SerialPortEventListener {
 		byte n = 0;
 		if (str.equals("on")) { n = 1; }
 		new Sender(new byte[]{DOCKLIGHT, n});
-		application.message("docklight "+str, null, null);
+		application.message("floodlight "+str, null, null);
 	}
 }

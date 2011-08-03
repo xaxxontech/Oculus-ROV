@@ -249,6 +249,11 @@ public class AutoDock implements Docker {
 			else { app.message("motion disabled", null, null); }
 		}
 		if (str.equals(State.undock)) {
+			if(state.getBoolean(State.autodocking)){
+				app.message("command dropped, autodocking", null, null);
+				return;
+			}
+			
 			comport.speedset("fast");
 			comport.goBackward();
 			state.set(State.motionenabled, true);

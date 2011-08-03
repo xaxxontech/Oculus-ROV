@@ -632,7 +632,7 @@ function rovvolumeclick(vol) {
 function lightpopulate() {
 	var a = document.getElementById("lightcontrol");
 	if (lightlevel != -1) {
-		var str = "<table><tr><td>headlight level: &nbsp;</td>";
+		var str = "<table><tr><td>spotlight brightness: &nbsp;</td>";
 		for (var i=0; i<=10; i++) {
 			str+="<td  id='lighttd"+i+"' style='height: 26px; width: 8px; text-align: center;" +
 			" border: 1px solid transparent; cursor: pointer;' onmouseover='lightover(&quot;"+i+"&quot;)'" +
@@ -641,7 +641,7 @@ function lightpopulate() {
 					" onclick='lightclick(&quot;"+i+"&quot;)'>|</span></td>";
 		}
 		str += "</tr></table>";
-		str += "dock light <a class='blackbg' href ='javascript: docklight(&quot;on&quot;)'";
+		str += "floodlight <a class='blackbg' href ='javascript: docklight(&quot;on&quot;)'";
 		str += ">on</a> / <a class='blackbg' href ='javascript: javascript: docklight(&quot;off&quot;)'>off</a>";
 		a.style.display = "";
 		a.innerHTML = str;
@@ -1543,8 +1543,10 @@ function steeringmouseout(id) {
 			(id == "bear right backward" && steeringmode == "bear right backward") ||
 			(id == "bear left backward" && steeringmode == "bear leftbackward") 
 			) {
-			move("stop");
-			steeringmode="stop";
+			if (!autodocking) {
+				move("stop");
+				steeringmode="stop";
+			}
 		}
 	}
 	if ( id == "camera up" || id=="camera down") { camera('stop'); }
@@ -1611,8 +1613,10 @@ function steeringmouseup(id) {
 			(id == "bear right backward" && steeringmode == "bear right backward") ||
 			(id == "bear left backward" && steeringmode == "bear left backward") 
 			) {
-			move("stop");
-			steeringmode="stop";
+			if (!autodocking) {
+				move("stop");
+				steeringmode="stop";
+			}
 		}
 		if ( id == "camera up" || id=="camera down") { camera('stop'); }
 	}

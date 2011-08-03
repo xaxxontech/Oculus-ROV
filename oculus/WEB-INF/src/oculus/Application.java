@@ -129,12 +129,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 					}
 				}
 				if (comport.moving) { comport.stopGoing(); }
+				if (light.isConnected()) { // && light.lightLevel != 0) { 
+					 light.setLevel(0);
+					 light.dockLight("off");
+				}
 			}
-			
-			if (light.isConnected()) { // && light.lightLevel != 0) { 
-				 light.setLevel(0);
-				 light.dockLight("off");
-			 }
 			
 		}
 		if (connection.equals(grabber)) {
@@ -427,8 +426,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (grabber instanceof IServiceCapableConnection) {
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
-				if(settings.getBoolean(State.developer)) 
-					messageplayer("dockgrab command received", null, null);
+//				if(settings.getBoolean(State.developer)) 
+//					messageplayer("dockgrab command received", null, null);
 			}
 			return;
 		}
@@ -460,7 +459,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			
 			if(state.getBoolean(State.autodocking)){
-				messageplayer("autodock in progress", null, null);
+				messageplayer("command dropped, autodocking", null, null);
 				return;
 			}
 			moveMacroCancel();
@@ -665,6 +664,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void publish(String str) {
+		if(state.getBoolean(State.autodocking)){
+			messageplayer("command dropped, autodocking", null, null);
+			return;
+		}
+
 		try {
 			// commands: camandmic camera mic stop
 			if (grabber instanceof IServiceCapableConnection) {
@@ -871,7 +875,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str += "dock un-docked";
 			}
 			messageplayer("docking cancelled by movement", "multiple", str);
-			docker.autoDock("cancel");
+			//docker.autoDock("cancel");
+			state.set(State.docking, false);
 		}
 		if (comport.sliding == true) 
 			comport.slidecancel();
@@ -881,7 +886,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// TODO: Issue#4 
 		if(state.getBoolean(State.autodocking)){
-			messageplayer("autodock in progress", null, null);
+			messageplayer("command dropped, autodocking", null, null);
 			return;
 		}
 		
@@ -946,7 +951,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		settings.writeSettings("vset", "vcustom");
 		settings.writeSettings("vcustom", str);
 		String s = "custom stream set to: " + str;
-		if (!stream.equals("stop")) {
+		if (!stream.equals("stop") && !state.getBoolean(State.autodocking)) {
 			publish(stream);
 			s += "<br>restarting stream";
 		}
@@ -957,7 +962,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void streamSettingsSet(String str) {
 		settings.writeSettings("vset", "v" + str);
 		String s = "stream set to: " + str;
-		if (!stream.equals("stop")) {
+		if (!stream.equals("stop") && !state.getBoolean(State.autodocking)) {
 			publish(stream);
 			s += "<br>restarting stream";
 		}
@@ -1020,15 +1025,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		// TODO: if want to block motion, stops are sent after 'move' commands
 		if (str.equals("stop")) {
-			// docker.autoDock("cancel");
+			if(state.getBoolean(State.autodocking)){ docker.autoDock("cancel"); }
 			comport.stopGoing();
+			moveMacroCancel();
 			message("command received: " + str, "motion", "STOPPED");
+			if(moves!=null) moves.append("move " + str);
 			return; 
 		}
+		moveMacroCancel();
 		
 		// TODO: Issue#4 - use autodock cancel if needed 
 		if(state.getBoolean(State.autodocking)){
-			messageplayer("autodock in progress", null, null);
+			messageplayer("command dropped, autodocking", null, null);
 			return;
 		}
 		
@@ -1042,9 +1050,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		else if (str.equals("right")) comport.turnRight();
 		else if (str.equals("left")) comport.turnLeft();
 			
-		moveMacroCancel();
 		messageplayer("command received: " + str, "motion", "MOVING");
 		if(moves!=null) moves.append("move " + str);
+
 	}
 
 	/** 
@@ -1064,7 +1072,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		// TODO: issue#4 
 		if(state.getBoolean(State.autodocking)){
-			messageplayer("autodock in progress", null, null);
+			messageplayer("command dropped, autodocking", null, null);
 			return;
 		}
 		
@@ -1098,7 +1106,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		if(state.getBoolean(State.autodocking)){
-			messageplayer("autodock in progress", null, null);
+			messageplayer("command dropped, autodocking", null, null);
 			return;
 		}
 		

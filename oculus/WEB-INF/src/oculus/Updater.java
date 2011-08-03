@@ -82,7 +82,7 @@ public class Updater {
 				while ((str = reader.readLine()) != null) {
 					mat = pat.matcher(str);
 					while (mat.find()) {
-						filename = mat.group();
+						filename = "http:"+mat.group();
 						break;
 					}
 				}

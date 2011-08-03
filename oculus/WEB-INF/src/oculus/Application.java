@@ -370,7 +370,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		tilttest, speedset, slide, nudge, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, 
 		streamsettingsset, streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update,
 		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
-		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, /*facegrab,*/ assumecontrol, 
+		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
 		lightsetlevel, docklight, dockgrab;
 	
@@ -554,7 +554,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case disconnectotherconnections: disconnectOtherConnections(); break;
 		case monitor: monitor(str); break;
 		case showlog: showlog(); break;
-		//case facegrab: faceGrab(str); break;
 		case autodock: docker.autoDock(str); break;
 		case autodockcalibrate: docker.autoDock("calibrate " + str); break;
 		case restart: restart(); break;

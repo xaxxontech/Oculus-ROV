@@ -73,7 +73,7 @@ public class Updater {
 		if (!downloadListPage.equals(null)) {
 			BufferedReader reader = new BufferedReader(new StringReader(downloadListPage));
 		    String str;
-		    Pattern pat = Pattern.compile("//oculus\\.googlecode\\.com/files/update\\w*\\.zip");
+		    Pattern pat = Pattern.compile("oculus\\.googlecode\\.com/files/update\\w*\\.zip");
 		    //Pattern pat = Pattern.compile("http://oculus\\.googlecode\\.com/files/update\\w*\\.zip");
 		    // http://oculus.googlecode.com/files/
 		    //Pattern pat = Pattern.compile("update\\w*\\.zip");
@@ -82,7 +82,7 @@ public class Updater {
 				while ((str = reader.readLine()) != null) {
 					mat = pat.matcher(str);
 					while (mat.find()) {
-						filename = "http:"+mat.group();
+						filename = "http://"+mat.group();
 						break;
 					}
 				}

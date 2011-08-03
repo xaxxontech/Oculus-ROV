@@ -40,7 +40,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     private String httpPort;
     private Docker docker = null;
     private State state = State.getReference();
-//    private Speech speech = new Speech();
+    private Speech speech = new Speech();
     private boolean initialstatuscalled = false;
     private boolean pendingplayerisnull = true;
     private boolean emailgrab = false;
@@ -780,8 +780,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void saySpeech(String str) {
 		messageplayer("synth voice: " + str, null, null);
 		messageGrabber("synth voice: " + str, null);
-		//speech.mluv(str);
-		Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
+		speech.mluv(str);
+//		Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
 		log.info("voice synth: '" + str + "'");
 	}
 

@@ -67,12 +67,14 @@ public class Updater {
 			e.printStackTrace();
 		}
 		
+		
 		// scrape html, check for matching update files
 		// format =>  http://.../update*###.zip  where ### = version num (any number of digits)
 		if (!downloadListPage.equals(null)) {
 			BufferedReader reader = new BufferedReader(new StringReader(downloadListPage));
 		    String str;
-		    Pattern pat = Pattern.compile("http://oculus\\.googlecode\\.com/files/update\\w*\\.zip");
+		    Pattern pat = Pattern.compile("//oculus\\.googlecode\\.com/files/update\\w*\\.zip");
+		    //Pattern pat = Pattern.compile("http://oculus\\.googlecode\\.com/files/update\\w*\\.zip");
 		    // http://oculus.googlecode.com/files/
 		    //Pattern pat = Pattern.compile("update\\w*\\.zip");
 		    Matcher mat = null;
@@ -89,6 +91,7 @@ public class Updater {
 			}
 		}
 		//if (!filename.equals("")) { filename = "http://dev.xaxxon.com/files/" + filename; }
+		//System.out.println("filename="+filename);
 		return filename; 
 	}
 	

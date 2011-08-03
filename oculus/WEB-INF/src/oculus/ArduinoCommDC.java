@@ -210,7 +210,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			if (version == null) {
 				// get just the number
 				version = response.substring(response.indexOf("version:") + 8, response.length());
-				application.message("firmware version: " + version, null, null);
+				application.message("arduinoculus version: " + version, null, null);
 			} else return;
 
 			// don't bother showing watch dog pings to user screen
@@ -227,7 +227,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				}
 				
 				// must be an echo 
-			} else application.message("arduino: " + response, null, null);
+			} else application.message("arduinoculus: " + response, getReadDelta()+"ms", getWriteDelta()+"ms");
 		}
 	}
 

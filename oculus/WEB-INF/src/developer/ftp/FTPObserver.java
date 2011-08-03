@@ -59,9 +59,7 @@ public class FTPObserver implements Observer {
 	@Override
 	public void updated(final String key) {
 		
-		//if( ! (key.equals(State.sonardistance) || key.equals(State.user) 
-			//	|| key.equals(State.userisconnected))) return;
-
+		if( ! (key.equals(State.user) || key.equals(State.userisconnected))) return;
 		
 		final String value = state.get(key);
 		if(value == null) return;

@@ -14,7 +14,7 @@ import oculus.State;
 public class SonarSteeringObserver implements Observer {
 
 	// private static Logger log = Red5LoggerFactory.getLogger(SonarObserver.class, "oculus");
-	private static final int TOO_CLOSE = 100; // cm 
+	private static final int TOO_CLOSE = 80; // cm 
 	private State state = State.getReference();
 	private java.util.Timer timer = new Timer();
 	
@@ -36,16 +36,17 @@ public class SonarSteeringObserver implements Observer {
 	public void updated(final String key) {
 
 		if (!key.equals(State.sonardistance)) return;
-		if (state.getBoolean(State.autodocking)) return;
-		if (!comm.movingforward) return;
 
 		final int value = state.getInteger(key);
-		System.out.println("_sonar: " + key + " = " + value);			
+		System.out.println("_sonar: " + key + " = " + value);	
+		
+		if (state.getBoolean(State.autodocking)) return;
+		if (!comm.movingforward) return;		
 		if (value < TOO_CLOSE) { 
 			comm.stopGoing();
-			app.playerCallServer(Application.playerCommands.chat, "carefull, sonar is: " + value);
-
-			//app.playerCallServer(Application.playerCommands.move, "stop");
+			app.message("carefull, sonar is: " + value, null, null);
+			// app.playerCallServer(Application.playerCommands.chat, "carefull, sonar is: " + value);
+			app.playerCallServer(Application.playerCommands.move, "stop");
 		}
 			
 	}

@@ -175,18 +175,25 @@ public class BatteryLife {
 	
 		int result = 999;
 		
-		//Execute the query
-		Variant vCollection = axWMI.invoke("ExecQuery", new Variant(query));
-		
-		//Our result is a collection, so we need to work though the collection.
-		// (it is odd, but there may be more than one battery... think about multiple
-		//   UPS on the system).
-		EnumVariant enumVariant = new EnumVariant(vCollection.toDispatch());
-		Dispatch item = null;
-		while (enumVariant.hasMoreElements()) { 
-			item = enumVariant.nextElement().toDispatch();
-			int percentLife = Dispatch.call(item,"BatteryStatus").getInt();
-			result = percentLife;
+		try {
+			
+			//Execute the query
+			Variant vCollection = axWMI.invoke("ExecQuery", new Variant(query));
+			
+			//Our result is a collection, so we need to work though the collection.
+			// (it is odd, but there may be more than one battery... think about multiple
+			//   UPS on the system).
+			EnumVariant enumVariant = new EnumVariant(vCollection.toDispatch());
+			Dispatch item = null;
+			while (enumVariant.hasMoreElements()) { 
+				item = enumVariant.nextElement().toDispatch(); // throws errors sometimes
+				int percentLife = Dispatch.call(item,"BatteryStatus").getInt();
+				result = percentLife;
+			}
+			
+		} catch (Exception e) {
+			log.error(e.getMessage()); 
+			// e.printStackTrace();
 		}
 	
 		return result;

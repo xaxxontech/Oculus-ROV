@@ -289,7 +289,7 @@ public class LightsComm implements SerialPortEventListener {
 		
 		if( !isConnected()){
 			System.out.println("lights not found");
-			application.message("lights not found", null, null);
+			// application.message("lights not found", null, null);
 			return;
 		}
 		

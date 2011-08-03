@@ -10,6 +10,9 @@ public class DockingObserver implements Observer {
 	private State state = State.getReference();
 	private Application app = null;
 	
+	private long start = 0;
+	private long end = 0;
+	
 	/** register for state changes */
 	public DockingObserver(Application a){
 		app = a;	
@@ -20,19 +23,27 @@ public class DockingObserver implements Observer {
 	@Override
 	public void updated(final String key) {
 		
-	//	if (key.equals(State.dockstatus) || key.equals(State.timeout) || 
-		//    key.equals(State.autodocktimeout) || key.equals(State.losttarget)){
+	if (key.equals(State.dockstatus) || key.equals(State.timeout) || 
+	    key.equals(State.autodocktimeout) || key.equals(State.losttarget)
+	    ||  key.equals(State.autodocking) ){
 				
 			final String status = state.get(key);
-			System.out.println("..dock observer: " + key + " " + status);
+			System.out.println("_.__dock observer: " + key + " " + status);
 	
-			if (key.equals(State.losttarget)){
-				app.message("__losttarget has been managed?", null, null);
+			if(state.getBoolean(State.autodocking)){
+				
+				System.out.println("_.__started autodock");
+				start = System.currentTimeMillis();
+				
+			}
+			
+			if (state.getBoolean(State.losttarget)){
+				app.message("_.__losttarget has been managed?", null, null);
 				state.delete(State.losttarget);
 				state.dump();
 			}
 	
-		//}
+		}
 	}
 
 	@Override

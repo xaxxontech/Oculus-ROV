@@ -214,7 +214,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new developer.ftp.FTPObserver(this);
 		new EmailAlerts(this);
 		new SystemWatchdog();
-		new ExternalAddressObserver(this);
 		new DockingObserver(this);
 		
 		grabberInitialize();
@@ -428,7 +427,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (grabber instanceof IServiceCapableConnection) {
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
-				// messageplayer("dockgrab command received", null, null);
+				if(settings.getBoolean(State.developer)) 
+					messageplayer("dockgrab command received", null, null);
 			}
 			return;
 		}
@@ -438,7 +438,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//--------------------------------------------------------//
 		if (Red5.getConnectionLocal() != player) {
 			System.out.println("error... security issue: " + fn.toString());
-			return;
+			//return;
 		}
 		
 		// X-rated.. must be logged in  
@@ -1010,7 +1010,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	/**
-	 * Move the bot in given direction if available
+	 * Move the bot in given direction if not busy docking 
 	 * 
 	 * @param str parameter is the direction 
 	 */
@@ -1020,7 +1020,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		// TODO: if want to block motion, stops are sent after 'move' commands
 		if (str.equals("stop")) {
-			docker.autoDock("cancel");
+			// docker.autoDock("cancel");
 			comport.stopGoing();
 			message("command received: " + str, "motion", "STOPPED");
 			return; 
@@ -1055,6 +1055,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * 
 	 */
 	private void nudge(String str) {
+		
 		if (str == null) return;
 		if ( ! state.getBoolean(State.motionenabled)) {
 			messageplayer("motion disabled", "motion", "disabled");
@@ -1457,8 +1458,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (con instanceof IServiceCapableConnection && con != grabber
 						&& !(con == pendingplayer && !pendingplayerisnull)) {
 					IServiceCapableConnection n = (IServiceCapableConnection) con;
-					n.invoke("message", new Object[] { str, "yellow", null,
-							null });
+					n.invoke("message", new Object[] { str, "yellow", null, null });
 				}
 			}
 		}
@@ -1589,8 +1589,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	/** */ 
-	
-	public void populateSettings() {
+	private void populateSettings() {
 		settings.writeSettings("skipsetup", "no");
 		String result = "populatevalues ";
 

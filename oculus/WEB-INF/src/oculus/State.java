@@ -84,14 +84,21 @@ public class State {
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
 		props.put(userisconnected, false);
 		props.put(localaddress, Util.getLocalAddress());
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+			String ip = Util.getExternalIPAddress();
+			if(ip!=null) State.getReference().set(State.externaladdress, ip);
+			}
+		}).start();
 	}
 
 	/** */
 	public void addObserver(Observer obs){
 		observers.add(obs);
 		
-		for(int i = 0 ; i < observers.size() ; i++)
-			System.out.println("_+__[" + i + "] " + observers.get(i).getClass().getName());
+		// for(int i = 0 ; i < observers.size() ; i++)
+			// System.out.println("_+__[" + i + "] " + observers.get(i).getClass().getName());
 	}
 	
 	/** test for string equality. any nulls will return false */ 

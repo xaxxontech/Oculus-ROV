@@ -1024,13 +1024,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		// TODO: if want to block motion, stops are sent after 'move' commands
 		if (str.equals("stop")) {
+			if(state.getBoolean(State.autodocking)) docker.autoDock("cancel");
 			if(state.getBoolean(State.autodocking)){ docker.autoDock("cancel"); }
+
 			comport.stopGoing();
 			moveMacroCancel();
 			message("command received: " + str, "motion", "STOPPED");
 			if(moves!=null) moves.append("move " + str);
 			return; 
 		}
+		
 		moveMacroCancel();
 		
 		// TODO: Issue#4 - use autodock cancel if needed 

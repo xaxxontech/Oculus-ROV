@@ -61,7 +61,7 @@ var popupmenu_yoffset = null;
 var bworig;
 var rovvolume = 0;
 var xmlhttp=null;
-var lightlevel = -1;
+var spotlightlevel = -1;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -374,7 +374,7 @@ function setstatus(status, value) {
 	}
 	if (status == "framegrabbed") { framegrabbed(); }
 	if (status == "rovvolume") { rovvolume = parseInt(value); }
-	if (status == "light") { lightlevel = parseInt(value); }
+	if (status == "light") { spotlightlevel = parseInt(value); }
 
 }
 
@@ -631,7 +631,7 @@ function rovvolumeclick(vol) {
 
 function lightpopulate() {
 	var a = document.getElementById("lightcontrol");
-	if (lightlevel != -1) {
+	if (spotlightlevel != -1) {
 		var str = "<table><tr><td>spotlight brightness: &nbsp;</td>";
 		for (var i=0; i<=10; i++) {
 			str+="<td  id='lighttd"+i+"' style='height: 26px; width: 8px; text-align: center;" +
@@ -641,15 +641,15 @@ function lightpopulate() {
 					" onclick='lightclick(&quot;"+i+"&quot;)'>|</span></td>";
 		}
 		str += "</tr></table>";
-		str += "floodlight <a class='blackbg' href ='javascript: docklight(&quot;on&quot;)'";
-		str += ">on</a> / <a class='blackbg' href ='javascript: javascript: docklight(&quot;off&quot;)'>off</a>";
+		str += "floodlight <a class='blackbg' href ='javascript: floodlight(&quot;on&quot;)'";
+		str += ">on</a> / <a class='blackbg' href ='javascript: javascript: floodlight(&quot;off&quot;)'>off</a>";
 		a.style.display = "";
 		a.innerHTML = str;
-		var b=document.getElementById("lighttd"+parseInt(lightlevel/10));
+		var b=document.getElementById("lighttd"+parseInt(spotlightlevel/10));
 		b.style.borderColor = "#4c56fe";
 		b.style.backgroundColor = "#222222";
-		if (lightlevel > 0) { 
-			document.getElementById("lighttd"+parseInt((lightlevel/10)-1)).style.borderRightColor = "#4c56fe";
+		if (spotlightlevel > 0) { 
+			document.getElementById("lighttd"+parseInt((spotlightlevel/10)-1)).style.borderRightColor = "#4c56fe";
 		}
 	}
 	else { a.style.display = "none"; }
@@ -666,18 +666,18 @@ function lightout(i) {
 	var a = document.getElementById("lightspan"+i);
 	a.style.color = "#4c56fe";
 	var b = document.getElementById("lighttd"+i);
-	if (i*10 != lightlevel) {
+	if (i*10 != spotlightlevel) {
 		b.style.backgroundColor = "transparent";
 	}
 	else { 	b.style.backgroundColor = "#222222"; }
 }
 
 function lightclick(level) {
-	var b = document.getElementById("lighttd"+parseInt(lightlevel/10));
+	var b = document.getElementById("lighttd"+parseInt(spotlightlevel/10));
 	b.style.borderColor = "transparent";
 	b.style.backgroundColor = "transparent";
-	if (lightlevel > 0) { 
-		document.getElementById("lighttd"+parseInt((lightlevel/10)-1)).style.borderRightColor = "transparent";
+	if (spotlightlevel > 0) { 
+		document.getElementById("lighttd"+parseInt((spotlightlevel/10)-1)).style.borderRightColor = "transparent";
 	}
 	
 	var a = document.getElementById("lighttd"+level);
@@ -686,15 +686,15 @@ function lightclick(level) {
 	if (level > 0) { 
 		document.getElementById("lighttd"+parseInt(level-1)).style.borderRightColor = "#4c56fe";
 	}
-	message("sending light level: "+ parseInt(level*10)+"%", sentcmdcolor);
-	callServer("lightsetlevel", parseInt(level*10)); // parseInt(level*255/10));
+	message("sending spotlight brightness: "+ parseInt(level*10)+"%", sentcmdcolor);
+	callServer("spotlightsetbrightness", parseInt(level*10)); // parseInt(level*255/10));
 	lagtimer = new Date().getTime();
-	lightlevel = level*10;
+	//spotlightlevel = level*10; // allow to be set by server message instead
 }
 
-function docklight(str) {
-	message("sending docklight: "+ str, sentcmdcolor);
-	callServer("docklight", str);
+function floodlight(str) {
+	message("sending floodlight: "+ str, sentcmdcolor);
+	callServer("floodlight", str);
 	lagtimer = new Date().getTime();
 
 }

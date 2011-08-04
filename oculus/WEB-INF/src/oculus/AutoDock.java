@@ -88,10 +88,14 @@ public class AutoDock implements Docker {
 				}
 				
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+				
 				if (light.isConnected()) {
-					light.setLevel(0);
-					light.dockLight("on");
+					if (light.spotLightBrightness() > 0) {
+						light.setSpotLightBrightness(0);
+						light.floodLight("on");
+					}
 				}
+				
 				else { app.monitor("on"); }
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
 				state.set(State.autodocking, true);
@@ -206,9 +210,13 @@ public class AutoDock implements Docker {
 									// needs to be before battStats()
 									moves.append("docked successfully");
 									life.battStats(); 
+									
 									if (light.isConnected()) {
-										light.dockLight("off");
+										if (light.floodLightOn()) {
+											light.floodLight("off");
+										}
 									}
+									
 									else { app.monitor("off"); }
 									break;
 								}

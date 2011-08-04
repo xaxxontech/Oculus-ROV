@@ -130,8 +130,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 				if (comport.moving) { comport.stopGoing(); }
 				if (light.isConnected()) { // && light.lightLevel != 0) { 
-					 light.setLevel(0);
-					 light.dockLight("off");
+					 if (light.spotLightBrightness() > 0) light.setSpotLightBrightness(0);
+					 if (light.floodLightOn()) light.floodLight("off");
 				}
 			}
 			
@@ -372,7 +372,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
 		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-		lightsetlevel, docklight, dockgrab;
+		spotlightsetbrightness, floodlight, dockgrab;
 	
 		@Override 
 		public String toString() {
@@ -560,8 +560,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case softwareupdate: softwareUpdate(str); break;
 		case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
 		case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
-		case lightsetlevel: light.setLevel(Integer.parseInt(str)); break;
-		case docklight: light.dockLight(str); return;
+		case spotlightsetbrightness: light.setSpotLightBrightness(Integer.parseInt(str)); break;
+		case floodlight: light.floodLight(str); return;
 		}
 	}
 
@@ -935,7 +935,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str += " dock " + state.get(State.dockstatus); 
 			
 			
-			if (light.isConnected()) { str += " light "+light.lightLevel; }
+			if (light.isConnected()) { str += " light "+light.spotLightBrightness(); }
 			
 			messageplayer("status check received", "multiple", str.trim());
 		
@@ -1024,7 +1024,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		// TODO: if want to block motion, stops are sent after 'move' commands
 		if (str.equals("stop")) {
-			if(state.getBoolean(State.autodocking)) docker.autoDock("cancel");
 			if(state.getBoolean(State.autodocking)){ docker.autoDock("cancel"); }
 
 			comport.stopGoing();

@@ -50,7 +50,8 @@ public class LightsComm implements SerialPortEventListener {
 	// make sure all threads know if connected 
 	private boolean isconnected = false;
 	
-	public int lightLevel = 0;
+	private int spotLightBrightness = 0;
+	private boolean floodLightOn = false;
 	
 	// call back
 	private Application application = null;
@@ -71,7 +72,7 @@ public class LightsComm implements SerialPortEventListener {
 					connect();				
 					Util.delay(SETUP);
 					// start with them off 
-					setLevel(0);	
+					// setLevel(0); 	
 				}	
 			}).start();
 		}	
@@ -103,6 +104,15 @@ public class LightsComm implements SerialPortEventListener {
 	public boolean isConnected(){
 		return isconnected;
 	}
+	
+	public int spotLightBrightness() {
+		return spotLightBrightness;
+	}
+	
+	public boolean floodLightOn() {
+		return floodLightOn;
+	}
+	
 	
 	@Override
 	/** buffer input on event and trigger parse on '>' charter  
@@ -285,7 +295,7 @@ public class LightsComm implements SerialPortEventListener {
 	}
 	*/
 	
-	public synchronized void setLevel(int target){
+	public synchronized void setSpotLightBrightness(int target){
 		
 		if( !isConnected()){
 			System.out.println("lights not found");
@@ -295,18 +305,26 @@ public class LightsComm implements SerialPortEventListener {
 		
 		int n = target*255/100;
 		new Sender(new byte[]{SET_PWM, (byte) n});
-		application.message("spotlight level set to "+target+"%", null, null);
-		lightLevel = target;
+		spotLightBrightness = target;
+		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(spotLightBrightness));
+
 	}
 	
-	public synchronized void dockLight(String str){
+	public synchronized void floodLight(String str){
 		if( !isConnected()){
 			System.out.println("lights not found");
 			application.message("lights not found", null, null);
 			return;
 		}
-		byte n = 0;
-		if (str.equals("on")) { n = 1; }
+		byte n;
+		if (str.equals("on")) { 
+			n = 1;
+			floodLightOn = true;
+		}
+		else { 
+			n=0; 
+			floodLightOn = false; 
+		}
 		new Sender(new byte[]{DOCKLIGHT, n});
 		application.message("floodlight "+str, null, null);
 	}

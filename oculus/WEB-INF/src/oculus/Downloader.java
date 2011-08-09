@@ -91,7 +91,7 @@ public class Downloader {
 		
 		// requires full path 
 		Util.systemCall("fbzip -e -p " + (System.getenv("RED5_HOME") + "\\" + zipFile).toLowerCase()
-				+ " " + (System.getenv("RED5_HOME") + "\\" + destFolder).toLowerCase(), true); 
+				+ " " + (System.getenv("RED5_HOME") + "\\carefull\\" + destFolder).toLowerCase(), true); 
 
 				
 		return false;

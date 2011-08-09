@@ -1696,7 +1696,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 								messageplayer("done.", "softwareupdate", "downloadcomplete");
 							}
 							
-							dl.deleteFile("webapps\\update.zip");
+							// need to wait better!
+							// dl.deleteFile("webapps\\update.zip");
 						} else { messageplayer("update download failed", null, null); }
 					}
 				}).start();

@@ -2,9 +2,10 @@ package oculus;
 
 import java.io.*;
 import java.net.*;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+
+//import java.util.Enumeration;
+//import java.util.zip.ZipEntry;
+//import java.util.zip.ZipFile;
 
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
@@ -79,10 +80,28 @@ public class Downloader {
 		return true;
 	}
 	
+
 	/**
 	 * @param zipFile the zip file that needs to be unzipped
 	 * @param destFolder the folder into which unzip the zip file and create the folder structure
 	 */
+	public boolean unzipFolder(final String zipFile, final String destFolder) {
+		
+		System.out.println("red: " + System.getenv("RED5_HOME") + " zip: " + zipFile + " folder: " + destFolder);
+		
+		Util.systemCall("fbzip -e -p " + (System.getenv("RED5_HOME") + zipFile).toLowerCase()
+				+ " " + (System.getenv("RED5_HOME") + "\\hhhh\\" + destFolder).toLowerCase(), true); 
+
+				
+		return false;
+	}
+	
+	
+	
+	/**
+	 * @param zipFile the zip file that needs to be unzipped
+	 * @param destFolder the folder into which unzip the zip file and create the folder structure
+	
 	public boolean unzipFolder( String zipFile, String destFolder ) {
 		boolean result = false;
 		try {
@@ -120,6 +139,7 @@ public class Downloader {
 		}
 		return result;
 	}
+	 */
 	
 	/**
 	 * @param filename

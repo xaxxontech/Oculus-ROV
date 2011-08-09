@@ -1685,28 +1685,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 				messageplayer("downloading software update...", null, null);
 				new Thread(new Runnable() {
 					public void run() {
-						String fileurl = new Updater().checkForUpdateFile();
-						System.out.println(fileurl);
+						//String fileurl = new Updater().checkForUpdateFile();
+						//System.out.println("downloading url: " + fileurl);
 						Downloader dl = new Downloader();
-						if (dl.FileDownload(fileurl, "update.zip", "webapps")) {
-							messageplayer(
-									"update download complete, unzipping...",
-									null, null);
-							if (!dl.unzipFolder("webapps\\update.zip",
-									"webapps")) {
-								dl.deleteDir(new File("webapps\\update"));
-								dl.deleteFile("webapps\\update.zip");
-								messageplayer(
-										"unable to unzip package, corrupted? Try again.",
-										null, null);
+						//if (dl.FileDownload(fileurl, "update.zip", "webapps")) {
+							messageplayer("update download complete, unzipping...", null, null);
+							if (!dl.unzipFolder("webapps\\update.zip", "webapps")) {
+								//dl.deleteDir(new File("webapps\\update"));
+								//dl.deleteFile("webapps\\update.zip");
+								messageplayer("unable to unzip package, corrupted? Try again.", null, null);
 							} else {
-								dl.deleteFile("webapps\\update.zip");
-								messageplayer("done.", "softwareupdate",
-										"downloadcomplete");
+								//dl.deleteFile("webapps\\update.zip");
+								messageplayer("done.", "softwareupdate", "downloadcomplete");
 							}
-						} else {
-							messageplayer("update download failed", null, null);
-						}
+						//} else { messageplayer("update download failed", null, null); }
 					}
 				}).start();
 			}

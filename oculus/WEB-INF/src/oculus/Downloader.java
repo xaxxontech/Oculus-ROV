@@ -93,8 +93,7 @@ public class Downloader {
 		Util.systemCall("fbzip -e -p " + (System.getenv("RED5_HOME") + "\\" + zipFile).toLowerCase()
 				+ " " + (System.getenv("RED5_HOME") + "\\carefull\\" + destFolder).toLowerCase(), true); 
 
-				
-		return false;
+		return true;
 	}
 	
 	

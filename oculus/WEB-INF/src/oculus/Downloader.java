@@ -87,10 +87,11 @@ public class Downloader {
 	 */
 	public boolean unzipFolder(final String zipFile, final String destFolder) {
 		
-		System.out.println("red: " + System.getenv("RED5_HOME") + " zip: " + zipFile + " folder: " + destFolder);
+		//System.out.println("red: " + System.getenv("RED5_HOME") + " zip: " + zipFile + " folder: " + destFolder);
 		
-		Util.systemCall("fbzip -e -p " + (System.getenv("RED5_HOME") + zipFile).toLowerCase()
-				+ " " + (System.getenv("RED5_HOME") + "\\hhhh\\" + destFolder).toLowerCase(), true); 
+		// requires full path 
+		Util.systemCall("fbzip -e -p " + (System.getenv("RED5_HOME") + "\\" + zipFile).toLowerCase()
+				+ " " + (System.getenv("RED5_HOME") + "\\" + destFolder).toLowerCase(), true); 
 
 				
 		return false;

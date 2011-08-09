@@ -1667,16 +1667,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 				String fileurl = updater.checkForUpdateFile();
 				int newver = updater.versionNum(fileurl);
 				if (newver > currver) {
-					String message = "New version available: v." + newver
-							+ "\n";
+					String message = "New version available: v." + newver + "\n";
 					if (currver == -1) {
 						message += "Current software version unknown\n";
 					} else {
 						message += "Current software is v." + currver + "\n";
 					}
 					message += "Do you want to download and install?";
-					messageplayer("new version available", "softwareupdate",
-							message);
+					messageplayer("new version available", "softwareupdate", message);
 				} else {
 					messageplayer("no new version available", null, null);
 				}
@@ -1685,20 +1683,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 				messageplayer("downloading software update...", null, null);
 				new Thread(new Runnable() {
 					public void run() {
-						//String fileurl = new Updater().checkForUpdateFile();
-						//System.out.println("downloading url: " + fileurl);
+						String fileurl = new Updater().checkForUpdateFile();
+						System.out.println("downloading url: " + fileurl);
 						Downloader dl = new Downloader();
-						//if (dl.FileDownload(fileurl, "update.zip", "webapps")) {
+						if (dl.FileDownload(fileurl, "update.zip", "webapps")) {
 							messageplayer("update download complete, unzipping...", null, null);
+							
 							if (!dl.unzipFolder("webapps\\update.zip", "webapps")) {
-								//dl.deleteDir(new File("webapps\\update"));
-								//dl.deleteFile("webapps\\update.zip");
+								dl.deleteDir(new File("webapps\\update"));
 								messageplayer("unable to unzip package, corrupted? Try again.", null, null);
 							} else {
-								//dl.deleteFile("webapps\\update.zip");
 								messageplayer("done.", "softwareupdate", "downloadcomplete");
 							}
-						//} else { messageplayer("update download failed", null, null); }
+							
+							dl.deleteFile("webapps\\update.zip");
+						} else { messageplayer("update download failed", null, null); }
 					}
 				}).start();
 			}

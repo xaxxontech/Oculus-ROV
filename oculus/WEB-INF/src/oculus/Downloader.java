@@ -16,7 +16,7 @@ public class Downloader {
 
 	/**
 	 * 
-	 * Download a given URL to the local disk. Will delete existing file first, and create directory if required. 
+	 * Down load a given URL to the local disk. Will delete existing file first, and create directory if required. 
 	 *
 	 * @param fileAddress is the full http://url of the remote file
 	 * @param localFileName the file name to use on the host
@@ -79,30 +79,73 @@ public class Downloader {
 		// all good
 		return true;
 	}
-	
+
 
 	/**
 	 * @param zipFile the zip file that needs to be unzipped
 	 * @param destFolder the folder into which unzip the zip file and create the folder structure
 	 */
-	public boolean unzipFolder(final String zipFile, final String destFolder) {
+	public boolean unzipFolder( String zipFile, String destFolder ) {
 		
-		//System.out.println("red: " + System.getenv("RED5_HOME") + " zip: " + zipFile + " folder: " + destFolder);
+		final String zip = (System.getenv("RED5_HOME") + zipFile).toLowerCase().trim();
+		final String des = (System.getenv("RED5_HOME") + destFolder).toLowerCase().trim(); 
 		
-		// requires full path 
-		Util.systemCall("fbzip -e -p " + (System.getenv("RED5_HOME") + "\\" + zipFile).toLowerCase()
-				+ " " + (System.getenv("RED5_HOME") + "\\carefull\\" + destFolder).toLowerCase(), true); 
-
-		return true;
+		// clean target 
+		if(new File(des).exists())
+			deleteDir(new File(des));
+		
+		// if zip exists, blocking extraction 
+		if(new File(zip).exists()){	
+			Util.systemCallBlocking("fbzip -e -p " + zip + " " + des);
+			
+			// test if folders 
+			if(new File(des).exists())
+				if(new File(des).isDirectory())
+					if(new File(des+"\\update").exists())
+						if(new File(des+"\\update").isDirectory()) 
+							return true;
+		}
+		
+		// error state
+		return false;
 	}
-	
 	
 	
 	/**
 	 * @param zipFile the zip file that needs to be unzipped
 	 * @param destFolder the folder into which unzip the zip file and create the folder structure
-	
+	 
 	public boolean unzipFolder( String zipFile, String destFolder ) {
+		
+		final String zip = (System.getenv("RED5_HOME") + zipFile).toLowerCase().trim();
+		final String des = (System.getenv("RED5_HOME") + destFolder).toLowerCase().trim(); 
+		
+		// clean target 
+		if(new File(des).exists())
+			deleteDir(new File(des));
+		
+		// if zip exists, blocking extraction 
+		if(new File(zip).exists()){	
+			Util.systemCallBlocking("fbzip -e -p " + zip + " " + des);
+			
+			// test if folders 
+			if(new File(des).exists())
+				if(new File(des).isDirectory())
+					if(new File(des+"\\update").exists())
+						if(new File(des+"\\update").isDirectory()) 
+							return true;
+		}
+		
+		// error state
+		return false;
+	}
+	*/
+	
+	/**
+	 * @param zipFile the zip file that needs to be unzipped
+	 * @param destFolder the folder into which unzip the zip file and create the folder structure
+	 
+	public boolean unzipFolderJava( String zipFile, String destFolder ) {
 		boolean result = false;
 		try {
 			ZipFile zf = new ZipFile(zipFile);

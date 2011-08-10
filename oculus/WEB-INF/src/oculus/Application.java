@@ -471,7 +471,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case systemcall:
 			System.out.println("received: " + str);
 			messageplayer("system command received", null, null);
-			Util.systemCall(str, admin);
+			if(admin) Util.systemCall(str);
 			break;
 
 		case relaunchgrabber:
@@ -608,7 +608,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case streammode: grabberSetStream(str); break;
 		case saveandlaunch: saveAndLaunch(str); break;
 		case populatesettings: populateSettings(); break;
-		case systemcall: Util.systemCall(str, true); break;
+		case systemcall: if(admin) Util.systemCall(str); break;
 		case chat: chat(str); break;
 		///case facerect: messageplayer(null, "facefound", str); break;
 		case dockgrabbed: {
@@ -1696,8 +1696,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 								messageplayer("done.", "softwareupdate", "downloadcomplete");
 							}
 							
-							// need to wait better!
-							// dl.deleteFile("webapps\\update.zip");
+							dl.deleteFile("webapps\\update.zip");
 						} else { messageplayer("update download failed", null, null); }
 					}
 				}).start();

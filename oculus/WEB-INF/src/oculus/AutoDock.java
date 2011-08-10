@@ -90,13 +90,15 @@ public class AutoDock implements Docker {
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				
 				if (light.isConnected()) {
+					if (light.spotLightBrightness() == 0 && !light.floodLightOn())
+						{ app.monitor("on"); }
 					if (light.spotLightBrightness() > 0) {
 						light.setSpotLightBrightness(0);
 						light.floodLight("on");
 					}
-				}
-				
+				}				
 				else { app.monitor("on"); }
+
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
 				state.set(State.autodocking, true);
 				autodockingcamctr = false;
@@ -202,6 +204,15 @@ public class AutoDock implements Docker {
 										if (!app.stream.equals("stop") && state.get(State.user)==null) { 
 											app.publish("stop"); 
 										}
+										
+										if (light.isConnected()) {
+											if (light.floodLightOn()) {
+												light.floodLight("off");
+											}
+											else { app.monitor("off"); }
+										}									
+										else { app.monitor("off"); }
+										
 									}
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
 									log.info(state.get(State.user) +" docked successfully");
@@ -211,13 +222,8 @@ public class AutoDock implements Docker {
 									moves.append("docked successfully");
 									life.battStats(); 
 									
-									if (light.isConnected()) {
-										if (light.floodLightOn()) {
-											light.floodLight("off");
-										}
-									}
+
 									
-									else { app.monitor("off"); }
 									break;
 								}
 								counter += 1;

@@ -213,7 +213,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new developer.ftp.FTPObserver(this);
 		new EmailAlerts(this);
 		new SystemWatchdog();
-		new DockingObserver(this);
+		// new DockingObserver(this);
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();

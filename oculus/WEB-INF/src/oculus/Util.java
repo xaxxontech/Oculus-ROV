@@ -254,7 +254,7 @@ public class Util {
 							new InputStreamReader(proc.getInputStream()));
 
 					String line = null;
-					System.out.println("process exit value = " + proc.exitValue());
+					System.out.println("process exit value = " + str);
 					while ((line = procReader.readLine()) != null)
 						System.out.println("systemCall() : " + line);
 					

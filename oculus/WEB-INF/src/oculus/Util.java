@@ -211,40 +211,54 @@ public class Util {
 		return true;
 	}
 	
+	/**
+	 * Run the given text string as a command on the windows host computer. 
+	 * 
+	 * @param str is the command to run, like: "restart
+	 * 
+	 */
+	public static void systemCallBlocking(final String args) {
+		try {	
+			
+			long start = System.currentTimeMillis();
+			Process proc = Runtime.getRuntime().exec(args);
+			BufferedReader procReader = new BufferedReader(
+					new InputStreamReader(proc.getInputStream()));
+
+			String line = null;
+			System.out.println(proc.hashCode() + " exec(): " + args);
+			while ((line = procReader.readLine()) != null)
+				System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
+			
+			System.out.println(proc.hashCode() + " process exit value = " + proc.exitValue());
+			System.out.println(proc.hashCode() + " run time = " + (System.currentTimeMillis()-start) + " ms");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Run the given text string as a command on the windows host computer. 
 	 * 
 	 * @param str is the command to run, like: "restart
-	 * @param admin will return if set, check on user level. 
+	 *  
 	 */
-	public static void systemCall(String str, boolean admin) {
-		
-		final String args = str.trim();
-		
-		System.out.println("application calling system: " + args);
-	
-		// only test for admin if flag not set 
-		if (!admin) {
-			System.out.println("not AMIN, cant exec!");
-			return;
-		}
-	
+	public static void systemCall(final String str){
 		new Thread(new Runnable() { 
 			public void run() {
 				try {
-				
-					// log output of process 
-					Process proc = Runtime.getRuntime().exec(args);
+			
+					Process proc = Runtime.getRuntime().exec(str);
 					BufferedReader procReader = new BufferedReader(
 							new InputStreamReader(proc.getInputStream()));
 
 					String line = null;
+					System.out.println("process exit value = " + proc.exitValue());
 					while ((line = procReader.readLine()) != null)
 						System.out.println("systemCall() : " + line);
 					
-					
-					// System.out.println("process exit value = " + proc.exitValue());
+					System.out.println("process exit value = " + proc.exitValue());
 				
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -317,7 +331,7 @@ public class Util {
 		new Settings().writeSettings(Settings.volume, percent);
 		float vol = (float) percent / 100 * 65535;
 		String str = "nircmdc.exe setsysvolume "+ (int) vol;
-		Util.systemCall(str, true);
+		Util.systemCall(str);
 	}
 
 	/**
@@ -331,6 +345,6 @@ public class Util {
 	public static void beep() {
 		// read setting every time in case settings changed by client
 		if (settings.getBoolean(Settings.loginnotify)) 
-			systemCall("nircmdc.exe beep 500 1000", true);
+			systemCall("nircmdc.exe beep 500 1000");
 	}
 }

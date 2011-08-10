@@ -111,15 +111,4 @@ public class Updater {
 		}
 		return version;
 	}
-
-	/** test driver */
-	public static void main(String[] args) {
-		
-		Updater updater = new Updater();
-		String filename  = updater.checkForUpdateFile();
-		System.out.println(filename);
-		System.out.println(updater.versionNum(filename));
-		// System.out.println(updater.getCurrentVersion());
-	}
-
 }

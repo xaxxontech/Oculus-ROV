@@ -76,7 +76,7 @@ public class SystemWatchdog {
 				} 
 				
 				// reboot  
-				Util.systemCall("shutdown -r -f -t 01", true);				
+				Util.systemCall("shutdown -r -f -t 01");				
 			}
 		}
 	}

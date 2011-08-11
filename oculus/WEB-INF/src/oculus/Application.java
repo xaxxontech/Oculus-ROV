@@ -841,7 +841,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void getTiltSettings() {
 		if (admin) {
 			String str = comport.camservohoriz + " " + comport.camposmax + " "
-					+ comport.camposmin + " " + comport.maxclickcam;
+					+ comport.camposmin + " " + comport.maxclickcam + " " + settings.readSetting("videoscale");
 			sendplayerfunction("tiltsettingsdisplay", str);
 		}
 	}
@@ -857,9 +857,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("camposmin", Integer.toString(comport.camposmin));
 			comport.maxclickcam = Integer.parseInt(comps[3]);
 			settings.writeSettings("maxclickcam", Integer.toString(comport.maxclickcam));
+			settings.writeSettings("videoscale", comps[4]);
 			String s = comport.camservohoriz + " " + comport.camposmax + " "
-					+ comport.camposmin + " " + comport.maxclickcam;
-			messageplayer("cam tilt set to: " + s, null, null);
+					+ comport.camposmin + " " + comport.maxclickcam + " " + comps[4];
+			messageplayer("cam settings set to: " + s, "videoscale", comps[4]);
 		}
 	}
 
@@ -935,9 +936,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (admin) str += " admin true";
 			if(state.get(State.dockstatus) != null)
 				str += " dock " + state.get(State.dockstatus); 
-			
-			
 			if (light.isConnected()) { str += " light "+light.spotLightBrightness(); }
+
+			String videoScale = settings.readSetting("videoscale");
+			if (videoScale != null) { str += " videoscale "+videoScale; }
 			
 			messageplayer("status check received", "multiple", str.trim());
 		

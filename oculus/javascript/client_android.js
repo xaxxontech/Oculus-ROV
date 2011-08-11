@@ -4,6 +4,7 @@ var username;
 var streammode = "stop";
 var steeringmode;
 var xmlhttp=null;
+var videoscale = 100;
 
 function loaded() {
 	
@@ -49,7 +50,7 @@ function play(str) {
 	streammode = str;
 	var num = 1;
 	if (streammode == "stop") { num =0 ; } 
-	getFlashMovie("oculus_android").flashplay(num);
+	getFlashMovie("oculus_android").flashplay(num, videoscale);
 }
 
 function getFlashMovie(movieName) {
@@ -71,7 +72,7 @@ function message(message, colour, status, value) {
 
 function setstatus(status, value) {
 	if (value.toUpperCase() == "CONNECTED" && !connected) { // initialize
-		// countdowntostatuscheck(); 
+		callServer("statuscheck","");
 		connected = true;
 		window.OCULUSANDROID.message("Connected to Oculus");
 		//publish("camera");

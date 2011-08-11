@@ -62,6 +62,7 @@ var bworig;
 var rovvolume = 0;
 var xmlhttp=null;
 var spotlightlevel = -1;
+var videoscale = 100;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -198,7 +199,7 @@ function play(str) { // called by javascript only?
 	streammode = str;
 	var num = 1;
 	if (streammode == "stop") { num =0 ; } 
-	getFlashMovie("oculus_player").flashplay(num);
+	getFlashMovie("oculus_player").flashplay(num, videoscale);
 }
 
 function getFlashMovie(movieName) {
@@ -375,6 +376,14 @@ function setstatus(status, value) {
 	if (status == "framegrabbed") { framegrabbed(); }
 	if (status == "rovvolume") { rovvolume = parseInt(value); }
 	if (status == "light") { spotlightlevel = parseInt(value); }
+	if (status == "videoscale") { 
+		var vs = parseInt(value);	
+		if (vs != videoscale && (streammode == "camera" || streammode == "camandmic")){
+			videoscale = vs;
+			play(streammode);
+		}
+		else { videoscale = vs; }
+	}
 
 }
 
@@ -517,7 +526,7 @@ function docklinetoggle(str) {
 }
 
 function docklineposition(n) {
-	var i = ctroffset;
+	var i = ctroffset * videoscale/100;
 	if (n) { i = n; }
 	var a = document.getElementById("dockline");
 	var b = document.getElementById("video");
@@ -807,7 +816,8 @@ function tiltsettingssend() {
 	str = document.getElementById('camhoriz').value + " "
 			+ document.getElementById('cammax').value + " "
 			+ document.getElementById('cammin').value + " "
-			+ document.getElementById('maxclickcam').value;
+			+ document.getElementById('maxclickcam').value + " "
+			+ parseInt(document.getElementById('vidscale').value);
 	callServer("tiltsettingsupdate", str);
 	message("sending tilt settings values: " + str, sentcmdcolor);
 	lagtimer = new Date().getTime(); // has to be *after* message()
@@ -820,6 +830,7 @@ function tiltsettingsdisplay(str) {
 	document.getElementById('cammax').value = splitstr[1];
 	document.getElementById('cammin').value = splitstr[2];
 	document.getElementById('maxclickcam').value = splitstr[3];
+	document.getElementById('vidscale').value = splitstr[4];
 }
 
 function tilttest() {
@@ -943,10 +954,13 @@ function autodocklock(str) {
 	var video = document.getElementById("video");
 	var box = document.getElementById("facebox");
 	splitstr = str.split(" "); // left top width height
-	box.style.width = (splitstr[2]*scale)+"px";
-	box.style.height = (splitstr[3]*scale)+"px";
-	box.style.left = (video.offsetLeft + (splitstr[0]*scale)) + "px";
-	box.style.top = (video.offsetTop + (splitstr[1]*scale)) + "px";
+	box.style.width = (splitstr[2]*scale*videoscale/100)+"px";
+	box.style.height = (splitstr[3]*scale*videoscale/100)+"px";
+	//box.style.left = (video.offsetLeft + (splitstr[0]*scale)) + "px";
+	box.style.left = video.offsetLeft + (video.offsetWidth/2) + 
+	   (((splitstr[0]*scale) - (video.offsetWidth/2)) * (videoscale/100)) + "px";
+	box.style.top = video.offsetTop + (video.offsetHeight/2) + 
+	   (((splitstr[1]*scale) - (video.offsetHeight/2)) * (videoscale/100)) + "px";
 	box.style.display = "";
 	setTimeout("document.getElementById('facebox').style.display='none';",500);
 }
@@ -964,6 +978,10 @@ function autodockcalibrate(ev) {
 	var video = document.getElementById("video");
 	x -= video.offsetLeft;
 	y -= video.offsetTop;
+	x *= videoscale/100;
+	y *= videoscale/100;
+	x = Math.round(x);
+	y = Math.round(y);
 	callServer("autodockcalibrate", x+" "+y);
 	message("sending autodock-calibrate: " + x+" "+y, sentcmdcolor);
 	lagtimer = new Date().getTime(); // has to be *after* message()
@@ -1381,14 +1399,17 @@ function videoOverlayClick(ev) {
 			var y = ev.clientY + document.body.scrollTop - document.body.clientTop;
 		}
 		var video = document.getElementById("video");
-		var xctroffset = x - (video.offsetLeft + (video.offsetWidth/2)); // converts to 320x240
-		var yctroffset = y - (video.offsetTop + (video.offsetHeight/2)); // converts to 320x240
-		if (Math.abs(xctroffset) < 30 ) { xctroffset = 0; }
+		scale = 2; // convert to 320
+		var xctroffset = x - (video.offsetLeft + (video.offsetWidth/scale)); 
+		var yctroffset = y - (video.offsetTop + (video.offsetHeight/scale)); 
+		if (Math.abs(xctroffset) < 30*videoscale/100 ) { xctroffset = 0; }
 		else { flashvidcursor("videocursor_top"); flashvidcursor("videocursor_bottom"); }
-		if (Math.abs(yctroffset) < 15) { yctroffset = 0; }
+		if (Math.abs(yctroffset) < 15*videoscale/100) { yctroffset = 0; }
 		else { flashvidcursor("videocursor_left"); flashvidcursor("videocursor_right"); }
 		if (!(xctroffset ==0 && yctroffset==0)) {
-			var str = xctroffset+" "+yctroffset;
+			xctroffset *= videoscale/100;
+			yctroffset *= videoscale/100;
+			var str = Math.round(xctroffset)+" "+Math.round(yctroffset);
 			callServer("clicksteer",str);
 			message("sending: clicksteer "+str, sentcmdcolor);
 			lagtimer = new Date().getTime(); // has to be *after* message()
@@ -1667,7 +1688,7 @@ function docklinecalibrate(str) {
 
 	if (str == "save") {
 		docklinetoggle("off");
-		ctroffset = ctroffsettemp;
+		ctroffset = Math.round(ctroffsettemp/(videoscale/100));
 		popupmenu("close");
 		clicksteer("on");
 		message("sending dockline position: " + ctroffset, sentcmdcolor);

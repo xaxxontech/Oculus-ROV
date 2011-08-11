@@ -535,7 +535,7 @@ monitor <a class="blackbg" href ="javascript: monitor('on');">on</a> /
 <table><tr><td style="height: 7px"></td></tr></table>
 <a class="blackbg" 
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;calibration_settings&quot;).innerHTML);">
-calibration/settings</a><br>
+settings/calibration</a><br>
 <a class="blackbg" 
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;account_settings&quot;).innerHTML);">
 accounts</a><br>
@@ -587,7 +587,7 @@ onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="vquality"
 Calibration:
 <table><tr><td style="height: 7px"></td></tr></table>
 <a class="blackbg" href="javascript: drivingsettings('on');">driving settings</a><br>
-<a class="blackbg" href="javascript: tiltcontrols('on');">camera tilt settings</a><br>
+<a class="blackbg" href="javascript: tiltcontrols('on');">camera settings</a><br>
 <a class="blackbg" href="javascript: docklinecalibrate('start');">calibrate dock line</a><br>
 <a class="blackbg" href="javascript: autodock('calibrate');">calibrate auto-dock</a><br>
 <a class="blackbg" href="javascript: muteROVonmovetoggle();">mute 
@@ -629,7 +629,10 @@ href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(
 <a class="blackbg" href= "javascript: popupmenu('menu', 'close')">
 &nbsp; <span class="cancelbox">X</span> CLOSE</a>
 <table><tr><td style="height: 10px"></td></tr></table>
-Camera tilt settings:<br>
+video scale
+<input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="vidscale" type="text" size="4" >%
+<br>Camera tilt settings:<br>
 horiz position <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="camhoriz" type="text" size="4" >
 <span style="white-space: nowrap">max angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
@@ -639,7 +642,7 @@ onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="cammin" t
 <br>
 max clicksteer angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="maxclickcam" type="text" size="4" >
-<br>Test at position: <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+<br>test at position: <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="tilttestposition" type="text" size="4" >
 <a class="blackbg" href="javascript: tilttest();">go</a>
 <table><tr><td style="height: 7px"></td></tr></table>

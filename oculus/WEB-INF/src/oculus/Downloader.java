@@ -27,6 +27,8 @@ public class Downloader {
 	public boolean FileDownload(final String fileAddress,
 			final String localFileName, final String destinationDir) {
 
+		long start = System.currentTimeMillis();
+		
 		InputStream is = null;
 		OutputStream os = null;
 		URLConnection URLConn = null;
@@ -62,6 +64,8 @@ public class Downloader {
 			}
 
 			log.info("saved to local file: " + path + " bytes: " + ByteWritten);
+			System.out.println("download took: "+ (System.currentTimeMillis()-start) + " ms");
+			System.out.println("downloaded " + ByteWritten + " bytes to: " + path);
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
@@ -87,59 +91,30 @@ public class Downloader {
 	 */
 	public boolean unzipFolder( String zipFile, String destFolder ) {
 		
-		final String zip = (System.getenv("RED5_HOME") + zipFile).toLowerCase().trim();
-		final String des = (System.getenv("RED5_HOME") + destFolder).toLowerCase().trim(); 
+		final String zip = (System.getenv("RED5_HOME") + "\\" + zipFile).trim();
+		final String des = (System.getenv("RED5_HOME") + "\\" + destFolder).trim(); 
 		
 		// clean target 
-		if(new File(des).exists())
-			deleteDir(new File(des));
+		if(new File(des).exists()) deleteDir(new File(des));
 		
-		// if zip exists, blocking extraction 
-		if(new File(zip).exists()){	
-			Util.systemCallBlocking("fbzip -e -p " + zip + " " + des);
-			
-			// test if folders 
-			if(new File(des).exists())
-				if(new File(des).isDirectory())
-					if(new File(des+"\\update").exists())
-						if(new File(des+"\\update").isDirectory()) 
-							return true;
+		if(!new File(zip).exists()){	
+			System.out.println("no zip file found: " + zip);
+			return false;
 		}
+				
+		// if zip exists, blocking extraction 
+		Util.systemCallBlocking("fbzip -e -p " + zip + " " + des);
+			
+		// test if folders 
+		if(new File(des).exists())
+			if(new File(des).isDirectory())
+				if(new File(des+"\\update").exists())
+					if(new File(des+"\\update").isDirectory()) 
+						return true;
 		
 		// error state
 		return false;
 	}
-	
-	
-	/**
-	 * @param zipFile the zip file that needs to be unzipped
-	 * @param destFolder the folder into which unzip the zip file and create the folder structure
-	 
-	public boolean unzipFolder( String zipFile, String destFolder ) {
-		
-		final String zip = (System.getenv("RED5_HOME") + zipFile).toLowerCase().trim();
-		final String des = (System.getenv("RED5_HOME") + destFolder).toLowerCase().trim(); 
-		
-		// clean target 
-		if(new File(des).exists())
-			deleteDir(new File(des));
-		
-		// if zip exists, blocking extraction 
-		if(new File(zip).exists()){	
-			Util.systemCallBlocking("fbzip -e -p " + zip + " " + des);
-			
-			// test if folders 
-			if(new File(des).exists())
-				if(new File(des).isDirectory())
-					if(new File(des+"\\update").exists())
-						if(new File(des+"\\update").isDirectory()) 
-							return true;
-		}
-		
-		// error state
-		return false;
-	}
-	*/
 	
 	/**
 	 * @param zipFile the zip file that needs to be unzipped
@@ -201,9 +176,7 @@ public class Downloader {
 	        String[] children = dir.list();
 	        for (int i=0; i<children.length; i++) {
 	            boolean success = deleteDir(new File(dir, children[i]));
-	            if (!success) {
-	                return false;
-	            }
+	            if (!success) return false;
 	        }
 	    }
 

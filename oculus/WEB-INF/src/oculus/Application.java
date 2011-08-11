@@ -213,7 +213,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new developer.ftp.FTPObserver(this);
 		new EmailAlerts(this);
 		new SystemWatchdog();
-		// new DockingObserver(this);
+		new DockingObserver(this);
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -469,9 +469,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 
 		case systemcall:
-			System.out.println("received: " + str);
-			messageplayer("system command received", null, null);
-			if(admin) Util.systemCall(str);
+			if(admin){
+				System.out.println("received: " + str);
+				messageplayer("system command received", null, null);
+				Util.systemCall(str);
+			}
 			break;
 
 		case relaunchgrabber:
@@ -1688,15 +1690,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 						Downloader dl = new Downloader();
 						if (dl.FileDownload(fileurl, "update.zip", "webapps")) {
 							messageplayer("update download complete, unzipping...", null, null);
-							
-							if (!dl.unzipFolder("webapps\\update.zip", "webapps")) {
-								dl.deleteDir(new File("webapps\\update"));
-								messageplayer("unable to unzip package, corrupted? Try again.", null, null);
-							} else {
+							if (dl.unzipFolder("webapps\\update.zip", "webapps")) 
 								messageplayer("done.", "softwareupdate", "downloadcomplete");
-							}
 							
+							// TODO: brad zemoved 
+							// never fails if destination folder created 
+							// else messageplayer("unable to unzip package, corrupted? Try again.", null, null);
+
+							Util.delay(1000);
 							dl.deleteFile("webapps\\update.zip");
+							
 						} else { messageplayer("update download failed", null, null); }
 					}
 				}).start();
@@ -1713,5 +1716,4 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 	}
-
 }

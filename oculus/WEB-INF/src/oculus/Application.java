@@ -425,8 +425,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if(state.getBoolean(State.developer))
 				System.out.println("playerCallServer(): " + fn + " " + str);
 		
-		// G-rated commands 
-		// return after command, don't do lower case statement 
 		switch (fn) {
 		case chat: chat(str); return;
 		case beapassenger: beAPassenger(str); return;
@@ -435,22 +433,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case dockgrab:
 			if (grabber instanceof IServiceCapableConnection) {
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
-//				if(settings.getBoolean(State.developer)) 
-//					messageplayer("dockgrab command received", null, null);
+				sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
 			}
 			return;
 		}
 
-		//--------------------------------------------------------//
-		//  TODO: security check mandatory 
-		//--------------------------------------------------------//
+		// must be driver/non-passenger for all commands below
+		// player only 
 		if (Red5.getConnectionLocal() != player) {
-			System.out.println("error... security issue: " + fn.toString());
-			//return;
+			System.out.println("passenger, command dropped: " + fn.toString());
+			return;
 		}
-		
-		// X-rated.. must be logged in  
+
 		switch (fn) {
 		case publish:
 			publish(str);
@@ -621,7 +615,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case populatesettings: populateSettings(); break;
 		case systemcall: Util.systemCall(str); break;
 		case chat: chat(str); break;
-		///case facerect: messageplayer(null, "facefound", str); break;
 		case dockgrabbed: {
 			docker.autoDock("dockgrabbed " + str); 
 			// System.out.println("grabberCallServer(): " + str);

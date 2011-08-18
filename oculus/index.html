@@ -75,10 +75,10 @@ var requiredRevision = 0;
 <body id="thebody" onkeydown= "keyBoardPressed(event);" onload="loaded();" 
 onunload="playerexit();" onresize="browserwindowresized();">
 
-<div style="height: 100%; background-image: url(images/oculus_corner_logo.gif); background-repeat: no-repeat;
-background-position: right bottom"> <!-- visible page div -->
+<table><tr><td id="topgap" style="height: 30px"> </td></tr></table>
 
-<table><tr><td style="height: 20px"></td></tr></table>
+<!-- visible page div -->
+<div id="visiblepagediv">  
 
 <table id="maintable" align="center" ><tr valign="middle">
 <td style="padding-left: 5px;">
@@ -408,7 +408,7 @@ self cam/mic OFF</div>
 <span class="cancelbox">X</span> CLOSE</a>
 </td></tr></table>
 </div> 
-<table><tr><td style="height: 20px"></td></tr></table>
+
 </td></tr></table>
 
 
@@ -443,6 +443,7 @@ border-top: none; border-right: none; border-left: none; height: 1px;"></div>
 <canvas id="videocursor_ctr" width="50" height="50" style="display:none; position: absolute"></canvas> 
 <div id="videocursor_ctr_html4" class="videocursor" style="width: 48px; height: 48px; display: none;
 position: absolute"> </div>
+
 <div id="facebox" class="facebox" style="display: none; position: absolute;"> </div>
 
 <!-- video overlay invisible -->
@@ -915,13 +916,6 @@ Choose action:<br>
 </td><td style="padding-left: 10px">
 <div class="menu" id="extendedsettingsbox" style="display: none; line-height: 22px"></div>
 
-
-
-
-
-
-
-
 </td>
 </tr></table>
 </div> <!--  end of admin commands box -->
@@ -929,6 +923,12 @@ Choose action:<br>
 </td></tr></table>
 </div> <!--  end of overlaycontents -->
 
+<div style="position: fixed; bottom: 5px; right: 5px; z-index: -1; padding-left: 5px;">
+
+<img src="images/oculus_corner_logo.gif" alt="">
+
+</div>
+ 
 <!--  debugbox -->
 <div id="debugbox" style="position: absolute; z-index: 100; left: 10px; top: 10px"></div>
 

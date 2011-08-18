@@ -67,7 +67,7 @@ var videoscale = 100;
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
     overlay("on");
-	resized();
+    browserwindowresized();
 	var b = new Image();
 	b.src = 'images/steering_icon_selected.gif';
 	bworig= document.body.clientWidth;
@@ -122,6 +122,13 @@ function resized() {
 }
 
 function browserwindowresized() {
+	var a = document.getElementById("visiblepagediv");
+//	debug(document.body.clientHeight + " " + a.offsetHeight);
+	if (document.body.clientHeight < document.getElementById("visiblepagediv").offsetHeight + 40) {
+		document.getElementById("topgap").style.height = "5px";
+	}
+	else { document.getElementById("topgap").style.height = "30px"; }
+	
 	docklineposition();
 	videooverlayposition();
 	overlay("");

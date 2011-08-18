@@ -619,7 +619,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case streammode: grabberSetStream(str); break;
 		case saveandlaunch: saveAndLaunch(str); break;
 		case populatesettings: populateSettings(); break;
-		case systemcall: if(admin) Util.systemCall(str); break;
+		case systemcall: Util.systemCall(str); break;
 		case chat: chat(str); break;
 		///case facerect: messageplayer(null, "facefound", str); break;
 		case dockgrabbed: {

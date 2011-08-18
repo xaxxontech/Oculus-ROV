@@ -379,7 +379,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate,
 		tilttest, speedset, slide, nudge, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, 
 		streamsettingsset, streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update,
-		new_user_add, pasword_update, user_list, delete_user, extrauser_password_update, username_update,
+		new_user_add, user_list, delete_user, extrauser_password_update, username_update,
 		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
 		spotlightsetbrightness, floodlight, dockgrab;
@@ -558,7 +558,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case playerbroadcast: playerBroadCast(str); break;
 		case password_update: account("password_update", str); break;
 		case new_user_add: account("new_user_add", str); break;
-		case pasword_update: account("pasword_update", str); break;
 		case user_list: account("user_list", ""); break;
 		case delete_user: account("delete_user", str); break;
 		case extrauser_password_update: account("extrauser_password_update", str); break;

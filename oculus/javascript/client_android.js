@@ -4,7 +4,6 @@ var username;
 var streammode = "stop";
 var steeringmode;
 var xmlhttp=null;
-var videoscale = 100;
 
 function loaded() {
 	
@@ -50,7 +49,7 @@ function play(str) {
 	streammode = str;
 	var num = 1;
 	if (streammode == "stop") { num =0 ; } 
-	getFlashMovie("oculus_android").flashplay(num, videoscale);
+	getFlashMovie("oculus_android").flashplay(num);
 }
 
 function getFlashMovie(movieName) {

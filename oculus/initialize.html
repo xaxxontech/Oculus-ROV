@@ -15,6 +15,11 @@ color: #222222;}
 TABLE {   border: 0px; border-collapse: collapse; padding: 0px }
 TR { border: 0px; }
 TD  { border: 0px; }
+a { color: #2522c5; text-decoration: none; border-bottom: none; } 
+a:link { color: #2522c5; text-decoration: none; border-bottom: none; }
+a:visited { color: #2522c5; text-decoration: none; border-bottom: none; }
+a:hover { color: #2522c5; background-color: #bbbbbb; text-decoration: none;  border-bottom: none;} 
+.message { color: green; }
 </style>
 <script src="javascript/server.js" type="text/javascript"></script>
 <script src="flash/AC_OETags.js" language="javascript"></script>
@@ -119,7 +124,7 @@ Allow camera and mic access if prompted, then right click in window, choose SETT
 <a href="javascript: document.getElementById('ifnot').style.display='none';">hide</a>
 </div>
 <br>
-<div id="messagebox" style="color: green;"> </div>
+<div id="messagebox" class="message" > </div>
 </td>
 
 <td style="padding-left: 8px;">
@@ -138,8 +143,8 @@ password again: <input id="userpassagain" type="password" name="password"size="1
 oculus hardware: <span id="comport">...</span><br>
 oculus lights: <span id="lightport">...</span><br>
 battery <span id="battery">... please wait</span><br>
-internal address: <span id="lanaddress">...</span><br>
-external address: <span id="wanaddress">...</span><br>
+internal IP address: <span id="lanaddress">...</span><br>
+external IP address: <span id="wanaddress">...</span><br>
 http port*: <input id="httpport" class="inputbox" type="text" size="10" ><br>
 rtmp port*: <input id="rtmpport" class="inputbox" type="text" size="10" ><br>
 &nbsp; (*changes to ports require application restart to take effect)
@@ -155,5 +160,10 @@ Skip this screen next time
 
 </td>
 </tr></table>
+
+<div style="position: fixed; bottom: 5px; right: 40px">
+<a href="http://www.xaxxon.com" style="color: #999999; font-size: 11px">&copy; Xaxxon</a>
+</div>
+
 </body>
 </html>

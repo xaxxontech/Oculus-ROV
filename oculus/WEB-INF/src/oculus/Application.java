@@ -44,13 +44,13 @@ public class Application extends MultiThreadedApplicationAdapter {
     private boolean initialstatuscalled = false;
     private boolean pendingplayerisnull = true;
     private boolean emailgrab = false;
+    private boolean playerstream = false;
     
 	// TODO:  best not to have publics 
 	public boolean muteROVonMove = false;
 	public boolean admin = false;
 	public String stream = "stop";
-	// WifiConnection wifi; // = new WifiConnection();
-
+	
 	/** */
 	public Application() {
 		super();
@@ -120,7 +120,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			player = null;
 			
 			// TODO: testing only 
-			state.dump();
+			// state.dump();
 			
 			if (!state.getBoolean(State.autodocking)) {
 				if(stream!=null){
@@ -133,6 +133,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 					 if (light.spotLightBrightness() > 0) light.setSpotLightBrightness(0);
 					 if (light.floodLightOn()) light.floodLight("off");
 				}
+			}
+			
+			if (playerstream) {
+				playerstream = false;
+				grabberPlayPlayer(0);
+				messageGrabber("playerbroadcast", "0"); 
 			}
 			
 		}
@@ -166,6 +172,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		log.info("grabber signed in from " + grabber.getRemoteAddress());
 		// System.out.println("grabbbersignin");
 		stream = "stop";
+		if (playerstream) {
+			grabberPlayPlayer(1);
+			messageGrabber("playerbroadcast", "1"); 
+		}
 
 		// eliminate any other grabbers
 		int i = 0;
@@ -1260,6 +1270,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 							e.printStackTrace();
 						}
 						grabberPlayPlayer(1);
+						playerstream = true;
 					}
 				}).start();
 				log.info("player broadcast start");
@@ -1267,6 +1278,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("publish", new Object[] { "stop", null, null, null,
 						null });
 				grabberPlayPlayer(0);
+				playerstream = false;
 				log.info("player broadcast stop");
 			}
 		}
@@ -1276,6 +1288,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("play", new Object[] { nostreams });
+			messageGrabber("playerbroadcast",Integer.toString(nostreams));
 		}
 	}
 

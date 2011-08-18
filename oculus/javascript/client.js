@@ -1240,9 +1240,11 @@ function arduinoEcho(value){
 }
 
 function restart() {
+	if (confirm("restart server\nare you sure?")) { 
 	  message("sending system command: "+str,sentcmdcolor);
 	  callServer('restart','');
 	  overlay('off');
+	}
 }
 
 function softwareupdate(command,value) {

@@ -59,7 +59,10 @@ function message(message,status) {
 	if (/^<CHAT>/.test(message)) {
 		message = "<span style='font-size: 20px'>"+message.slice(6)+"</span>";
 	}
-	
+	if (message=="playerbroadcast") { videooverlay(parseInt(status)); message=""; status = null; }
+
+	//messages not wanting to be displayed should erase content and go above here
+
 	if (message != "") {
 		var a = document.getElementById("messagebox");
 		var str = a.innerHTML;
@@ -74,7 +77,8 @@ function message(message,status) {
 			datetime += " "+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
 			datetime +="</span>";
 		}
-		a.innerHTML = "&bull; "+message+" " + datetime + "<br/>" + str;
+		a.innerHTML = "<table><tr valign='top'><td class='message'>&bull; </td><td class='message'>"+message+" " +
+				datetime + "</td></td></table>" + str;
 	}
 	
 	if (/^connected/.test(message)) { // some things work better if down here -wtf???
@@ -94,7 +98,7 @@ function setstatus(status) {
 	var a;
 	for (var n=0; n<s.length; n=n+2) {
 		if (a= document.getElementById(s[n]+"_status")) {
-			a.innerHTML = s[n+1];
+			a.innerHTML = s[n+1].replace("&nbsp;"," ");
 		}
 	}
 }
@@ -187,13 +191,13 @@ function populatevalues(values) {
 		if (splitstr[n]=="comport") {
 			a = document.getElementById("comport");
 			var str = splitstr[n+1];
-			if (str == "nil") { a.innerHTML="<a href=\"http://www.xaxxon.com/xaxxon/shop\" target=\"_blank\">buy now</a>"; }
+			if (str == "nil") { a.innerHTML="not found <a href=\"http://www.xaxxon.com/shop\" target=\"_blank\">buy now</a>"; }
 			else { a.innerHTML = "found on "+str; }
 		}
 		if (splitstr[n]=="lightport") {
 			a = document.getElementById("lightport");
 			var str = splitstr[n+1];
-			if (str == "nil") { a.innerHTML="<a href=\"http://www.xaxxon.com/xaxxon/shop\" target=\"_blank\">buy now</a>"; }
+			if (str == "nil") { a.innerHTML="not found <a href=\"http://www.xaxxon.com/shop\" target=\"_blank\">buy now</a>"; }
 			else { a.innerHTML = "found on "+str; }
 		}
 		if (splitstr[n]=="lanaddress") {
@@ -264,4 +268,11 @@ function keypress(e) {
 		keynum = e.which;
 	} // Netscape/Firefox/Opera
 	return keynum;
+}
+
+function videooverlay(n) {
+	if (n == 0) {
+		document.getElementById("flashoverlay").style.display = "";
+	}
+	else { document.getElementById("flashoverlay").style.display = "none"; } 
 }

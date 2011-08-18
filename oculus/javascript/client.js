@@ -1241,9 +1241,9 @@ function arduinoEcho(value){
 
 function restart() {
 	if (confirm("restart server\nare you sure?")) { 
-	  message("sending system command: "+str,sentcmdcolor);
+	  message("sending restart: "+str,sentcmdcolor);
 	  callServer('restart','');
-	  overlay('off');
+	  //overlay('off');
 	}
 }
 
@@ -1266,7 +1266,7 @@ function softwareupdate(command,value) {
 		var str = "Software update download complete.\n";
 		str += "Update will take effect on next server restart.\n\n";
 		str += "Do you want to restart server now?";
-		if (confirm(str)) { restart(); }
+		if (confirm(str)) { callServer('restart',''); }
 	}
 	if (command =="version") {
 		message("sending software version request",sentcmdcolor);

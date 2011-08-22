@@ -286,8 +286,12 @@ function message(message, colour, status, value) {
 				str = str.slice(0, maxmessagecontents);
 			}
 			var datetime = "<span style='color: #444444; font-size: 11px'>";
+			var minutes = d.getMinutes();
+			if (minutes < 10) { minutes = "0"+minutes; }
+			var seconds = d.getSeconds();
+			if (seconds < 10) { seconds = "0"+seconds; }
 			datetime += d.getDate()+"-"+(d.getMonth()+1)+"-"+d.getFullYear();
-			datetime += " "+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
+			datetime += " "+d.getHours()+":"+minutes+":"+seconds;
 			datetime +="</span>";
 			b.innerHTML = message + hiddenmessageboxping + " &nbsp; " + datetime + "<br>" + str + " ";
 		}

@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 import javax.imageio.ImageIO;
-
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.Red5;
@@ -26,7 +26,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     private static final int STREAM_CONNECT_DELAY = 2000;
     private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
     private Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
-    private static String salt = "PSDLkfkljsdfas345usdofi";
+    private static String salt; //  = "PSDLkfkljsdfas345usdofi";
     private IConnection grabber = null;
     private IConnection player = null;
     private ArduinoCommDC comport = null;
@@ -49,7 +49,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	// TODO:  best not to have publics 
 	public boolean muteROVonMove = false;
 	public boolean admin = false;
-	public String stream = "stop";
+	public String stream = null;
 	
 	/** */
 	public Application() {
@@ -161,7 +161,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	public void grabbersignin() {
+	public void grabbersignin(String mode) {
+		if (mode.equals("init")) { stream = null; }
+		else { stream = "stop"; }
 		grabber = Red5.getConnectionLocal();
 		String str = "awaiting&nbsp;connection";
 		if (state.get(State.user) != null) {
@@ -171,7 +173,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageGrabber("connected to subsystem", "connection " + str);
 		log.info("grabber signed in from " + grabber.getRemoteAddress());
 		// System.out.println("grabbbersignin");
-		stream = "stop";
+		// stream = "stop";
 		if (playerstream) {
 			grabberPlayPlayer(1);
 			messageGrabber("playerbroadcast", "1"); 
@@ -208,6 +210,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
+		
+		salt = settings.readSetting("salt");
+		if (salt == null) {
+			salt = UUID.randomUUID().toString();
+			settings.newSetting("salt", salt);
+		}
 
 		if (settings.getBoolean(State.developer)){
 			new developer.CommandManager(this);
@@ -219,11 +227,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Util.setSystemVolume(volume);
 	
 		// TODO: Brad added, removable with single comment line here 
-		new developer.sonar.SonarSteeringObserver(this, comport);
-		new developer.ftp.FTPObserver(this);
+		//new developer.sonar.SonarSteeringObserver(this, comport);
+		//new developer.ftp.FTPObserver(this);
 		new EmailAlerts(this);
 		new SystemWatchdog();
-		new DockingObserver(this);
+		//new DockingObserver(this);
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -264,6 +272,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
+					//stream = null;
 					String address = "127.0.0.1:" + httpPort;
 					Runtime.getRuntime().exec(
 							"cmd.exe /c start http://" + address
@@ -280,14 +289,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			public void run() {
 				try {
 
-					// String address = settings.readSetting("address") + ":"+
-					// settings.readSetting("http_port");
+					// stream = "stop";
 					String address = "127.0.0.1:" + httpPort;
 					Runtime.getRuntime().exec(
 							"cmd.exe /c start http://" + address
 									+ "/oculus/server.html");
-					// Runtime.getRuntime().exec("cmd.exe /c start /MIN http://"
-					// + address+ "/oculus/grabber.html");
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -448,7 +454,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		switch (fn) {
 		case publish:
 			publish(str);
-			messageplayer("command received: publish " + str, null, null);
 			break;
 
 		case speedset:
@@ -671,6 +676,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("command dropped, autodocking", null, null);
 			return;
 		}
+		
+		//System.out.println("stream: "+stream);
+		if (stream == null) { 
+			messageplayer("stream control unavailable, server may be in setup mode", null, null);
+			return;
+		}
 
 		try {
 			// commands: camandmic camera mic stop
@@ -684,6 +695,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				int quality = Integer.parseInt(vals[3]);
 				sc.invoke("publish", new Object[] { str, width, height, fps, quality });
 				// messageGrabber("stream "+str);
+				messageplayer("command received: publish " + str, null, null);
 			}
 		} catch (NumberFormatException e) {
 			System.out.println("publish() " + e.getMessage());

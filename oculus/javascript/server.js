@@ -40,7 +40,9 @@ function rtmpPortReturned() { //xmlhttp event handler
 	if (xmlhttp.readyState==4) {// 4 = "loaded"
 		if (xmlhttp.status==200) {// 200 = OK
 			getFlashMovie("oculus_grabber").setRtmpPort(xmlhttp.responseText);
-			getFlashMovie("oculus_grabber").connect();
+			var mode = "server";
+			if (initialize) { mode = "init"; }
+			getFlashMovie("oculus_grabber").connect(mode);
 		}
 	}
 }
@@ -72,9 +74,13 @@ function message(message,status) {
 		var datetime="";
 		if (!initialize) {
 			var d = new Date();
+			var minutes = d.getMinutes();
+			if (minutes < 10) { minutes = "0"+minutes; }
+			var seconds = d.getSeconds();
+			if (seconds < 10) { seconds = "0"+seconds; }
 			datetime += "<span style='font-size: 11px; color: #666666;'>";
 			datetime += d.getDate()+"-"+(d.getMonth()+1)+"-"+d.getFullYear();
-			datetime += " "+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
+			datetime += " "+d.getHours()+":"+minutes + ":"+seconds;
 			datetime +="</span>";
 		}
 		a.innerHTML = "<table><tr valign='top'><td class='message'>&bull; </td><td class='message'>"+message+" " +

@@ -432,7 +432,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					}
 				}
 				Util.delay(250);
-				sendCommand(CAMRELEASE);
+				if(!state.getBoolean(State.holdservo))
+					sendCommand(CAMRELEASE);
 			}
 		}).start();
 	}
@@ -457,7 +458,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				public void run() {
 					sendCommand(new byte[] { CAM, (byte) camservopos });
 					Util.delay(camdelay);
-					sendCommand(CAMRELEASE);
+					if(!state.getBoolean(State.holdservo))
+						sendCommand(CAMRELEASE);
 				}
 			}).start();
 		} else if (str.equals("upabit")) {
@@ -469,7 +471,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				public void run() {
 					sendCommand(new byte[] { CAM, (byte) camservopos });
 					Util.delay(camwait);
-					sendCommand(CAMRELEASE);
+					if(!state.getBoolean(State.holdservo))
+						sendCommand(CAMRELEASE);
 				}
 			}).start();
 		}
@@ -484,7 +487,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					byte[] cam = { CAM, (byte) camservopos };
 					sendCommand(cam);
 					Thread.sleep(camwait);
-					sendCommand(CAMRELEASE);
+					if(!state.getBoolean(State.holdservo))
+						sendCommand(CAMRELEASE);
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -500,7 +504,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				try {
 					sendCommand(new byte[] { CAM, (byte) camservopos });
 					Thread.sleep(camwait);
-					sendCommand(CAMRELEASE);
+					if(!state.getBoolean(State.holdservo))
+						sendCommand(CAMRELEASE);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -694,13 +699,27 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					byte[] command = { CAM, (byte) camservopos };
 					sendCommand(command);
 					Thread.sleep(camwait + clicknudgedelay);
-					sendCommand(CAMRELEASE);
+					if(!state.getBoolean(State.holdservo))
+						sendCommand(CAMRELEASE);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}).start();
 		return camservopos;
+	}
+	
+	/** turn off the servo holding the mirror */ 
+	public void releaseCameraServo(){
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					sendCommand(CAMRELEASE);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
 
 	/** send steering compensation values to the arduino */

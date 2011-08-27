@@ -23,16 +23,12 @@ public class State {
 	public static final String lightport = "lightport";
 	public static final String target = "target";
 	public static final String boottime = "boottime";
+
 	public static final String sonarenabled = "sonarenabled";
 	public static final String sonardistance = "sonardistance";
 	public static final String sonardebug = "sonardebug";
 	public static final String sonar = "sonar";
 
-	// bad var name!
-	// public static final String status = "status";
-	//public static final String dockx = "dockx";
-	//public static final String docky = "docky";
-	
 	public static final String motionenabled = "motionenabled";
 	public static final String dockdensity = "dockdensity";
 	public static final String dockxpos = "dockxpos";
@@ -50,8 +46,7 @@ public class State {
 	public static final String docked = "docked";
 	public static final String undocked = "undocked";
 	public static final String undock = "undock";
-//	public static final String gueststart = "gueststart";
-//	public static final String guestend = "guestend";
+	public static final String holdservo = "holdservo";
 	public static final String unknown = "unknown";	
 
 	public static final long ONE_DAY = 86400000;

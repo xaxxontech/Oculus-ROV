@@ -116,11 +116,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageGrabber(str, "connection awaiting&nbsp;connection");
 			admin = false;			
 			state.delete(State.user);
-			state.delete(State.userisconnected); 
+			state.delete(State.userisconnected);
 			player = null;
-			
-			// TODO: testing only 
-			// state.dump();
 			
 			if (!state.getBoolean(State.autodocking)) {
 				if(stream!=null){
@@ -128,10 +125,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 						publish("stop"); 		
 					}
 				}
-				if (comport.moving) { comport.stopGoing(); }
+				
 				if (light.isConnected()) { // && light.lightLevel != 0) { 
 					 if (light.spotLightBrightness() > 0) light.setSpotLightBrightness(0);
 					 if (light.floodLightOn()) light.floodLight("off");
+				}
+
+				// TODO: BRAD TESTING
+				if(comport != null) {
+					comport.stopGoing();
+					comport.releaseCameraServo();
 				}
 			}
 			
@@ -227,11 +230,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Util.setSystemVolume(volume);
 	
 		// TODO: Brad added, removable with single comment line here 
-		//new developer.sonar.SonarSteeringObserver(this, comport);
+		new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this);
+		//new developer.sonar.SonarSteeringObserver(this, comport);
+		//new developer.ftp.FTPObserver(this)
 		new EmailAlerts(this);
 		new SystemWatchdog();
-		//new DockingObserver(this);
+
+		// new DockingObserver(this
+		//new DockingObserver(this
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -302,32 +309,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}).start();
 	}
 
-
-	/** @return true if within range in settings. Will return false if not configured 
-	public boolean guestHours(){
-	
-		final int start = settings.getInteger(State.gueststart);
-		final int end = settings.getInteger(State.guestend);
-		
-		// if doesn't exist, don't enforce 
-		if(start==Settings.ERROR) return true;
-		if(end==Settings.ERROR) return true;
-		
-		final Date now = new Date();
-		final DateFormat dfm = new SimpleDateFormat("HH");
-		final int current = Integer.parseInt(dfm.format(now));
-		
-		System.out.println("start : " + start); 
-		System.out.println("now   : " + dfm.format(now));
-		System.out.println("end   : " + end);
-		
-		// don't bother with minutes
-		if( current < start ) return false;
-		if( current > end ) return false;
-	
-		return true;
-	}*/
-	
 	/** */
 	public void playersignin() {
 		
@@ -506,15 +487,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				messageplayer("framegrab command received", null, null);
 			}
 			break;
-/*
-		case dockgrab:
-			if (grabber instanceof IServiceCapableConnection) {
-				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
-				// messageplayer("dockgrab command received", null, null);
-			}
-			break;
-*/
+			
 		case emailgrab:
 			if (grabber instanceof IServiceCapableConnection) {
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -525,10 +498,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 
 		case arduinoecho:
-			if (str.equalsIgnoreCase("on"))
-				comport.setEcho(true);
-			else
-				comport.setEcho(false);
+			if (str.equalsIgnoreCase("on")) comport.setEcho(true);
+			else comport.setEcho(false);
 			messageplayer("echo set to: " + str, null, null);
 			break;
 
@@ -1192,16 +1163,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** */ 
 	private void assumeControl(String user) {
-		
-		//TODO:  BRAD testing 
-		/*
-		if(( ! admin ) || ( ! guestHours())){
-			log.debug("user can't log in at this time");
-			System.out.println("user can't log in at this time");
-			
-			// TODO: COLIN .. js screen 
-			return;
-		}*/
 	
 		messageplayer("controls hijacked", "hijacked", user);
 		IConnection tmp = player;
@@ -1226,17 +1187,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** */ 
 	private void beAPassenger(String user) {
-
-		/*
-		//TODO:  BRAD testing 
-		if(( ! admin ) || ( ! guestHours())){
-			log.debug("user can't log in at this time");
-			System.out.println("user can't log in at this time");
-			
-			// TODO: COLIN .. js screen 
-			return;
-		}
-		*/
 		
 		pendingplayerisnull = true;
 		String str = user + " added as passenger";
@@ -1279,8 +1229,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}).start();
 				log.info("player broadcast start");
 			} else {
-				sc.invoke("publish", new Object[] { "stop", null, null, null,
-						null });
+				sc.invoke("publish", new Object[] { "stop", null, null, null, null });
+				// TODO: BRAD TESTING
+				if(comport!=null) comport.releaseCameraServo();
 				grabberPlayPlayer(0);
 				playerstream = false;
 				log.info("player broadcast stop");
@@ -1654,31 +1605,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageGrabber(result, null);
 	}
 
-	/*
-	private void faceGrab(String str) {
-		messageplayer("facegrab " + str + " received", null, null);
-		if (str.equals("off")) {
-			facegrabon = false;
-		} else {
-			facegrabon = true;
-			new Thread(new Runnable() {
-				public void run() {
-					try {
-						while (facegrabon) {
-							if (grabber instanceof IServiceCapableConnection) {
-								IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-								sc.invoke("facegrab", new Object[] {});
-							}
-							Thread.sleep(1000);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-		}
-	}*/
-
 	private void softwareUpdate(String str) {
 		if (admin) {
 			if (str.equals("check")) {
@@ -1707,9 +1633,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 						String fileurl = new Updater().checkForUpdateFile();
 						System.out.println("downloading url: " + fileurl);
 						Downloader dl = new Downloader();
-						if (dl.FileDownload(fileurl, "update.zip", "webapps")) {
+						if (dl.FileDownload(fileurl, "update.zip", "download")) {
 							messageplayer("update download complete, unzipping...", null, null);
-							if (dl.unzipFolder("webapps\\update.zip", "webapps")) 
+							if (dl.unzipFolder("download\\update.zip", "webapps")) 
 								messageplayer("done.", "softwareupdate", "downloadcomplete");
 							
 							// TODO: brad zemoved 
@@ -1717,7 +1643,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 							// else messageplayer("unable to unzip package, corrupted? Try again.", null, null);
 
 							Util.delay(1000);
-							dl.deleteFile("webapps\\update.zip");
+							dl.deleteFile("download\\update.zip");
 							
 						} else { messageplayer("update download failed", null, null); }
 					}
@@ -1726,11 +1652,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (str.equals("versiononly")) {
 				int currver = new Updater().getCurrentVersion();
 				String msg = "";
-				if (currver == -1) {
-					msg = "version unknown";
-				} else {
-					msg = "version: v." + currver;
-				}
+				if (currver == -1) { msg = "version unknown";
+				} else { msg = "version: v." + currver; }
 				messageplayer(msg, null, null);
 			}
 		}

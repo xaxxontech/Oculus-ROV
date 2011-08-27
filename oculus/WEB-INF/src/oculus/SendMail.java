@@ -93,26 +93,6 @@ public class SendMail {
 		}).start();
 	}
 	
-
-	/** blocking send
-	public SendMail(final String sub, final String text, final String file, boolean block) {
-
-		subject = sub;
-		body = text;
-		fileName = file;
-			
-		sendAttachment();	
-	}*/
-
-	/**	blocking send 
-	SendMail(final String sub, final String text, boolean block) {
-
-		subject = sub;
-		body = text;
-
-		sendMessage();
-	}*/
-	
 	/** */
 	private void sendMessage() {
 
@@ -148,7 +128,7 @@ public class SendMail {
 			if(application!=null) application.message("email has been sent", null, null);
 
 		} catch (Exception e) {
-			log.error(e.getMessage() + "\n error sending email, check settings");
+			log.error(e.getMessage() + "error sending email, check settings");
 			if(application!=null) application.message("error sending email", null, null);
 		}
 	}
@@ -204,7 +184,7 @@ public class SendMail {
 
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			// if(debug) System.out.println("error sending email, check settings");
+			System.out.println("error sending email, check settings");
 			if(application!=null) application.message("error sending email", null, null);
 		}
 	}

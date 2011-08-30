@@ -69,6 +69,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	protected int steeringcomp = settings.getInteger("steeringcomp");
 	protected final boolean sonar = settings.getBoolean(State.sonarenabled);
+	protected final boolean holdservo = settings.getBoolean(State.holdservo);
 
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;
@@ -106,16 +107,21 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 		// call back to notify on reset events etc
 		application = app;
-
+		
 		if (state.get(State.serialport) != null) {
 			new Thread(new Runnable() {
 				public void run() {
 
 					connect();
 					Util.delay(SETUP);
-					new Sender(GET_VERSION);
-					camHoriz();
-
+					//new Sender(GET_VERSION);
+					
+					// camHoriz(); //causing null pointer reading holdservo, do manually instead: 
+					byte[] cam = { CAM, (byte) camservopos };
+					sendCommand(cam);
+					Util.delay(camwait);
+					sendCommand(CAMRELEASE);
+					
 					// check for lost connection
 					new WatchDog().start();
 
@@ -210,7 +216,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			if (version == null) {
 				// get just the number
 				version = response.substring(response.indexOf("version:") + 8, response.length());
-				application.message("arduinoculus version: " + version, null, null);
+				application.message("arduinoculus firmware version: " + version, null, null);
 			} else return;
 
 			// don't bother showing watch dog pings to user screen
@@ -431,9 +437,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 						camservodirection = 0;
 					}
 				}
-				Util.delay(250);
-				if(!state.getBoolean(State.holdservo))
-					sendCommand(CAMRELEASE);
+				
+				checkForHoldServo();
 			}
 		}).start();
 	}
@@ -457,9 +462,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			new Thread(new Runnable() {
 				public void run() {
 					sendCommand(new byte[] { CAM, (byte) camservopos });
-					Util.delay(camdelay);
-					if(!state.getBoolean(State.holdservo))
-						sendCommand(CAMRELEASE);
+					checkForHoldServo();
 				}
 			}).start();
 		} else if (str.equals("upabit")) {
@@ -470,12 +473,15 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			new Thread(new Runnable() {
 				public void run() {
 					sendCommand(new byte[] { CAM, (byte) camservopos });
-					Util.delay(camwait);
-					if(!state.getBoolean(State.holdservo))
-						sendCommand(CAMRELEASE);
+					checkForHoldServo();
 				}
 			}).start();
-		}
+		} 
+//		else if (str.equals("hold")) {
+//			new Thread(new Runnable() {  public void run() {
+//					sendCommand(new byte[] { CAM, (byte) camservopos });
+//				} }).start();
+//		}
 	}
 
 	/** level the camera servo */
@@ -486,9 +492,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				try {
 					byte[] cam = { CAM, (byte) camservopos };
 					sendCommand(cam);
-					Thread.sleep(camwait);
-					if(!state.getBoolean(State.holdservo))
-						sendCommand(CAMRELEASE);
+					checkForHoldServo();
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -503,9 +507,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			public void run() {
 				try {
 					sendCommand(new byte[] { CAM, (byte) camservopos });
-					Thread.sleep(camwait);
-					if(!state.getBoolean(State.holdservo))
-						sendCommand(CAMRELEASE);
+					checkForHoldServo();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -698,9 +700,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				try {
 					byte[] command = { CAM, (byte) camservopos };
 					sendCommand(command);
-					Thread.sleep(camwait + clicknudgedelay);
-					if(!state.getBoolean(State.holdservo))
-						sendCommand(CAMRELEASE);
+					checkForHoldServo();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -720,6 +720,14 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				}
 			}
 		}).start();
+	}
+	
+	private void checkForHoldServo() { 
+		if(!holdservo || application.stream.equals("stop") ||
+				application.stream.equals("mic") || application.stream ==null) {
+			Util.delay(camwait);
+			sendCommand(CAMRELEASE);
+		}
 	}
 
 	/** send steering compensation values to the arduino */

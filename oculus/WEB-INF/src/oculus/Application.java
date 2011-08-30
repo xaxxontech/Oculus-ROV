@@ -26,7 +26,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     private static final int STREAM_CONNECT_DELAY = 2000;
     private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
     private Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
-    private static String salt; //  = "PSDLkfkljsdfas345usdofi";
+    private static String salt; 
     private IConnection grabber = null;
     private IConnection player = null;
     private ArduinoCommDC comport = null;
@@ -131,7 +131,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 					 if (light.floodLightOn()) light.floodLight("off");
 				}
 
-				// TODO: BRAD TESTING
 				if(comport != null) {
 					comport.stopGoing();
 					comport.releaseCameraServo();
@@ -230,7 +229,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Util.setSystemVolume(volume);
 	
 		// TODO: Brad added, removable with single comment line here 
-		new developer.sonar.SonarSteeringObserver(this, comport);
+		// new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this);
 		//new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this)
@@ -615,6 +614,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private void grabberSetStream(String str) {
 		stream = str;
+		
+		if (str.equals("camera") || str.equals("camandmic")) {
+			if(comport!=null && comport.holdservo) {
+				comport.camToPos(comport.camservopos);
+			}
+		}
+		
+		if (str.equals("stop") || str.equals("mic")) {
+			if(comport!=null && comport.holdservo) comport.releaseCameraServo();
+		}
+		
 		// messageplayer("streaming "+str,"stream",stream);
 		messageGrabber("streaming " + stream, "stream " + stream);
 		log.info("streaming " + stream);
@@ -648,7 +658,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			return;
 		}
 		
-		//System.out.println("stream: "+stream);
 		if (stream == null) { 
 			messageplayer("stream control unavailable, server may be in setup mode", null, null);
 			return;
@@ -1231,7 +1240,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			} else {
 				sc.invoke("publish", new Object[] { "stop", null, null, null, null });
 				// TODO: BRAD TESTING
-				if(comport!=null) comport.releaseCameraServo();
 				grabberPlayPlayer(0);
 				playerstream = false;
 				log.info("player broadcast stop");
@@ -1507,7 +1515,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				message += "Error: password must be letters/numbers only ";
 				oktoadd = false;
 			}
-			int i = 0;
+			int i = 1; // admin user = 0, start from 1 (non admin)
 			String name;
 			while (true) {
 				name = settings.readSetting("user" + i);
@@ -1515,7 +1523,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					break;
 				}
 				if ((name.toUpperCase()).equals((user).toUpperCase())) {
-					message += "Error: user name already exists ";
+					message += "Error: non-admin user name already exists ";
 					oktoadd = false;
 				}
 				i++;

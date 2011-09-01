@@ -1241,6 +1241,12 @@ function arduinoReset() {
 	overlay('off');
 }
 
+function factoryreset(){
+	message("resetting to factory settings",sentcmdcolor);
+	callServer('factoryreset');
+	overlay('off');
+}
+
 function arduinoEcho(value){
 	message("firmware command echo" + value, sentcmdcolor);
 	

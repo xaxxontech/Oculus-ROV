@@ -368,7 +368,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new_user_add, user_list, delete_user, extrauser_password_update, username_update,
 		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, assumecontrol, 
 		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-		spotlightsetbrightness, floodlight, dockgrab;
+		spotlightsetbrightness, floodlight, dockgrab, factoryreset;
 	
 		@Override 
 		public String toString() {
@@ -407,9 +407,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final playerCommands fn, final String str) {
 
-		if(!fn.equals(playerCommands.statuscheck))
-			if(state.getBoolean(State.developer))
-				System.out.println("playerCallServer(): " + fn + " " + str);
+		if(state.getBoolean(State.developer))
+			if(!fn.equals(playerCommands.statuscheck))
+				if(state.getBoolean(State.developer))
+					System.out.println("playerCallServer(): " + fn + " " + str);
 		
 		switch (fn) {
 		case chat: chat(str); return;
@@ -422,13 +423,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
 			}
 			return;
+			
+		case softwareupdate: softwareUpdate(str); return;
+		case restart: restart(); return;
+
 		}
 
 		// must be driver/non-passenger for all commands below
 		// player only 
 		if (Red5.getConnectionLocal() != player) {
 			System.out.println("passenger, command dropped: " + fn.toString());
-			return;
+			//return;
 		}
 
 		switch (fn) {
@@ -541,7 +546,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
 		case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
 		case spotlightsetbrightness: light.setSpotLightBrightness(Integer.parseInt(str)); break;
-		case floodlight: light.floodLight(str); return;
+		case floodlight: light.floodLight(str); break;
+		case factoryreset: factoryReset(); break;
 		}
 	}
 
@@ -1614,7 +1620,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void softwareUpdate(String str) {
-		if (admin) {
+		
+		System.out.println("sw: " + str);
+	//	if (admin) {
 			if (str.equals("check")) {
 				messageplayer("checking for new software...", null, null);
 				Updater updater = new Updater();
@@ -1646,10 +1654,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 							if (dl.unzipFolder("download\\update.zip", "webapps")) 
 								messageplayer("done.", "softwareupdate", "downloadcomplete");
 							
-							// TODO: brad zemoved 
-							// never fails if destination folder created 
-							// else messageplayer("unable to unzip package, corrupted? Try again.", null, null);
-
 							Util.delay(1000);
 							dl.deleteFile("download\\update.zip");
 							
@@ -1664,6 +1668,25 @@ public class Application extends MultiThreadedApplicationAdapter {
 				} else { msg = "version: v." + currver; }
 				messageplayer(msg, null, null);
 			}
-		}
+		//}
 	}
+	
+	public void factoryReset(){
+		
+		System.out.println("factory reset.....");
+	
+		String defaults = System.getenv("RED5_HOME") + "\\conf\\oculus_settings_default_copy.txt";
+		String settings = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
+		String backup = System.getenv("RED5_HOME") + "\\conf\\" + System.currentTimeMillis() + "_oculus_settings.txt";
+
+		// backup
+		new File(settings).renameTo(new File(backup));
+		
+		// delete it
+		new File(settings).delete();
+		
+		// copy
+		Util.copyfile(defaults, settings);
+	}
+	
 }

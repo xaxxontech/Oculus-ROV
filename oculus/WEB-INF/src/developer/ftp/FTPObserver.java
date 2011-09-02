@@ -151,9 +151,12 @@ public class FTPObserver implements Observer {
 		}
 	}
 
+	/*
 	@Override
 	public void removed(String key) {
 		System.out.println("...ftp removed: " + key);
 		state.dump();
 	}
+	*/
+	
 }

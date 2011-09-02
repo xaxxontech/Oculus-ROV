@@ -39,12 +39,26 @@ public class Util {
 		System.out.println("state writing to: " + path);
 	
 		try {
-
-			props.store(new FileOutputStream(new File(path)), comment);
+			
+			FileWriter out = new FileWriter(path);
+			out.append("# "+comment);
+			Enumeration<Object> keys = props.keys();
+			while(keys.hasMoreElements()){
+				String key = (String) keys.nextElement();
+				String value = (String) props.getProperty(key);
+				
+				System.out.println(key + " " + value);
+				out.write(key + " " + value + "\r\n");
+			}
+ 			
+			out.close();
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 		
+		} 	
+		
+
+		//props.store(new FileOutputStream(new File(path)), comment);
 	}
 	
 	

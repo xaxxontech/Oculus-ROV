@@ -1,7 +1,5 @@
 package oculus;
 
-import java.io.FileWriter;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -296,8 +294,8 @@ public class State {
 	public synchronized void delete(String key) {
 		props.remove(key);
 		
-		for(int i = 0 ; i < observers.size() ; i++)
-			observers.get(i).updated(key);	
+	//	for(int i = 0 ; i < observers.size() ; i++)
+		//	observers.get(i).updated(key);	
 	}
 	
 

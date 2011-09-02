@@ -46,8 +46,11 @@ public class DockingObserver implements Observer {
 		}
 	}
 
+	/*
 	@Override
 	public void removed(String key) {
 		System.out.println("__dock observer remove: " + key);
 	}
+	*/
+	
 }

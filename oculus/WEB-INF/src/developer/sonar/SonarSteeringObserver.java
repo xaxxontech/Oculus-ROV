@@ -46,16 +46,16 @@ public class SonarSteeringObserver implements Observer {
 		if (value < TOO_CLOSE) { 
 			comm.stopGoing();
 			app.message("carefull, sonar is: " + value, null, null);
-			// app.playerCallServer(Application.playerCommands.chat, "carefull, sonar is: " + value);
 			app.playerCallServer(PlayerCommands.move, "stop");
 		}
 			
 	}
 
+	/*
 	@Override
 	public void removed(String key) {
 		System.out.println("...sonar removed: " + key);
-	}
+	}*/
 
 	/**	 */
 	private class SonarTast extends TimerTask {

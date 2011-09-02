@@ -17,8 +17,7 @@ public class CommandManager {
 	private static String oculus = "oculus";
 	private static String function = "function";
 	private static String argument = "argument";
-	private static Logger log = Red5LoggerFactory.getLogger(
-			CommandManager.class, oculus);
+	private static Logger log = Red5LoggerFactory.getLogger(CommandManager.class, oculus);
 	private State state = State.getReference();
 	private static Application app = null;
 	private MulticastChannel channel = null;
@@ -74,7 +73,7 @@ public class CommandManager {
 				new File(temp).delete();
 
 				// write current state to file
-				state.writeFile(temp);
+				// State.writeFile(state.getProperties(), temp);
 
 				// blocking send
 				// new SendMail("Oculus State Dump", "debug dump attached",
@@ -83,7 +82,7 @@ public class CommandManager {
 				// true);
 
 				// email'ed it, now delete it
-				new File(temp).delete();
+				// new File(temp).delete();
 				// new File(move).delete();
 
 			}

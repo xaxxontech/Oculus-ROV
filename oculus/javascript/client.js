@@ -1242,9 +1242,12 @@ function arduinoReset() {
 }
 
 function factoryreset(){
-	message("resetting to factory settings",sentcmdcolor);
-	callServer('factoryreset');
-	overlay('off');
+	if(confirm("restore factory default settings?\n(a backup file will be created and application restarted)")){
+		message("resetting to factory settings",sentcmdcolor);
+		callServer('factoryreset');
+		callServer('restart','');
+		overlay('off');
+	}
 }
 
 function arduinoEcho(value){

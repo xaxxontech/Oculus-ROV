@@ -561,6 +561,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
+	
+	
 	/**
 	 * turn string input to command id
 	 * 
@@ -1674,19 +1676,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void factoryReset(){
 		
 		System.out.println("factory reset.....");
-	
-		String defaults = System.getenv("RED5_HOME") + "\\conf\\oculus_settings_default_copy.txt";
 		String settings = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
-		String backup = System.getenv("RED5_HOME") + "\\conf\\" + System.currentTimeMillis() + "_oculus_settings.txt";
+		String backup = System.getenv("RED5_HOME") + "\\conf\\oculus_settings_"
+			+ System.currentTimeMillis() + ".txt";
 
 		// backup
 		new File(settings).renameTo(new File(backup));
 		
 		// delete it
 		new File(settings).delete();
-		
-		// copy
-		Util.copyfile(defaults, settings);
+	
+		// create from scratch
+		State.writeFile(State.createDeaults(), settings);
 	}
+	
 	
 }

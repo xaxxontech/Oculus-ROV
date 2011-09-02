@@ -45,8 +45,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     private boolean pendingplayerisnull = true;
     private boolean emailgrab = false;
     private boolean playerstream = false;
-    
-	// TODO:  best not to have publics 
+ 
 	public boolean muteROVonMove = false;
 	public boolean admin = false;
 	public String stream = null;
@@ -68,20 +67,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if ((connection.getRemoteAddress()).equals("127.0.0.1")
 				&& logininfo[0].equals("")) 
 					return true;
-	
-		// TODO: new feature testing. Use 24 hour clock 
-		// if a guest, test if permitted hour 
-		//if ( ! logininfo[0].equals(settings.readSetting("user0"))){
-			//if(!guestHours()){
-				// TODO: COLIN ... plz send this message to login screen 
-				//log.error("Not permitted hours for: " + logininfo[0].toString());	
-				// System.out.println("Not permitted hours for: " + logininfo[0].toString() + 
-				//	" start: " + settings.readSetting("guest_start") + " end: " +
-				//		settings.readSetting("guest_end"));
-				//return false;
-		
-	//		} // else System.out.println("_guest hours login: " + logininfo[0]);
-	//	} // else System.out.println("_admin login: " + logininfo[0]);
 		
 		if (logininfo.length == 1) { // test for cookie auth
 			String username = logintest("", logininfo[0]);
@@ -229,7 +214,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Util.setSystemVolume(volume);
 	
 		// TODO: Brad added, removable with single comment line here 
-		// new developer.sonar.SonarSteeringObserver(this, comport);
+		new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this);
 		//new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this)
@@ -237,7 +222,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new SystemWatchdog();
 
 		// new DockingObserver(this
-		//new DockingObserver(this
+		// new DockingObserver(this
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -358,24 +343,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		state.set(State.logintime, System.currentTimeMillis());
 	}
 
-	/** put all commands here */
-	public enum playerCommands { 
-		
-		publish, move, battStats, docklineposupdate, autodock, autodockcalibrate,
-		speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate,
-		tilttest, speedset, slide, nudge, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, 
-		streamsettingsset, streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update,
-		new_user_add, user_list, delete_user, extrauser_password_update, username_update,
-		disconnectotherconnections, showlog, monitor, framegrab, emailgrab, assumecontrol, 
-		softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-		spotlightsetbrightness, floodlight, dockgrab, factoryreset;
-	
-		@Override 
-		public String toString() {
-			return super.toString();
-		}
-	}
-
 	/**
 	 * distribute commands from player
 	 * 
@@ -388,9 +355,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void playerCallServer(final String fn, final String str) {
 		if (fn == null) return;
 		if (fn.equals("")) return;
-		playerCommands cmd = null;
+		PlayerCommands cmd = null;
 		try {
-			cmd = playerCommands.valueOf(fn);
+			cmd = PlayerCommands.valueOf(fn);
 		} catch (Exception e) {
 			System.out.println("playerCallServer() command not found:" + fn);
 			return;
@@ -405,10 +372,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param fn to call in flash player [file name].swf
 	 * @param str is the argument string to pass along 
 	 */
-	public void playerCallServer(final playerCommands fn, final String str) {
+	public void playerCallServer(final PlayerCommands fn, final String str) {
 
 		if(state.getBoolean(State.developer))
-			if(!fn.equals(playerCommands.statuscheck))
+			if(!fn.equals(PlayerCommands.statuscheck))
 				if(state.getBoolean(State.developer))
 					System.out.println("playerCallServer(): " + fn + " " + str);
 		
@@ -433,7 +400,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// player only 
 		if (Red5.getConnectionLocal() != player) {
 			System.out.println("passenger, command dropped: " + fn.toString());
-			//return;
+			return;
 		}
 
 		switch (fn) {
@@ -1624,7 +1591,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void softwareUpdate(String str) {
 		
 		System.out.println("sw: " + str);
-	//	if (admin) {
+		if (admin) {
 			if (str.equals("check")) {
 				messageplayer("checking for new software...", null, null);
 				Updater updater = new Updater();
@@ -1670,14 +1637,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 				} else { msg = "version: v." + currver; }
 				messageplayer(msg, null, null);
 			}
-		//}
+		}
 	}
 	
 	public void factoryReset(){
 		
-		System.out.println("factory reset.....");
-		String settings = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
-		String backup = System.getenv("RED5_HOME") + "\\conf\\oculus_settings_"
+		final String settings = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
+		final String backup = System.getenv("RED5_HOME") + "\\conf\\oculus_settings_"
 			+ System.currentTimeMillis() + ".txt";
 
 		// backup
@@ -1687,7 +1653,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new File(settings).delete();
 	
 		// create from scratch
-		State.writeFile(State.createDeaults(), settings);
+		Util.writeFile(FactorySettings.createDeaults(), settings, "factory reset");
 	}
 	
 	

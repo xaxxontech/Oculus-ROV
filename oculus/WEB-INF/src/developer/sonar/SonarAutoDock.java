@@ -8,7 +8,7 @@ import oculus.LogManager;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
-import oculus.Application.playerCommands;
+import oculus.PlayerCommands;
 
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection;
@@ -152,7 +152,7 @@ public class SonarAutoDock implements Docker {
 					System.out.println("line 109... auto dock");
 					autodockgrabattempts ++;
 					
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 		
 				} else { 
 					
@@ -256,7 +256,7 @@ public class SonarAutoDock implements Docker {
 											comport.goBackward();
 											Thread.sleep(2000);
 											comport.stopGoing();
-											app.playerCallServer(Application.playerCommands.dockgrab, null);
+											app.playerCallServer(PlayerCommands.dockgrab, null);
 										} catch (Exception e) { e.printStackTrace(); } } }).start();
 									}
 									break;
@@ -320,7 +320,7 @@ public class SonarAutoDock implements Docker {
 					comport.stopGoing();
 					Thread.sleep(500); // let deaccelerate
 
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 
 		//				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 		//			sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
@@ -335,7 +335,7 @@ public class SonarAutoDock implements Docker {
 					comport.stopGoing();
 					Thread.sleep(500); // let deaccelerate
 
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					//IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 					//sc.invoke("dockgrab", new Object[] {0,0,"find"}); // sends xy, but they're unused
@@ -363,7 +363,7 @@ public class SonarAutoDock implements Docker {
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
 						
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
@@ -375,7 +375,7 @@ public class SonarAutoDock implements Docker {
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
 				
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
@@ -387,13 +387,13 @@ public class SonarAutoDock implements Docker {
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);
 
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 				else {
 
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 
 				}
 			}
@@ -404,7 +404,7 @@ public class SonarAutoDock implements Docker {
 				comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 				new Thread(new Runnable() { public void run() { try {
 					Thread.sleep(1500);
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else {
@@ -422,7 +422,7 @@ public class SonarAutoDock implements Docker {
 						Thread.sleep(1500); 
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 					log.info("autodock backup");

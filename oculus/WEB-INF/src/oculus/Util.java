@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -13,6 +14,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Properties;
 
 //import org.red5.logging.Red5LoggerFactory;
 //import org.slf4j.Logger;
@@ -25,6 +28,25 @@ public class Util {
 	// private final boolean debug = settings.getBoolean(Settings.developer);
 	// private final boolean alerts = settings.getBoolean(Settings.emailalerts);
     // private static final boolean notify = settings.getBoolean(Settings.loginnotify);
+	
+
+	/**
+	 * @param props is the list of values to send to disk 
+	 * @param path, is the file to write the state value pairs too
+	 */ 
+	public static void writeFile(Properties props, final String path, final String comment){
+		
+		System.out.println("state writing to: " + path);
+	
+		try {
+
+			props.store(new FileOutputStream(new File(path)), comment);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 		
+	}
+	
 	
 	/**
 	 * Delays program execution for the specified delay.

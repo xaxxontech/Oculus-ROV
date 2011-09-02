@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import oculus.Application;
 import oculus.ArduinoCommDC;
 import oculus.Observer;
+import oculus.PlayerCommands;
 import oculus.State;
 
 /**
@@ -46,7 +47,7 @@ public class SonarSteeringObserver implements Observer {
 			comm.stopGoing();
 			app.message("carefull, sonar is: " + value, null, null);
 			// app.playerCallServer(Application.playerCommands.chat, "carefull, sonar is: " + value);
-			app.playerCallServer(Application.playerCommands.move, "stop");
+			app.playerCallServer(PlayerCommands.move, "stop");
 		}
 			
 	}

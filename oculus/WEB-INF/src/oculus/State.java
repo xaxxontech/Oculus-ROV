@@ -10,36 +10,6 @@ public class State {
 
 	private Settings settings = new Settings();
 
-	/** these settings must be available in basic configuration */
-	public enum factoryDefaults {
-		
-		skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
-		docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay,
-		clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam,
-		volume, mute_rov_on_move, videoscale;
-		
-		@Override
-		public String toString() {
-			return super.toString();
-		}
-	}
-	
-	/** place extensions to settings here */
-	public enum optionalSettings {
-
-		emailalerts, emailaddress, emailpassword, developer, reboot, loginnotify, holdservo;
-		
-		@Override
-		public String toString() {
-			return super.toString();
-		}
-	}
-	
-	
-	//  public static final String enable = "enable";
-    //	public static final String disable = "disable";
-	//  private boolean locked = false
-	
 	public static final String user = "user";
 	public static final String logintime = "logintime";
 	public static final String userisconnected = "userisconnected";
@@ -126,37 +96,6 @@ public class State {
 			// System.out.println("_+__[" + i + "] " + observers.get(i).getClass().getName());
 	}
 	
-	
-	
-	/** get basic settings */
-	public static Properties createDeaults(){
-		Properties config = new Properties();
-		config.setProperty(factoryDefaults.skipsetup.toString(), "false");
-		config.setProperty(factoryDefaults.speedslow.toString(), "115");
-		config.setProperty(factoryDefaults.speedmed.toString(), "180");
-		config.setProperty(factoryDefaults.steeringcomp.toString(), "128");
-		config.setProperty(factoryDefaults.camservohoriz.toString(), "68");
-		config.setProperty(factoryDefaults.camposmax.toString(), "89");
-		config.setProperty(factoryDefaults.camposmin.toString(), "58");
-		config.setProperty(factoryDefaults.nudgedelay.toString(), "150");
-		config.setProperty(factoryDefaults.docktarget.toString(), "1.194_0.23209_0.17985_0.22649_129_116_80_67_-0.045455");
-		config.setProperty(factoryDefaults.vidctroffset.toString(), "0");
-		config.setProperty(factoryDefaults.vlow.toString(), "320_240_4_85");
-		config.setProperty(factoryDefaults.vmed.toString(), "320_240_8_95");
-		config.setProperty(factoryDefaults.vhigh.toString(), "640_480_8_85");
-		config.setProperty(factoryDefaults.vfull.toString(), "640_480_8_95");
-		config.setProperty(factoryDefaults.vcustom.toString(), "1024_768_8_85");
-		config.setProperty(factoryDefaults.vset.toString(), "vmed");
-		config.setProperty(factoryDefaults.maxclicknudgedelay.toString(), "580");
-		config.setProperty(factoryDefaults.clicknudgedelaymomentumfactor.toString(), "0.7");
-		config.setProperty(factoryDefaults.clicknudgemomentummult.toString(), "0.7");
-		config.setProperty(factoryDefaults.maxclickcam.toString(), "14");
-		config.setProperty(factoryDefaults.volume.toString(), "20");
-		config.setProperty(factoryDefaults.mute_rov_on_move.toString(), "true"); // was "yes"
-		config.setProperty(factoryDefaults.videoscale.toString(), "100");
-		return config;
-	}
-	
 	/** test for string equality. any nulls will return false */ 
 	public boolean equals(final String a, final String b){
 		String aa = get(a);
@@ -224,7 +163,7 @@ public class State {
 	/**
 	 * @param props is the list of values to send to disk 
 	 * @param path, is the file to write the state value pairs too
-	 */ 
+ 
 	public static void writeFile(Properties props, String path){
 		
 		System.out.println("state writing to: " + path);
@@ -250,7 +189,7 @@ public class State {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 		
-	}
+	}*/
 	
 	/** Put a name/value pair into the configuration */
 	public synchronized void set(final String key, final String value) {
@@ -264,21 +203,9 @@ public class State {
 			observers.get(i).updated(key.trim());	
 	}
 
-	/** 
-	private void notifyObservers(String updated) {
-		for(int i = 0 ; i < observers.size() ; i++)
-			observers.get(i).updated(updated);
-	}*/
-
 	/** Put a name/value pair into the config */
-	public /* synchronized */ void set(final String key, final long value) {
-		//try {
-			set(key, Long.toString(value));
-			// props.put(key.trim(), Long.toString(value));
-			// notifyObservers(key.trim());
-	//	} catch (Exception e) {
-	//		e.printStackTrace();
-	//	}
+	public void set(final String key, final long value) {
+		set(key, Long.toString(value));
 	}
 	
 	/** */
@@ -367,12 +294,16 @@ public class State {
 
 	/** */ 
 	public synchronized void delete(String key) {
-		//System.out.println("_+___state.delete(): " + key);
-		//for(int i = 0 ; i < observers.size() ; i++)
-		//	observers.get(i).updated(key.trim());	
-		
 		props.remove(key);
+		
+		for(int i = 0 ; i < observers.size() ; i++)
+			observers.get(i).updated(key);	
 	}
+	
+
+	//  public static final String enable = "enable";
+    //	public static final String disable = "disable";
+	//  private boolean locked = false
 	
 	
 	/*

@@ -4,6 +4,7 @@ import java.io.File;
 
 import oculus.Application;
 //import oculus.SendMail;
+import oculus.PlayerCommands;
 import oculus.State;
 import oculus.Util;
 
@@ -52,10 +53,10 @@ public class CommandManager {
 				return;
 			}
 
-			app.playerCallServer(Application.playerCommands.nudge, "left");
+			app.playerCallServer(PlayerCommands.nudge, "left");
 			Util.delay(3000);
-			app.playerCallServer(Application.playerCommands.move, "stop");
-			app.playerCallServer(Application.playerCommands.autodock, "go");
+			app.playerCallServer(PlayerCommands.move, "stop");
+			app.playerCallServer(PlayerCommands.autodock, "go");
 
 		}
 
@@ -131,8 +132,8 @@ public class CommandManager {
 					
 					
 					try {
-						app.playerCallServer(Application.playerCommands.autodock, "cancel");
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.autodock, "cancel");
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 					} catch (Exception e) {
 						System.out.println("_app call error");
 					}

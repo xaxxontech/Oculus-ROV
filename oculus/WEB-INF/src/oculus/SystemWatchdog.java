@@ -56,7 +56,7 @@ public class SystemWatchdog {
 					new File(temp).delete();
 					
 					// write current state to file
-					State.writeFile(state.getProperties(), temp);
+					Util.writeFile(state.getProperties(), temp, "watchdog written");
 					
 					if(Util.copyfile(logfile, temp)){
 						if(Util.copyfile(oculus, temp)){

@@ -125,7 +125,7 @@ public class AutoDock implements Docker {
 						// if(debug) new SendMail("Oculus Message", "auto dock fail, line 109 is being used!"); 
 						 System.out.println("line 109... auto dock");
 						// autodockgrabattempts ++;						
-						// app.playerCallServer(Application.playerCommands.dockgrab, null);
+						// app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					} else { 
 					*/	
@@ -249,7 +249,7 @@ public class AutoDock implements Docker {
 											comport.goBackward();
 											Thread.sleep(2000);
 											comport.stopGoing();
-											app.playerCallServer(Application.playerCommands.dockgrab, null);
+											app.playerCallServer(PlayerCommands.dockgrab, null);
 										} catch (Exception e) { e.printStackTrace(); } } }).start();
 									}
 									break;
@@ -317,7 +317,7 @@ public class AutoDock implements Docker {
 					Thread.sleep(1500);
 					comport.stopGoing();
 					Thread.sleep(500); // let deaccelerate
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 					
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
@@ -328,7 +328,7 @@ public class AutoDock implements Docker {
 					Thread.sleep(1500);
 					comport.stopGoing();
 					Thread.sleep(500); // let deaccelerate
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
@@ -353,7 +353,7 @@ public class AutoDock implements Docker {
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
 						
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
@@ -365,7 +365,7 @@ public class AutoDock implements Docker {
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
 				
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
@@ -377,13 +377,13 @@ public class AutoDock implements Docker {
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);
 
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 				else {
 
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 
 				}
 			}
@@ -394,7 +394,7 @@ public class AutoDock implements Docker {
 				comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 				new Thread(new Runnable() { public void run() { try {
 					Thread.sleep(1500);
-					app.playerCallServer(Application.playerCommands.dockgrab, null);
+					app.playerCallServer(PlayerCommands.dockgrab, null);
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else {
@@ -412,7 +412,7 @@ public class AutoDock implements Docker {
 						Thread.sleep(1500); 
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
-						app.playerCallServer(Application.playerCommands.dockgrab, null);
+						app.playerCallServer(PlayerCommands.dockgrab, null);
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 					log.info("autodock backup");
 				}

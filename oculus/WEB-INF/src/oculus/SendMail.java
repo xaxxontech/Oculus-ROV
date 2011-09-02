@@ -25,9 +25,8 @@ public class SendMail {
 	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
 
 	private Settings settings = new Settings();
-	private final String user = settings.readSetting(State.optionalSettings.emailaddress.toString()); // "email");
-	private final String pass = settings.readSetting(State.optionalSettings.emailpassword.toString()); //"email_password");
-	//private final boolean debug = settings.getBoolean("developer");
+	private final String user = settings.readSetting(OptionalSettings.emailaddress.toString()); 
+	private final String pass = settings.readSetting(OptionalSettings.emailpassword.toString()); 
 
 	private String subject = null;
 	private String body = null;

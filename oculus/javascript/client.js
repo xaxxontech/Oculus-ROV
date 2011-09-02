@@ -1243,10 +1243,10 @@ function arduinoReset() {
 
 function factoryreset(){
 	if(confirm("restore factory default settings?\n(a backup file will be created and application restarted)")){
-		message("resetting to factory settings",sentcmdcolor);
+		//message("resetting to factory settings",sentcmdcolor);
 		callServer('factoryreset');
 		callServer('restart','');
-		overlay('off');
+		// overlay('off');
 	}
 }
 

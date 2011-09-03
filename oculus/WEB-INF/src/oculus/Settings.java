@@ -1,6 +1,7 @@
 package oculus;
 
 import java.io.*;
+import java.util.Properties;
 
 public class Settings {
 	
@@ -105,6 +106,26 @@ public class Settings {
 		catch (Exception e) { e.printStackTrace(); }
 		return result;
 	}
+	
+	/**
+	 * @return the settings file in a parsed list
+	 */
+	public static Properties getProperties() {	
+		Properties result = new Properties();;
+		try{
+			FileInputStream filein = new FileInputStream(filename);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
+			String line = "";
+		    while ((line = reader.readLine()) != null) {
+		    	String items[] = line.split(" ");
+		    	result.setProperty(items[0], items[1]);
+		    }
+		    filein.close();		
+		}
+		catch (Exception e) { e.printStackTrace(); }
+		return result;
+	}
+	
 	
 	/**
 	 * modify value of existing settings file 

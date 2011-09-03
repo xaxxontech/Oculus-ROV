@@ -6,7 +6,7 @@ import java.util.TimerTask;
 import oculus.Application;
 import oculus.ArduinoCommDC;
 import oculus.Observer;
-import oculus.PlayerCommands;
+//import oculus.PlayerCommands;
 import oculus.State;
 
 /**
@@ -46,7 +46,7 @@ public class SonarSteeringObserver implements Observer {
 		if (value < TOO_CLOSE) { 
 			comm.stopGoing();
 			app.message("carefull, sonar is: " + value, null, null);
-			app.playerCallServer(PlayerCommands.move, "stop");
+			//app.playerCallServer(PlayerCommands.move, "stop");
 		}
 			
 	}

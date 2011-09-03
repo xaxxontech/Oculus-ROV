@@ -30,8 +30,7 @@ public class EmailAlerts {
 		
 		if (alerts){
 			timer.scheduleAtFixedRate(new Task(), State.ONE_MINUTE, DELAY);
-			
-			// if(debug) System.out.println("starting email alerts...");
+			System.out.println("starting email alerts...");
 		}
 	}
 

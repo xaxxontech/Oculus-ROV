@@ -41,7 +41,7 @@ public class Util {
 		try {
 			
 			FileWriter out = new FileWriter(path);
-			out.append("# "+comment);
+			out.append("# "+ comment + "\r\n");
 			Enumeration<Object> keys = props.keys();
 			while(keys.hasMoreElements()){
 				String key = (String) keys.nextElement();

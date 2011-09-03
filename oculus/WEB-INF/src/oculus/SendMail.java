@@ -36,7 +36,7 @@ public class SendMail {
 	private Application application = null;
 
 	/** */
-	SendMail(final String sub, final String text, final String file) {
+	public SendMail(final String sub, final String text, final String file) {
 
 		subject = sub;
 		body = text;
@@ -50,7 +50,7 @@ public class SendMail {
 	}
 
 	/**	*/
-	SendMail(final String sub, final String text) {
+	public SendMail(final String sub, final String text) {
 
 		subject = sub;
 		body = text;
@@ -64,7 +64,7 @@ public class SendMail {
 
 
 	/** send messages to user */
-	SendMail(final String sub, final String text, final String file, Application app) {
+	public SendMail(final String sub, final String text, final String file, Application app) {
 		
 		subject = sub;
 		body = text;
@@ -79,7 +79,7 @@ public class SendMail {
 	}
 
 	/** send messages to user */
-	SendMail(final String sub, final String text, Application app) {
+	public SendMail(final String sub, final String text, Application app) {
 		
 		subject = sub;
 		body = text;

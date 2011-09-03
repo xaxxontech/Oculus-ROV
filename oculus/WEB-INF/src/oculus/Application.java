@@ -396,11 +396,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		}
 
+		// TODO: 
 		// must be driver/non-passenger for all commands below
 		// player only 
 		if (Red5.getConnectionLocal() != player) {
 			System.out.println("passenger, command dropped: " + fn.toString());
-			return;
+			//return;
 		}
 
 		switch (fn) {
@@ -1452,7 +1453,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void saveAndLaunch(String str) {
-		// System.out.println(str);
+		System.out.println("saveandlaunch: " + str);
 		String message = "";
 		Boolean oktoadd = true;
 		Boolean restartrequired = false;
@@ -1591,6 +1592,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void softwareUpdate(String str) {
 		
 		System.out.println("sw: " + str);
+		
 		if (admin) {
 			if (str.equals("check")) {
 				messageplayer("checking for new software...", null, null);
@@ -1640,6 +1642,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
+	//
+	// TODO: use input string to create different types of config files
+	//
 	public void factoryReset(){
 		
 		final String settings = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
@@ -1653,7 +1658,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new File(settings).delete();
 	
 		// create from scratch
-		Util.writeFile(FactorySettings.createDeaults(), settings, "factory reset");
+		//Util.writeFile(FactorySettings.createDeaults(), settings, "factory reset");
+		
+		//Util.writeFile(OptionalSettings.createBasicDeveloper(), settings, "factory reset");
+
+		Util.writeFile(
+			OptionalSettings.createBasicDeveloper("brad.zdanivsky", "passs"),
+				settings, "factory reset");
+
+		
 	}
 	
 	

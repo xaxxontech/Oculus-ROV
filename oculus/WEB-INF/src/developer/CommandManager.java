@@ -1,10 +1,18 @@
 package developer;
 
+//import java.io.File;
+
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import oculus.Application;
 //import oculus.SendMail;
+//import oculus.PlayerCommands;
+import oculus.FactorySettings;
 import oculus.PlayerCommands;
+import oculus.SendMail;
+import oculus.Settings;
 import oculus.State;
 import oculus.Util;
 
@@ -18,7 +26,8 @@ public class CommandManager {
 	private static String oculus = "oculus";
 	private static String function = "function";
 	private static String argument = "argument";
-	private static Logger log = Red5LoggerFactory.getLogger(CommandManager.class, oculus);
+	private static Logger log = Red5LoggerFactory.getLogger(
+			CommandManager.class, oculus);
 	private State state = State.getReference();
 	private static Application app = null;
 	private MulticastChannel channel = null;
@@ -31,11 +40,10 @@ public class CommandManager {
 		System.out.println("command manager ready");
 	}
 
-	/** send a command to the group */
-	public void send(Command command) {
-		channel.write(command);
-	}
-
+	/**
+	 * send a command to the group public void send(Command command) {
+	 * channel.write(command); }
+	 */
 	/** try to find dock by turning in a circle and scanning */
 	public void home() {
 
@@ -53,10 +61,10 @@ public class CommandManager {
 				return;
 			}
 
-			app.playerCallServer(PlayerCommands.nudge, "left");
+			// app.playerCallServer(PlayerCommands.nudge, "left");
 			Util.delay(3000);
-			app.playerCallServer(PlayerCommands.move, "stop");
-			app.playerCallServer(PlayerCommands.autodock, "go");
+			// app.playerCallServer(PlayerCommands.move, "stop");
+			// app.playerCallServer(PlayerCommands.autodock, "go");
 
 		}
 
@@ -67,25 +75,30 @@ public class CommandManager {
 		new Thread() {
 			public void run() {
 
+				// System.out.println(state.toString());
+
+				/*
 				final String temp = System.getenv("RED5_HOME") + "\\log\\debug.txt";
-				//final String move = System.getenv("RED5_HOME") + "\\log\\moves.log";
-
-				// delete if exists from before
-				new File(temp).delete();
-
-				// write current state to file
-				// State.writeFile(state.getProperties(), temp);
-
+				new java.io.File(temp).delete();
+				Util.writeFile(state.getProperties(), temp, "dumper");
+				*/
+				
+				state.dump();
+				
 				// blocking send
-				// new SendMail("Oculus State Dump", "debug dump attached",
-				// temp, true);
-				// new SendMail("Oculus Move Log", "debug dump attached", move,
-				// true);
+				new SendMail("Oculus State Dump", "debug dump attached..."); // , temp);
+				
+				// FactorySettings.validate(FactorySettings.createDeaults());
 
-				// email'ed it, now delete it
-				// new File(temp).delete();
-				// new File(move).delete();
-
+				try {
+					FileWriter file = new FileWriter(new File("kkk.txt"));
+					FactorySettings.appendFile(file, Settings.getProperties()); 
+					//FactorySettings.createDeaults());
+					file.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
 			}
 		}.start();
 	}
@@ -93,7 +106,7 @@ public class CommandManager {
 	/** take any message on this channel, look for an action */
 	public void execute(Command command) {
 		if (app == null) {
-			System.out.println("execute(): not configured");
+			System.out.println("CommandManager.execute(): not configured");
 			log.error("execute(): not configured");
 			return;
 		}
@@ -106,46 +119,49 @@ public class CommandManager {
 			final String fn = command.get(function);
 			final String arg = command.get(argument);
 
-			if (fn == null) return; 
-			
-				if (fn.equalsIgnoreCase("home")) {
+			if (fn == null) return;
 
-					new Thread() {
-						public void run() {
-							home();
-						}
-					}.start();
+			// if (fn.equalsIgnoreCase("home")) {
+			/*
+			 * new Thread() { public void run() { home(); } }.start();
+			 */
+			// } else
 
-				} else if (fn.equalsIgnoreCase("dump")) {
+			if (fn.equalsIgnoreCase("salt")) {
 
-					dump();
+				String salt = new Settings().readSetting("salt");
+				if (salt != null) {
 
-				} else if (fn.equalsIgnoreCase("sonar")) {
-					if (arg != null) {
-						if (arg.equals("debug"))
-							state.set(State.sonardebug, true);
-						if (arg.equals("reset"))
-							state.set(State.sonardebug, false);
-					}
-				} else if (fn.equalsIgnoreCase("find")) {
+					System.out.println("salt: " + salt);
 
-					
-					
-					try {
-						app.playerCallServer(PlayerCommands.autodock, "cancel");
-						app.playerCallServer(PlayerCommands.dockgrab, null);
-					} catch (Exception e) {
-						System.out.println("_app call error");
-					}
+					// Command cmd = new Command("kk");
+					// cmd.add("salted", salt);
+					// cmd.send();
+					// System.out.println(cmd);
 
-				} else { // must be an application primitive
-					try {
-						app.playerCallServer(fn, arg);
-					} catch (Exception e) {
-						System.out.println("_app call error");
-					}
+				} else System.err.println("error - no salt");
+
+			} else if (fn.equalsIgnoreCase("dump")) {
+
+				dump();
+
+			} else if (fn.equalsIgnoreCase("sonar")) {
+				if (arg != null) {
+					if (arg.equals("debug"))
+						state.set(State.sonardebug, true);
+					if (arg.equals("reset"))
+						state.set(State.sonardebug, false);
 				}
-			
+			} else if (fn.equalsIgnoreCase("find")) {
+
+				app.playerCallServer(PlayerCommands.dockgrab, null);
+				
+			} else {
+				
+				// must be an application primitive try {
+				app.playerCallServer(fn, arg);
+
+			}
 		}
 	}
 }

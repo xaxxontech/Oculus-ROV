@@ -1,5 +1,7 @@
 package oculus;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Properties;
 
 public enum FactorySettings {
@@ -9,7 +11,6 @@ public enum FactorySettings {
 	skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
 	docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay, 
 	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, volume, mute_rov_on_move, videoscale;
-
 
 	/** get basic settings */
 	public static Properties createDeaults(){
@@ -40,9 +41,40 @@ public enum FactorySettings {
 		return config;
 	}
 	
+
+	/** @returns true if all settings are in properties */ 
+	public static boolean validate(Properties conf){
+		Settings fromfile = new Settings();
+		String value = null;
+		for (FactorySettings settings : FactorySettings.values()) {
+			value = fromfile.readSetting(settings.toString());
+			if(value==null) return false;
+		}
+		return true;
+	}
+	
+	/** write to file in the order above */
+	public static void appendFile(FileWriter file, Properties conf){
+		if(validate(conf)){
+			Settings fromfile = new Settings();
+			String value = null;
+			for (FactorySettings settings : FactorySettings.values()) {
+				value = fromfile.readSetting(settings.toString());
+				try {
+					file.append(settings.toString() + " " + value.toString() + "\r\n");
+				} catch (IOException e) {
+					try {
+						file.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return super.toString();
 	}
-
 }

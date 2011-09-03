@@ -54,29 +54,29 @@ public class MulticastChannel implements Runnable {
 		server.start();
 	}
 
-	/** Constructor, use where not needing a call back hook */
+	/** Constructor, use where not needing a call back hook 
 	MulticastChannel() {
 
 		try {
 
 			groupPort = Integer.parseInt(DEFAULT_PORT);
 
-			/** get group IP */
+			// get group IP 
 			groupAddress = InetAddress.getByName(DEFAULT_ADDRESS);
 
-			/** construct the server socket */
+			// construct the server socket 
 			serverSocket = new MulticastSocket(groupPort);
 
-			/** join this group */
+			// join this group 
 			serverSocket.joinGroup(groupAddress);
 
-			/** find our ip */
+			// find our ip 
 			local = (InetAddress.getLocalHost()).getHostAddress();
 
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
-	}
+	}*/
 
 	/** @return the address of this node */
 	public String getLocalAddress() {
@@ -112,10 +112,10 @@ public class MulticastChannel implements Runnable {
 				String input = new String(packet.getData()).trim();
 
 				/** get sending node's addr */
-				// String sendersIp = ((InetAddress) packet.getAddress()).getHostAddress();
+				//String sendersIp = ((InetAddress) packet.getAddress()).getHostAddress();
 
 				/** test the input */
-				///if (valid(input, sendersIp)) {
+				//if (valid(input, sendersIp)) {
 				
 					Command cmd = parse.parse(input);
 
@@ -123,6 +123,7 @@ public class MulticastChannel implements Runnable {
 					if (manager != null) {
 						if (cmd != null) {
 							try {
+								//cmd.add("sender", sendersIp);
 								manager.execute(cmd);
 							} catch (Exception e) {
 								System.out.println("manager.execute(): " + e.getMessage());
@@ -130,6 +131,7 @@ public class MulticastChannel implements Runnable {
 						}
 					}
 				}
+			//}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

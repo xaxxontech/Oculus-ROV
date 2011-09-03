@@ -200,7 +200,13 @@ public class Command {
 	}
 
 	public void send() {
-		if(channel==null) channel = new MulticastChannel();
+		if(channel==null) {
+			
+			System.out.println("null channel");
+			return;
+			
+			//channel = new MulticastChannel();
+		}
 		channel.write(command.toString());
 	}
 

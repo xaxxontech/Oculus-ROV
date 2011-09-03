@@ -11,7 +11,7 @@ public class DockingObserver implements Observer {
 	private Application app = null;
 	
 	private long start = 0;
-	private long end = 0;
+//	private long end = 0;
 	
 	/** register for state changes */
 	public DockingObserver(Application a){
@@ -45,12 +45,12 @@ public class DockingObserver implements Observer {
 	
 		}
 	}
-
+	
 	/*
 	@Override
 	public void removed(String key) {
 		System.out.println("__dock observer remove: " + key);
-	}
-	*/
+	}*/
+	
 	
 }

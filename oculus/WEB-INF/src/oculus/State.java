@@ -89,9 +89,6 @@ public class State {
 	/** */
 	public void addObserver(Observer obs){
 		observers.add(obs);
-		
-		// for(int i = 0 ; i < observers.size() ; i++)
-			// System.out.println("_+__[" + i + "] " + observers.get(i).getClass().getName());
 	}
 	
 	/** test for string equality. any nulls will return false */ 

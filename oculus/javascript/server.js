@@ -142,6 +142,7 @@ function saveandlaunch() {
 		}
 		str += "user " + user + " password " + pass + " ";  
 	}
+	
 	//battery
 //	if (document.getElementById("battery").checked) { str += "battery yes "; }
 //	else { str += "battery no "; }
@@ -169,6 +170,8 @@ function saveandlaunch() {
 	//TODO: Brad
 	if (document.getElementById("developer").checked) {str += "developer "; }
 	if (document.getElementById("holdservo").checked) {str += "holdservo "; }
+	if (document.getElementById("loginnotify").checked) {str += "loginnotify "; }
+	if (document.getElementById("sonarconnected").checked) {str += "sonarconnected "; }
 
 	
 	if (msg != "") { message(msg); }

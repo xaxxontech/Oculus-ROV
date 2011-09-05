@@ -7,7 +7,7 @@ import java.util.Properties;
 /** place extensions to settings here */
 public enum OptionalSettings {
 	
-	emailalerts, emailaddress, emailpassword, developer, reboot, loginnotify, holdservo;
+	emailalerts, emailaddress, emailpassword, developer, reboot, loginnotify, holdservo, sonar;
 
 	/** get basic settings */
 	public static Properties createDeaults(){

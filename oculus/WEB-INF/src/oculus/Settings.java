@@ -116,13 +116,11 @@ public class Settings {
 	/**
 	 * @return the settings file in a parsed list
 	 */
-	public static Properties getProperties() {
+	public synchronized static Properties getProperties() {
 		Properties result = new Properties();
-		;
 		try {
 			FileInputStream filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					filein));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			String line = "";
 			while ((line = reader.readLine()) != null) {
 				String items[] = line.split(" ");
@@ -138,35 +136,29 @@ public class Settings {
 	/**
 	 * Organize the settings file into 3 sections. Use Enums's to order the file
 	 */
-	public void writeFile() {
+	public synchronized void writeFile() {
 		try {
 			final String temp = System.getenv("RED5_HOME") + "\\conf\\oculus_created.txt";
 			FileWriter fw = new FileWriter(new File(temp));
 			fw.append("# required settings \r\n");
-			Properties defaults = FactorySettings.createDeaults();
 			for (FactorySettings factory : FactorySettings.values()) {
 
 				// over write with user's settings
 				String val = readSetting(factory.toString());
-				if (val == null) {
-					fw.append(factory.toString() + " "
-							+ defaults.getProperty(factory.toString()) + "\r\n");
-				} else {
-					fw.append(factory.toString() + " " + val + "\r\n");
-				}
+				if (val != null) 
+					if( ! val.equalsIgnoreCase("null"))
+						fw.append(factory.toString() + " " + val + "\r\n");
 			}
-
+			
 			// optional
 			fw.append("# optional settings \r\n");
 			for (OptionalSettings ops : OptionalSettings.values()) {
 
 				// over write with user's settings
 				String val = readSetting(ops.toString());
-				if (val == null) {
-					fw.append(ops.toString() + " " + defaults.getProperty(ops.toString()) + "\r\n");
-				} else {
-					fw.append(ops.toString() + " " + val + "\r\n");
-				}
+				if (val != null)
+					if( ! val.equalsIgnoreCase("null"))
+						fw.append(ops.toString() + " " + val + "\r\n");
 			}
 
 			fw.append("# user list \r\n");
@@ -245,12 +237,13 @@ public class Settings {
 	public void writeSettings(String setting, String value) {
 		value = value.trim();
 		FileInputStream filein;
+		
+		// TODO: WHOA BAD, USE VECTOR 
 		String[] lines = new String[999];
 		try {
 
 			filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					filein));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			int i = 0;
 			while ((lines[i] = reader.readLine()) != null) {
 				String items[] = lines[i].split(" ");

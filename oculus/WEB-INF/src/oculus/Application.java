@@ -103,7 +103,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			admin = false;			
 			state.delete(State.user);
 			state.set(State.userisconnected, "false");
-			//state.delete(State.userisconnected);
 			player = null;
 			
 			if (!state.getBoolean(State.autodocking)) {
@@ -1217,7 +1216,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				log.info("player broadcast start");
 			} else {
 				sc.invoke("publish", new Object[] { "stop", null, null, null, null });
-				// TODO: BRAD TESTING
 				grabberPlayPlayer(0);
 				playerstream = false;
 				log.info("player broadcast stop");
@@ -1483,6 +1481,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (s[n].equals("skipsetup")) {
 				skipsetup = s[n + 1];
 			}
+			
+			//TODO: BRAD ...............
 /*
 			if (s[n].equals("developer")) {
 				developer = s[n + 1];
@@ -1491,12 +1491,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 			
 		}
-		
-		boolean holdservo = false;
-		if(str.indexOf("holdservo")>0) holdservo = true;
-		
-		boolean developer = false;
-		if(str.indexOf("developer")>0) developer = true;
 		
 		// user & password
 		if (user != null) {
@@ -1560,28 +1554,45 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		// TODO: BRAD
-		// if set, add stettings 
-		if(developer){
-			//if(developer.equalsIgnoreCase("true")){
-			
-			///System.out.println("d: " + developer);
-			
 		
-			settings.newSetting("developer", "true"); 
+		if(str.indexOf(OptionalSettings.developer.toString())>0){
+
+			System.out.println("developer..............");
+			
+			if(settings.readSetting(OptionalSettings.developer.toString()) == null)
+				settings.newSetting(OptionalSettings.developer.toString(), "true"); 
+			else 
+				settings.writeSettings(OptionalSettings.developer.toString(), "true");
+			
 			settings.newSetting("reboot", "true"); 
-			
-			//String test = settings.readSetting("developer");
-			//if( test == null ) System.out.println("errrrrrrrrrrrrrrr");
-			
-			///*OptionalSettings.developer.toString(), */"true");
-			
-			//settings.writeSettings(OptionalSettings.emailalerts.toString(), "true");
-			//	settings.writeSettings(OptionalSettings.emailaddress.toString(), "true");
-			//	settings.writeSettings(OptionalSettings.emailaddress.toString(), "true");
-			//}
+			settings.writeFile();
 		}
 		
-		if(holdservo) settings.newSetting("holdservo", "true");
+		if(str.indexOf(OptionalSettings.holdservo.toString())>0) {
+			if(settings.readSetting(OptionalSettings.holdservo.toString()) == null)
+				settings.newSetting(OptionalSettings.holdservo.toString(), "true");
+			else 
+				settings.writeSettings(OptionalSettings.holdservo.toString(), "true");
+			settings.writeFile();
+		}
+		
+		if(str.indexOf(OptionalSettings.loginnotify.toString())>0) {
+			if(settings.readSetting(OptionalSettings.loginnotify.toString()) == null)
+				settings.newSetting(OptionalSettings.loginnotify.toString(), "true");
+			else 
+				settings.writeSettings(OptionalSettings.loginnotify.toString(), "true");
+			settings.writeFile();
+		}
+		
+
+		if(str.indexOf(OptionalSettings.sonar.toString())>0) {
+			if(settings.readSetting(OptionalSettings.sonar.toString()) == null)
+				settings.newSetting(OptionalSettings.sonar.toString(), "true");
+			else 
+				settings.writeSettings(OptionalSettings.sonar.toString(), "true");
+			settings.writeFile();
+			restartrequired = true;
+		}
 		
 
 		if (oktoadd) {
@@ -1627,7 +1638,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// rtmp port
 		result += "rtmpport " + settings.readRed5Setting("rtmp.port") + " ";
 		
-		// System.out.println("__str:" + result);
+		System.out.println("__str:" + result);
 		messageGrabber(result, null);
 	}
 

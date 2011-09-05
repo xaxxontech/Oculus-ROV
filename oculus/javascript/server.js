@@ -166,6 +166,11 @@ function saveandlaunch() {
 	if (document.getElementById("skipsetup").checked) {str += "skipsetup yes "; }
 	else { str += "skipsetup no "; }
 	
+	//TODO: Brad
+	if (document.getElementById("developer").checked) {str += "developer "; }
+	if (document.getElementById("holdservo").checked) {str += "holdservo "; }
+
+	
 	if (msg != "") { message(msg); }
 	if (oktosend) {
 		message("submitting info",null);

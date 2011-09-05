@@ -88,16 +88,7 @@ public class CommandManager {
 				// blocking send
 				new SendMail("Oculus State Dump", "debug dump attached..."); // , temp);
 				
-				// FactorySettings.validate(FactorySettings.createDeaults());
-
-				try {
-					FileWriter file = new FileWriter(new File("kkk.txt"));
-					FactorySettings.appendFile(file, Settings.getProperties()); 
-					//FactorySettings.createDeaults());
-					file.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				new Settings().writeFile();
 				
 			}
 		}.start();

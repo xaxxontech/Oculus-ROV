@@ -1,5 +1,7 @@
 package oculus;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Properties;
 
 /** place extensions to settings here */
@@ -28,7 +30,7 @@ public enum OptionalSettings {
 	}
 	
 	/** get an gmail */
-	public static Properties createBasicDeveloper(String email, String pass){
+	public static Properties createDeveloper(String email, String pass){
 		Properties config = FactorySettings.createDeaults();
 		config.setProperty(emailaddress.toString(), email);
 		config.setProperty(emailpassword.toString(), pass);
@@ -51,6 +53,35 @@ public enum OptionalSettings {
 		config.setProperty(holdservo.toString(), "true");
 		return config;
 	}
+	
+
+
+	
+	/** write to file in the order set in enum */
+	public static void CreateFile(FileWriter file, Properties props){
+		
+		// write optional 
+		
+		
+		
+		// write factory 
+		for (FactorySettings settings : FactorySettings.values()) {
+			try {
+				file.append(settings.toString() + " " 
+					+ props.getProperty(settings.toString()) + "\r\n");
+				
+			} catch (IOException e) {
+				try {
+					file.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		
+		
+	}
+	
 	
 	@Override
 	public String toString() {

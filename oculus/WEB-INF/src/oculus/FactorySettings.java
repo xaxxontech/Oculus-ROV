@@ -10,12 +10,13 @@ public enum FactorySettings {
 
 	skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
 	docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay, 
-	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, volume, mute_rov_on_move, videoscale;
+	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, mute_rov_on_move,
+	videoscale, volume;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
 		Properties config = new Properties();
-		config.setProperty(skipsetup.toString(), "false");
+		config.setProperty(skipsetup.toString(), "no");
 		config.setProperty(speedslow.toString(), "115");
 		config.setProperty(speedmed.toString(), "180");
 		config.setProperty(steeringcomp.toString(), "128");
@@ -48,26 +49,30 @@ public enum FactorySettings {
 		String value = null;
 		for (FactorySettings settings : FactorySettings.values()) {
 			value = fromfile.readSetting(settings.toString());
-			if(value==null) return false;
+			if(value==null){
+				System.out.println(conf.toString());
+				System.out.println("settings file missing: " + settings);
+				return false;
+			}
 		}
 		return true;
 	}
 	
-	/** write to file in the order above */
-	public static void appendFile(FileWriter file, Properties conf){
-		if(validate(conf)){
-			Settings fromfile = new Settings();
-			String value = null;
-			for (FactorySettings settings : FactorySettings.values()) {
-				value = fromfile.readSetting(settings.toString());
+	
+	/** write to file in the order set in enum */
+	public static void writeFile(FileWriter file){
+		Properties props = FactorySettings.createDeaults();
+		for (FactorySettings settings : FactorySettings.values()) {
+			try {
+				
+				file.append(settings.toString() + " " 
+					+ props.getProperty(settings.toString()) + "\r\n");
+				
+			} catch (IOException e) {
 				try {
-					file.append(settings.toString() + " " + value.toString() + "\r\n");
-				} catch (IOException e) {
-					try {
-						file.close();
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
+					file.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
 			}
 		}

@@ -4,8 +4,8 @@ import java.io.*;
 import java.util.Properties;
 
 public class Settings {
-	
-	private static String filename = System.getenv("RED5_HOME")+"\\conf\\oculus_settings.txt";
+
+	private static final String filename = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
 
 	// put all constants here
 	public static final String emailalerts = "emailalerts";
@@ -13,9 +13,8 @@ public class Settings {
 	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
 	public static final String developer = "developer";
-	public static final int ERROR = -1; //Integer.MIN_VALUE;
+	public static final int ERROR = -1; // Integer.MIN_VALUE;
 
-	
 	/**
 	 * lookup values from props file
 	 * 
@@ -23,12 +22,16 @@ public class Settings {
 	 *            is the lookup value
 	 * @return the matching value from properties file (or false if not found)
 	 */
-	public boolean getBoolean(String key){
-		if(key==null) return false;
+	public boolean getBoolean(String key) {
+		if (key == null)
+			return false;
 		String str = readSetting(key);
-		if(str==null) return false;
-		if(str.toUpperCase().equals("YES")) return true;
-		else if(str.toUpperCase().equals("TRUE")) return true;		
+		if (str == null)
+			return false;
+		if (str.toUpperCase().equals("YES"))
+			return true;
+		else if (str.toUpperCase().equals("TRUE"))
+			return true;
 		return false;
 	}
 
@@ -80,108 +83,201 @@ public class Settings {
 		return value;
 	}
 
-	
 	/**
-	 *
+	 * 
 	 * read through whole file line by line, extract result
 	 * 
-	 * @param str this parameter we are looking for 
-	 * @return a String value for this given parameter, or
-	 *  null if not found
+	 * @param str
+	 *            this parameter we are looking for
+	 * @return a String value for this given parameter, or null if not found
 	 */
 	public String readSetting(String str) {
-		FileInputStream filein;	
-		String result=null;
-		try{
-			
+		FileInputStream filein;
+		String result = null;
+		try {
+
 			filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					filein));
 			String line = "";
-		    while ((line = reader.readLine()) != null) {
-		    	String items[] = line.split(" ");
-		    	if ((items[0].toUpperCase()).equals(str.toUpperCase())) { result = items[1]; }		        
-		    }
-		    filein.close();		
+			while ((line = reader.readLine()) != null) {
+				String items[] = line.split(" ");
+				if ((items[0].toUpperCase()).equals(str.toUpperCase())) {
+					result = items[1];
+				}
+			}
+			filein.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
 		return result;
 	}
-	
+
 	/**
 	 * @return the settings file in a parsed list
 	 */
-	public static Properties getProperties() {	
-		Properties result = new Properties();;
-		try{
+	public static Properties getProperties() {
+		Properties result = new Properties();
+		;
+		try {
 			FileInputStream filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					filein));
 			String line = "";
-		    while ((line = reader.readLine()) != null) {
-		    	String items[] = line.split(" ");
-		    	result.setProperty(items[0], items[1]);
-		    }
-		    filein.close();		
+			while ((line = reader.readLine()) != null) {
+				String items[] = line.split(" ");
+				result.setProperty(items[0], items[1]);
+			}
+			filein.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
 		return result;
 	}
-	
-	
+
 	/**
-	 * modify value of existing settings file 
+	 * Organize the settings file into 3 sections. Use Enums's to order the file
+	 */
+	public void writeFile() {
+		try {
+			final String temp = System.getenv("RED5_HOME") + "\\conf\\oculus_created.txt";
+			FileWriter fw = new FileWriter(new File(temp));
+			fw.append("# required settings \r\n");
+			Properties defaults = FactorySettings.createDeaults();
+			for (FactorySettings factory : FactorySettings.values()) {
+
+				// over write with user's settings
+				String val = readSetting(factory.toString());
+				if (val == null) {
+					fw.append(factory.toString() + " "
+							+ defaults.getProperty(factory.toString()) + "\r\n");
+				} else {
+					fw.append(factory.toString() + " " + val + "\r\n");
+				}
+			}
+
+			// optional
+			fw.append("# optional settings \r\n");
+			for (OptionalSettings ops : OptionalSettings.values()) {
+
+				// over write with user's settings
+				String val = readSetting(ops.toString());
+				if (val == null) {
+					fw.append(ops.toString() + " " + defaults.getProperty(ops.toString()) + "\r\n");
+				} else {
+					fw.append(ops.toString() + " " + val + "\r\n");
+				}
+			}
+
+			fw.append("# user list \r\n");
+			fw.append("salt " + readSetting("salt") + "\r\n");
+
+			String[][] users = getUsers();
+			for (int j = 0; j < users.length; j++) {
+				fw.append("user" + j + " " + users[j][0] + "\r\n");
+				fw.append("pass" + j + " " + users[j][1] + "\r\n");
+			}
+
+			// fw.append("# written on: " + new java.util.Date().toString() + "\r\n");
+			fw.close();
+			
+			// now swap temp for real file
+			new File(filename).delete();
+			new File(temp).renameTo(new File(filename));
+			new File(temp).delete();
+
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		}
+	}
+
+	/**
+	 * @return a list of user/pass values from the existing settings file
+	 */
+	public String[][] getUsers() {
+
+		int i = 0; // count users
+		for (;; i++)
+			if (readSetting("user" + i) == null)
+				break;
+
+		// System.out.println("found: " + i);
+		String[][] users = new String[i][2];
+
+		for (int j = 0; j < i; j++) {
+			users[j][0] = readSetting("user" + j);
+			users[j][1] = readSetting("pass" + j);
+		}
+
+		return users;
+	}
+
+	/**
+	 * modify value of existing settings file
 	 * 
-	 * @param setting 
-	 * 				is the key to be written to file  
+	 * @param setting
+	 *            is the key to be written to file
 	 * @param value
-	 * 				is the integer to parse into a string before being written to file
+	 *            is the integer to parse into a string before being written to
+	 *            file
 	 */
 	public void writeSettings(String setting, int value) {
-	
-		String str = null; 
-		
+
+		String str = null;
+
 		try {
 			str = Integer.toString(value);
 		} catch (Exception e) {
 			return;
 		}
-	
-		if(str != null)
+
+		if (str != null)
 			writeSettings(setting, str);
 	}
-	
-	public void writeSettings(String setting, String value) { // modify value of existing setting
-		// read whole file, replace line while you're at it, write whole file
-		value = value.replaceAll("\\s+$", ""); // remove trailing whitespace
+
+	/**
+	 * Modify value of existing setting. read whole file, replace line while
+	 * you're at it, write whole file
+	 * 
+	 * @param setting
+	 * @param value
+	 */
+	public void writeSettings(String setting, String value) {
+		value = value.trim();
 		FileInputStream filein;
 		String[] lines = new String[999];
-		try{
-			
+		try {
+
 			filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));			
-			int i=0;
-		    while ((lines[i] = reader.readLine()) != null) { 
-		    	String items[] = lines[i].split(" ");
-		    	if ((items[0].toUpperCase()).equals(setting.toUpperCase())) {
-		    		lines[i] = setting+" "+value;
-		    	}
-		    	i++;
-		    }
-		    filein.close();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					filein));
+			int i = 0;
+			while ((lines[i] = reader.readLine()) != null) {
+				String items[] = lines[i].split(" ");
+				if ((items[0].toUpperCase()).equals(setting.toUpperCase())) {
+					lines[i] = setting + " " + value;
+				}
+				i++;
+			}
+			filein.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
-		
+
 		FileOutputStream fileout;
-		try{
-			fileout = new FileOutputStream (filename);
-			for (int n=0; n<lines.length; n++) {
+		try {
+			fileout = new FileOutputStream(filename);
+			for (int n = 0; n < lines.length; n++) {
 				if (lines[n] != null) {
-					new PrintStream(fileout).println (lines[n]);
+					new PrintStream(fileout).println(lines[n]);
 				}
 			}
-		    fileout.close();		
-		} catch (Exception e) { e.printStackTrace(); }
+			fileout.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
-	
+
 	/**
 	 * read whole file, add single line, write whole file
 	 * 
@@ -190,128 +286,137 @@ public class Settings {
 	 */
 	public void newSetting(String setting, String value) {
 
-		setting = setting.trim();// setting.replaceAll("\\s+$", ""); // remove trailing whitespace
-		value = value.trim();  // value.replaceAll("\\s+$", ""); 
-		
+		setting = setting.trim(); // remove trailing whitespace
+		value = value.trim();
+
 		FileInputStream filein;
 		String[] lines = new String[999];
-		try
-		{
+		try {
 			filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));			
-			int i=0;
-		    while ((lines[i] = reader.readLine()) != null) { 
-	    		lines[i] = lines[i].replaceAll("\\s+$", ""); 
-	    		if (!lines[i].equals("")) { i++; }
-		    }
-		    filein.close();
-		}
-		catch (Exception e) { e.printStackTrace(); }
-		
-		FileOutputStream fileout;
-		try
-		{
-			fileout = new FileOutputStream (filename);
-			for (int n=0; n<lines.length; n++) {
-				if (lines[n] != null) {
-					new PrintStream(fileout).println (lines[n]);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					filein));
+			int i = 0;
+			while ((lines[i] = reader.readLine()) != null) {
+				lines[i] = lines[i].replaceAll("\\s+$", "");
+				if (!lines[i].equals("")) {
+					i++;
 				}
 			}
-			new PrintStream(fileout).println (setting+" "+value);
-		    fileout.close();		
+			filein.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
+
+		FileOutputStream fileout;
+		try {
+			fileout = new FileOutputStream(filename);
+			for (int n = 0; n < lines.length; n++) {
+				if (lines[n] != null) {
+					new PrintStream(fileout).println(lines[n]);
+				}
+			}
+			new PrintStream(fileout).println(setting + " " + value);
+			fileout.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void deleteSetting(String setting) {
-		//read whole file, remove offending line, write whole file
+		// read whole file, remove offending line, write whole file
 		setting = setting.replaceAll("\\s+$", ""); // remove trailing whitespace
 		FileInputStream filein;
 		String[] lines = new String[999];
-		try
-		{
+		try {
 			filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));			
-			int i=0;
-		    while ((lines[i] = reader.readLine()) != null) { 
-		    	String items[] = lines[i].split(" ");
-		    	if ((items[0].toUpperCase()).equals(setting.toUpperCase())) {
-		    		lines[i] = null;
-		    	} 
-	    		i++;
-		    }
-		    filein.close();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					filein));
+			int i = 0;
+			while ((lines[i] = reader.readLine()) != null) {
+				String items[] = lines[i].split(" ");
+				if ((items[0].toUpperCase()).equals(setting.toUpperCase())) {
+					lines[i] = null;
+				}
+				i++;
+			}
+			filein.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
-		
+
 		FileOutputStream fileout;
-		try
-		{
-			fileout = new FileOutputStream (filename);
-			for (int n=0; n<lines.length; n++) {
+		try {
+			fileout = new FileOutputStream(filename);
+			for (int n = 0; n < lines.length; n++) {
 				if (lines[n] != null) {
-					new PrintStream(fileout).println (lines[n]);
+					new PrintStream(fileout).println(lines[n]);
 				}
 			}
-		    fileout.close();		
+			fileout.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
 	}
-	
+
 	public String readRed5Setting(String str) {
-		String filenm = System.getenv("RED5_HOME")+"\\conf\\red5.properties";
-		FileInputStream filein;	
-		String result=null;
-		try
-		{
+		String filenm = System.getenv("RED5_HOME") + "\\conf\\red5.properties";
+		FileInputStream filein;
+		String result = null;
+		try {
 			filein = new FileInputStream(filenm);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					filein));
 			String line = "";
-		    while ((line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				String s[] = line.split("=");
-				if (s[0].equals(str)) { result = s[1]; }
-		    }
-		    filein.close();
+				if (s[0].equals(str)) {
+					result = s[1];
+				}
+			}
+			filein.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
 		return result;
 	}
-	
-	public void writeRed5Setting(String setting, String value) { // modify value of existing setting
+
+	public void writeRed5Setting(String setting, String value) { // modify value
+																	// of
+																	// existing
+																	// setting
 		// read whole file, replace line while you're at it, write whole file
-		String filenm = System.getenv("RED5_HOME")+"\\conf\\red5.properties";
+		String filenm = System.getenv("RED5_HOME") + "\\conf\\red5.properties";
 		value = value.replaceAll("\\s+$", ""); // remove trailing whitespace
 		FileInputStream filein;
 		String[] lines = new String[999];
-		try
-		{
+		try {
 			filein = new FileInputStream(filenm);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));			
-			int i=0;
-		    while ((lines[i] = reader.readLine()) != null) { 
-		    	String items[] = lines[i].split("=");
-		    	if ((items[0].toUpperCase()).equals(setting.toUpperCase())) {
-		    		lines[i] = setting+"="+value;
-		    	}
-		    	i++;
-		    }
-		    filein.close();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					filein));
+			int i = 0;
+			while ((lines[i] = reader.readLine()) != null) {
+				String items[] = lines[i].split("=");
+				if ((items[0].toUpperCase()).equals(setting.toUpperCase())) {
+					lines[i] = setting + "=" + value;
+				}
+				i++;
+			}
+			filein.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
-		
+
 		FileOutputStream fileout;
-		try
-		{
-			fileout = new FileOutputStream (filenm);
-			for (int n=0; n<lines.length; n++) {
+		try {
+			fileout = new FileOutputStream(filenm);
+			for (int n = 0; n < lines.length; n++) {
 				if (lines[n] != null) {
-					new PrintStream(fileout).println (lines[n]);
+					new PrintStream(fileout).println(lines[n]);
 				}
 			}
-		    fileout.close();		
+			fileout.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		catch (Exception e) { e.printStackTrace(); }
 	}
 }
-
-

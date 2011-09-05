@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
@@ -101,7 +102,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageGrabber(str, "connection awaiting&nbsp;connection");
 			admin = false;			
 			state.delete(State.user);
-			state.delete(State.userisconnected);
+			state.set(State.userisconnected, "false");
+			//state.delete(State.userisconnected);
 			player = null;
 			
 			if (!state.getBoolean(State.autodocking)) {
@@ -1462,9 +1464,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String httpport = null;
 		String rtmpport = null;
 		String skipsetup = null;
+		
 		String s[] = str.split(" ");
 		for (int n = 0; n < s.length; n = n + 2) {
-			// user password comport httpport rtmpport skipsetup
+			// user password comport httpport rtmpport skipsetup developer
 			if (s[n].equals("user")) {
 				user = s[n + 1];
 			}
@@ -1480,7 +1483,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (s[n].equals("skipsetup")) {
 				skipsetup = s[n + 1];
 			}
+/*
+			if (s[n].equals("developer")) {
+				developer = s[n + 1];
+			}
+			*/
+			
+			
 		}
+		
+		boolean holdservo = false;
+		if(str.indexOf("holdservo")>0) holdservo = true;
+		
+		boolean developer = false;
+		if(str.indexOf("developer")>0) developer = true;
+		
 		// user & password
 		if (user != null) {
 			if (!user.matches("\\w+")) {
@@ -1541,6 +1558,31 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (skipsetup != null) {
 			settings.writeSettings("skipsetup", skipsetup);
 		}
+		
+		// TODO: BRAD
+		// if set, add stettings 
+		if(developer){
+			//if(developer.equalsIgnoreCase("true")){
+			
+			///System.out.println("d: " + developer);
+			
+		
+			settings.newSetting("developer", "true"); 
+			settings.newSetting("reboot", "true"); 
+			
+			//String test = settings.readSetting("developer");
+			//if( test == null ) System.out.println("errrrrrrrrrrrrrrr");
+			
+			///*OptionalSettings.developer.toString(), */"true");
+			
+			//settings.writeSettings(OptionalSettings.emailalerts.toString(), "true");
+			//	settings.writeSettings(OptionalSettings.emailaddress.toString(), "true");
+			//	settings.writeSettings(OptionalSettings.emailaddress.toString(), "true");
+			//}
+		}
+		
+		if(holdservo) settings.newSetting("holdservo", "true");
+		
 
 		if (oktoadd) {
 			message = "launch server";
@@ -1625,7 +1667,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 							if (dl.unzipFolder("download\\update.zip", "webapps")) 
 								messageplayer("done.", "softwareupdate", "downloadcomplete");
 							
-							Util.delay(1000);
+							// Util.delay(1000);
 							dl.deleteFile("download\\update.zip");
 							
 						} else { messageplayer("update download failed", null, null); }
@@ -1642,14 +1684,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
+	
+	
 	//
-	// TODO: use input string to create different types of config files
+	// TODO: use input string to create different types of config files?/?
 	//
 	public void factoryReset(){
+		
+		// System.out.println("write: " +settings);
 		
 		final String settings = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
 		final String backup = System.getenv("RED5_HOME") + "\\conf\\oculus_settings_"
 			+ System.currentTimeMillis() + ".txt";
+
+		System.out.println("write: " +settings);
 
 		// backup
 		new File(settings).renameTo(new File(backup));
@@ -1657,17 +1705,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// delete it
 		new File(settings).delete();
 	
-		// create from scratch
-		//Util.writeFile(FactorySettings.createDeaults(), settings, "factory reset");
-		
-		//Util.writeFile(OptionalSettings.createBasicDeveloper(), settings, "factory reset");
-
-		Util.writeFile(
-			OptionalSettings.createBasicDeveloper("brad.zdanivsky", "passs"),
-				settings, "factory reset");
-
-		
+		// create fresh file
+		try {
+			FileWriter fw = new FileWriter(new File(settings));
+			if(fw!=null){
+				
+				// OptionalSettings.appendDeveloper(email, pass)
+				
+				FactorySettings.writeFile(fw); 
+				fw.close();
+				restart();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	
 }

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -338,15 +339,29 @@ public class Util {
 		return address;
 	}
 	
-	/**
-	 * @return the local host's IP, null on error
-	 */
-	public static String getLocalAddress(){
+	
+	/** @return a list of ip's for this local network */ 
+	public static String getLocalAddress() {
+		String address = "";
 		try {
-			return (InetAddress.getLocalHost()).getHostAddress();
-		} catch (UnknownHostException e) {
-			return null;
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			if (interfaces != null)
+				while (interfaces.hasMoreElements()) {
+					NetworkInterface ni = (NetworkInterface) interfaces.nextElement();
+					if (!ni.isVirtual())
+						if (!ni.isLoopback())
+							if (ni.isUp()) {
+								Enumeration<InetAddress> addrs = ni.getInetAddresses();
+								while (addrs.hasMoreElements()) {
+									InetAddress a = (InetAddress) addrs.nextElement();
+									address += a.getHostAddress() + " ";
+								}
+							}
+				}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return address.trim();
 	}
 
 	/**

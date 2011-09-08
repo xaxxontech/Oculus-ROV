@@ -77,6 +77,7 @@ public class State {
 			public void run() {
 				String ip = Util.getExternalIPAddress();
 				if(ip!=null) State.getReference().set(State.externaladdress, ip);
+				else State.getReference().set(State.externaladdress, Util.getExternalIPAddress());
 			}
 		}).start();
 	}

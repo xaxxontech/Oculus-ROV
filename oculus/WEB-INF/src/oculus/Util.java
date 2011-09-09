@@ -57,9 +57,6 @@ public class Util {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 	
-		
-
-		//props.store(new FileOutputStream(new File(path)), comment);
 	}
 	
 	
@@ -361,7 +358,14 @@ public class Util {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return address.trim();
+		
+		String[] addrs = address.split(" ");
+		for(int i = 0 ; i < addrs.length ; i++){
+			if(!addrs[i].contains(":"))
+				return addrs[i];
+		}
+		
+		return null;
 	}
 
 	/**

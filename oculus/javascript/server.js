@@ -168,10 +168,10 @@ function saveandlaunch() {
 	else { str += "skipsetup no "; }
 	
 	//TODO: Brad
-	if (document.getElementById("developer").checked) {str += "developer "; }
-	if (document.getElementById("holdservo").checked) {str += "holdservo "; }
-	if (document.getElementById("loginnotify").checked) {str += "loginnotify "; }
-	if (document.getElementById("sonarconnected").checked) {str += "sonarconnected "; }
+	//if (document.getElementById("developer").checked) {str += "developer "; }
+	//if (document.getElementById("holdservo").checked) {str += "holdservo "; }
+	//if (document.getElementById("loginnotify").checked) {str += "loginnotify "; }
+	//if (document.getElementById("sonarconnected").checked) {str += "sonarconnected "; }
 
 	
 	if (msg != "") { message(msg); }

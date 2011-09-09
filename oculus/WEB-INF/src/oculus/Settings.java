@@ -170,7 +170,9 @@ public class Settings {
 				fw.append("pass" + j + " " + users[j][1] + "\r\n");
 			}
 
-			// fw.append("# written on: " + new java.util.Date().toString() + "\r\n");
+			if(State.getReference().getBoolean(State.developer))
+				fw.append("# written on: " + new java.util.Date().toString() + "\r\n");
+			
 			fw.close();
 			
 			// now swap temp for real file

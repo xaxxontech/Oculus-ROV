@@ -1,5 +1,6 @@
 package oculus;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
@@ -10,11 +11,11 @@ public enum FactorySettings {
 
 	skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
 	docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay, 
-	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, mute_rov_on_move,
+	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, mute_rov_on_move, 
 	videoscale, volume;
 
 	/** get basic settings */
-	public static Properties createDeaults(){
+	public static Properties createDeaults() {
 		Properties config = new Properties();
 		config.setProperty(skipsetup.toString(), "no");
 		config.setProperty(speedslow.toString(), "115");
@@ -41,15 +42,14 @@ public enum FactorySettings {
 		config.setProperty(videoscale.toString(), "100");
 		return config;
 	}
-	
 
-	/** @returns true if all settings are in properties */ 
-	public static boolean validate(Properties conf){
+	/** @returns true if all settings are in properties */
+	public static boolean validate(Properties conf) {
 		Settings fromfile = new Settings();
 		String value = null;
 		for (FactorySettings settings : FactorySettings.values()) {
 			value = fromfile.readSetting(settings.toString());
-			if(value==null){
+			if (value == null) {
 				System.out.println(conf.toString());
 				System.out.println("settings file missing: " + settings);
 				return false;
@@ -57,27 +57,44 @@ public enum FactorySettings {
 		}
 		return true;
 	}
-	
-	
+
 	/** write to file in the order set in enum */
-	public static void writeFile(FileWriter file){
-		Properties props = FactorySettings.createDeaults();
-		for (FactorySettings settings : FactorySettings.values()) {
+	public synchronized static void createFile() {
+
+		// kill if exists
+		
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(new File(Settings.filename+".tmp"));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			return;
+		}
+		
+		try {
+			
+			fw.append("# FACTORY RESET on: " + new java.util.Date().toString() + "\r\n");
+			final Properties props = createDeaults();
+			for (FactorySettings factory : FactorySettings.values()) {
+				fw.append(factory.toString() + " "
+						+ props.getProperty(factory.toString()) + "\r\n");
+			}
+
+			fw.close();
+			
+		} catch (IOException e) {
 			try {
-				
-				file.append(settings.toString() + " " 
-					+ props.getProperty(settings.toString()) + "\r\n");
-				
-			} catch (IOException e) {
-				try {
-					file.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+				fw.close();
+			} catch (IOException e2) {
+				e2.printStackTrace();
 			}
 		}
+		
+		if (new File(Settings.filename).exists()) new File(Settings.filename).delete();
+
+		new File(Settings.filename+".tmp").renameTo(new File(Settings.filename));
 	}
-	
+
 	@Override
 	public String toString() {
 		return super.toString();

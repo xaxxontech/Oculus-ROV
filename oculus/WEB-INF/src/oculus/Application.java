@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
@@ -215,7 +214,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Util.setSystemVolume(volume);
 	
 		// TODO: Brad added, removable with single comment line here 
-		new developer.sonar.SonarSteeringObserver(this, comport);
+		// new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this);
 		//new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this)
@@ -848,7 +847,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str += "dock un-docked";
 			}
 			messageplayer("docking cancelled by movement", "multiple", str);
-			//docker.autoDock("cancel");
 			state.set(State.docking, false);
 		}
 		if (comport.sliding == true) 
@@ -857,7 +855,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private void cameraCommand(String str) {
 		
-		// TODO: Issue#4 
 		if(state.getBoolean(State.autodocking)){
 			messageplayer("command dropped, autodocking", null, null);
 			return;
@@ -1701,34 +1698,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 	// TODO: use input string to create different types of config files?/?
 	//
 	public void factoryReset(){
-		
-		// System.out.println("write: " +settings);
-		
-		final String settings = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
+				
 		final String backup = System.getenv("RED5_HOME") + "\\conf\\oculus_settings_"
 			+ System.currentTimeMillis() + ".txt";
 
-		System.out.println("write: " +settings);
-
 		// backup
-		new File(settings).renameTo(new File(backup));
+		new File(Settings.filename).renameTo(new File(backup));
 		
-		// delete it
-		new File(settings).delete();
-	
-		// create fresh file
-		try {
-			FileWriter fw = new FileWriter(new File(settings));
-			if(fw!=null){
-				
-				// OptionalSettings.appendDeveloper(email, pass)
-				
-				FactorySettings.writeFile(fw); 
-				fw.close();
-				restart();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		FactorySettings.createFile();
+		message("restarting server...", null, null);
+		Util.delay(1000);
+		restart();
 	}
 }

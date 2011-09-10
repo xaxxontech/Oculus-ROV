@@ -5,7 +5,7 @@ import java.util.Properties;
 
 public class Settings {
 
-	private static final String filename = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
+	static final String filename = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
 
 	// put all constants here
 	public static final String emailalerts = "emailalerts";
@@ -14,6 +14,11 @@ public class Settings {
 	public static final String skipsetup = "skipsetup";
 	public static final String developer = "developer";
 	public static final int ERROR = -1; // Integer.MIN_VALUE;
+	
+	public Settings(){
+		if( ! new File(filename).exists()) 
+			FactorySettings.createFile();
+	}
 
 	/**
 	 * lookup values from props file
@@ -170,8 +175,8 @@ public class Settings {
 				fw.append("pass" + j + " " + users[j][1] + "\r\n");
 			}
 
-			if(State.getReference().getBoolean(State.developer))
-				fw.append("# written on: " + new java.util.Date().toString() + "\r\n");
+			//if(State.getReference().getBoolean(State.developer))
+				//fw.append("# written on: " + new java.util.Date().toString() + "\r\n");
 			
 			fw.close();
 			

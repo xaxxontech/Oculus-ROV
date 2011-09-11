@@ -15,6 +15,7 @@ public class Settings {
 	public static final String developer = "developer";
 	public static final int ERROR = -1; // Integer.MIN_VALUE;
 	
+	/** create new file if missing */
 	public Settings(){
 		if( ! new File(filename).exists()) 
 			FactorySettings.createFile();

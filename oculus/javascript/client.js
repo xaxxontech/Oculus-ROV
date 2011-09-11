@@ -1249,11 +1249,15 @@ function factoryreset(){
 }
 
 function arduinoEcho(value){
-	message("firmware command echo" + value, sentcmdcolor);
+	message("firmware command echo " + value, sentcmdcolor);
 	
 	if(value=='on')	callServer("arduinoecho", "on");
 	if(value=='off') callServer("arduinoecho", "off");
-	//lagtimer = new Date().getTime(); // has to be *after* message()
+	overlay('off');
+}
+
+function writesetting(value){
+	callServer('writesetting', value);
 	overlay('off');
 }
 

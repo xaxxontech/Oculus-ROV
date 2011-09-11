@@ -9,7 +9,7 @@ public enum PlayerCommands {
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update,
 	disconnectotherconnections, showlog, monitor, framegrab, emailgrab, assumecontrol, 
 	softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-	spotlightsetbrightness, floodlight, dockgrab, factoryreset;
+	spotlightsetbrightness, floodlight, dockgrab, factoryreset, writesetting;
 
 	@Override 
 	public String toString() {

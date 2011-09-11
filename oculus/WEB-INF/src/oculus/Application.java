@@ -45,6 +45,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     private boolean pendingplayerisnull = true;
     private boolean emailgrab = false;
     private boolean playerstream = false;
+    private developer.CommandManager cmdManager = null;
  
 	public boolean muteROVonMove = false;
 	public boolean admin = false;
@@ -204,14 +205,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.newSetting("salt", salt);
 		}
 
+		// 
+		cmdManager = new developer.CommandManager(this);
+		
 		if (settings.getBoolean(State.developer)){
-			new developer.CommandManager(this);
 			moves.open(System.getenv("RED5_HOME") + "\\log\\moves.log");
 		}
 		
-		int volume = settings.getInteger(Settings.volume);
-		if (volume == Settings.ERROR) settings.newSetting(Settings.volume, "0");
-		Util.setSystemVolume(volume);
+		//int volume = settings.getInteger(Settings.volume);
+		//if (volume == Settings.ERROR) settings.newSetting(Settings.volume, "0");
+		Util.setSystemVolume(settings.getInteger(Settings.volume));
 	
 		// TODO: Brad added, removable with single comment line here 
 		// new developer.sonar.SonarSteeringObserver(this, comport);
@@ -220,9 +223,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//new developer.ftp.FTPObserver(this)
 		new EmailAlerts(this);
 		new SystemWatchdog();
-
-		// new DockingObserver(this
-		// new DockingObserver(this
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -394,8 +394,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case softwareupdate: softwareUpdate(str); return;
 		case restart: restart(); return;
 
+		case writesetting: 
+			System.out.println("setting: " + str);
+			String[] cmd = str.split(" ");
+			if(settings.readSetting(cmd[0]) == null)
+				settings.newSetting(cmd[0], cmd[1]);
+			else
+				settings.writeSettings(cmd[0], cmd[1]);
+			settings.writeFile();
+			return;
 		}
 
+		//if(cmdManager==null);;
+		
 		// TODO: 
 		// must be driver/non-passenger for all commands below
 		// player only 
@@ -521,7 +532,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** put all commands here */
 	public enum gabberCommands {
-		streammode, saveandlaunch, populatesettings, systemcall, chat, /*facerect,*/ 
+		streammode, saveandlaunch, populatesettings, systemcall, chat, 
 			dockgrabbed, autodock, restart, checkforbattery;
 		@Override
 		public String toString() {
@@ -529,8 +540,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	
-	
 	/**
 	 * turn string input to command id
 	 * 
@@ -616,8 +625,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 									&& !(con == pendingplayer && !pendingplayerisnull)) {
 								IServiceCapableConnection n = (IServiceCapableConnection) con;
 								n.invoke("message", new Object[] {
-										"streaming " + stream, "green",
-										"stream", stream });
+										"streaming " + stream, "green", "stream", stream });
 							}
 						}
 					}
@@ -994,7 +1002,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		if(str==null) return;
 	
-		// TODO: if want to block motion, stops are sent after 'move' commands
 		if (str.equals("stop")) {
 			if(state.getBoolean(State.autodocking)){ docker.autoDock("cancel"); }
 
@@ -1007,7 +1014,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		moveMacroCancel();
 		
-		// TODO: Issue#4 - use autodock cancel if needed 
+		// Issue#4 - use autodock cancel if needed 
 		if(state.getBoolean(State.autodocking)){
 			messageplayer("command dropped, autodocking", null, null);
 			return;
@@ -1551,7 +1558,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		// TODO: BRAD
-		
+		/*
 		if(str.indexOf(OptionalSettings.developer.toString())>0){
 
 			System.out.println("developer..............");
@@ -1590,7 +1597,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeFile();
 			restartrequired = true;
 		}
-		
+		*/
 
 		if (oktoadd) {
 			message = "launch server";
@@ -1636,6 +1643,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		result += "rtmpport " + settings.readRed5Setting("rtmp.port") + " ";
 		
 		System.out.println("__str:" + result);
+		new Settings().writeFile();
+		
 		messageGrabber(result, null);
 	}
 
@@ -1699,15 +1708,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 	//
 	public void factoryReset(){
 				
-		final String backup = System.getenv("RED5_HOME") + "\\conf\\oculus_settings_"
-			+ System.currentTimeMillis() + ".txt";
+		final String backup = Settings.filename + "_" + System.currentTimeMillis() + ".txt";
 
 		// backup
 		new File(Settings.filename).renameTo(new File(backup));
 		
-		FactorySettings.createFile();
-		message("restarting server...", null, null);
-		Util.delay(1000);
+		// delete it 
+		new File(Settings.filename).delete();
+		
+		// FactorySettings.createFile();
+		// message("restarting server...", null, null);
+		// Util.delay(1000);
 		restart();
 	}
 }

@@ -69,7 +69,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	protected int steeringcomp = settings.getInteger("steeringcomp");
 	protected final boolean sonar = settings.getBoolean(State.sonarenabled);
-	protected final boolean holdservo = settings.getBoolean(State.holdservo);
+	protected boolean holdservo = settings.getBoolean(State.holdservo);
 
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;

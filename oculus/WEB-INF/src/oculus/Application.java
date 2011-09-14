@@ -545,6 +545,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
 			case spotlightsetbrightness: light.setSpotLightBrightness(Integer.parseInt(str)); break;
 			case floodlight: light.floodLight(str); break;
+			case holdservo: 
+				if (str.equalsIgnoreCase("true")) {
+					comport.holdservo = true;
+					settings.writeSettings("holdservo", str);
+				}
+				else {
+					comport.holdservo = false;
+					settings.writeSettings("holdservo", str);
+				}
+				messageplayer("holdservo "+str, null, null);
+				break;
 		}
 	}
 

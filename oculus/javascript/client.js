@@ -1251,7 +1251,14 @@ function arduinoEcho(value){
 
 function writesetting(value){
 	callServer('writesetting', value);
-//	overlay('off');
+	message("sending setting: "+value,sentcmdcolor);
+	lagtimer = new Date().getTime(); // has to be *after* message()
+}
+
+function holdservo(str) {
+	callServer("holdservo",str);
+	message("sending holdservo "+str,sentcmdcolor);
+	lagtimer = new Date().getTime(); // has to be *after* message()
 }
 
 function restart() {

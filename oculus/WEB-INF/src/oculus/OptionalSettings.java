@@ -7,7 +7,7 @@ import java.util.Properties;
 /** place extensions to settings here */
 public enum OptionalSettings {
 	
-	emailalerts, emailaddress, emailpassword, developer, reboot, loginnotify, holdservo, sonar;
+	emailalerts, emailaddress, emailpassword, developer, reboot, loginnotify, sonar;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
@@ -15,7 +15,6 @@ public enum OptionalSettings {
 		config.setProperty(developer.toString(), "false");
 		config.setProperty(reboot.toString(), "false");
 		config.setProperty(loginnotify.toString(), "false");
-		config.setProperty(holdservo.toString(), "false");
 		return config;
 	}
 
@@ -25,7 +24,6 @@ public enum OptionalSettings {
 		config.setProperty(developer.toString(), "true");
 		config.setProperty(reboot.toString(), "true");
 		config.setProperty(loginnotify.toString(), "true");
-		config.setProperty(holdservo.toString(), "true");
 		return config;
 	}
 	
@@ -38,7 +36,6 @@ public enum OptionalSettings {
 		config.setProperty(developer.toString(), "true");
 		config.setProperty(reboot.toString(), "true");
 		config.setProperty(loginnotify.toString(), "true");
-		config.setProperty(holdservo.toString(), "true");
 		return config;
 	}
 	
@@ -50,7 +47,6 @@ public enum OptionalSettings {
 		config.setProperty(developer.toString(), "true");
 		config.setProperty(reboot.toString(), "true");
 		config.setProperty(loginnotify.toString(), "true");
-		config.setProperty(holdservo.toString(), "true");
 		return config;
 	}
 	

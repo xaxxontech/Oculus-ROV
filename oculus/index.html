@@ -632,6 +632,13 @@ href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(
 <a class="blackbg" href= "javascript: popupmenu('menu', 'close')">
 &nbsp; <span class="cancelbox">X</span> CLOSE</a>
 <table><tr><td style="height: 10px"></td></tr></table>
+
+hold servo at stop <a class="blackbg" href="javascript: writesetting('holdservo true');">on</a> / 
+<a class="blackbg" href="javascript: writesetting('holdservo false');">off</a><br> 
+test at position: <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="tilttestposition" type="text" size="4" >
+<a class="blackbg" href="javascript: tilttest();">go</a>
+<table><tr><td style="height: 10px"></td></tr></table>
 video scale
 <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="vidscale" type="text" size="4" >%
@@ -645,12 +652,11 @@ onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="cammin" t
 <br>
 max clicksteer angle <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="maxclickcam" type="text" size="4" >
-<br>test at position: <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
-onblur="keyboard('enable'); this.style.backgroundColor='#262626';"" id="tilttestposition" type="text" size="4" >
-<a class="blackbg" href="javascript: tilttest();">go</a>
+
 <table><tr><td style="height: 7px"></td></tr></table>
 <a class="blackbg" href="javascript: tiltsettingssend();">
 <span class="cancelbox">&radic;</span> send values</a> &nbsp;
+
 </div>
 
 <!--  account settings -->
@@ -799,7 +805,6 @@ Server commands:<br>
 <table><tr><td style="height: 7px"></td></tr></table>
 <a class="blackbg" href="javascript: softwareupdate('version','');">software version</a><br>
 <a class="blackbg" href="javascript: softwareupdate('check','');">check for software update</a><br>
-<a class="blackbg" href="javascript: factoryreset();">restore factory settings</a><br>
 <a class="blackbg" href="javascript: systemcall('shutdown -s -f -t 01','y');">shutdown</a><br>
 <a class="blackbg" href="javascript: systemcall('shutdown -r -f -t 01','y')">reboot</a><br>
 <a class="blackbg" href="javascript: restart();">restart server</a><br>
@@ -817,10 +822,6 @@ Developer menu:<br>
 <table><tr><td style="height: 7px"></td></tr></table>
 firmware echo <a class="blackbg" href="javascript: arduinoEcho('on');">on</a> / 
 <a class="blackbg" href="javascript: arduinoEcho('off');">off</a><br> 
-
-<!-- brad -->
-hold servo <a class="blackbg" href="javascript: writesetting('holdservo true');">on</a> / 
-<a class="blackbg" href="javascript: writesetting('holdservo false');">off</a><br> 
 
 login notify <a class="blackbg" href="javascript: writesetting('loginnotify true');">on</a> / 
 <a class="blackbg" href="javascript: writesetting('loginnotify false');">off</a><br> 

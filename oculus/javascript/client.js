@@ -1210,7 +1210,7 @@ function systemcall(str,conf) {
 		var a = document.getElementById('usersyscommand');
 		str=a.value;
 		a.value = "";
-		overlay('off');
+//		overlay('off');
 		message("sending system command: "+str,sentcmdcolor);
 	}
 	if (conf=="y") {
@@ -1238,14 +1238,7 @@ function usersyscommanddivShow() {
 function arduinoReset() {
 	message("resetting arduino ",sentcmdcolor);
 	callServer('arduinoreset');
-	overlay('off');
-}
-
-function factoryreset(){
-	if(confirm("restore factory default settings?\n(a backup file will be created and application restarted)")){
-		callServer('factoryreset');
-		overlay('off');
-	}
+//	overlay('off');
 }
 
 function arduinoEcho(value){
@@ -1253,19 +1246,19 @@ function arduinoEcho(value){
 	
 	if(value=='on')	callServer("arduinoecho", "on");
 	if(value=='off') callServer("arduinoecho", "off");
-	overlay('off');
+//	overlay('off');
 }
 
 function writesetting(value){
 	callServer('writesetting', value);
-	overlay('off');
+//	overlay('off');
 }
 
 function restart() {
 	if (confirm("restart server\nare you sure?")) { 
 	  message("sending restart: "+str,sentcmdcolor);
 	  callServer('restart','');
-	  overlay('off');
+//	  overlay('off');
 	}
 }
 
@@ -1274,7 +1267,7 @@ function softwareupdate(command,value) {
 		callServer("softwareupdate","check");
 		message("sending software update request",sentcmdcolor);
 		lagtimer = new Date().getTime(); // has to be *after* message()
-		overlay('off');
+//		overlay('off');
 	}
 	if (command=="available") {
 		if (confirm(value)) {
@@ -1294,7 +1287,7 @@ function softwareupdate(command,value) {
 		message("sending software version request",sentcmdcolor);
 		lagtimer = new Date().getTime(); // has to be *after* message()
 		callServer("softwareupdate","versiononly");
-		overlay("off");
+//		overlay("off");
 	}
 }
 

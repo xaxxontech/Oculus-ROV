@@ -290,3 +290,9 @@ function videooverlay(n) {
 	}
 	else { document.getElementById("flashoverlay").style.display = "none"; } 
 }
+
+function factoryreset(){
+	if(confirm("Restore factory default settings?\n(A backup file will be created and application restarted)")){
+		callServer('factoryreset','');
+	}
+}

@@ -97,22 +97,22 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 </script>
 <noscript>
   	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
-			id="oculus_grabber" width="100%" height="100%"
-			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
-			<param name="movie" value="flash/oculus_grabber.swf" />
-			<param name="quality" value="high" />
-			<param name="bgcolor" value="#869ca7" />
-			<param name="allowScriptAccess" value="always" />
-			<embed src="flash/oculus_grabber.swf" quality="high" bgcolor="#869ca7"
-				width="100%" height="100%" name="oculus_grabber" align="middle"
-				play="true"
-				loop="false"
-				quality="high"
-				wmode="transparent"
-				allowScriptAccess="sameDomain"
-				type="application/x-shockwave-flash"
-				pluginspage="http://www.adobe.com/go/getflashplayer">
-			</embed>
+		id="oculus_grabber" width="100%" height="100%"
+		codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+		<param name="movie" value="flash/oculus_grabber.swf" />
+		<param name="quality" value="high" />
+		<param name="bgcolor" value="#869ca7" />
+		<param name="allowScriptAccess" value="always" />
+		<embed src="flash/oculus_grabber.swf" quality="high" bgcolor="#869ca7"
+			width="100%" height="100%" name="oculus_grabber" align="middle"
+			play="true"
+			loop="false"
+			quality="high"
+			wmode="transparent"
+			allowScriptAccess="sameDomain"
+			type="application/x-shockwave-flash"
+			pluginspage="http://www.adobe.com/go/getflashplayer">
+		</embed>
 	</object>
 </noscript>
 </div>
@@ -130,7 +130,7 @@ Allow camera and mic access if prompted, then right click in window, choose SETT
 <td style="padding-left: 8px;">
 <img src="images/oculus_logo.gif"><br>
 &nbsp;<span style="color: #888888;">SETUP</span>
-<br><br>
+<table><tr><td style="height: 6px"></tr></table>
 admin user:  <span id="username"></span>
 <a id="changeuserboxlink" href="javascript: userbox('show');">change</a><br>
 <div id="changeuserbox" style="display: none">
@@ -140,23 +140,26 @@ password again: <input id="userpassagain" type="password" name="password"size="1
 
 &nbsp; <a href="javascript: userbox('hide');">hide</a><br>
 
-<br>
 </div>
 oculus hardware: <span id="comport">...</span><br>
 oculus lights: <span id="lightport">...</span><br>
 battery <span id="battery">... please wait</span><br>
-internal IP address: <span id="lanaddress">...</span><br>
-external IP address: <span id="wanaddress">...</span><br>
+
 http port*: <input id="httpport" class="inputbox" type="text" size="10" ><br>
 rtmp port*: <input id="rtmpport" class="inputbox" type="text" size="10" ><br>
 &nbsp; (*changes to ports require application restart to take effect)
-<br><br>
+<table><tr><td style="height: 6px"></tr></table>
+Network addresses (for reference, router setup):<br>
+&nbsp; internal IP: <span id="lanaddress">...</span><br>
+&nbsp; external IP: <span id="wanaddress">...</span><br>
+<table><tr><td style="height: 6px"></tr></table>
 Skip this screen next time
 <input id="skipsetup" type="checkbox" name="skipsetup" checked="checked"><br>
-<br>
-<a href="javascript: saveandlaunch();">save settings and LAUNCH</a><br>
-<br>
+<table><tr><td style="height: 6px"></tr></table>
+<a href="javascript: saveandlaunch();">SAVE SETTINGS and LAUNCH</a><br>
+<table><tr><td style="height: 6px"></tr></table>
 <a href="initialize.html" target="_top">revert to last saved settings</a><br>
+<a href="javascript: factoryreset();">restore factory settings</a><br>
 <a href="javascript: restart();">restart</a><br>
 <a href="javascript: quit();">quit<a/><br>
 

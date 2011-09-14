@@ -335,38 +335,49 @@ public class Util {
 		// all good 
 		return address;
 	}
+
+    /**
+     * @return the local host's IP, null on error
+     */
+    public static String getLocalAddress(){
+            try {
+                    return (InetAddress.getLocalHost()).getHostAddress();
+            } catch (UnknownHostException e) {
+                    return null;
+            }
+    }
 	
 	
-	/** @return a list of ip's for this local network */ 
-	public static String getLocalAddress() {
-		String address = "";
-		try {
-			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-			if (interfaces != null)
-				while (interfaces.hasMoreElements()) {
-					NetworkInterface ni = (NetworkInterface) interfaces.nextElement();
-					if (!ni.isVirtual())
-						if (!ni.isLoopback())
-							if (ni.isUp()) {
-								Enumeration<InetAddress> addrs = ni.getInetAddresses();
-								while (addrs.hasMoreElements()) {
-									InetAddress a = (InetAddress) addrs.nextElement();
-									address += a.getHostAddress() + " ";
-								}
-							}
-				}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		String[] addrs = address.split(" ");
-		for(int i = 0 ; i < addrs.length ; i++){
-			if(!addrs[i].contains(":"))
-				return addrs[i];
-		}
-		
-		return null;
-	}
+//	/** @return a list of ip's for this local network */ 
+//	public static String getLocalAddress() {
+//		String address = "";
+//		try {
+//			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+//			if (interfaces != null)
+//				while (interfaces.hasMoreElements()) {
+//					NetworkInterface ni = (NetworkInterface) interfaces.nextElement();
+//					if (!ni.isVirtual())
+//						if (!ni.isLoopback())
+//							if (ni.isUp()) {
+//								Enumeration<InetAddress> addrs = ni.getInetAddresses();
+//								while (addrs.hasMoreElements()) {
+//									InetAddress a = (InetAddress) addrs.nextElement();
+//									address += a.getHostAddress() + " ";
+//								}
+//							}
+//				}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//		String[] addrs = address.split(" ");
+//		for(int i = 0 ; i < addrs.length ; i++){
+//			if(!addrs[i].contains(":"))
+//				return addrs[i];
+//		}
+//		
+//		return null;
+//	}
 
 	/**
 	 * write new value to user's screen and set it 

@@ -204,6 +204,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/** */ 
 	public void initialize() {
 
+		salt = settings.readSetting("salt");
+		if (salt == null) {
+			salt = UUID.randomUUID().toString();
+			settings.newSetting("salt", salt);
+		}
+		settings.writeFile(); // needs to be below salt set
+		
 		// must be blocking search of all ports, but only once!
 		new Discovery().search();
 		comport = new ArduinoCommDC(this);
@@ -211,12 +218,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
-		
-		salt = settings.readSetting("salt");
-		if (salt == null) {
-			salt = UUID.randomUUID().toString();
-			settings.newSetting("salt", salt);
-		}
 
 		// 
 		// loginrecords = new LoginRecords();
@@ -397,160 +398,160 @@ public class Application extends MultiThreadedApplicationAdapter {
 					System.out.println("playerCallServer(): " + fn + " " + str);
 		
 		switch (fn) {
-		case chat: chat(str); return;
-		case beapassenger: beAPassenger(str); return;
-		case assumecontrol: assumeControl(str); return;
-
-		case dockgrab:
-			if (grabber instanceof IServiceCapableConnection) {
-				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
-			}
-			return;
-			
-		case softwareupdate: softwareUpdate(str); return;
-		case restart: restart(); return;
-
-		case writesetting: 
-			System.out.println("setting: " + str);
-			String[] cmd = str.split(" ");
-			if(settings.readSetting(cmd[0]) == null)
-				settings.newSetting(cmd[0], cmd[1]);
-			else
-				settings.writeSettings(cmd[0], cmd[1]);
-			settings.writeFile();
-			return;
+			case chat: chat(str); return;
+			case beapassenger: beAPassenger(str); return;
+			case assumecontrol: assumeControl(str); return;
+	
+			case dockgrab:
+				if (grabber instanceof IServiceCapableConnection) {
+					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+					sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
+				}
+				return;
 		}
 
-		//if(cmdManager==null);;
-		
 		// TODO: 
 		// must be driver/non-passenger for all commands below
 		// player only 
-		if (Red5.getConnectionLocal() != player) {
+		if (Red5.getConnectionLocal() != player) { 
 			System.out.println("passenger, command dropped: " + fn.toString());
-			//return;
+			return;
 		}
 
 		switch (fn) {
-		case publish:
-			publish(str);
-			break;
 
-		case speedset:
-			comport.speedset(str);
-			messageplayer("speed set: " + str, "speed", str.toUpperCase());
-			break;
-
-		case slide:
-			if (!state.getBoolean(State.motionenabled)) {	
-				messageplayer("motion disabled", "motion", "disabled");
-				break;
-			}
-			
-			if(state.getBoolean(State.autodocking)){
-				messageplayer("command dropped, autodocking", null, null);
+			case writesetting: 
+				System.out.println("setting: " + str);
+				String[] cmd = str.split(" ");
+				if(settings.readSetting(cmd[0]) == null) {
+					settings.newSetting(cmd[0], cmd[1]);
+					messageplayer("new setting: " + cmd[1], null, null);
+				}
+				else {
+					settings.writeSettings(cmd[0], cmd[1]);
+					messageplayer(cmd[0] + " " + cmd[1], null, null);
+				}
+				settings.writeFile();
 				return;
-			}
-			moveMacroCancel();
-			comport.slide(str);
-			if(moves != null) moves.append("slide " + str);
-			messageplayer("command received: " + fn + str, null, null);
-			break;
-
-		case systemcall:
-			if(admin){
-				System.out.println("received: " + str);
-				messageplayer("system command received", null, null);
-				Util.systemCall(str);
-			}
-			break;
-
-		case relaunchgrabber:
-			if (admin) {
-				grabber_launch();
-				messageplayer("relaunching grabber", null, null);
-			}
-			break;
-
-		case docklineposupdate:
-			if (admin) {
-				settings.writeSettings("vidctroffset", str);
-				messageplayer("vidctroffset set to : " + str, null, null);
-			}
-			break;
-
-		case framegrab:
-			if (grabber instanceof IServiceCapableConnection) {
-				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				sc.invoke("framegrab", new Object[] {});
-				messageplayer("framegrab command received", null, null);
-			}
-			break;
-			
-		case emailgrab:
-			if (grabber instanceof IServiceCapableConnection) {
-				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				sc.invoke("framegrab", new Object[] {});
-				messageplayer("framegrab command received", null, null);
-			}
-			emailgrab = true;
-			break;
-
-		case arduinoecho:
-			if (str.equalsIgnoreCase("on")) comport.setEcho(true);
-			else comport.setEcho(false);
-			messageplayer("echo set to: " + str, null, null);
-			break;
-
-		case arduinoreset:
-			comport.reset();
-			messageplayer("resetting arduino", null, null);
-			break;
-
-		case move:move(str);break;
-		case nudge:nudge(str);break;
-		case speech: saySpeech(str);break;
-		case dock: docker.dock(str); break;
-		case battStats: battery.battStats(); break;
-		case cameracommand: cameraCommand(str); break;
-		case gettiltsettings: getTiltSettings(); break;
-		case getdrivingsettings: getDrivingSettings(); break;
-		case motionenabletoggle: motionEnableToggle(); break;
-		case drivingsettingsupdate: drivingSettingsUpdate(str); break;
-		case tiltsettingsupdate: tiltSettingsUpdate(str); break;
-		case tilttest: tiltTest(str); break;
-		case clicksteer: clickSteer(str); break;
-		case streamsettingscustom: streamSettingsCustom(str); break;
-		case streamsettingsset: streamSettingsSet(str); break;
-		case statuscheck: statusCheck(str); break;
-		case playerexit: appDisconnect(player); break;
-		case playerbroadcast: playerBroadCast(str); break;
-		case password_update: account("password_update", str); break;
-		case new_user_add: account("new_user_add", str); break;
-		case user_list: account("user_list", ""); break;
-		case delete_user: account("delete_user", str); break;
-		case extrauser_password_update: account("extrauser_password_update", str); break;
-		case username_update: account("username_update", str); break;
-		case disconnectotherconnections: disconnectOtherConnections(); break;
-		case monitor: monitor(str); break;
-		case showlog: showlog(); break;
-		case autodock: docker.autoDock(str); break;
-		case autodockcalibrate: docker.autoDock("calibrate " + str); break;
-		case restart: restart(); break;
-		case softwareupdate: softwareUpdate(str); break;
-		case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
-		case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
-		case spotlightsetbrightness: light.setSpotLightBrightness(Integer.parseInt(str)); break;
-		case floodlight: light.floodLight(str); break;
-		case factoryreset: factoryReset(); break;
+				
+	
+			case publish:
+				publish(str);
+				break;
+	
+			case speedset:
+				comport.speedset(str);
+				messageplayer("speed set: " + str, "speed", str.toUpperCase());
+				break;
+	
+			case slide:
+				if (!state.getBoolean(State.motionenabled)) {	
+					messageplayer("motion disabled", "motion", "disabled");
+					break;
+				}
+				
+				if(state.getBoolean(State.autodocking)){
+					messageplayer("command dropped, autodocking", null, null);
+					return;
+				}
+				moveMacroCancel();
+				comport.slide(str);
+				if(moves != null) moves.append("slide " + str);
+				messageplayer("command received: " + fn + str, null, null);
+				break;
+	
+			case systemcall:
+				if(admin){
+					System.out.println("received: " + str);
+					messageplayer("system command received", null, null);
+					Util.systemCall(str);
+				}
+				break;
+	
+			case relaunchgrabber:
+				if (admin) {
+					grabber_launch();
+					messageplayer("relaunching grabber", null, null);
+				}
+				break;
+	
+			case docklineposupdate:
+				if (admin) {
+					settings.writeSettings("vidctroffset", str);
+					messageplayer("vidctroffset set to : " + str, null, null);
+				}
+				break;
+	
+			case framegrab:
+				if (grabber instanceof IServiceCapableConnection) {
+					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+					sc.invoke("framegrab", new Object[] {});
+					messageplayer("framegrab command received", null, null);
+				}
+				break;
+				
+			case emailgrab:
+				if (grabber instanceof IServiceCapableConnection) {
+					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+					sc.invoke("framegrab", new Object[] {});
+					messageplayer("framegrab command received", null, null);
+				}
+				emailgrab = true;
+				break;
+	
+			case arduinoecho:
+				if (str.equalsIgnoreCase("on")) comport.setEcho(true);
+				else comport.setEcho(false);
+				messageplayer("echo set to: " + str, null, null);
+				break;
+	
+			case arduinoreset:
+				comport.reset();
+				messageplayer("resetting arduino", null, null);
+				break;
+	
+			case move:move(str);break;
+			case nudge:nudge(str);break;
+			case speech: saySpeech(str);break;
+			case dock: docker.dock(str); break;
+			case battStats: battery.battStats(); break;
+			case cameracommand: cameraCommand(str); break;
+			case gettiltsettings: getTiltSettings(); break;
+			case getdrivingsettings: getDrivingSettings(); break;
+			case motionenabletoggle: motionEnableToggle(); break;
+			case drivingsettingsupdate: drivingSettingsUpdate(str); break;
+			case tiltsettingsupdate: tiltSettingsUpdate(str); break;
+			case tilttest: tiltTest(str); break;
+			case clicksteer: clickSteer(str); break;
+			case streamsettingscustom: streamSettingsCustom(str); break;
+			case streamsettingsset: streamSettingsSet(str); break;
+			case statuscheck: statusCheck(str); break;
+			case playerexit: appDisconnect(player); break;
+			case playerbroadcast: playerBroadCast(str); break;
+			case password_update: account("password_update", str); break;
+			case new_user_add: account("new_user_add", str); break;
+			case user_list: account("user_list", ""); break;
+			case delete_user: account("delete_user", str); break;
+			case extrauser_password_update: account("extrauser_password_update", str); break;
+			case username_update: account("username_update", str); break;
+			case disconnectotherconnections: disconnectOtherConnections(); break;
+			case monitor: monitor(str); break;
+			case showlog: showlog(); break;
+			case autodock: docker.autoDock(str); break;
+			case autodockcalibrate: docker.autoDock("calibrate " + str); break;
+			case restart: restart(); break;
+			case softwareupdate: softwareUpdate(str); break;
+			case setsystemvolume: Util.setSystemVolume(Integer.parseInt(str), this); break;
+			case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
+			case spotlightsetbrightness: light.setSpotLightBrightness(Integer.parseInt(str)); break;
+			case floodlight: light.floodLight(str); break;
 		}
 	}
 
 	/** put all commands here */
-	public enum gabberCommands {
+	public enum grabberCommands {
 		streammode, saveandlaunch, populatesettings, systemcall, chat, 
-			dockgrabbed, autodock, restart, checkforbattery;
+			dockgrabbed, autodock, restart, checkforbattery, factoryreset;
 		@Override
 		public String toString() {
 			return super.toString();
@@ -566,9 +567,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the parameters to pass on to the function.
 	 */
 	public void grabberCallServer(String fn, String str) {
-		gabberCommands cmd = null;
+		grabberCommands cmd = null;
 		try {
-			cmd = gabberCommands.valueOf(fn);
+			cmd = grabberCommands.valueOf(fn);
 		} catch (Exception e) {
 			return; 
 		}
@@ -585,7 +586,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param str
 	 *            is the parameters to pass on to the function.
 	 */
-	public void grabberCallServer(final gabberCommands cmd, final String str) {
+	public void grabberCallServer(final grabberCommands cmd, final String str) {
 		switch (cmd) {
 		case streammode: grabberSetStream(str); break;
 		case saveandlaunch: saveAndLaunch(str); break;
@@ -606,12 +607,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		case autodock: docker.autoDock(str); break;
 		case checkforbattery: checkForBattery(str); break;
+		case factoryreset: factoryReset(); break;
 		case restart:
 			admin = true;
 			System.out.println("restart command received from grabber");
 			restart();
 			break;
 		}
+
+
 	}
 
 	private void grabberSetStream(String str) {
@@ -1572,11 +1576,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeRed5Setting("rtmp.port", rtmpport);
 		}
 
-		// skipsetup
-		if (skipsetup != null) {
-			settings.writeSettings("skipsetup", skipsetup);
-		}
-		
 		// TODO: BRAD
 		/*
 		if(str.indexOf(OptionalSettings.developer.toString())>0){
@@ -1620,6 +1619,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		*/
 		
 		if (oktoadd) {
+			// skipsetup
+			if (skipsetup != null) {
+				settings.writeSettings("skipsetup", skipsetup);
+			}
+			
 			message = "launch server";
 			if (restartrequired) {
 				message = "shutdown";
@@ -1735,6 +1739,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// delete it, build on startup 
 		new File(Settings.filename).delete();
+		admin = true;
 		restart();
 	}
 }

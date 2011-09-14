@@ -116,6 +116,28 @@ public class Settings {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+//		 if setting missing due to old config file version, try to create as needed from default on demand
+		if (result == null) {
+			FactorySettings factory = null;
+			Properties fprops = FactorySettings.createDeaults();
+			try { 
+				factory = FactorySettings.valueOf(str);
+				result = fprops.getProperty(factory.toString());
+			}
+			catch (Exception e) {  }
+			
+		}
+		if (result == null) {
+			OptionalSettings optional = null;
+			Properties oprops = OptionalSettings.createDeaults();
+			try { 
+				optional = OptionalSettings.valueOf(str); 
+				result = oprops.getProperty(optional.toString());
+			}
+			catch (Exception e) {  }
+		}
+		
 		return result;
 	}
 
@@ -247,6 +269,7 @@ public class Settings {
 		FileInputStream filein;
 		
 		// TODO: WHOA BAD, USE VECTOR 
+		// what the heck is a Vector, Victor?
 		String[] lines = new String[999];
 		try {
 

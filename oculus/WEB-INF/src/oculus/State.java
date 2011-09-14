@@ -197,6 +197,9 @@ public class State {
 		
 		for(int i = 0 ; i < observers.size() ; i++)
 			observers.get(i).updated(key.trim());	
+		
+		if(State.getReference().getBoolean(State.developer))
+			System.out.println("__state: " + key + " = " + value);
 	}
 
 	/** Put a name/value pair into the config */

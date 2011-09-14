@@ -1,17 +1,8 @@
 package developer;
 
-//import java.io.File;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 import oculus.Application;
-//import oculus.SendMail;
-//import oculus.PlayerCommands;
-import oculus.FactorySettings;
+import oculus.LoginRecords;
 import oculus.PlayerCommands;
-import oculus.SendMail;
 import oculus.Settings;
 import oculus.State;
 import oculus.Updater;
@@ -31,12 +22,13 @@ public class CommandManager {
 			CommandManager.class, oculus);
 	private State state = State.getReference();
 	private static Application app = null;
-	private MulticastChannel channel = null;
+
+	//private MulticastChannel channel = null;
 
 	/** */
 	public CommandManager(Application a) {
 		app = a;
-		channel = new MulticastChannel(this);
+		//channel = new MulticastChannel(this);
 		log.debug("command manager ready");
 		System.out.println("command manager ready");
 	}
@@ -76,23 +68,16 @@ public class CommandManager {
 		new Thread() {
 			public void run() {
 
+				System.out.println("--dump--");
 				System.out.println("version: " + new Updater().getCurrentVersion());
-				
+				System.out.println("passengers: " + app.loginrecords.getPassengers());
 				System.out.println("login records: " + app.loginrecords.toString());
-
-				/*
-				final String temp = System.getenv("RED5_HOME") + "\\log\\debug.txt";
-				new java.io.File(temp).delete();
-				Util.writeFile(state.getProperties(), temp, "dumper");
-				*/
-				
 				state.dump();
 				
+				new LoginRecords().save();
+				
 				// blocking send
-				new SendMail("Oculus State Dump", "debug dump attached..."); // , temp);
-				
-				new Settings().writeFile();
-				
+				// new SendMail("Oculus State Dump", "debug dump attached...");				
 			}
 		}.start();
 	}

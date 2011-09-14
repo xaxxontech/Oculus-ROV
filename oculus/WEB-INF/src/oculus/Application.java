@@ -105,17 +105,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 			String str = state.get(State.user) + " disconnected";
 			
 			log.info(str);
-			System.out.println(str); // never see this in log!
+			System.out.println(str); // never see this in log!?
 			
 			messageGrabber(str, "connection awaiting&nbsp;connection");
 			admin = false;			
 
 		    // TODO: issue 24 
-			loginrecords.logout(state.get(State.user));
-			cmdManager.dump();
-			
-			state.delete(State.user);
-			state.set(State.userisconnected, false);
+			// cmdManager.dump();
+			// state.set(State.userisconnected, false);
+			loginrecords.signout();
+		//	state.delete(State.user);
+
 			player = null;
 			
 			if (!state.getBoolean(State.autodocking)) {
@@ -219,6 +219,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 
 		// 
+		// loginrecords = new LoginRecords();
 		cmdManager = new developer.CommandManager(this);
 		
 		if (settings.getBoolean(State.developer)){
@@ -352,8 +353,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			Util.beep();
 		}
 		
-		state.set(State.userisconnected, true);
-		state.set(State.logintime, System.currentTimeMillis());
+		System.out.println("before...................");
+		//state.set(State.userisconnected, true);
+		//state.set(State.logintime, System.currentTimeMillis());
+		loginrecords.beDriver();
+		System.out.println("after.......................");
 	}
 
 	/**
@@ -1062,8 +1066,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("motion disabled", "motion", "disabled");
 			return;
 		}
-	
-		// TODO: issue#4 
+
 		if(state.getBoolean(State.autodocking)){
 			messageplayer("command dropped, autodocking", null, null);
 			return;
@@ -1183,11 +1186,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (state.equalsSetting(State.user, "user0")) admin = true;
 		else admin = false;
 
-		loginrecords.login(state.get(State.user));
-		System.out.println("app in: " + state.get(State.user));
-		
-		state.set(State.userisconnected, true);
-		state.set(State.logintime, System.currentTimeMillis());
+		// state.set(State.userisconnected, true);
+		// state.set(State.logintime, System.currentTimeMillis());
+		loginrecords.beDriver();
 		Util.beep();
 	}
 
@@ -1206,14 +1207,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 					if (con instanceof IServiceCapableConnection
 							&& con != grabber && con != player) {
 						IServiceCapableConnection sc = (IServiceCapableConnection) con;
-						// sc.invoke("play", new Object[] { 1 });
 						sc.invoke("message", new Object[] {
-								"streaming " + stream, "green", "stream",
-								stream });
+								"streaming " + stream, "green", "stream", stream });
 					}
 				}
 			}
 		}
+	
+		//TODO: brad
+		// state.set(State.userisconnected, true);
+		// state.set(State.logintime, System.currentTimeMillis());
+		loginrecords.bePassenger();
 		Util.beep();
 	}
 

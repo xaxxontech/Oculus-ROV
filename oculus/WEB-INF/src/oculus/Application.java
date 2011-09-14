@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.imageio.ImageIO;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 import org.red5.server.api.IConnection;
@@ -45,6 +46,11 @@ public class Application extends MultiThreadedApplicationAdapter {
     private boolean pendingplayerisnull = true;
     private boolean emailgrab = false;
     private boolean playerstream = false;
+    
+    // TODO: issue 24 
+    public LoginRecords loginrecords = new LoginRecords();
+    
+    // TODO: BRAD TEST
     private developer.CommandManager cmdManager = null;
  
 	public boolean muteROVonMove = false;
@@ -97,12 +103,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void appDisconnect(IConnection connection) {
 		if (connection.equals(player)) {
 			String str = state.get(State.user) + " disconnected";
-			// log.info(str);
+			
+			log.info(str);
 			System.out.println(str); // never see this in log!
+			
 			messageGrabber(str, "connection awaiting&nbsp;connection");
 			admin = false;			
+
+		    // TODO: issue 24 
+			loginrecords.logout(state.get(State.user));
+			cmdManager.dump();
+			
 			state.delete(State.user);
-			state.set(State.userisconnected, "false");
+			state.set(State.userisconnected, false);
 			player = null;
 			
 			if (!state.getBoolean(State.autodocking)) {
@@ -1170,6 +1183,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (state.equalsSetting(State.user, "user0")) admin = true;
 		else admin = false;
 
+		loginrecords.login(state.get(State.user));
+		System.out.println("app in: " + state.get(State.user));
+		
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
 		Util.beep();
@@ -1598,7 +1614,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			restartrequired = true;
 		}
 		*/
-
+		
 		if (oktoadd) {
 			message = "launch server";
 			if (restartrequired) {
@@ -1694,8 +1710,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (str.equals("versiononly")) {
 				int currver = new Updater().getCurrentVersion();
 				String msg = "";
-				if (currver == -1) { msg = "version unknown";
-				} else { msg = "version: v." + currver; }
+				if (currver == -1) msg = "version unknown";
+				else msg = "version: v." + currver; 
 				messageplayer(msg, null, null);
 			}
 		}
@@ -1708,17 +1724,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	//
 	public void factoryReset(){
 				
-		final String backup = Settings.filename + "_" + System.currentTimeMillis() + ".txt";
+		final String backup = Settings.filename + "bak";
 
 		// backup
 		new File(Settings.filename).renameTo(new File(backup));
 		
-		// delete it 
+		// delete it, build on startup 
 		new File(Settings.filename).delete();
-		
-		// FactorySettings.createFile();
-		// message("restarting server...", null, null);
-		// Util.delay(1000);
 		restart();
 	}
 }

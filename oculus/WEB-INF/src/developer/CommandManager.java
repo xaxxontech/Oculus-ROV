@@ -14,6 +14,7 @@ import oculus.PlayerCommands;
 import oculus.SendMail;
 import oculus.Settings;
 import oculus.State;
+import oculus.Updater;
 import oculus.Util;
 
 import org.red5.logging.Red5LoggerFactory;
@@ -75,7 +76,9 @@ public class CommandManager {
 		new Thread() {
 			public void run() {
 
-				// System.out.println(state.toString());
+				System.out.println("version: " + new Updater().getCurrentVersion());
+				
+				System.out.println("login records: " + app.loginrecords.toString());
 
 				/*
 				final String temp = System.getenv("RED5_HOME") + "\\log\\debug.txt";

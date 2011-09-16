@@ -35,7 +35,8 @@ var streammode = "stop";
 var streamdetails = [];
 var steeringmode;
 var cameramoving = false;
-var broadcasting = false;
+var broadcasting = null;
+var broadcastmicon = false; 
 var clicksteeron = true;
 var maxmessagecontents = 150000;
 var maxmessageboxsize = 4000;
@@ -217,25 +218,25 @@ function getFlashMovie(movieName) {
 function publish(str) {
 	if (str=="broadcast_camandmic") {
 		callServer("playerbroadcast","camandmic");
-		broadcasting = true;
+		broadcasting = "camandmic";
 		message ("sending: playerbroadcast camandmic",sentcmdcolor);
 		clicksteer("off");
 	}
 	else if (str=="broadcast_camera") {
 		callServer("playerbroadcast","camera");
-		broadcasting = true;
+		broadcasting = "camera";
 		message ("sending: playerbroadcast camonly",sentcmdcolor);
 		clicksteer("off");
 	}
 	else if (str=="broadcast_mic") {
 		callServer("playerbroadcast","mic");
-		broadcasting = true;
+		broadcasting = "mic";
 		message ("sending: playerbroadcast miconly",sentcmdcolor);
 		clicksteer("off");
 	}
 	else if (str=="broadcast_off") {
 		callServer("playerbroadcast","off"); 
-		broadcasting = false;
+		broadcasting = null;
 		message ("sending: playerbroadcast off",sentcmdcolor);
 		clicksteer("on"); 
 	}
@@ -468,6 +469,25 @@ function keyBoardPressed(event) {
 		if (keycode == 70) { camera('horiz'); } // F
 		if (keycode == 86) { camera('downabit'); } // V
 		if (steeringmode == "forward") { document.getElementById("forward").style.backgroundImage = "none"; }
+		
+		if (keycode == 84 && broadcastmicon==false && (broadcasting=="mic" || broadcasting=="camandmic")) { 
+			getFlashMovie("oculus_player").unmutePlayerMic();
+			broadcastmicon = true;
+			setstatus("selfstream","mic ON");
+			//message("unmute player mic", "orange");
+		}
+	}
+}
+
+function keyBoardReleased(event) {
+	if (enablekeyboard) {
+		var keycode = event.keyCode;
+		if (keycode == 84 && (broadcasting=="mic" || broadcasting=="camandmic")) {
+			getFlashMovie("oculus_player").mutePlayerMic();
+			setstatus("selfstream",broadcasting);
+			broadcastmicon = false;
+			//message("mute player mic", "orange");
+		}
 	}
 }
 

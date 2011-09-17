@@ -15,6 +15,7 @@ public enum PlayerCommands {
 	// sub-set that are restricted to "user0" 
 	public enum AdminCommands {
 		
+		
 		//TODO: CHECK THESE 
 		new_user_add, user_list, delete_user, extrauser_password_update, restart,
 		disconnectotherconnections, showlog, softwareupdate, relaunchgrabber, systemcall
@@ -32,6 +33,17 @@ public enum PlayerCommands {
 		return false;
 	}
 	
+	/**
+	 * @return true if given command is in the sub-set
+	 */
+	public boolean requiresAdmin(){
+		for(AdminCommands admin : AdminCommands.values()){
+			if(admin.equals(this)) 
+				return true;
+		}
+		
+		return false;
+	}
 	
 	@Override 
 	public String toString() {

@@ -1,4 +1,4 @@
-package oculus;
+package developer;
 
 import java.util.*;
 
@@ -7,6 +7,10 @@ import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
+
+import oculus.Application;
+import oculus.OptionalSettings;
+import oculus.Settings;
 
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;

@@ -5,6 +5,8 @@ import org.red5.server.api.IConnection;
 import org.red5.server.api.service.IServiceCapableConnection;
 import org.slf4j.Logger;
 
+import developer.LogManager;
+
 public class AutoDock implements Docker {
 
 	/* notes 

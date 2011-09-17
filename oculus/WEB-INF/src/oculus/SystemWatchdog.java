@@ -1,6 +1,5 @@
 package oculus;
 
-import java.io.File;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,11 +10,9 @@ import org.slf4j.Logger;
 public class SystemWatchdog {
 	
 	private static Logger log = Red5LoggerFactory.getLogger(SystemWatchdog.class, "oculus");
-
-	// if reboot is "true" in config file
 	private final Settings settings = new Settings();
 	private final boolean reboot = settings.getBoolean(State.reboot);
-	private final boolean debug = settings.getBoolean(State.developer);
+	//private final boolean debug = settings.getBoolean(State.developer);
 
 	// check every hour
 	public static final long DELAY = State.TWO_MINUTES;
@@ -30,8 +27,8 @@ public class SystemWatchdog {
 	public SystemWatchdog() {
 		if (reboot){
 			Timer timer = new Timer();
-			timer.scheduleAtFixedRate(new Task(), State.ONE_MINUTE, DELAY);
-			if(debug) log.info("system watchdog starting");
+			timer.scheduleAtFixedRate(new Task(), State.TEN_MINUTES, DELAY);
+			//if(debug) log.info("system watchdog starting");
 		}	
 	}
 	
@@ -44,7 +41,7 @@ public class SystemWatchdog {
 				String boot = new Date(state.getLong(State.boottime)).toString();				
 				log.info("rebooting, last was: " + boot);
 				log.info("user logged in for: " + state.getLoginSince() + " ms");
-			
+			/*
 				if(debug){
 					
 					// copy stdout log and email it 
@@ -74,6 +71,7 @@ public class SystemWatchdog {
 						} else log.error("error on file copy: " + oculus);
 					} else log.error("error on file copy: " + logfile);
 				} 
+				*/
 				
 				// reboot  
 				Util.systemCall("shutdown -r -f -t 01");				

@@ -8,7 +8,6 @@ import java.util.Vector;
 
 public class LoginRecords {
 
-	private static final String filename = System.getenv("RED5_HOME") + "\\log\\login.txt";
 	public static Vector<Record> list = new Vector<Record>();
 	public static State state = State.getReference();
 	public static final String PASSENGER = "passenger";
@@ -22,8 +21,10 @@ public class LoginRecords {
 	
 	public void beDriver(String ip) {
 		
-		if(isConnected(state.get(State.user), ip))
+		if(isConnected(state.get(State.user), ip)){
 			System.out.println("user is allready connected!");
+			System.out.println(this);
+		}
 		
 		list.add(new Record(state.get(State.user), DRIVER, ip));
 		state.set(State.userisconnected, true);
@@ -50,7 +51,7 @@ public class LoginRecords {
 		state.set(State.userisconnected, true);
 	}
 
-	/** @return true if this user is allready connected from this address */ 
+	/** @return true if this user is already connected from this address */ 
 	public boolean isConnected(final String user, final String ip){
 		for (int i = 0; i < list.size(); i++){
 			Record rec = list.get(i);
@@ -67,8 +68,8 @@ public class LoginRecords {
 	public void signout() {
 		
 		if(state.getBoolean(State.developer)){
-			System.out.println("_logging out: " + state.get(State.user));
-			System.out.println("_waiting now:" + getPassengers());
+			System.out.println("+_logging out: " + state.get(State.user));
+			System.out.println("+_waiting now:" + getPassengers());
 			System.out.println(toString());
 		}
 		
@@ -91,7 +92,7 @@ public class LoginRecords {
 		if(list.size() > MAX_RECORDS) list.remove(0);
 		
 		if(state.getBoolean(State.developer)){
-			System.out.println("_logging out: " + state.get(State.user));
+			System.out.println("-_logging out: " + state.get(State.user));
 			System.out.println("_waiting now:" + getPassengers());
 			System.out.println(toString());
 		}
@@ -129,12 +130,12 @@ public class LoginRecords {
 	/** create snap shot of current use to disk */
 	public static boolean save(){
 		
-		if(new File(filename).exists()) 
-			new File(filename).delete();
+		if(new File(Settings.loginactivity).exists()) 
+			new File(Settings.loginactivity).delete();
 		
 		FileWriter fw = null;
 		try {
-			fw = new FileWriter(new File(filename));
+			fw = new FileWriter(new File(Settings.loginactivity));
 		} catch (IOException e1) {
 			return false;
 		}

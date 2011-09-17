@@ -21,6 +21,10 @@ import org.red5.io.amf3.ByteArray;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
+import developer.EmailAlerts;
+import developer.LogManager;
+import developer.SendMail;
+
 /** red5 application */
 public class Application extends MultiThreadedApplicationAdapter {
 
@@ -51,7 +55,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     public LoginRecords loginrecords = new LoginRecords();
     
     // TODO: BRAD TEST
-    private developer.CommandManager cmdManager = null;
+    // private developer.CommandManager cmdManager = null;
  
 	public boolean muteROVonMove = false;
 	public boolean admin = false;
@@ -219,9 +223,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
-		// 
-		// loginrecords = new LoginRecords();
-		cmdManager = new developer.CommandManager(this);
+		new developer.CommandManager(this);
 		
 		if (settings.getBoolean(State.developer)){
 			moves.open(System.getenv("RED5_HOME") + "\\log\\moves.log");
@@ -358,6 +360,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//state.set(State.userisconnected, true);
 		//state.set(State.logintime, System.currentTimeMillis());
 		loginrecords.beDriver();
+		System.out.print(loginrecords);
 		System.out.println("after.......................");
 	}
 
@@ -384,6 +387,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 			playerCallServer(cmd, str);
 	}
 
+	// TODO: Make this private 
+	
+	public void commandManager(String cmd, String arg){
+		dockGrab();
+	}
+
+	public void dockGrab(){
+		if (grabber instanceof IServiceCapableConnection) {
+			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+			sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
+		} else System.out.println("brad... this doesn't work!");
+	}
+	
 	/**
 	 * distribute commands from player
 	 * 
@@ -401,7 +417,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case chat: chat(str); return;
 			case beapassenger: beAPassenger(str); return;
 			case assumecontrol: assumeControl(str); return;
-	
 			case dockgrab:
 				if (grabber instanceof IServiceCapableConnection) {
 					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -410,9 +425,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				return;
 		}
 
-		// TODO: 
-		// must be driver/non-passenger for all commands below
-		// player only 
+		// must be driver/non-passenger for all commands below. player only 
 		if (Red5.getConnectionLocal() != player) { 
 			System.out.println("passenger, command dropped: " + fn.toString());
 			return;
@@ -558,6 +571,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				break;
 		}
 	}
+	
 
 	/** put all commands here */
 	public enum grabberCommands {

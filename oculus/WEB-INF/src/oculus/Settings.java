@@ -5,7 +5,9 @@ import java.util.Properties;
 
 public class Settings {
 
+	static final String loginactivity = System.getenv("RED5_HOME") + "\\log\\loginactivity.txt";
 	static final String filename = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
+	static final String movesfile = System.getenv("RED5_HOME") + "\\log\\moves.txt";
 
 	// put all constants here
 	public static final String emailalerts = "emailalerts";

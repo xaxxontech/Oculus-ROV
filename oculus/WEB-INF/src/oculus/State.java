@@ -70,14 +70,19 @@ public class State {
 	/** private constructor for this singleton class */
 	private State() {
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
-		props.put(userisconnected, false);
+		// not required
+		// props.put(userisconnected, false);
 		props.put(localaddress, Util.getLocalAddress());
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String ip = Util.getExternalIPAddress();
-				if(ip!=null) State.getReference().set(State.externaladdress, ip);
-				else State.getReference().set(State.externaladdress, Util.getExternalIPAddress());
+				String ip = null; 
+				while(ip==null){
+					ip = Util.getExternalIPAddress();
+					if(ip!=null)
+						State.getReference().set(State.externaladdress, ip);
+					else Util.delay(500);
+				}
 			}
 		}).start();
 	}

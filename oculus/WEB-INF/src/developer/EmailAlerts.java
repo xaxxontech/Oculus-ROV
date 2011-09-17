@@ -1,7 +1,13 @@
-package oculus;
+package developer;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import oculus.Application;
+import oculus.BatteryLife;
+import oculus.Settings;
+import oculus.State;
+
 
 /** */
 public class EmailAlerts {

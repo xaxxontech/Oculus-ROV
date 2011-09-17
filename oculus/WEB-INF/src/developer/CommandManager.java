@@ -18,8 +18,7 @@ public class CommandManager {
 	private static String oculus = "oculus";
 	private static String function = "function";
 	private static String argument = "argument";
-	private static Logger log = Red5LoggerFactory.getLogger(
-			CommandManager.class, oculus);
+	private static Logger log = Red5LoggerFactory.getLogger( CommandManager.class, oculus);
 	private State state = State.getReference();
 	private static Application app = null;
 
@@ -28,7 +27,7 @@ public class CommandManager {
 	/** */
 	public CommandManager(Application a) {
 		app = a;
-		//channel = new MulticastChannel(this);
+		new MulticastChannel(this);
 		log.debug("command manager ready");
 		System.out.println("command manager ready");
 	}
@@ -51,7 +50,7 @@ public class CommandManager {
 
 			if (state.get("status").equalsIgnoreCase("docked")) {
 				System.out.println("...home found....");
-				app.playerCallServer(PlayerCommands.restart, null);
+				app.commandManager("restart", null);
 				return;
 			}
 
@@ -75,7 +74,7 @@ public class CommandManager {
 				System.out.println("login records: " + app.loginrecords.toString());
 				state.dump();
 				
-				new LoginRecords().save();
+				LoginRecords.save();
 				
 				// blocking send
 				// new SendMail("Oculus State Dump", "debug dump attached...");				
@@ -99,6 +98,13 @@ public class CommandManager {
 			final String fn = command.get(function);
 			final String arg = command.get(argument);
 
+			final String pass = command.get("salted");
+			
+			if(pass==null){
+				System.out.println("no salted meats!");
+				//return;
+			}
+			
 			if (fn == null) return;
 
 			// if (fn.equalsIgnoreCase("home")) {

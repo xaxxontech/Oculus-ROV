@@ -1,4 +1,4 @@
-package oculus;
+package developer;
 
 import oculus.Application;
 import oculus.Observer;

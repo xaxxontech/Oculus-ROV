@@ -46,7 +46,7 @@ public class BatteryLife {
 	 */
 	public void init(Application parent){
 		
-		System.out.println("battery init...");
+		//System.out.println("battery init...");
 			
 		if(app == null){
 			

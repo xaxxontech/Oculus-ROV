@@ -54,9 +54,6 @@ public class Application extends MultiThreadedApplicationAdapter {
     // TODO: issue 24 
     public LoginRecords loginrecords = new LoginRecords();
     
-    // TODO: BRAD TEST
-    // private developer.CommandManager cmdManager = null;
- 
 	public boolean muteROVonMove = false;
 	public boolean admin = false;
 	public String stream = null;
@@ -115,11 +112,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			admin = false;			
 
 		    // TODO: issue 24 
-			// cmdManager.dump();
-			// state.set(State.userisconnected, false);
 			loginrecords.signout();
-		//	state.delete(State.user);
-
 			player = null;
 			
 			if (!state.getBoolean(State.autodocking)) {
@@ -223,10 +216,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
-		new developer.CommandManager(this);
 		
 		if (settings.getBoolean(State.developer)){
-			moves.open(System.getenv("RED5_HOME") + "\\log\\moves.log");
+			new developer.CommandManager(this);
+			moves.open(Settings.movesfile); 
+			// System.getenv("RED5_HOME") + "\\log\\moves.log");
 		}
 		
 		//int volume = settings.getInteger(Settings.volume);
@@ -353,13 +347,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageGrabber(str, "connection " +  state.get(State.user) + "&nbsp;connected");
 			System.out.println(str);
 			log.info(str);
-			Util.beep();
 		}
 		
 		System.out.println("before...................");
-		//state.set(State.userisconnected, true);
-		//state.set(State.logintime, System.currentTimeMillis());
-		loginrecords.beDriver();
+		loginrecords.beDriver(player.getRemoteAddress());
 		System.out.print(loginrecords);
 		System.out.println("after.......................");
 	}
@@ -383,8 +374,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 			System.out.println("playerCallServer() command not found:" + fn);
 			return;
 		}
-		if(cmd!=null) 
-			playerCallServer(cmd, str);
+		if(cmd!=null){
+			if(cmd.requiresAdmin())
+				if(! admin){
+					message("must be an admin", null, null);
+					System.out.println("must be an admin to do: " + fn.toString());
+					return;
+				}			
+			playerCallServer(cmd, str);			
+		}
 	}
 
 	// TODO: Make this private 
@@ -406,7 +404,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param fn to call in flash player [file name].swf
 	 * @param str is the argument string to pass along 
 	 */
-	public void playerCallServer(final PlayerCommands fn, final String str) {
+	private void playerCallServer(final PlayerCommands fn, final String str) {
 
 		if(state.getBoolean(State.developer))
 			if(!fn.equals(PlayerCommands.statuscheck))
@@ -620,7 +618,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case chat: chat(str); break;
 		case dockgrabbed: {
 			docker.autoDock("dockgrabbed " + str); 
-			// System.out.println("grabberCallServer(): " + str);
+			System.out.println("grabberCallServer(): " + str);
 			// find xx yy xSize ySize, 0.xxxx 
 			String[] arg = str.split(" ");
 			state.set(State.dockxpos, arg[1]);
@@ -1044,7 +1042,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * 
 	 * @param str parameter is the direction 
 	 */
-	private void move(String str) {
+	public void move(String str) {
 		
 		if(str==null) return;
 	
@@ -1088,7 +1086,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * Valid choices are: "right", "left", "backward", "forward" 
 	 * 
 	 */
-	private void nudge(String str) {
+	public void nudge(String str) {
 		
 		if (str == null) return;
 		if ( ! state.getBoolean(State.motionenabled)) {
@@ -1215,10 +1213,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (state.equalsSetting(State.user, "user0")) admin = true;
 		else admin = false;
 
-		// state.set(State.userisconnected, true);
-		// state.set(State.logintime, System.currentTimeMillis());
-		loginrecords.beDriver();
-		Util.beep();
+		loginrecords.beDriver(player.getRemoteAddress());
 	}
 
 	/** */ 
@@ -1244,10 +1239,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	
 		//TODO: brad
-		// state.set(State.userisconnected, true);
-		// state.set(State.logintime, System.currentTimeMillis());
 		loginrecords.bePassenger();
-		Util.beep();
 	}
 
 	private void playerBroadCast(String str) {

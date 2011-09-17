@@ -22,35 +22,26 @@ public class LoginRecords {
 	public void beDriver(String ip) {
 		
 		if(isConnected(state.get(State.user), ip)){
-			System.out.println("user is allready connected!");
+			System.out.println("user is already connected!");
 			System.out.println(this);
 		}
 		
 		list.add(new Record(state.get(State.user), DRIVER, ip));
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
-	}
-	
-	public void bePassenger(String ip) {
-		list.add(new Record(state.get(State.user), PASSENGER, ip));
-		state.set(State.userisconnected, true);
-	}
-	
-
-	public void beDriver() {
+		Util.beep();
 		
-	//	if(isConnected(state.get(State.user), ip))
-		
-		list.add(new Record(state.get(State.user), DRIVER, "xxx.xxx.xxx.xxx"));
-		state.set(State.userisconnected, true);
-		state.set(State.logintime, System.currentTimeMillis());
+		if(state.getBoolean(State.developer)) System.out.println(this);
 	}
 	
 	public void bePassenger() {
 		list.add(new Record(state.get(State.user), PASSENGER, "xxx.xxx.xxx.xxx"));
 		state.set(State.userisconnected, true);
+		Util.beep();
+		
+		if(state.getBoolean(State.developer)) System.out.println(this);
 	}
-
+	
 	/** @return true if this user is already connected from this address */ 
 	public boolean isConnected(final String user, final String ip){
 		for (int i = 0; i < list.size(); i++){
@@ -214,7 +205,9 @@ public class LoginRecords {
 		
 		@Override
 		public String toString() {
-			String str = user + " " + role.toUpperCase() + " address: " + ip + " login: " + new Date(timein).toString();
+			String str = user + " " + role.toUpperCase();
+			if(!isPassenger()) str += " address: " + ip;
+			str += " login: " + new Date(timein).toString();
 			if(isActive()) str += " is ACTIVE";
 			else str += " logout: " + new Date(timeout).toString();
 			

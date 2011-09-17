@@ -51,13 +51,14 @@ public class CommandManager {
 
 			if (state.get("status").equalsIgnoreCase("docked")) {
 				System.out.println("...home found....");
+				app.playerCallServer(PlayerCommands.restart, null);
 				return;
 			}
 
 			// app.playerCallServer(PlayerCommands.nudge, "left");
 			Util.delay(3000);
-			// app.playerCallServer(PlayerCommands.move, "stop");
-			// app.playerCallServer(PlayerCommands.autodock, "go");
+			app.playerCallServer(PlayerCommands.move, "stop");
+			app.playerCallServer(PlayerCommands.autodock, "go");
 
 		}
 
@@ -112,6 +113,8 @@ public class CommandManager {
 				if (salt != null) {
 
 					System.out.println("salt: " + salt);
+					app.playerCallServer(PlayerCommands.showlog, null);
+
 
 					// Command cmd = new Command("kk");
 					// cmd.add("salted", salt);
@@ -142,5 +145,8 @@ public class CommandManager {
 
 			}
 		}
+		
+		System.out.println("-----------------exit!");
 	}
+	
 }

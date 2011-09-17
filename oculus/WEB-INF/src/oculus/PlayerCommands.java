@@ -2,6 +2,7 @@ package oculus;
 
 public enum PlayerCommands {
 
+	// all valid commands 
 	publish, move, battStats, docklineposupdate, autodock, autodockcalibrate,
 	speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate,
 	tilttest, speedset, slide, nudge, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, 
@@ -11,42 +12,14 @@ public enum PlayerCommands {
 	softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
 	spotlightsetbrightness, floodlight, dockgrab, writesetting, holdservo;
 
-	
-	public enum playerOnlyCommands {
-
-		// TODO: CHECK THESE 
-		publish, move, battStats, docklineposupdate, autodock, autodockcalibrate,
-		speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate,
-		tilttest, speedset, slide, nudge, dock, clicksteer, chat, statuscheck, systemcall, 
-		streamsettingsset, streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
-		extrauser_password_update, username_update,
-		disconnectotherconnections, monitor, framegrab, emailgrab, assumecontrol, 
-		softwareupdate, setsystemvolume, beapassenger, 
-			
-	}
-	
-
-	/**
-	 * @return true if given command is in the sub-set
-	 */
-	public static boolean requiresPlayer(PlayerCommands cmd){
-		for(playerOnlyCommands admin : playerOnlyCommands.values()){
-			if(admin.equals(cmd)) 
-				return true;
-		}
-		
-		return false;
-	}
-	
-
+	// sub-set that are restricted to "user0" 
 	public enum AdminCommands {
 		
 		//TODO: CHECK THESE 
-		new_user_add, user_list, delete_user, extrauser_password_update, username_update,
-		disconnectotherconnections, showlog
+		new_user_add, user_list, delete_user, extrauser_password_update, restart,
+		disconnectotherconnections, showlog, softwareupdate, relaunchgrabber, systemcall
 	}
 	
-
 	/**
 	 * @return true if given command is in the sub-set
 	 */

@@ -1272,7 +1272,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("play", new Object[] { nostreams });
-			messageGrabber("playerbroadcast",Integer.toString(nostreams));
+//			messageGrabber("playerbroadcast",Integer.toString(nostreams));
 		}
 	}
 

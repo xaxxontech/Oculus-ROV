@@ -61,7 +61,7 @@ function message(message,status) {
 	if (/^<CHAT>/.test(message)) {
 		message = "<span style='font-size: 20px'>"+message.slice(6)+"</span>";
 	}
-	if (message=="playerbroadcast") { videooverlay(parseInt(status)); message=""; status = null; }
+//	if (message=="playerbroadcast") { videooverlay(parseInt(status)); message=""; status = null; }
 
 	//messages not wanting to be displayed should erase content and go above here
 
@@ -284,12 +284,12 @@ function keypress(e) {
 	return keynum;
 }
 
-function videooverlay(n) {
-	if (n == 0) {
-		document.getElementById("flashoverlay").style.display = "";
-	}
-	else { document.getElementById("flashoverlay").style.display = "none"; } 
-}
+//function videooverlay(n) {
+//	if (n == 0) {
+//		document.getElementById("flashoverlay").style.display = "";
+//	}
+//	else { document.getElementById("flashoverlay").style.display = "none"; } 
+//}
 
 function factoryreset(){
 	if(confirm("Restore factory default settings?\n(A backup file will be created and application restarted)")){

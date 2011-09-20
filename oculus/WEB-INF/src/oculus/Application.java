@@ -21,10 +21,6 @@ import org.red5.io.amf3.ByteArray;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
-import developer.EmailAlerts;
-import developer.LogManager;
-import developer.SendMail;
-
 /** red5 application */
 public class Application extends MultiThreadedApplicationAdapter {
 
@@ -36,7 +32,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     private IConnection player = null;
     private ArduinoCommDC comport = null;
     private LightsComm light = null;
-    private LogManager moves = new LogManager();
+    private developer.LogManager moves = new developer.LogManager();
     private BatteryLife battery = null;
     private Settings settings = new Settings();
     private String pendinguserconnected = null;
@@ -54,6 +50,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     // TODO: issue 24 
     public LoginRecords loginrecords = new LoginRecords();
     
+    // try to make private 
 	public boolean muteROVonMove = false;
 	public boolean admin = false;
 	public String stream = null;
@@ -113,6 +110,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		    // TODO: issue 24 
 			loginrecords.signout();
+			System.out.println("after appDisconnect(): " + loginrecords );
 			player = null;
 			
 			if (!state.getBoolean(State.autodocking)) {
@@ -216,11 +214,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
-		
 		if (settings.getBoolean(State.developer)){
 			new developer.CommandManager(this);
-			moves.open(Settings.movesfile); 
-			// System.getenv("RED5_HOME") + "\\log\\moves.log");
+			moves.open(System.getenv(Settings.movesfile));
 		}
 		
 		//int volume = settings.getInteger(Settings.volume);
@@ -232,8 +228,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//new developer.ftp.FTPObserver(this);
 		//new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this)
-		new EmailAlerts(this);
-		new SystemWatchdog();
+		new developer.EmailAlerts(this);
+		new developer.SystemWatchdog();
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -349,10 +345,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			log.info(str);
 		}
 		
-		System.out.println("before...................");
+		System.out.println("playersignin()");
 		loginrecords.beDriver(player.getRemoteAddress());
 		System.out.print(loginrecords);
-		System.out.println("after.......................");
+		System.out.println("-- done --");
 	}
 
 	/**
@@ -374,6 +370,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			System.out.println("playerCallServer() command not found:" + fn);
 			return;
 		}
+		if(cmd!=null) playerCallServer(cmd, str);
 		if(cmd!=null){
 			if(cmd.requiresAdmin())
 				if(! admin){
@@ -385,7 +382,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	// TODO: Make this private 
+	// TODO: BRAD separate tree of commands  
 	
 	public void commandManager(String cmd, String arg){
 		dockGrab();
@@ -404,6 +401,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param fn to call in flash player [file name].swf
 	 * @param str is the argument string to pass along 
 	 */
+	// TODO: Make this private 
+
 	private void playerCallServer(final PlayerCommands fn, final String str) {
 
 		if(state.getBoolean(State.developer))
@@ -415,12 +414,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case chat: chat(str); return;
 			case beapassenger: beAPassenger(str); return;
 			case assumecontrol: assumeControl(str); return;
-			case dockgrab:
-				if (grabber instanceof IServiceCapableConnection) {
-					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
-				}
-				return;
 		}
 
 		// must be driver/non-passenger for all commands below. player only 
@@ -430,67 +423,73 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 
 		switch (fn) {
-
-			case writesetting: 
-				System.out.println("setting: " + str);
-				String[] cmd = str.split(" ");
-				if(settings.readSetting(cmd[0]) == null) {
-					settings.newSetting(cmd[0], cmd[1]);
-					messageplayer("new setting: " + cmd[1], null, null);
-				}
-				else {
-					settings.writeSettings(cmd[0], cmd[1]);
-					messageplayer(cmd[0] + " " + cmd[1], null, null);
-				}
-				settings.writeFile();
+		
+		case dockgrab:
+			if (grabber instanceof IServiceCapableConnection) {
+				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+				sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
+			}
+			break;
+		
+		case writesetting: 
+			System.out.println("setting: " + str);
+			String[] cmd = str.split(" ");
+			if(settings.readSetting(cmd[0]) == null) {
+				settings.newSetting(cmd[0], cmd[1]);
+				messageplayer("new setting: " + cmd[1], null, null);
+			}
+			else {
+				settings.writeSettings(cmd[0], cmd[1]);
+				messageplayer(cmd[0] + " " + cmd[1], null, null);
+			}
+			settings.writeFile();
+			break;
+				
+		case publish:
+			publish(str);
+			break;
+	
+		case speedset:
+			comport.speedset(str);
+			messageplayer("speed set: " + str, "speed", str.toUpperCase());
+			break;
+	
+		case slide:
+			if (!state.getBoolean(State.motionenabled)) {	
+				messageplayer("motion disabled", "motion", "disabled");
+				break;
+			}
+				
+			if(state.getBoolean(State.autodocking)){
+				messageplayer("command dropped, autodocking", null, null);
 				return;
-				
-	
-			case publish:
-				publish(str);
-				break;
-	
-			case speedset:
-				comport.speedset(str);
-				messageplayer("speed set: " + str, "speed", str.toUpperCase());
-				break;
-	
-			case slide:
-				if (!state.getBoolean(State.motionenabled)) {	
-					messageplayer("motion disabled", "motion", "disabled");
-					break;
-				}
-				
-				if(state.getBoolean(State.autodocking)){
-					messageplayer("command dropped, autodocking", null, null);
-					return;
-				}
-				moveMacroCancel();
-				comport.slide(str);
-				if(moves != null) moves.append("slide " + str);
-				messageplayer("command received: " + fn + str, null, null);
-				break;
+			}
+			moveMacroCancel();
+			comport.slide(str);
+			if(moves != null) moves.append("slide " + str);
+			messageplayer("command received: " + fn + str, null, null);
+			break;
 	
 			case systemcall:
-				if(admin){
+			//	if(admin){
 					System.out.println("received: " + str);
 					messageplayer("system command received", null, null);
 					Util.systemCall(str);
-				}
+			//	}
 				break;
 	
 			case relaunchgrabber:
-				if (admin) {
+				//if (admin) {
 					grabber_launch();
 					messageplayer("relaunching grabber", null, null);
-				}
+				//}
 				break;
 	
 			case docklineposupdate:
-				if (admin) {
+				//if (admin) {
 					settings.writeSettings("vidctroffset", str);
 					messageplayer("vidctroffset set to : " + str, null, null);
-				}
+				// }
 				break;
 	
 			case framegrab:
@@ -776,7 +775,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					ImageIO.write(JavaImage, "PNG", new File(file));
 					if (emailgrab) {
 						emailgrab = false;
-						new SendMail("Oculus Screen Shot", "image attached", file, this);
+						new developer.SendMail("Oculus Screen Shot", "image attached", file, this);
 					}
 				}
 			} catch (IOException e) {
@@ -1213,7 +1212,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (state.equalsSetting(State.user, "user0")) admin = true;
 		else admin = false;
 
+		// TODO: BRAD 
+		// state.set(State.userisconnected, true);
+		// state.set(State.logintime, System.currentTimeMillis());
 		loginrecords.beDriver(player.getRemoteAddress());
+		System.out.println("after assumeControl(): " + loginrecords);
 	}
 
 	/** */ 
@@ -1240,6 +1243,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		//TODO: brad
 		loginrecords.bePassenger();
+		System.out.println("after bePassenger(): " + loginrecords);
 	}
 
 	private void playerBroadCast(String str) {

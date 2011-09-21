@@ -12,37 +12,42 @@ public class LoginRecords {
 	public static State state = State.getReference();
 	public static final String PASSENGER = "passenger";
 	public static final String DRIVER = "driver";
-	public static final int MAX_RECORDS = 50;
+	public static final int MAX_RECORDS = 5;
 	
 	// TODO: only allow user to sign in once from a given ip??
 	// This should trigger an admin gmail warning if ppl share passwords?
 	
-	public LoginRecords() {}
+	public LoginRecords() {System.out.println("login records");}
 	
-	public void beDriver(String ip) {
+	public void beDriver() { // String id) {
 		
-		if(isConnected(state.get(State.user), ip)){
-			System.out.println("user is already connected!");
-			System.out.println(this);
-		}
+		//if(isConnected(state.get(State.user), id)){
+		//	System.out.println("user is already connected!");
+		//	System.out.println(this);
+		//}
 		
-		list.add(new Record(state.get(State.user), DRIVER, ip));
+		list.add(new Record(state.get(State.user), DRIVER)); // id));
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
 		Util.beep();
 		
 		if(state.getBoolean(State.developer)) System.out.println(this);
+		
+		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
 	
 	public void bePassenger() {
-		list.add(new Record(state.get(State.user), PASSENGER, "xxx.xxx.xxx.xxx"));
+		list.add(new Record(state.get(State.user), PASSENGER)); // "xxx.xxx.xxx.xxx"));
 		state.set(State.userisconnected, true);
 		Util.beep();
 		
 		if(state.getBoolean(State.developer)) System.out.println(this);
+		
+		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
 	
 	/** @return true if this user is already connected from this address */ 
+	/*
 	public boolean isConnected(final String user, final String ip){
 		for (int i = 0; i < list.size(); i++){
 			Record rec = list.get(i);
@@ -54,7 +59,8 @@ public class LoginRecords {
 		}
 		
 		return false;
-	}
+	}*/
+	
 	
 	public void signout() {
 		
@@ -168,12 +174,14 @@ public class LoginRecords {
 		private long timeout = 0;
 		private String user = null;
 		private String role = null;
-		private String ip = null;
-		
-		Record(String usr, String role, String addr) {
+//		private String id = "unkown";
+//		private String ip = null;
+
+		Record(String usr, String role){ //, String id) {
 			this.user = usr;
 			this.role = role;
-			this.ip = addr;
+			//this.ip = addr;
+			// this.id = id;
 			
 			if(state.getBoolean(State.developer))
 				System.out.println("ceated login: " + toString());
@@ -191,9 +199,9 @@ public class LoginRecords {
 			return timeout;
 		}
 		
-		public String getAddress(){
-			return ip;
-		}
+	//	public String getAddress(){
+	//		return ip;
+	//	}
 		
 		public boolean isActive(){
 			return (timeout==0);
@@ -205,8 +213,8 @@ public class LoginRecords {
 		
 		@Override
 		public String toString() {
-			String str = user + " " + role.toUpperCase();
-			if(!isPassenger()) str += " address: " + ip;
+			String str = user + " " + role.toUpperCase(); // + " id: " + id;
+			//if(!isPassenger()) str += " address: " + ip;
 			str += " login: " + new Date(timein).toString();
 			if(isActive()) str += " is ACTIVE";
 			else str += " logout: " + new Date(timeout).toString();
@@ -217,8 +225,8 @@ public class LoginRecords {
 		public void logout() {
 			if(timeout==0){
 				timeout = System.currentTimeMillis();
-				///System.out.println("logged out : " + toString());
-			} // else System.out.println("__error: trying to logout twice");	
+				System.out.println("logged out : " + toString());
+			} else System.out.println("__error: trying to logout twice");	
 		}
 	}
 }

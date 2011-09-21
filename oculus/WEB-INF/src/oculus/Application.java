@@ -160,7 +160,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void grabbersignin(String mode) {
 		if (mode.equals("init")) { stream = null; }
 		else { stream = "stop"; }
-		grabber = Red5.getConnectionLocal();
+		grabber = Red5.getConnectionLocal(); 
 		String str = "awaiting&nbsp;connection";
 		if (state.get(State.user) != null) {
 			str = state.get(State.user) + "&nbsp;connected";
@@ -194,6 +194,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		//else
 		// TODO: BRAD
 		docker = new AutoDock(this, grabber, comport, light);
+		
+		// System.out.println("grabber: " + grabber.getSessionId());
 	}
 
 	/** */ 
@@ -216,7 +218,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		if (settings.getBoolean(State.developer)){
 			new developer.CommandManager(this);
-			moves.open(System.getenv(Settings.movesfile));
+			moves.open(Settings.movesfile);
 		}
 		
 		//int volume = settings.getInteger(Settings.volume);
@@ -343,12 +345,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageGrabber(str, "connection " +  state.get(State.user) + "&nbsp;connected");
 			System.out.println(str);
 			log.info(str);
+		
+			System.out.println("-- playersignin() --");
+			loginrecords.beDriver(); //player.getSessionId()); //getRemoteAddress());
+			System.out.print(loginrecords);
+			System.out.println("-- done --");
 		}
 		
-		System.out.println("playersignin()");
-		loginrecords.beDriver(player.getRemoteAddress());
-		System.out.print(loginrecords);
-		System.out.println("-- done --");
 	}
 
 	/**
@@ -370,7 +373,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			System.out.println("playerCallServer() command not found:" + fn);
 			return;
 		}
-		if(cmd!=null) playerCallServer(cmd, str);
+		//(cmd!=null) playerCallServer(cmd, str);
 		if(cmd!=null){
 			if(cmd.requiresAdmin())
 				if(! admin){
@@ -382,8 +385,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	// TODO: BRAD separate tree of commands  
-	
+	// TODO: BRAD separate tree of commands 
 	public void commandManager(String cmd, String arg){
 		dockGrab();
 	}
@@ -1215,8 +1217,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// TODO: BRAD 
 		// state.set(State.userisconnected, true);
 		// state.set(State.logintime, System.currentTimeMillis());
-		loginrecords.beDriver(player.getRemoteAddress());
-		System.out.println("after assumeControl(): " + loginrecords);
+		loginrecords.beDriver();
+		
+		//player.getSessionId()); //.getRemoteAddress());
+		
+		System.out.println("...after assumeControl(): " + loginrecords);
 	}
 
 	/** */ 
@@ -1243,7 +1248,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		//TODO: brad
 		loginrecords.bePassenger();
-		System.out.println("after bePassenger(): " + loginrecords);
+		//System.out.println("....after bePassenger(): " + loginrecords);
 	}
 
 	private void playerBroadCast(String str) {

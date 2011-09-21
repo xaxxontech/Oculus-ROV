@@ -64,6 +64,7 @@ var rovvolume = 0;
 var xmlhttp=null;
 var spotlightlevel = -1;
 var videoscale = 100;
+var pingcountertimer;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -162,6 +163,21 @@ function statuscheck() {
 	}
 }
 
+function pingcounter() {
+	clearTimeout(pingcountertimer);
+	var pm = document.getElementById("pingcountmeter");
+	var length;
+	length = (pm.innerHTML).length; 
+	if (length < 1) { length = pingintervalamount-2; }
+	else  { length = length-1; }
+	var str = "";
+	for (var i = 0 ; i < length; i++) {
+		str += "&middot;";
+	} 
+	document.getElementById("pingcountmeter").innerHTML = str;
+	if (length>0) { pingcountertimer = setTimeout("pingcounter();",1000); }
+}
+
 function checkforstatusreceived() {
 	if (statuscheckreceived==false) {
 		missedstatuschecks += 1;
@@ -257,6 +273,8 @@ function message(message, colour, status, value) {
 			if (officiallagtimer != 0) {
 				var i = d.getTime() - officiallagtimer;
 				setstatus("lag",i+"ms");
+				//pingcounter();
+				pingcountertimer = setTimeout("pingcounter();",1000);
 			}
 		}
 		else {

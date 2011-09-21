@@ -146,6 +146,12 @@ if (hasRequestedVersion) {
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
+<span class="status_title" id="lag_title">ping:
+<span class="status" id="lag_status" style="color: #45F239; background-color: #262626;
+text-transform: none;">
+<span class="status_unknown">unknown</span></span>
+<span id="pingcountmeter" style="color: green"></span>&nbsp; &nbsp;</span><br>
+
 <span class="status_title" id="motion_title">motion:
 <span class="status" id="motion_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
@@ -185,12 +191,6 @@ if (hasRequestedVersion) {
 <span class="status_title" id="keyboard_title">keyboard input:
 <span class="status" id="keyboard_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">enabled</span></span>
-&nbsp; &nbsp;</span><br>
-
-<span class="status_title" id="lag_title">ping:
-<span class="status" id="lag_status" style="color: #45F239; background-color: #262626;
-text-transform: none;">
-<span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
 <span class="status_title" id="user_title">user:
@@ -548,13 +548,14 @@ server commands</a><br>
 <a class="blackbg" 
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;developer_menu&quot;).innerHTML);">
 developer menu</a><br>
-<a class="blackbg" href="http://www.xaxxon.com/docs/view?f=contents" target="_blank">online documentation</a><br>
+<a class="blackbg" href="http://www.xaxxon.com/docs/view?f=contents" target="_blank">online help</a><br>
 
 </div>
 
 <!-- main menu non-admin -->
 <div id = "main_menu_nonadmin" style="display: none;">
 <a class="blackbg" href="javascript: account('change_password');">change password</a><br>
+<a class="blackbg" href="http://www.xaxxon.com/docs/view?f=contents" target="_blank">online help</a><br>
 </div> 
 
 <!-- custom stream settings (ROV) -->

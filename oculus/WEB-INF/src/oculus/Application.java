@@ -176,7 +176,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 
 		// eliminate any other grabbers
-		int i = 0;
+		//int i = 0;
 		Collection<Set<IConnection>> concollection = getConnections();
 		for (Set<IConnection> cc : concollection) {
 			for (IConnection con : cc) {
@@ -184,7 +184,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 						&& con != player
 						&& (con.getRemoteAddress()).equals("127.0.0.1")) {
 							con.close();
-							i++;
+		//					i++;
+		// TODO: NOT USED?
+							
 				}
 			}
 		}
@@ -195,6 +197,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// TODO: BRAD
 		docker = new AutoDock(this, grabber, comport, light);
 		
+		if (settings.getBoolean(State.developer)){
+			new developer.CommandManager(this, docker, comport);
+			moves.open(Settings.movesfile);
+		}
+		
+
 		// System.out.println("grabber: " + grabber.getSessionId());
 	}
 
@@ -216,26 +224,23 @@ public class Application extends MultiThreadedApplicationAdapter {
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
-		if (settings.getBoolean(State.developer)){
-			new developer.CommandManager(this);
-			moves.open(Settings.movesfile);
-		}
 		
-		//int volume = settings.getInteger(Settings.volume);
-		//if (volume == Settings.ERROR) settings.newSetting(Settings.volume, "0");
 		Util.setSystemVolume(settings.getInteger(Settings.volume));
 	
 		// TODO: Brad added, removable with single comment line here 
 		// new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this);
-		//new developer.sonar.SonarSteeringObserver(this, comport);
-		//new developer.ftp.FTPObserver(this)
 		new developer.EmailAlerts(this);
 		new developer.SystemWatchdog();
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
 		log.info("initialize");
+		
+//		if (settings.getBoolean(State.developer)){
+//			new developer.CommandManager(this, docker, comport);
+//			moves.open(Settings.movesfile);
+//		}
 	}
 
 	/**
@@ -373,10 +378,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			System.out.println("playerCallServer() command not found:" + fn);
 			return;
 		}
-		//(cmd!=null) playerCallServer(cmd, str);
 		if(cmd!=null){
 			if(cmd.requiresAdmin())
 				if(! admin){
+					log.error("must be admin to do: " + fn);
 					message("must be an admin", null, null);
 					System.out.println("must be an admin to do: " + fn.toString());
 					return;
@@ -386,11 +391,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	// TODO: BRAD separate tree of commands 
-	public void commandManager(String cmd, String arg){
-		dockGrab();
-	}
+	//public void commandManager(String cmd, String arg){
+	//	dockGrab();
+	//}
 
 	public void dockGrab(){
+		// System.out.println(" dock..");
+		log.debug("grabbing dock target...");
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
@@ -403,14 +410,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param fn to call in flash player [file name].swf
 	 * @param str is the argument string to pass along 
 	 */
-	// TODO: Make this private 
-
 	private void playerCallServer(final PlayerCommands fn, final String str) {
 
 		if(state.getBoolean(State.developer))
 			if(!fn.equals(PlayerCommands.statuscheck))
-				if(state.getBoolean(State.developer))
-					System.out.println("playerCallServer(): " + fn + " " + str);
+				System.out.println("playerCallServer(): " + fn + " " + str);
 		
 		switch (fn) {
 			case chat: chat(str); return;
@@ -418,7 +422,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case assumecontrol: assumeControl(str); return;
 		}
 
-		// must be driver/non-passenger for all commands below. player only 
+		// must be driver/non-passenger for all commands below 
 		if (Red5.getConnectionLocal() != player) { 
 			System.out.println("passenger, command dropped: " + fn.toString());
 			return;
@@ -439,8 +443,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if(settings.readSetting(cmd[0]) == null) {
 				settings.newSetting(cmd[0], cmd[1]);
 				messageplayer("new setting: " + cmd[1], null, null);
-			}
-			else {
+			} else {
 				settings.writeSettings(cmd[0], cmd[1]);
 				messageplayer(cmd[0] + " " + cmd[1], null, null);
 			}
@@ -448,6 +451,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 				
 		case publish:
+			// System.out.println("publish:  " + str);
 			publish(str);
 			break;
 	
@@ -1048,7 +1052,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if(str==null) return;
 	
 		if (str.equals("stop")) {
-			if(state.getBoolean(State.autodocking)){ docker.autoDock("cancel"); }
+			if(state.getBoolean(State.autodocking)) 
+				docker.autoDock("cancel"); 
 
 			comport.stopGoing();
 			moveMacroCancel();
@@ -1058,13 +1063,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		moveMacroCancel();
-		
+	
 		// Issue#4 - use autodock cancel if needed 
 		if(state.getBoolean(State.autodocking)){
 			messageplayer("command dropped, autodocking", null, null);
 			return;
 		}
-		
+	
 		if (!state.getBoolean(State.motionenabled)) {
 			messageplayer("motion disabled (try un-dock)", "motion", "DISABLED");
 			return;
@@ -1215,11 +1220,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		else admin = false;
 
 		// TODO: BRAD 
-		// state.set(State.userisconnected, true);
-		// state.set(State.logintime, System.currentTimeMillis());
 		loginrecords.beDriver();
 		
-		//player.getSessionId()); //.getRemoteAddress());
+		// System.out.println("id: " + player.getSessionId()); 
+		// .getRemoteAddress());
 		
 		System.out.println("...after assumeControl(): " + loginrecords);
 	}
@@ -1248,7 +1252,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		//TODO: brad
 		loginrecords.bePassenger();
-		//System.out.println("....after bePassenger(): " + loginrecords);
+		System.out.println("....after bePassenger(): " + loginrecords);
 	}
 
 	private void playerBroadCast(String str) {

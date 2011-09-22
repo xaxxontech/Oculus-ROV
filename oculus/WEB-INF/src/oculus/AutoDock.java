@@ -271,9 +271,10 @@ public class AutoDock implements Docker {
 				return;
 			}
 			
+			System.out.println("...undock called.... in java");
+			state.set(State.motionenabled, true);
 			comport.speedset("fast");
 			comport.goBackward();
-			state.set(State.motionenabled, true);
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
 			state.set(State.dockstatus, State.undocked);
 			new Thread(new Runnable() {

@@ -17,7 +17,7 @@ public class LoginRecords {
 	// TODO: only allow user to sign in once from a given ip??
 	// This should trigger an admin gmail warning if ppl share passwords?
 	
-	public LoginRecords() {System.out.println("login records");}
+	public LoginRecords() {System.out.println("login records started..");}
 	
 	public void beDriver() { // String id) {
 		

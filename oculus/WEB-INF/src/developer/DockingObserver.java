@@ -26,18 +26,10 @@ public class DockingObserver implements Observer {
 	@Override
 	public void updated(final String key) {
 
-		// if (key.equals(State.dockstatus) || key.equals(State.timeout) ||
-		// key.equals(State.autodocktimeout) || key.equals(State.losttarget)
-		// || key.equals(State.autodocking) ){
-
-		// final String status = state.get(key);
-
-		// System.out.println("_.__dock observer: " + key + " " + status);
-
 		if (state.getBoolean(State.autodocking)) {
 			if (!docking) {
 				docking = true;
-				System.out.println("_.__started autodock");
+				System.out.println("__started autodocking...");
 				start = System.currentTimeMillis();
 			}
 		}
@@ -45,22 +37,21 @@ public class DockingObserver implements Observer {
 		if (state.get(State.dockstatus) != null) {
 			if (state.get(State.dockstatus).equals(State.docked)) {
 
-				System.out.println("-.--- done docking");
+				// System.out.println("-.--- done docking");
 				end = System.currentTimeMillis();
-				System.out.println("_.--- took: " + ((end - start) / 1000) + " seconds to dock");
+				
+				if((end - start)>State.TEN_MINUTES){
+					System.out.println("docking booting still?");
+					return;
+				}
+				
+				app.message("docking took " + ((end - start) / 1000) + " seconds" , null, null);
+				System.out.println("docking took: " + ((end - start) / 1000) + " seconds");
 				docking = false;
 				state.dump();
 
 			}
 		}
-		/*
-		 * 
-		 * if (state.getBoolean(State.losttarget)){
-		 * app.message("_.__losttarget has been managed?", null, null);
-		 * state.delete(State.losttarget); state.dump(); }
-		 */
-
-		// }
 	}
 
 	/*

@@ -402,12 +402,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	//}
 
 	public void dockGrab(){
-		// System.out.println(" dock..");
-		log.debug("grabbing dock target...");
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
-		} else System.out.println("brad... this doesn't work!");
+		} else log.error("failed to grab dock target");
 	}
 	
 	/**
@@ -422,10 +420,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if(!fn.equals(PlayerCommands.statuscheck))
 				System.out.println("playerCallServer(): " + fn + " " + str);
 		
-		switch (fn) {
-			case chat: chat(str); return;
-			case beapassenger: beAPassenger(str); return;
-			case assumecontrol: assumeControl(str); return;
+		switch (fn) {	
+		case chat: chat(str); return;
+		case beapassenger: beAPassenger(str); return;
+		case assumecontrol: assumeControl(str); return;
+		case docktest: commandManager.dockingTest(); return;
 		}
 
 		// must be driver/non-passenger for all commands below 
@@ -436,11 +435,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		switch (fn) {
 		
-		case dockgrab:
-			if (grabber instanceof IServiceCapableConnection) {
+		case dockgrab: dockGrab();
+			/*if (grabber instanceof IServiceCapableConnection) {
 				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 				sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
-			}
+			}*/
 			break;
 		
 		case writesetting: 
@@ -471,10 +470,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 				messageplayer("motion disabled", "motion", "disabled");
 				break;
 			}
-				
 			if(state.getBoolean(State.autodocking)){
 				messageplayer("command dropped, autodocking", null, null);
-				return;
+				break;
 			}
 			moveMacroCancel();
 			comport.slide(str);

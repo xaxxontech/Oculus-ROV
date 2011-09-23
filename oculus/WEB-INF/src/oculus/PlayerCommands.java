@@ -10,7 +10,7 @@ public enum PlayerCommands {
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update,
 	disconnectotherconnections, showlog, monitor, framegrab, emailgrab, assumecontrol, 
 	softwareupdate, restart, arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle,
-	spotlightsetbrightness, floodlight, dockgrab, writesetting, holdservo;
+	spotlightsetbrightness, floodlight, dockgrab, writesetting, holdservo, docktest;
 
 	// sub-set that are restricted to "user0" 
 	public enum AdminCommands {

@@ -1299,6 +1299,11 @@ function holdservo(str) {
 	lagtimer = new Date().getTime(); // has to be *after* message()
 }
 
+function docktest(){
+	message("test docking", "go", sentcmdcolor); //colour, status, value); //
+	callServer('docktest', 'notused');
+}
+
 function restart() {
 	if (confirm("restart server\nare you sure?")) { 
 	  message("sending restart: "+str,sentcmdcolor);

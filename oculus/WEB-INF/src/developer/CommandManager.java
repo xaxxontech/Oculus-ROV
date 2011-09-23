@@ -23,64 +23,70 @@ public class CommandManager {
 	private static Logger log = Red5LoggerFactory.getLogger( CommandManager.class, oculus);
 	private static State state = State.getReference();
 	private static Application app = null;
-	private static Docker docker = null;
+	private Docker docker = null;
 	private static ArduinoCommDC port = null;
 	
 	//private MulticastChannel channel = null;
-
-	/**
-	 * @param docker  */
-	public CommandManager(Application a, Docker d, ArduinoCommDC p) {
+	
+	public CommandManager(Application a, ArduinoCommDC p) {
 		
 		app = a;
-		docker = d;
+		//docker = d;
 		port = p;
 		
-		if(app==null) System.out.println("null app in cmd mgr");
-		if(docker==null) System.out.println("null docker in cmd mgr");
-		if(port==null) System.out.println("null port in cmd mgr");
+		//if(app==null) System.out.println("null app in cmd mgr");
+		//if(docker==null) System.out.println("null docker in cmd mgr");
+		//if(port==null) System.out.println("null port in cmd mgr");
 
 		//new MulticastChannel(this);
 		//log.debug("command manager ready");
 		//System.out.println("command manager ready...");
+	
+		System.out.println("command manager...");
+		log.debug("command manager ready...");
+	}
+
+	public void setDocker(Docker d){
+		
+		this.docker = d;
+		
+		System.out.println("CommandManager: new docker created.... "); // sent to cmd mnger");
 		
 		new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
 
-				Util.delay(30000);
-				System.out.println("---calling undock...");
+				Util.delay(10000);
 				
-				//state.set(State.motionenabled, true);
-				//state.set(State.docked, false);
-				
-				
-				docker.dock(State.undock);
-				
-				//System.out.println(state.toString());
-				
-				// port.nudge("backward");
-				app.move("backwards");
+				System.out.println("----camera on----");
 				
 				app.publish("camera");
+
+				docker.dock(State.undock);
 				Util.delay(7000);
+
+				System.out.println("----going backward");
+				port.nudge("backward");
+								
+				Util.delay(7000);
+				port.nudge("left");
+
+				System.out.println("----calling grab");
+
 				app.dockGrab();
-				app.move("stop");
-				port.stopGoing();
-				
-				System.out.println("starting docking...");
-				
+								
+				Util.delay(7000);
+				System.out.println("--state--");
+				state.dump();
+				System.out.println("-- now dock --");
+
 				docker.autoDock("go");
 
 				
 			}
-		}).start();
-		
-		System.out.println("command manager ready now!");
-		log.debug("command manager ready");
+		}).start();	
 	}
-
 	
 	/**
 	 * send a command to the group public void send(Command command) {

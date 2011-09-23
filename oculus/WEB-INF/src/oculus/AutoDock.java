@@ -271,7 +271,7 @@ public class AutoDock implements Docker {
 				return;
 			}
 			
-			System.out.println("...undock called.... in java");
+			// System.out.println("...undock called.... in java");
 			state.set(State.motionenabled, true);
 			comport.speedset("fast");
 			comport.goBackward();

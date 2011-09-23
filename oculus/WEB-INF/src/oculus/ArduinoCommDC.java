@@ -24,7 +24,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	public static final int SONAR_DELAY = 3000; 
 	public static final int WATCHDOG_DELAY = 5000;
 
-	// this commands require arguments from current state
+	// these commands require arguments from current state
 	public static final byte FORWARD = 'f';
 	public static final byte BACKWARD = 'b';
 	public static final byte LEFT = 'l';
@@ -41,7 +41,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	private static final byte[] ECHO_ON = { 'e', '1' };
 	private static final byte[] ECHO_OFF = { 'e', '0' };
 
-	// comm cannel
+	// comm channel
 	private SerialPort serialPort = null;
 	private InputStream in;
 	private OutputStream out;
@@ -56,8 +56,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	// track write times
 	private long lastSent = System.currentTimeMillis();
 	private long lastRead = System.currentTimeMillis();
-
-	Settings settings = new Settings();
+	
+	private Settings settings = new Settings();
 	protected int speedslow = settings.getInteger("speedslow");
 	protected int speedmed = settings.getInteger("speedmed");
 	protected int camservohoriz = settings.getInteger("camservohoriz");
@@ -68,8 +68,8 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int maxclickcam = settings.getInteger("maxclickcam");
 	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	protected int steeringcomp = settings.getInteger("steeringcomp");
-	protected final boolean sonar = settings.getBoolean(State.sonarenabled);
-	protected boolean holdservo = settings.getBoolean(State.holdservo);
+	protected boolean sonar = settings.getBoolean(OptionalSettings.sonarenabled.toString());
+	protected boolean holdservo = settings.getBoolean(FactorySettings.holdservo.toString());
 
 	protected int camservodirection = 0;
 	protected int camservopos = camservohoriz;

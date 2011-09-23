@@ -21,6 +21,8 @@ import org.red5.io.amf3.ByteArray;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
+import developer.CommandManager;
+
 /** red5 application */
 public class Application extends MultiThreadedApplicationAdapter {
 
@@ -39,7 +41,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     private String remember = null;
     private IConnection pendingplayer = null;
     private String httpPort;
-    private Docker docker = null;
+    public Docker docker = null;
     private State state = State.getReference();
     private Speech speech = new Speech();
     private boolean initialstatuscalled = false;
@@ -49,6 +51,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     
     // TODO: issue 24 
     public LoginRecords loginrecords = new LoginRecords();
+    private CommandManager commandManager = null;
     
     // try to make private 
 	public boolean muteROVonMove = false;
@@ -198,8 +201,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		docker = new AutoDock(this, grabber, comport, light);
 		
 		if (settings.getBoolean(State.developer)){
-			new developer.CommandManager(this, docker, comport);
-			moves.open(Settings.movesfile);
+		
+			commandManager.setDocker(docker);
+			
+			//new developer.CommandManager(this, docker, comport);
+			//moves.open(Settings.movesfile);
 		}
 		
 
@@ -224,11 +230,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
+		if (settings.getBoolean(State.developer)){
+			commandManager = new developer.CommandManager(this, comport);
+			moves.open(Settings.movesfile);
+		}
 		
 		Util.setSystemVolume(settings.getInteger(Settings.volume));
 	
 		// TODO: Brad added, removable with single comment line here 
-		// new developer.sonar.SonarSteeringObserver(this, comport);
+		new developer.DockingObserver(this);
+		new developer.sonar.SonarSteeringObserver(this, comport);
 		//new developer.ftp.FTPObserver(this);
 		new developer.EmailAlerts(this);
 		new developer.SystemWatchdog();
@@ -236,11 +247,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		grabberInitialize();
 		battery = BatteryLife.getReference();
 		log.info("initialize");
-		
-//		if (settings.getBoolean(State.developer)){
-//			new developer.CommandManager(this, docker, comport);
-//			moves.open(Settings.movesfile);
-//		}
 	}
 
 	/**

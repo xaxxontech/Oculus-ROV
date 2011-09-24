@@ -2,8 +2,10 @@ package developer;
 
 import oculus.Application;
 import oculus.ArduinoCommDC;
+import oculus.AutoDock;
 import oculus.Docker;
 import oculus.LoginRecords;
+import oculus.PlayerCommands;
 //  oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.State;
@@ -17,8 +19,7 @@ import org.slf4j.Logger;
 public class CommandManager {
 
 	// TODO: make this reserved string in app.java?
-	private static Logger log = Red5LoggerFactory.getLogger(
-			CommandManager.class, "oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(CommandManager.class, "oculus");
 	private static State state = State.getReference();
 	private static String oculus = "oculus";
 	private static String function = "function";
@@ -26,6 +27,8 @@ public class CommandManager {
 	private static Application app = null;
 	private Docker docker = null;
 	private static ArduinoCommDC port = null;
+///	public static boolean busy = false;
+
 
 	// private MulticastChannel channel = null;
 
@@ -42,7 +45,7 @@ public class CommandManager {
 		System.out.println("CommandManager: new docker created.... ");
 	}
 
-	public void dockingTest() {
+	public /*synchronized*/ void dockingTest() {
 
 		if (docker == null || port == null || app == null) {
 			log.error("not configured");
@@ -54,78 +57,108 @@ public class CommandManager {
 			return;
 		}
 
+		if( ! state.getBoolean("busy")){
+			state.set("busy", true);
+		} else {
+			log.error("can't auto dock twice, busy");
+			return;
+		}
+		
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-
+				
+				app.playerCallServer(PlayerCommands.chat.toString(), "command manager taking over");
 				System.out.println("----camera on----");
-
-				// app.
 				app.publish("camera");
-
-				docker.dock(State.undock);
-				Util.delay(3000);
-
-				System.out.println("----going backward");
-				port.nudge("backward");
-				Util.delay(3000);
-				port.nudge("backward");
-				// Util.delay(3000);
+				port.camHoriz();
+		
+				
+				if (state.equals(State.dockstatus, State.docked)) {
+					docker.dock(State.undock);
+					Util.delay(3000);
+					docker.dock(State.undock);
+					Util.delay(3000);	
+				}
+				
+				
+				//.out.println("----going backward");
 				// port.nudge("backward");
-				// Util.delay(3000);
+		//		Util.delay(3000);				
+			//	port.nudge("backward");
+				Util.delay(3000);				
+		//		port.slide("left");
 
-				// Util.delay(2000);
-				// port.slide("left");
-				// Util.delay(3000);
-				// port.slide("left");
-				// Util.delay(3000);
-				// port.slide("left");
-
-				System.out.println("----calling grab");
+		//		System.out.println("----calling grab");
 				app.dockGrab();
 
-				// Util.delay(7000);
+				Util.delay(4000);
 				// System.out.println("--state--");
 
 				// state.dump();
 				// System.out.println("-- now dock --");
 
-				Util.delay(7000);
+				//Util.delay(7000);
+				
 
+
+				/* System.out.println("----camera on----");
+					app.publish("camera");
+					port.camHoriz();
+					
+					Util.delay(27000);
+
+					if (state.equals(State.dockstatus, State.docked)) {
+						System.out.println("---- undocking");
+						docker.dock(State.undock);
+						Util.delay(3000);
+						port.nudge("backward");
+						Util.delay(3000);
+						port.turnRight();
+						Random r = new Random();
+						int d = r.nextInt(2000)+300;
+						Util.delay(d);
+						port.stopGoing();
+						System.out.println("---- rand = " + d);
+					}
+					*/
+				
 				// TODO: how many is 360??
-				for (int i = 0; i < 50; i++) {
+				for (int i = 0; i < 20; i++) {
 					if (state.getInteger(State.dockxsize) > 0) {
 
 						port.turnRight();
-						Util.delay(200);
+						Util.delay(300);
 						port.stopGoing();
 						port.nudge("forward");
-						Util.delay(7000);
+						Util.delay(3000);
 
 						if (state.getInteger(State.dockxsize) > 0) {
+							// docker = new AutoDock(app, null, port, null);
 							docker.autoDock("go");
+							state.delete("busy");
 							return;
-						}
+						} else app.dockGrab();
+
 
 					} else {
 
 						System.out.println("can't see dock... " + i);
 						Util.delay(1000);
 						port.turnLeft();
+						// TODO: TAKE THIS INFO FROM X Y 
 						Util.delay(300);
 						port.stopGoing();
 						Util.delay(3000);
-
 						app.dockGrab();
-						System.out.println("----calling grab");
-
+					
 					}
 				}
 
 				System.out.println("_+_+_ failure to find dock");
 				new SendMail("Oculus Message", "failure to find dock", app);
-
+				state.delete("busy");
 			}
 		}).start();
 	}

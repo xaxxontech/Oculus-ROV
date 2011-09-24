@@ -203,7 +203,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getBoolean(State.developer)){
 		
 			commandManager.setDocker(docker);
-			
+			//commandManager.dockingTest();
 			//new developer.CommandManager(this, docker, comport);
 			//moves.open(Settings.movesfile);
 		}

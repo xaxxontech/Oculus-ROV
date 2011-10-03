@@ -12,8 +12,8 @@ public class DockingObserver implements Observer {
 	private State state = State.getReference();
 	private Application app = null;
 
-	private long start = 0;
-	private long end = 0;
+	private long start = System.currentTimeMillis();
+	private long end = System.currentTimeMillis();
 	private boolean docking = false;
 
 	/** register for state changes */
@@ -53,10 +53,4 @@ public class DockingObserver implements Observer {
 			}
 		}
 	}
-
-	/*
-	 * @Override public void removed(String key) {
-	 * System.out.println("__dock observer remove: " + key); }
-	 */
-
 }

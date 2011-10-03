@@ -17,6 +17,8 @@ public class State {
 	public static final String lightport = "lightport";
 	public static final String target = "target";
 	public static final String boottime = "boottime";
+	public static final String batterylife = "batterylife";
+	public static final String batterystatus = "batterstatus";
 
 	public static final String sonarenabled = "sonarenabled";
 	public static final String sonardistance = "sonardistance";
@@ -149,9 +151,7 @@ public class State {
 		}
 	}*/
 	
-	/**
-	 * debug
-	 */
+	/** debug */
 	public void dump(){
 		Enumeration<Object> keys = props.keys();
 		while(keys.hasMoreElements()){
@@ -159,6 +159,19 @@ public class State {
 			String value = (String) props.getProperty(key);			
 			System.out.println(key + " = " + value);
 		}
+	}
+	
+	/** */
+	@Override
+	public String toString(){
+		String str = new String();
+		Enumeration<Object> keys = props.keys();
+		while(keys.hasMoreElements()){
+			String key = (String) keys.nextElement();
+			String value = (String) props.getProperty(key);					
+			str += key + " : " + value + "\r\n";
+		}	
+		return str;
 	}
 	
 	/**
@@ -299,9 +312,8 @@ public class State {
 	/** */ 
 	public synchronized void delete(String key) {
 		props.remove(key);
-		
-	//	for(int i = 0 ; i < observers.size() ; i++)
-		//	observers.get(i).updated(key);	
+		for(int i = 0 ; i < observers.size() ; i++)
+			observers.get(i).updated(key);	
 	}
 	
 

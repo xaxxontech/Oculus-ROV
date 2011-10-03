@@ -12,21 +12,16 @@ public class LoginRecords {
 	public static State state = State.getReference();
 	public static final String PASSENGER = "passenger";
 	public static final String DRIVER = "driver";
-	public static final int MAX_RECORDS = 5;
+	public static final int MAX_RECORDS = 20;
 	
 	// TODO: only allow user to sign in once from a given ip??
 	// This should trigger an admin gmail warning if ppl share passwords?
 	
 	public LoginRecords() {System.out.println("login records started..");}
 	
-	public void beDriver() { // String id) {
+	public void beDriver() { 
 		
-		//if(isConnected(state.get(State.user), id)){
-		//	System.out.println("user is already connected!");
-		//	System.out.println(this);
-		//}
-		
-		list.add(new Record(state.get(State.user), DRIVER)); // id));
+		list.add(new Record(state.get(State.user), DRIVER)); 
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
 		Util.beep();
@@ -37,6 +32,7 @@ public class LoginRecords {
 	}
 	
 	public void bePassenger() {
+		
 		list.add(new Record(state.get(State.user), PASSENGER)); // "xxx.xxx.xxx.xxx"));
 		state.set(State.userisconnected, true);
 		Util.beep();
@@ -107,6 +103,18 @@ public class LoginRecords {
 
 		return passengers;
 	}
+
+	/** @return the number of users */
+	public int getActive() {
+		int active = 0;
+		for (int i = 0; i < list.size(); i++){
+			Record rec = list.get(i);
+			if(rec.isActive())
+				active++;
+		}
+
+		return active;
+	}
 	
 	/** @return a list of user names waiting in line */
 	public String[] getPassengerList() {
@@ -114,6 +122,18 @@ public class LoginRecords {
 		for (int i = 0; i < list.size(); i++){
 			Record rec = list.get(i);
 			if(rec.isActive() && rec.isPassenger())
+				passengers[i] = rec.getUser();
+		}
+
+		return passengers;
+	}
+	
+	/** @return a list of user names */
+	public String[] getActiveList() {
+		String[] passengers = new String[getActive()];
+		for (int i = 0; i < list.size(); i++){
+			Record rec = list.get(i);
+			if(rec.isActive())
 				passengers[i] = rec.getUser();
 		}
 
@@ -152,7 +172,6 @@ public class LoginRecords {
 		return true;
 	}
 
-	@Override
 	public String toString() {
 
 		if (list.isEmpty())
@@ -191,13 +210,15 @@ public class LoginRecords {
 			return user;
 		}
 
+		/*
 		public long inTime() {
 			return timein;
 		}
 
 		public long outTime() {
 			return timeout;
-		}
+		}*/
+		
 		
 	//	public String getAddress(){
 	//		return ip;

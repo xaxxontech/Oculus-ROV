@@ -1,33 +1,33 @@
 package oculus;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Properties;
 
 /** place extensions to settings here */
 public enum OptionalSettings {
 	
-	emailalerts, emailaddress, emailpassword, developer, reboot, loginnotify, sonarenabled;
+	emailalerts, emailaddress, emailpassword, developer, commandport, reboot, loginnotify, sonarenabled;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
 		Properties config = FactorySettings.createDeaults();
 		config.setProperty(developer.toString(), "false");
-		config.setProperty(reboot.toString(), "false");
-		config.setProperty(loginnotify.toString(), "false");
+		config.setProperty(reboot.toString(), "true");
+		config.setProperty(loginnotify.toString(), "true");
+		config.setProperty(commandport.toString(), "4444");
+
 		return config;
 	}
 
-	/** */
+	/** 
 	public static Properties createBasicDeveloper(){
 		Properties config = FactorySettings.createDeaults();
 		config.setProperty(developer.toString(), "true");
 		config.setProperty(reboot.toString(), "true");
 		config.setProperty(loginnotify.toString(), "true");
 		return config;
-	}
+	}*/
 	
-	/** get an gmail */
+	/** get an gmail
 	public static Properties createDeveloper(String email, String pass){
 		Properties config = FactorySettings.createDeaults();
 		config.setProperty(emailaddress.toString(), email);
@@ -37,7 +37,7 @@ public enum OptionalSettings {
 		config.setProperty(reboot.toString(), "true");
 		config.setProperty(loginnotify.toString(), "true");
 		return config;
-	}
+	}*/
 	
 	/** add in settings */
 	public static Properties appendDeveloper(Properties config, String email, String pass){
@@ -50,16 +50,12 @@ public enum OptionalSettings {
 		return config;
 	}
 	
-
-
-	
-	/** write to file in the order set in enum */
+	/** write to file in the order set in enum 
 	public static void CreateFile(FileWriter file, Properties props){
 		
 		// write optional 
 		
-		
-		
+	
 		// write factory 
 		for (FactorySettings settings : FactorySettings.values()) {
 			try {
@@ -74,9 +70,7 @@ public enum OptionalSettings {
 				}
 			}
 		}
-		
-		
-	}
+	}*/
 	
 	
 	@Override

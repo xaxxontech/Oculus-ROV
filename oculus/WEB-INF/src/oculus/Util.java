@@ -17,6 +17,12 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.red5.logging.Red5LoggerFactory;
+import org.slf4j.Logger;
+
+import developer.SendMail;
+import developer.XMLCommandManager;
+
 //import org.red5.logging.Red5LoggerFactory;
 //import org.slf4j.Logger;
 
@@ -411,5 +417,98 @@ public class Util {
 		// read setting every time in case settings changed by client
 		if (settings.getBoolean(Settings.loginnotify)) 
 			systemCall("nircmdc.exe beep 500 1000");
+	}
+	
+	
+	/** */ 
+	public static void dockingTest(final Application app, final ArduinoCommDC port, final Docker docker) {
+
+		Logger log = Red5LoggerFactory.getLogger(XMLCommandManager.class, "oculus");
+		State state = State.getReference();
+
+		if (docker == null || port == null || app == null) {
+			log.error("not configured");
+			return;
+		}
+
+		if (state.getBoolean(State.autodocking)) {
+			log.error("can't auto dock twice");
+			return;
+		}
+
+		if( ! state.getBoolean("busy")){
+			state.set("busy", true);
+		} else {
+			log.error("can't auto dock twice, busy");
+			return;
+		}
+		
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				State state = State.getReference();
+				app.playerCallServer(PlayerCommands.chat.toString(), "command manager taking over");
+				System.out.println("----camera on----");
+				app.publish("camera");
+				port.camHoriz();
+				int min = new Settings().getInteger(FactorySettings.camposmin.toString()); 
+				port.camToPos(min);
+				port.camToPos(min);
+				
+				if (state.equals(State.dockstatus, State.docked)) {
+					
+					docker.dock(State.undock);
+					Util.delay(3000);
+					docker.dock(State.undock);
+					Util.delay(3000);	
+
+					/*
+					port.turnRight();
+					java.util.Random r = new java.util.Random();
+					int d = r.nextInt(500)+300;
+					Util.delay(d);
+					port.stopGoing();
+	*/
+					
+				}
+				
+				Util.delay(5000);				
+				app.dockGrab();
+				Util.delay(5000);
+
+				// TODO: how many is 360??
+				for (int i = 0; i < 25; i++) {
+					if (state.getInteger(State.dockxsize) > 0) {
+						if (state.getInteger(State.dockxsize) > 0) {
+							
+							docker.autoDock("go");
+							state.delete("busy");
+							app.message("command manager handing off to docker", null, null);
+							return;
+							
+						} else app.dockGrab();
+
+					} else {
+
+						System.out.println("_can't see dock... " + i);
+						Util.delay(2000);
+						port.turnLeft();
+						// TODO:TAKE THIS INFO FROM X Y 
+						Util.delay(450);
+						port.stopGoing();
+						port.camToPos(min);
+						Util.delay(3000);
+						app.dockGrab();
+					
+					}
+				}
+
+				System.out.println("_+_+_ failure to find dock");
+				new SendMail("Oculus Message", "failure to find dock", app);
+				state.delete("busy");
+				
+			}
+		}).start();
 	}
 }

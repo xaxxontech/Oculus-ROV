@@ -1,93 +1,54 @@
 package developer;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import oculus.Application;
-import oculus.BatteryLife;
+import oculus.Observer;
 import oculus.Settings;
 import oculus.State;
 
-
 /** */
-public class EmailAlerts {
+public class EmailAlerts implements Observer {
 
 	// how low of battery to warm user with email
 	// any lower and my dell will go into 
 	// low power mode, need time to park it   
 	public static final int WARN_LEVEL = 35;
-
-	// how often to check, ten minutes 
-	public static final long DELAY = State.FIVE_MINUTES;
-
-	// call back to message window
 	private Application app = null;
-	private Timer timer = new java.util.Timer();
-
-	// configuration 
 	private Settings settings = new Settings();
-	// private final boolean debug = settings.getBoolean(Settings.developer);
-	private final boolean alerts = settings.getBoolean(Settings.emailalerts);
-	private BatteryLife life = BatteryLife.getReference();
+	private State state = State.getReference();
 	
 	/** Constructor */
 	public EmailAlerts(Application parent) {
 		app = parent;
 		
-		if (alerts){
-			timer.scheduleAtFixedRate(new Task(), State.ONE_MINUTE, DELAY);
+		if (settings.getBoolean(Settings.emailalerts)){
+			state.addObserver(this);
 			System.out.println("starting email alerts...");
 		}
 	}
 
-	/** run on timer */
-	private class Task extends TimerTask {
-		@Override
-		public void run() {
-			
-			// not needed? 
-			if (life.batteryPresent()) {
-
-				int batt[] = life.battStatsCombined();
-				if(batt == null) {
-					System.out.println("batery not ready, email alerts");
-					return;
-				}
-				
-				// String lifestr = Integer.toString(batt[0]);
-				int life = batt[0];
-				int status = batt[1];
-				
-				// if draining only
-				if (status == 1) {
-
-					//if (debug)
-						//app.message("checking battery: " + "battery " + lifestr + "%", null, null);
-
-					if (life < WARN_LEVEL) {
+	@Override
+	public void updated(String key) {
 		
-						app.message("battery low, sending email", null, null);
-						
-						String msg = "The battery " + Integer.toString(life) 
-						+ "% and is draining!"; 
-										
-						// add the link back to the user screen 
-						msg += "\n\nPlease find the dock, log in here: http://" 
-							+ State.getReference().get(State.externaladdress) 
-							+ ":" + settings.readRed5Setting("http.port") 
-							+ "/oculus/";
-						
-						// send email 
-						new SendMail("Oculus Message", msg, app); 
+		if( ! key.equals(State.batterylife)) return;
+		
+		if (state.getInteger(State.batterylife) < WARN_LEVEL) {
+			
+			app.message("battery low, sending email", null, null);
+			
+			String msg = "The battery " + Integer.toString(state.getInteger(State.batterylife)) 
+			+ "% and is draining!"; 
+							
+			// add the link back to the user screen 
+			msg += "\n\nPlease find the dock, log in here: http://" 
+				+ State.getReference().get(State.externaladdress) 
+				+ ":" + settings.readRed5Setting("http.port") 
+				+ "/oculus/";
+			
+			// send email 
+			new SendMail("Oculus Message", msg, app); 
 
-						// TODO: trigger auto dock
-						// app.autodock();
-
-						// only send single email
-						timer.cancel();
-					}
-				}
-			}
+			// TODO: trigger auto dock
+			// app.autodock();
 		}
 	}
 }

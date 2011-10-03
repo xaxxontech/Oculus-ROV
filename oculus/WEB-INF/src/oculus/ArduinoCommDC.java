@@ -723,8 +723,11 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	}
 	
 	private void checkForHoldServo() { 
+		
+		if(application.stream==null) return;
+	
 		if(!holdservo || application.stream.equals("stop") ||
-				application.stream.equals("mic") || application.stream ==null) {
+				application.stream.equals("mic") || application.stream == null) {
 			Util.delay(camwait);
 			sendCommand(CAMRELEASE);
 		}

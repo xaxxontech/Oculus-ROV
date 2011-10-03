@@ -20,10 +20,10 @@ public class MulticastChannel implements Runnable {
 
 	private XMLParser parse = new XMLParser();
 	private boolean running = true;
-	private CommandManager manager = null;
+	private XMLCommandManager manager = null;
 
 	/** Constructor */
-	MulticastChannel(CommandManager cm) {
+	MulticastChannel(XMLCommandManager cm) {
 
 		manager = cm;
 

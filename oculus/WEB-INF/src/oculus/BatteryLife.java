@@ -225,6 +225,11 @@ public class BatteryLife {
 			result[0] = Dispatch.call(item,"EstimatedChargeRemaining").getInt();
 			result [1] = Dispatch.call(item,"BatteryStatus").getInt();
 		}
+		
+		// update in state for sending to listeners 
+		state.set(State.batterylife, result[0]);
+		state.set(State.batterystatus, result[1]);
+		
 		return result;
 	}
 }

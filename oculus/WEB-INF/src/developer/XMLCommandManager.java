@@ -4,6 +4,7 @@ import oculus.Application;
 import oculus.ArduinoCommDC;
 import oculus.AutoDock;
 import oculus.Docker;
+import oculus.FactorySettings;
 import oculus.LoginRecords;
 import oculus.PlayerCommands;
 //  oculus.PlayerCommands;
@@ -16,10 +17,10 @@ import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
 /** */
-public class CommandManager {
+public class XMLCommandManager {
 
 	// TODO: make this reserved string in app.java?
-	private static Logger log = Red5LoggerFactory.getLogger(CommandManager.class, "oculus");
+	private static Logger log = Red5LoggerFactory.getLogger(XMLCommandManager.class, "oculus");
 	private static State state = State.getReference();
 	private static String oculus = "oculus";
 	private static String function = "function";
@@ -30,12 +31,14 @@ public class CommandManager {
 ///	public static boolean busy = false;
 
 
-	// private MulticastChannel channel = null;
+	private CommandServer channel = null;
 
-	public CommandManager(Application a, ArduinoCommDC p) {
+	public XMLCommandManager(Application a, ArduinoCommDC p) {
 		app = a;
 		port = p;
 
+		// channel = new CommandServer(this);
+		
 		System.out.println("command manager...");
 		log.debug("command manager ready...");
 	}
@@ -43,6 +46,7 @@ public class CommandManager {
 	public void setDocker(Docker d) {
 		this.docker = d;
 		System.out.println("CommandManager: new docker created.... ");
+		
 	}
 
 	public /*synchronized*/ void dockingTest() {
@@ -73,7 +77,9 @@ public class CommandManager {
 				System.out.println("----camera on----");
 				app.publish("camera");
 				port.camHoriz();
-		
+				int min = new Settings().getInteger(FactorySettings.camposmin.toString()); 
+				port.camToPos(min);
+				port.camToPos(min);
 				
 				if (state.equals(State.dockstatus, State.docked)) {
 					docker.dock(State.undock);
@@ -82,33 +88,11 @@ public class CommandManager {
 					Util.delay(3000);	
 				}
 				
-				
-				//.out.println("----going backward");
-				// port.nudge("backward");
-		//		Util.delay(3000);				
-			//	port.nudge("backward");
-				Util.delay(3000);				
-		//		port.slide("left");
-
-		//		System.out.println("----calling grab");
+				Util.delay(5000);				
 				app.dockGrab();
+				Util.delay(5000);
 
-				Util.delay(4000);
-				// System.out.println("--state--");
-
-				// state.dump();
-				// System.out.println("-- now dock --");
-
-				//Util.delay(7000);
-				
-
-
-				/* System.out.println("----camera on----");
-					app.publish("camera");
-					port.camHoriz();
-					
-					Util.delay(27000);
-
+				/*
 					if (state.equals(State.dockstatus, State.docked)) {
 						System.out.println("---- undocking");
 						docker.dock(State.undock);
@@ -125,11 +109,11 @@ public class CommandManager {
 					*/
 				
 				// TODO: how many is 360??
-				for (int i = 0; i < 20; i++) {
+				for (int i = 0; i < 25; i++) {
 					if (state.getInteger(State.dockxsize) > 0) {
 
 						port.turnRight();
-						Util.delay(300);
+						Util.delay(400);
 						port.stopGoing();
 						port.nudge("forward");
 						Util.delay(3000);
@@ -138,18 +122,21 @@ public class CommandManager {
 							// docker = new AutoDock(app, null, port, null);
 							docker.autoDock("go");
 							state.delete("busy");
+							app.playerCallServer(PlayerCommands.chat.toString(), 
+									"command manager handing off to docker");
 							return;
 						} else app.dockGrab();
 
 
 					} else {
 
-						System.out.println("can't see dock... " + i);
-						Util.delay(1000);
+						System.out.println("_can't see dock... " + i);
+						Util.delay(2000);
 						port.turnLeft();
 						// TODO: TAKE THIS INFO FROM X Y 
-						Util.delay(300);
+						Util.delay(450);
 						port.stopGoing();
+						port.camToPos(min);
 						Util.delay(3000);
 						app.dockGrab();
 					
@@ -230,8 +217,7 @@ public class CommandManager {
 			return;
 		}
 
-		System.out.println("type: " + command.getType() + " cmd: "
-				+ command.list());
+		System.out.println("type: " + command.getType() + " cmd: " + command.list());
 
 		// only listen to <oculus> xml </oculus> messages
 		if (command.getType().equalsIgnoreCase(oculus)) {

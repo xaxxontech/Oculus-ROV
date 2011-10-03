@@ -21,8 +21,6 @@ import org.red5.io.amf3.ByteArray;
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 
-import developer.CommandManager;
-
 /** red5 application */
 public class Application extends MultiThreadedApplicationAdapter {
 
@@ -51,7 +49,7 @@ public class Application extends MultiThreadedApplicationAdapter {
     
     // TODO: issue 24 
     public LoginRecords loginrecords = new LoginRecords();
-    private CommandManager commandManager = null;
+    private developer.CommandServer commandServer = null;
     
     // try to make private 
 	public boolean muteROVonMove = false;
@@ -202,7 +200,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		if (settings.getBoolean(State.developer)){
 		
-			commandManager.setDocker(docker);
+			commandServer.setDocker(docker);
 			//commandManager.dockingTest();
 			//new developer.CommandManager(this, docker, comport);
 			//moves.open(Settings.movesfile);
@@ -231,7 +229,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 
 		if (settings.getBoolean(State.developer)){
-			commandManager = new developer.CommandManager(this, comport);
+			commandServer = new developer.CommandServer(this, comport);
 			moves.open(Settings.movesfile);
 		}
 		
@@ -358,7 +356,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			log.info(str);
 		
 			System.out.println("-- playersignin() --");
-			loginrecords.beDriver(); //player.getSessionId()); //getRemoteAddress());
+			loginrecords.beDriver();
 			System.out.print(loginrecords);
 			System.out.println("-- done --");
 		}
@@ -396,11 +394,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	// TODO: BRAD separate tree of commands 
-	//public void commandManager(String cmd, String arg){
-	//	dockGrab();
-	//}
-
 	public void dockGrab(){
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -424,7 +417,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case chat: chat(str); return;
 		case beapassenger: beAPassenger(str); return;
 		case assumecontrol: assumeControl(str); return;
-		case docktest: commandManager.dockingTest(); return;
+	// TODO : remove from java script
+	//	case docktest: commandManager.dockingTest(); return;
 		}
 
 		// must be driver/non-passenger for all commands below 
@@ -641,7 +635,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case checkforbattery: checkForBattery(str); break;
 		case factoryreset: factoryReset(); break;
 		case restart:
-			admin = true;
+			//admin = true;
 			System.out.println("restart command received from grabber");
 			restart();
 			break;
@@ -721,6 +715,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void muteROVMic() {
+		if(grabber==null) return;
+		if(stream==null) return;
 		if (grabber instanceof IServiceCapableConnection && 
 				 (stream.equals("camandmic") || stream.equals("mic"))) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -729,9 +725,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void unmuteROVMic() {
+		if(grabber==null) return;
+		if(stream==null) return;
 		if (grabber instanceof IServiceCapableConnection && 
 				 (stream.equals("camandmic") || stream.equals("mic"))) {
-		
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("unmuteROVMic", new Object[] { });
 		}
@@ -1014,7 +1011,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void restart() {
-		if (admin) {
+		//if (admin) {
 			messageplayer("restarting server application", null, null);
 			messageGrabber("restarting server application", null);
 			File f;
@@ -1027,7 +1024,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
+		//}
 	}
 
 	public void monitor(String str) {
@@ -1165,7 +1162,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	private String logintest(String user, String pass) {
+	public String logintest(String user, String pass) {
 		int i;
 		String value = "";
 		String returnvalue = null;
@@ -1225,10 +1222,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		// TODO: BRAD 
 		loginrecords.beDriver();
-		
-		// System.out.println("id: " + player.getSessionId()); 
-		// .getRemoteAddress());
-		
 		System.out.println("...after assumeControl(): " + loginrecords);
 	}
 
@@ -1491,6 +1484,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		log.info("(chat) " + str);
 		messageGrabber("<CHAT>" + str, null);
+		commandServer.chat(str);
 	}
 
 	private void showlog() {
@@ -1543,15 +1537,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (s[n].equals("skipsetup")) {
 				skipsetup = s[n + 1];
 			}
-			
-			//TODO: BRAD ...............
-/*
-			if (s[n].equals("developer")) {
-				developer = s[n + 1];
-			}
-			*/
-			
-			
 		}
 		
 		// user & password
@@ -1610,48 +1595,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeRed5Setting("rtmp.port", rtmpport);
 		}
 
-		// TODO: BRAD
-		/*
-		if(str.indexOf(OptionalSettings.developer.toString())>0){
-
-			System.out.println("developer..............");
-			
-			if(settings.readSetting(OptionalSettings.developer.toString()) == null)
-				settings.newSetting(OptionalSettings.developer.toString(), "true"); 
-			else 
-				settings.writeSettings(OptionalSettings.developer.toString(), "true");
-			
-			settings.newSetting("reboot", "true"); 
-			settings.writeFile();
-		}
-		
-		if(str.indexOf(OptionalSettings.holdservo.toString())>0) {
-			if(settings.readSetting(OptionalSettings.holdservo.toString()) == null)
-				settings.newSetting(OptionalSettings.holdservo.toString(), "true");
-			else 
-				settings.writeSettings(OptionalSettings.holdservo.toString(), "true");
-			settings.writeFile();
-		}
-		
-		if(str.indexOf(OptionalSettings.loginnotify.toString())>0) {
-			if(settings.readSetting(OptionalSettings.loginnotify.toString()) == null)
-				settings.newSetting(OptionalSettings.loginnotify.toString(), "true");
-			else 
-				settings.writeSettings(OptionalSettings.loginnotify.toString(), "true");
-			settings.writeFile();
-		}
-		
-
-		if(str.indexOf(OptionalSettings.sonar.toString())>0) {
-			if(settings.readSetting(OptionalSettings.sonar.toString()) == null)
-				settings.newSetting(OptionalSettings.sonar.toString(), "true");
-			else 
-				settings.writeSettings(OptionalSettings.sonar.toString(), "true");
-			settings.writeFile();
-			restartrequired = true;
-		}
-		*/
-		
 		if (oktoadd) {
 			// skipsetup
 			if (skipsetup != null) {
@@ -1700,17 +1643,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// rtmp port
 		result += "rtmpport " + settings.readRed5Setting("rtmp.port") + " ";
 		
-		System.out.println("__str:" + result);
 		new Settings().writeFile();
-		
 		messageGrabber(result, null);
 	}
 
 	private void softwareUpdate(String str) {
 		
 		System.out.println("sw: " + str);
-		
-		if (admin) {
+	
+		//if (admin) {
 			if (str.equals("check")) {
 				messageplayer("checking for new software...", null, null);
 				Updater updater = new Updater();
@@ -1756,7 +1697,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				else msg = "version: v." + currver; 
 				messageplayer(msg, null, null);
 			}
-		}
+	//	}
 	}
 	
 	
@@ -1773,7 +1714,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// delete it, build on startup 
 		new File(Settings.filename).delete();
-		admin = true;
+		
+		// admin = true;
 		restart();
 	}
 }

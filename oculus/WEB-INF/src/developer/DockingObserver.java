@@ -4,16 +4,14 @@ import oculus.Application;
 import oculus.Observer;
 import oculus.State;
 
-/** Manage autodocking events like timeout and losttarget */
+/** Manage auto docking events like timeout and lost target */
 public class DockingObserver implements Observer {
 
-	// private static Logger log =
-	// Red5LoggerFactory.getLogger(SonarObserver.class, "oculus");
 	private State state = State.getReference();
 	private Application app = null;
 
-	private long start = System.currentTimeMillis();
-	private long end = System.currentTimeMillis();
+	private long start = 0; // System.currentTimeMillis();
+	private long end = 0; // System.currentTimeMillis();
 	private boolean docking = false;
 
 	/** register for state changes */
@@ -37,7 +35,7 @@ public class DockingObserver implements Observer {
 		if (state.get(State.dockstatus) != null) {
 			if (state.get(State.dockstatus).equals(State.docked)) {
 
-				// System.out.println("-.--- done docking");
+				System.out.println("__done docking");
 				end = System.currentTimeMillis();
 				
 				if((end - start)>State.TEN_MINUTES){
@@ -48,7 +46,6 @@ public class DockingObserver implements Observer {
 				app.message("docking took " + ((end - start) / 1000) + " seconds" , null, null);
 				System.out.println("docking took: " + ((end - start) / 1000) + " seconds");
 				docking = false;
-				state.dump();
 
 			}
 		}

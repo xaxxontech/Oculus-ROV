@@ -80,9 +80,15 @@ onload="loaded();" onunload="playerexit();" onresize="browserwindowresized();">
 <!-- visible page div -->
 <div id="visiblepagediv">  
 
-<table id="maintable" align="center" ><tr valign="middle">
+<table id="maintable" align="center" ><tr valign="top">
+<td style="padding-left: 5px">
+<table><tr><td id="topgap" style="height: 10px"> </td></tr></table>
+<div style="padding-left: 0px">
+<a class="dkbluelink" id="mainmenulink" href="javascript: mainmenu('mainmenulink');" >
+&nbsp; <img src="images/wrench.gif" border=0 style="vertical-align: middle;"><br>
+MENU</a><br>
+</div></td>
 <td style="padding-left: 5px;">
-
 
 <table><tr valign="bottom"><td style="text-align: right">
 <div id="video" style="position: relative; z-index: 0">
@@ -199,11 +205,13 @@ text-transform: none;">
 &nbsp; &nbsp;</span><br>
 <table><tr><td style="height: 15px"></td></tr></table>
 </div>
+<!-- 
 <div style="padding-left: 7px">
 <a class="dkbluelink" id="mainmenulink" href="javascript: mainmenu('mainmenulink');" >
 MENU <img src="images/wrench.gif" border=0 style="vertical-align: middle;"></a><br>
 </div>
-<table><tr><td style="height: 10px"></td></tr></table>
+ -->
+<table><tr><td style="height: 25px"></td></tr></table>
 
 <div style="padding-left: 3px; width: 195px">
 <table class="boxcolor" style="background-image: url('images/steering_icons.gif'); background-repeat: no-repeat;
@@ -402,8 +410,6 @@ self cam/mic OFF</div>
 <table><tr><td>
 <img id ="framegrabpic" alt="">
 </td><td style="padding-left: 5px;">
-<a class="blackbg" href="javascript: callServer('framegrab',''); overlay('off');">frame grab</a>
-<br><br>	
 <a href= "javascript: document.getElementById('framegrabbox').style.display = 'none';">
 <span class="cancelbox">X</span> CLOSE</a>
 </td></tr></table>
@@ -546,11 +552,18 @@ accounts</a><br>
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;server_commands&quot;).innerHTML);">
 server commands</a><br>
 <a class="blackbg" 
+href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;advanced_menu&quot;).innerHTML);">
+advanced menu</a><br>
+<div id="developermenu" style="display: none"> 
+<a class="blackbg"  
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;developer_menu&quot;).innerHTML);">
-developer menu</a><br>
-<a class="blackbg" href="http://www.xaxxon.com/docs/view?f=contents" target="_blank">online help</a><br>
-
+developer menu</a>
 </div>
+<a class="blackbg" href="http://www.xaxxon.com/docs/view?f=contents" target="_blank">online help</a><br>
+</div>
+
+<!--  main menu developer link -->
+
 
 <!-- main menu non-admin -->
 <div id = "main_menu_nonadmin" style="display: none;">
@@ -812,26 +825,21 @@ Server commands:<br>
 <a class="blackbg" href="javascript: serverlog();">server log</a><br>
 </div>
 
-<!-- developer menu -->
-<div id="developer_menu" style="display: none">
+<!--  advanced menu -->
+<div id="advanced_menu" style="display: none">
 <a class="blackbg" href= "javascript: mainmenu()"> 
 <span class="cancelbox">&larr;</span> BACK</a>
 <a class="blackbg" href= "javascript: popupmenu('menu', 'close')">
 &nbsp; <span class="cancelbox">X</span> CLOSE</a>
 <table><tr><td style="height: 10px"></td></tr></table>
-Developer menu:<br>
+Advanced menu:<br>
 <table><tr><td style="height: 7px"></td></tr></table>
 firmware echo <a class="blackbg" href="javascript: arduinoEcho('on');">on</a> / 
 <a class="blackbg" href="javascript: arduinoEcho('off');">off</a><br> 
-
+<a class="blackbg" href="javascript: arduinoReset();">reset arduinoculus board</a><br>
 login notify <a class="blackbg" href="javascript: writesetting('loginnotify true');">on</a> / 
 <a class="blackbg" href="javascript: writesetting('loginnotify false');">off</a><br> 
-
-sonar enabled <a class="blackbg" href="javascript: writesetting('sonarenabled true');">on</a> / 
-<a class="blackbg" href="javascript: writesetting('sonarenabled false');">off</a><br> 
-
-<a class="blackbg" href="javascript: arduinoReset();">reset arduino</a><br>
-<a class="blackbg" href="javascript: relaunchgrabber();">relaunch cam/mic grabber</a><br>
+<a class="blackbg" href="javascript: relaunchgrabber();">relaunch server browser page</a><br>
 
 <a class="blackbg" href="javascript: usersyscommanddivShow();">system command</a><span 
 id="usersyscommanddiv" style="display: none">:<br>&nbsp;
@@ -844,6 +852,22 @@ onKeyPress="if (keypress(event)==13) { systemcall('',''); }">
 </span><br/>
 
 <a class="blackbg" href="javascript: callServer('framegrab',''); ">frame grab</a><br> 
+
+</div>
+
+<!-- developer menu -->
+<div id="developer_menu" style="display: none">
+<a class="blackbg" href= "javascript: mainmenu()"> 
+<span class="cancelbox">&larr;</span> BACK</a>
+<a class="blackbg" href= "javascript: popupmenu('menu', 'close')">
+&nbsp; <span class="cancelbox">X</span> CLOSE</a>
+<table><tr><td style="height: 10px"></td></tr></table>
+Developer menu:<br>
+<table><tr><td style="height: 7px"></td></tr></table>
+
+sonar enabled <a class="blackbg" href="javascript: writesetting('sonarenabled true');">on</a> / 
+<a class="blackbg" href="javascript: writesetting('sonarenabled false');">off</a><br> 
+
 <a class="blackbg" href="javascript: callServer('emailgrab',''); ">email frame grab</a><br>
 
 </div>

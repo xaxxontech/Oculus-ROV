@@ -414,6 +414,7 @@ function setstatus(status, value) {
 		}
 		else { videoscale = vs; }
 	}
+	if (status == "developer") { document.getElementById("developermenu").style.display = ""; }
 
 }
 
@@ -621,9 +622,9 @@ function mainmenu(id) {
 	if (id) {
 		var link = document.getElementById(id);
 		var xy = findpos(link);
-		x = xy[0]+link.offsetWidth+150;
+		x = xy[0]+link.offsetWidth+270; // =150;
 		xy = findpos(document.getElementById("video"));
-		y = xy[1]+30;
+		y = xy[1]+4; // +30
 	}
 	popupmenu("menu", "show", x, y, str, null, 1, 0);
 //	resized();

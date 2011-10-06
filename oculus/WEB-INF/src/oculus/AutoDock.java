@@ -221,7 +221,9 @@ public class AutoDock implements Docker {
 									state.set(State.motionenabled, false);
 									state.set(State.dockstatus, State.docked);
 									// needs to be before battStats()
-									moves.append("docked successfully");
+									if (settings.getBoolean(State.developer)){
+										moves.append("docked successfully");
+									}
 									life.battStats(); 
 									
 

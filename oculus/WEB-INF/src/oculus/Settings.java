@@ -170,7 +170,7 @@ public class Settings {
 		try {
 			final String temp = System.getenv("RED5_HOME") + "\\conf\\oculus_created.txt";
 			FileWriter fw = new FileWriter(new File(temp));
-			fw.append("# required settings \r\n");
+			// fw.append("# required settings \r\n");
 			for (FactorySettings factory : FactorySettings.values()) {
 
 				// over write with user's settings
@@ -181,7 +181,7 @@ public class Settings {
 			}
 			
 			// optional
-			fw.append("# optional settings \r\n");
+			fw.append("# manual settings \r\n");
 			for (OptionalSettings ops : OptionalSettings.values()) {
 
 				// over write with user's settings

@@ -199,9 +199,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		docker = new AutoDock(this, grabber, comport, light);
 		
 		if (settings.getBoolean(State.developer)){
-		
+
 			commandServer.setDocker(docker);
 			//commandManager.dockingTest();
+
 			//new developer.CommandManager(this, docker, comport);
 			//moves.open(Settings.movesfile);
 		}
@@ -231,16 +232,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getBoolean(State.developer)){
 			commandServer = new developer.CommandServer(this, comport);
 			moves.open(Settings.movesfile);
+			
+			// TODO: Brad added, removable with single comment line here 
+			new developer.DockingObserver(this);
+			new developer.sonar.SonarSteeringObserver(this, comport);
+			//new developer.ftp.FTPObserver(this);
+			new developer.EmailAlerts(this);
+			new developer.SystemWatchdog();
 		}
 		
 		Util.setSystemVolume(settings.getInteger(Settings.volume));
-	
-		// TODO: Brad added, removable with single comment line here 
-		new developer.DockingObserver(this);
-		new developer.sonar.SonarSteeringObserver(this, comport);
-		//new developer.ftp.FTPObserver(this);
-		new developer.EmailAlerts(this);
-		new developer.SystemWatchdog();
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -621,7 +622,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case chat: chat(str); break;
 		case dockgrabbed: {
 			docker.autoDock("dockgrabbed " + str); 
-			System.out.println("grabberCallServer(): " + str);
+			//System.out.println("grabberCallServer(): " + str);
 			// find xx yy xSize ySize, 0.xxxx 
 			String[] arg = str.split(" ");
 			state.set(State.dockxpos, arg[1]);
@@ -963,6 +964,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if(state.get(State.dockstatus) != null)
 				str += " dock " + state.get(State.dockstatus); 
 			if (light.isConnected()) { str += " light "+light.spotLightBrightness(); }
+			if (settings.getBoolean(State.developer)==true) {
+				str += " developer true";
+			}
 
 			String videoScale = settings.readSetting("videoscale");
 			if (videoScale != null) { str += " videoscale "+videoScale; }

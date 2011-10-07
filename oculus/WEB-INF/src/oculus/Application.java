@@ -362,7 +362,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			System.out.println("-- done --");
 			
 			if (settings.getBoolean(Settings.loginnotify)) {
-				saySpeech("lawg inn");
+				speech.mluv("lawg inn"); 
 			}
 		}
 		
@@ -1233,7 +1233,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// read setting every time in case settings changed by client
 		
 		if (settings.getBoolean(Settings.loginnotify)) {
-			saySpeech("lawg inn");
+			speech.mluv("lawg inn");
 		}
 
 		System.out.println("...after assumeControl(): " + loginrecords);

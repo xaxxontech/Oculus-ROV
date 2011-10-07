@@ -5,13 +5,12 @@ import java.util.Properties;
 /** place extensions to settings here */
 public enum OptionalSettings {
 	
-	emailalerts, emailaddress, emailpassword, developer, commandport, reboot, sonarenabled;
+	emailalerts, emailaddress, emailpassword, developer, commandport, sonarenabled;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
 		Properties config = FactorySettings.createDeaults();
 		config.setProperty(developer.toString(), "false");
-		config.setProperty(reboot.toString(), "false");
 		config.setProperty(commandport.toString(), "4444");
 		return config;
 	}
@@ -43,7 +42,6 @@ public enum OptionalSettings {
 		config.setProperty(emailpassword.toString(), pass);
 		config.setProperty(emailalerts.toString(), "true");
 		config.setProperty(developer.toString(), "true");
-		config.setProperty(reboot.toString(), "true");
 		return config;
 	}
 	

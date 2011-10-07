@@ -550,7 +550,7 @@ href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(
 accounts</a><br>
 <a class="blackbg" 
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;server_commands&quot;).innerHTML);">
-server commands</a><br>
+server menu</a><br>
 <a class="blackbg" 
 href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(&quot;advanced_menu&quot;).innerHTML);">
 advanced menu</a><br>
@@ -619,7 +619,8 @@ href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(
 <a class="blackbg" href= "javascript: popupmenu('menu', 'close')">
 &nbsp; <span class="cancelbox">X</span> CLOSE</a>
 <table><tr><td style="height: 10px"></td></tr></table>
-Driving settings:<br>
+Driving settings:
+<table><tr><td style="height: 7px"></td></tr></table>
 <div style="white-space: nowrap">speed offsets: slow <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
 onblur="keyboard('enable'); this.style.backgroundColor='#262626';" id="slowoffset" type="text" size="4" >
 med <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
@@ -646,7 +647,8 @@ href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(
 <a class="blackbg" href= "javascript: popupmenu('menu', 'close')">
 &nbsp; <span class="cancelbox">X</span> CLOSE</a>
 <table><tr><td style="height: 10px"></td></tr></table>
-
+Camera settings:
+<table><tr><td style="height: 7px"></td></tr></table>
 tilt power brakes <a class="blackbg" href="javascript: holdservo('true');">on</a> / 
 <a class="blackbg" href="javascript: holdservo('false');">off</a><br> 
 test at position: <input class="inputbox" onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
@@ -803,9 +805,7 @@ href="javascript: popupmenu('menu', 'show', null, null, document.getElementById(
 Delete user:
 <table><tr><td style="height: 7px"></td></tr></table>
 <div id="deluserlist"></div>
-<br>
-<a class="blackbg" href="javascript: closebox('extendedsettingsbox');">
-<span class="cancelbox">X</span> <span style="font-size: 11px">CANCEL</span></a>
+
 </div>
 
 <!-- server commands -->
@@ -815,7 +815,7 @@ Delete user:
 <a class="blackbg" href= "javascript: popupmenu('menu', 'close')">
 &nbsp; <span class="cancelbox">X</span> CLOSE</a>
 <table><tr><td style="height: 10px"></td></tr></table>
-Server commands:<br>
+Server Menu:<br>
 <table><tr><td style="height: 7px"></td></tr></table>
 <a class="blackbg" href="javascript: softwareupdate('version','');">software version</a><br>
 <a class="blackbg" href="javascript: softwareupdate('check','');">check for software update</a><br>
@@ -823,6 +823,13 @@ Server commands:<br>
 <a class="blackbg" href="javascript: systemcall('shutdown -r -f -t 01','y')">reboot</a><br>
 <a class="blackbg" href="javascript: restart();">restart server</a><br>
 <a class="blackbg" href="javascript: serverlog();">server log</a><br>
+reboot every 48 hrs <span style="font-size: 11px">(requires server restart)</span>
+<a class="blackbg" href="javascript: writesetting('reboot true');">yes</a> / 
+<a class="blackbg" href="javascript: writesetting('reboot false');">no</a>
+
+<br> 
+
+<a class="blackbg" href="javascript: relaunchgrabber();">relaunch server browser page</a><br>
 </div>
 
 <!--  advanced menu -->

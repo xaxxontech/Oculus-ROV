@@ -228,7 +228,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
-
+		new SystemWatchdog();
+		
 		if (settings.getBoolean(State.developer)){
 			commandServer = new developer.CommandServer(this, comport);
 			moves.open(Settings.movesfile);
@@ -238,7 +239,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			new developer.sonar.SonarSteeringObserver(this, comport);
 			//new developer.ftp.FTPObserver(this);
 			new developer.EmailAlerts(this);
-			new developer.SystemWatchdog();
 		}
 		
 		Util.setSystemVolume(settings.getInteger(Settings.volume));
@@ -360,6 +360,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			loginrecords.beDriver();
 			System.out.print(loginrecords);
 			System.out.println("-- done --");
+			
+			if (settings.getBoolean(Settings.loginnotify)) {
+				saySpeech("lawg inn");
+			}
 		}
 		
 	}
@@ -1226,6 +1230,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		// TODO: BRAD 
 		loginrecords.beDriver();
+		// read setting every time in case settings changed by client
+		
+		if (settings.getBoolean(Settings.loginnotify)) {
+			saySpeech("lawg inn");
+		}
+
 		System.out.println("...after assumeControl(): " + loginrecords);
 	}
 

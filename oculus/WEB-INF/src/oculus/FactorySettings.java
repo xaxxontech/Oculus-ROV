@@ -12,7 +12,7 @@ public enum FactorySettings {
 	skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
 	docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay, 
 	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, mute_rov_on_move, 
-	videoscale, volume, holdservo, loginnotify;
+	videoscale, volume, holdservo, loginnotify, reboot;
 
 	/** get basic settings */
 	public static Properties createDeaults() {
@@ -41,6 +41,7 @@ public enum FactorySettings {
 		config.setProperty(videoscale.toString(), "100");
 		config.setProperty(holdservo.toString(), "false");
 		config.setProperty(loginnotify.toString(), "false");
+		config.setProperty(reboot.toString(), "false");
 		return config;
 	}
 

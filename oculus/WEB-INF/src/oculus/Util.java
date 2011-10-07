@@ -414,9 +414,7 @@ public class Util {
 	 * 				is the phrase to turn from text to speech 
 	 */
 	public static void beep() {
-		// read setting every time in case settings changed by client
-		if (settings.getBoolean(Settings.loginnotify)) 
-			systemCall("nircmdc.exe beep 500 1000");
+		systemCall("nircmdc.exe beep 500 1000");
 	}
 	
 	

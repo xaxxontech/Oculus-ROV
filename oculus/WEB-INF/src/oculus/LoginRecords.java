@@ -24,18 +24,15 @@ public class LoginRecords {
 		list.add(new Record(state.get(State.user), DRIVER)); 
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
-		Util.beep();
-		
+
 		if(state.getBoolean(State.developer)) System.out.println(this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
 	
-	public void bePassenger() {
-		
+	public void bePassenger() {		
 		list.add(new Record(state.get(State.user), PASSENGER)); // "xxx.xxx.xxx.xxx"));
 		state.set(State.userisconnected, true);
-		Util.beep();
 		
 		if(state.getBoolean(State.developer)) System.out.println(this);
 		

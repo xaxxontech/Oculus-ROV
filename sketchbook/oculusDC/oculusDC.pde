@@ -48,8 +48,6 @@ void loop() {
     manageCommand(); 
   } 
 
-  // if not busy doing a command  
-  // pollSensors();
 }
 
 // buffer and/or execute commands from host controller 
@@ -71,7 +69,6 @@ void manageCommand(){
     // protect buffer
     if(commandSize >= MAX_BUFFER){
       commandSize = 0;
-      // Serial.println("<overflow>");
     }
   }
 }
@@ -86,33 +83,29 @@ void parseCommand(){
     // Serial.println("<speed " + (String)buffer[1] + ">");
   } 
 
-  if (buffer[0] == 'f') {
+  if (buffer[0] == 'f') { // forward
     digitalWrite(motorA1Pin, HIGH);   
     digitalWrite(motorA2Pin, LOW);  
     digitalWrite(motorB1Pin, HIGH); 
     digitalWrite(motorB2Pin, LOW);
-//    Serial.println("<forward>");  
   }
-  else if (buffer[0] == 'b') {
+  else if (buffer[0] == 'b') { // backward
     digitalWrite(motorA1Pin, LOW);  
     digitalWrite(motorA2Pin, HIGH); 
     digitalWrite(motorB1Pin, LOW);  
     digitalWrite(motorB2Pin, HIGH);
- //   Serial.println("<backward>"); 
   }
-  else if (buffer[0] == 'r') {
+  else if (buffer[0] == 'r') { // right
     digitalWrite(motorA1Pin, HIGH);   
     digitalWrite(motorA2Pin, LOW); 
     digitalWrite(motorB1Pin, LOW);  
     digitalWrite(motorB2Pin, HIGH);
-   // Serial.println("<right>"); 
   }
-  else if (buffer[0] == 'l') {
+  else if (buffer[0] == 'l') { // left
     digitalWrite(motorA1Pin, LOW);  
     digitalWrite(motorA2Pin, HIGH); 
     digitalWrite(motorB1Pin, HIGH); 
     digitalWrite(motorB2Pin, LOW);
-   // Serial.println("<left>");
   } 
   if(buffer[0] == 'x'){
     Serial.println("<id:oculusDC>");
@@ -120,19 +113,16 @@ void parseCommand(){
   else if(buffer[0] == 'y'){
     Serial.println("<version:0.5.2>"); 
   }   
-  else if (buffer[0] == 's') {
+  else if (buffer[0] == 's') { // stop
     OCR2A = 0;
     OCR2B = 0;
-    //Serial.println("<stop>");
   }
-  else if(buffer[0] == 'v'){
+  else if(buffer[0] == 'v'){ // camtilt
     camservo.attach(camservopin);
     camservo.write(buffer[1]);
-   // Serial.println("<camTilt " + (String)buffer[1] + ">");
   }
-  else if(buffer[0]== 'w'){
+  else if(buffer[0]== 'w'){ // camrelease
     camservo.detach();
-   // Serial.println("<camRelease>");
   }
   else if(buffer[0] == 'c'){
     // 128 = 0, > 128 = acomp, < 128 = bcomp
@@ -148,7 +138,6 @@ void parseCommand(){
       acomp = 0;
       bcomp = (128-buffer[1])*2;
     }
-    // Serial.println("<setComp " + (String)buffer[1] + ">"); 
   } 
   else if(buffer[0] == 'e'){
     if(buffer[1] == '1')

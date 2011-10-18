@@ -4,13 +4,15 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
+//import javax.imageio.ImageIO;
+//import javax.imageio.stream.ImageOutputStream;
+
 import oculus.ArduinoCommDC;
 import oculus.Docker;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
 import oculus.Settings;
-import oculus.State;
 import oculus.Util;
 
 /**
@@ -26,7 +28,7 @@ public class CommandServer {
 	private static Docker docker = null;
 	private static ArduinoCommDC port = null;
 	private static oculus.Application app = null;
-	private static State state = State.getReference();
+	//private static State state = State.getReference();
 	private static oculus.Settings settings = new Settings(); 
 	private static ServerSocket serverSocket = null; 
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
@@ -35,6 +37,7 @@ public class CommandServer {
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread implements Observer {
 	
+		private oculus.State state = oculus.State.getReference();
 		private Socket clientSocket = null;
 		private BufferedReader in = null;
 		private PrintWriter out = null;
@@ -48,13 +51,18 @@ public class CommandServer {
 			} catch (IOException e) {
 				System.out.println("fail aquire tcp streams: " + e.getMessage());
 				try {
-					in.close();
-					out.close();
+					
+					//in.close();
+					//out.close();
 					clientSocket.close();
+					clientSocket = null;
+					
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					System.out.println(e1.getMessage());
 					return;
 				}
+
+				clientSocket = null;
 				return;
 			}
 
@@ -67,9 +75,10 @@ public class CommandServer {
 				sendToGroup(clientSocket.getInetAddress() + " attempt by " + user);
 
 				if(app.logintest(user, pass)==null){
-					System.out.println(".....login failure:"+user);
-					in.close();
-					out.close();
+					sendToGroup("login failure: " + user);
+					out.println("login fail -- please drop dead");
+					//out.flush();
+					//out.close();
 					clientSocket.close();
 					return;
 				}
@@ -81,9 +90,12 @@ public class CommandServer {
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 				try {
+					//if(in!=null)in.close();
+					//if(out!=null)out.close();
 					clientSocket.close();
 					return;
 				} catch (IOException e) {
+					System.out.println(e.getMessage());
 					return;
 				}
 			}
@@ -126,12 +138,142 @@ public class CommandServer {
 
 					if(str.equals("reboot")) app.restart();
 					
+					if(str.equals("image")) {
+						
+						//out.println("------image----------");
+						//System.out.println("-------------------------");
+						
+						// app.framgrabbusy = true;
+						app.frameGrab();
+						//Util.delay(100);
+						// state.set("frameGrabBusy", true);
+						state.dump();
+
+						while(app.framgrabbusy){//state.getBoolean("busy")){
+							out.println("waiting....");
+							Util.delay(100);
+						}
+
+						//ImageIO.writ.framefile,"png" out);
+						/*
+						BufferedImage img = null;
+						try {
+						    img = ImageIO.read(new File(Settings.framefile));
+						} catch (IOException e) {
+						}	
+						*/
+						
+					//	ImageIO.write(img, "PNG", (ImageOutputStream) out);
+
+						/*
+						FileReader file = new FileReader(Settings.framefile);
+						BufferedReader reader = new BufferedReader(file);
+						String input = null;
+						byte[] bytes = new byte[1024];
+						while(true){
+							
+						
+							input = reader.readLine();
+						
+							if(input == null) break;
+							
+							out.println(input);
+							
+						//while(file.available()>0){
+						
+							//bytes = new byte[1024];
+							//file.read(bytes);
+							//out.w
+							
+						//}
+						
+						}
+						*/
+						out.println("...done...");
+						System.out.println("...done...");
+					}
+					
+					if(str.startsWith("nudge")){
+						String[] cmd = str.split(" ");
+						port.nudge(cmd[1]);
+					}
+					
+					if(str.startsWith("state")){
+						String[] cmd = str.split(" ");
+						
+						System.out.println("cmd: "+cmd.length);
+						
+						//if(cmd.length==2)
+							//if(cmd[1]!=null)
+								//if(cmd[1].equals("get"))
+									//out.println(state.toString());
+					
+									
+						if(cmd.length==3){
+							state.set(cmd[1], cmd[2]);
+						}
+					}
+					
+					if(str.startsWith("move")){
+						String[] cmd = str.split(" ");
+						if(cmd[1].equals("forward")) port.goForward();
+						else if(cmd[1].equals("backwards")) port.goBackward();
+					}
+					
+					if(str.startsWith("busy")){
+					
+						if( ! state.getBoolean("busy")){
+							state.set("busy", true);
+							state.dump();
+						} else {
+
+							System.out.println("... cant, am busy");
+							return;
+							
+						}
+						
+					}
+
+
+					if(str.startsWith("stop")){
+						out.println("---- stop -----");
+						state.set("busy", false);
+						port.stopGoing();
+						out.println(state.toString());
+					}
+
+					if(str.startsWith("not")){	
+						state.set("busy", false);
+						state.dump();
+					}
+					
+					if(str.equals("settings")){
+						out.println(settings.toString());
+					}
+					
+				/*	
+					if(str.startsWith("settings")){
+						String[] cmd = str.split(" ");
+						if(cmd[1].equals("get")){
+							System.out.println("getting..." + cmd[2]);
+							out.println(settings.readSetting(cmd[2]));
+						}
+					*/	
+						
+			
+					
 					if(str.equals("cam")){
 						app.publish("camera");
 						port.camHoriz();
 						port.camCommand("down");
 						Util.delay(1500);
 						port.camCommand("stop");
+					}
+					
+					if(str.equals("bye")) {
+						out.close();
+						in.close();
+						return;
 					}
 					
 					/*
@@ -143,7 +285,7 @@ public class CommandServer {
 					
 					if(str.equals("find")) app.dockGrab();	
 					
-					if(str.equals("state")) out.println(state.toString());
+					if(str.startsWith("state")) out.println(state.toString());
 										
 					if(str.equals("dock") && docker!=null) docker.autoDock("go");
 					
@@ -170,6 +312,7 @@ public class CommandServer {
 					}
 				}
 			} catch (Exception e) {
+				System.out.println(e.getMessage());
 				shutDown();
 			}
 		}
@@ -184,16 +327,17 @@ public class CommandServer {
 			try {
 				// close resources
 				printers.remove(out);
-				in.close();
-				out.close();
+				//in.close();
+				//out.close();
 				clientSocket.close();
 			} catch (Exception e) {
 				e.printStackTrace();
+				return;
 			}
 
 			// show this users is no longer in the group
 			System.out.println("currently [" + printers.size() + "] users are connected.");
-			app.message(printers.size() + " tcp users are connected.", null, null);
+			app.message(printers.size() + " tcp connections active.", null, null);
 			sendToGroup(printers.size() + " tcp connections active.");
 		}
 

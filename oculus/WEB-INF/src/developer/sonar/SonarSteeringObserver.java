@@ -9,13 +9,12 @@ import oculus.Observer;
 //import oculus.PlayerCommands;
 import oculus.State;
 
-/**
- * Stop the robot before hitting the wall 
- */
+/** Stop the robot before hitting the wall */
 public class SonarSteeringObserver implements Observer {
 
 	// private static Logger log = Red5LoggerFactory.getLogger(SonarObserver.class, "oculus");
-	private static final int TOO_CLOSE = 80; // cm 
+	
+	private static final int TOO_CLOSE = 42; // cm 
 	private State state = State.getReference();
 	private java.util.Timer timer = new Timer();
 	
@@ -30,32 +29,27 @@ public class SonarSteeringObserver implements Observer {
 		state.addObserver(this);
 
 		// refresh on timer too
-		timer.scheduleAtFixedRate(new SonarTast(), State.ONE_MINUTE, 1700);
+		timer.scheduleAtFixedRate(new SonarTast(), State.ONE_MINUTE, 1800);
 	}
 
 	@Override
 	public void updated(final String key) {
-
-		if (!key.equals(State.sonardistance)) return;
-
-		final int value = state.getInteger(key);
-		System.out.println("_sonar: " + key + " = " + value);	
-		
-		if (state.getBoolean(State.autodocking)) return;
-		if (!comm.movingforward) return;		
-		if (value < TOO_CLOSE) { 
-			comm.stopGoing();
-			app.message("carefull, sonar is: " + value, null, null);
-			//app.playerCallServer(PlayerCommands.move, "stop");
-		}
+		if (key.equals(State.sonarright)) {
 			
-	}
+			if (state.getBoolean(State.autodocking)) return;
 
-	/*
-	@Override
-	public void removed(String key) {
-		System.out.println("...sonar removed: " + key);
-	}*/
+			final int value = state.getInteger(key);
+			
+			System.out.println("obv_sonar: " + key + " = " + value);	
+			
+			if (!comm.movingforward) return;
+			
+			if (value < TOO_CLOSE) { 
+				comm.stopGoing();
+				app.message("carefull, sonar is: " + value, null, null);
+			}
+		}
+	}
 
 	/**	 */
 	private class SonarTast extends TimerTask {
@@ -64,8 +58,8 @@ public class SonarSteeringObserver implements Observer {
 		public void run() {
 	
 			comm.pollSensor();
-			//System.out.println("poll sonar");
-			//app.message("sonar task update to: " + state.get(State.sonardistance), null, null);   
+			
+			// System.out.println("poll sonar");
 		
 		} 
 	}

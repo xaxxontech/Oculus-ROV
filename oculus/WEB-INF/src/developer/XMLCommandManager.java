@@ -261,14 +261,14 @@ public class XMLCommandManager {
 
 				dump();
 
-			} else if (fn.equalsIgnoreCase("sonar")) {
+			} /*else if (fn.equalsIgnoreCase("sonar")) {
 				if (arg != null) {
 					if (arg.equals("debug"))
 						state.set(State.sonardebug, true);
 					if (arg.equals("reset"))
 						state.set(State.sonardebug, false);
-				}
-			} else if (fn.equalsIgnoreCase("find")) {
+				}*/
+			else if (fn.equalsIgnoreCase("find")) {
 
 				app.dockGrab();
 				// playerCallServer(PlayerCommands.dockgrab, null);

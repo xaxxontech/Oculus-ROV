@@ -20,11 +20,15 @@ public class State {
 	public static final String batterylife = "batterylife";
 	public static final String batterystatus = "batterstatus";
 
-	public static final String sonarenabled = "sonarenabled";
-	public static final String sonardistance = "sonardistance";
-	public static final String sonardebug = "sonardebug";
+	//public static final String sonarenabled = "sonarenabled";
+	//public static final String sonardistance = "sonardistance";
+	//public static final String sonardebug = "sonardebug";
 	public static final String sonar = "sonar";
 
+	public static final String sonarback = "sonarback";
+	public static final String sonarright = "sonarright";
+	public static final String sonarleft = "sonarleft";
+	
 	public static final String motionenabled = "motionenabled";
 	public static final String dockdensity = "dockdensity";
 	public static final String dockxpos = "dockxpos";
@@ -42,8 +46,9 @@ public class State {
 	public static final String docked = "docked";
 	public static final String undocked = "undocked";
 	public static final String undock = "undock";
-	public static final String holdservo = "holdservo";
+//	public static final String holdservo = "holdservo";
 	public static final String unknown = "unknown";	
+	public static final String frameGrabBusy = "frameGrabBusy";
 
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
@@ -53,11 +58,14 @@ public class State {
 	public static final int ERROR = -1;
 
 
+
+
 	/** notify these on change events */
 	public Vector<Observer> observers = new Vector<Observer>();
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
+
 
 	/** properties object to hold configuration */
 	private Properties props = new Properties();

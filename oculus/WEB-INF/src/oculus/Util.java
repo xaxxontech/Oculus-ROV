@@ -412,10 +412,11 @@ public class Util {
 	 * 
 	 * @param str
 	 * 				is the phrase to turn from text to speech 
-	 */
+	 
 	public static void beep() {
 		systemCall("nircmdc.exe beep 500 1000");
 	}
+	*/
 	
 	
 	/** */ 

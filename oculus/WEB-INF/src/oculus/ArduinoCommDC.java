@@ -68,7 +68,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	protected int maxclickcam = settings.getInteger("maxclickcam");
 	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	protected int steeringcomp = settings.getInteger("steeringcomp");
-	protected boolean sonar = settings.getBoolean(OptionalSettings.sonarenabled.toString());
+	protected boolean sonarEnabled = settings.getBoolean(OptionalSettings.sonarenabled.toString());
 	protected boolean holdservo = settings.getBoolean(FactorySettings.holdservo.toString());
 
 	protected int camservodirection = 0;
@@ -216,24 +216,27 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			if (version == null) {
 				// get just the number
 				version = response.substring(response.indexOf("version:") + 8, response.length());
-				application.message("arduinoculus firmware version: " + version, null, null);
+				application.message("arduinoculus version: " + version, null, null);
 			} else return;
 
 			// don't bother showing watch dog pings to user screen
 		} else if (response.charAt(0) != GET_VERSION[0]) {
 
-			// if sonar enabled will get <cm xxx> as watchdog
-			if (response.startsWith("cm")) {
-				final String val = response.substring(response.indexOf(' ') + 1, response.length());
-				final int range = Integer.parseInt(val);				
-				if (Math.abs(range - state.getInteger(State.sonardistance)) > 1) {
-					state.set(State.sonardistance, val);
-					if(state.getBoolean(State.sonardebug))
-						application.message("sonar range: " + range, null, null);
+			// if sonar enabled will get <sonar back|left|right xxx> as watchdog
+			if (response.startsWith("sonar")) {				
+				final String[] param = response.split(" ");
+				final int range = Integer.parseInt(param[2]);	
+				
+				if(param[1].equals("back")){
+					if (Math.abs(range - state.getInteger(State.sonarback)) > 1) 
+						state.set(State.sonarback, range);
+				} else if(param[1].equals("right")){
+					if (Math.abs(range - state.getInteger(State.sonarright)) > 1) 
+						state.set(State.sonarright, range);
 				}
 				
 				// must be an echo 
-			} else application.message("arduinoculus: " + response, getReadDelta()+"ms", getWriteDelta()+"ms");
+			} else application.message("arduinoculus: " + response, null, null); 
 		}
 	}
 
@@ -288,13 +291,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 				
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					log.error("arduino watchdog time out");
-					return; // die, no point living 
+					return; // die, no point living?
 				}
 				
-				// TODO: COLIN ... should we re-connect? 
-				// if ( !isconnected) { connect(); return; }
-				
-				if (sonar){ 
+				if (sonarEnabled){ 
 					if (getReadDelta() > SONAR_DELAY){ 
 						new Sender(SONAR);
 						Util.delay(SONAR_DELAY);						
@@ -366,6 +366,26 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		
 		if (application.muteROVonMove && moving) { application.unmuteROVMic(); }
 		
+		//TODO: BRAD BREAKING
+		/*
+		if(movingforward) {
+			
+
+			new Sender(STOP);
+			new Sender(new byte[] { BACKWARD, (byte)180 });
+			Util.delay(40);
+			
+		} else {
+			
+			
+			
+			
+		}
+		*/
+		
+		//nudge("backward");
+		//else nudge("forward");
+	
 		new Sender(STOP);
 		moving = false;
 		movingforward = false;
@@ -383,7 +403,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 	/** */
 	public void pollSensor() {
-		if (sonar) new Sender(SONAR);
+		if (sonarEnabled) new Sender(SONAR);
 	}
 
 	/** */

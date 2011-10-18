@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 public class Application extends MultiThreadedApplicationAdapter {
 
     private static final int STREAM_CONNECT_DELAY = 2000;
+//	private static final Settings framegstate = null;
     private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
     private Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
     private static String salt; 
@@ -39,12 +40,13 @@ public class Application extends MultiThreadedApplicationAdapter {
     private String remember = null;
     private IConnection pendingplayer = null;
     private String httpPort;
-    public Docker docker = null;
+    private Docker docker = null;
     private State state = State.getReference();
     private Speech speech = new Speech();
     private boolean initialstatuscalled = false;
     private boolean pendingplayerisnull = true;
     private boolean emailgrab = false;
+    public boolean framgrabbusy = false;
     private boolean playerstream = false;
     
     // TODO: issue 24 
@@ -362,10 +364,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			System.out.println("-- done --");
 			
 			if (settings.getBoolean(Settings.loginnotify)) {
-				speech.mluv("lawg inn"); 
+				int now = settings.getInteger(Settings.volume);
+				Util.setSystemVolume(100);
+				speech.mluv("lawg inn " + state.get(State.user)); 
+				Util.setSystemVolume(now);
 			}
-		}
-		
+		}	
 	}
 
 	/**
@@ -501,23 +505,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				// }
 				break;
 	
-			case framegrab:
-				if (grabber instanceof IServiceCapableConnection) {
-					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					sc.invoke("framegrab", new Object[] {});
-					messageplayer("framegrab command received", null, null);
-				}
-				break;
-				
-			case emailgrab:
-				if (grabber instanceof IServiceCapableConnection) {
-					IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-					sc.invoke("framegrab", new Object[] {});
-					messageplayer("framegrab command received", null, null);
-				}
-				emailgrab = true;
-				break;
-	
 			case arduinoecho:
 				if (str.equalsIgnoreCase("on")) comport.setEcho(true);
 				else comport.setEcho(false);
@@ -551,6 +538,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case new_user_add: account("new_user_add", str); break;
 			case user_list: account("user_list", ""); break;
 			case delete_user: account("delete_user", str); break;
+			case framegrab: frameGrab(); break;
+			case emailgrab: frameGrab(); emailgrab = true; break;
 			case extrauser_password_update: account("extrauser_password_update", str); break;
 			case username_update: account("username_update", str); break;
 			case disconnectotherconnections: disconnectOtherConnections(); break;
@@ -567,11 +556,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case holdservo: 
 				if (str.equalsIgnoreCase("true")) {
 					comport.holdservo = true;
-					settings.writeSettings("holdservo", str);
+					settings.writeSettings(FactorySettings.holdservo.toString(), str);
 				}
 				else {
 					comport.holdservo = false;
-					settings.writeSettings("holdservo", str);
+					settings.writeSettings(FactorySettings.holdservo.toString(), str);
 				}
 				messageplayer("holdservo "+str, null, null);
 				break;
@@ -752,6 +741,23 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
+
+	/** */
+	public void frameGrab(){
+		//state.set("frameGrabBusy", true);
+		
+		if(framgrabbusy){ // framegstate.getBoolean("framgrabbusy"){
+			System.out.println("...still waiting for a result from framegrab");
+			return;
+		}
+		
+		if (grabber instanceof IServiceCapableConnection) {
+			framgrabbusy = true;
+			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+			sc.invoke("framegrab", new Object[] {});
+			messageplayer("framegrab command received", null, null);
+		}
+	}
 	
 	/** */ 
 	public void frameGrabbed(ByteArray _RAWBitmapImage){ // , final String filename) {
@@ -774,20 +780,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		if (BCurrentlyAvailable > 0) {
 			System.out.println("The byte Array currently has "
-					+ BCurrentlyAvailable + " bytes. The Buffer has "
-					+ db.available());
+					+ BCurrentlyAvailable + " bytes. The Buffer has " + db.available());
 			try {
 				BufferedImage JavaImage = ImageIO.read(db);
 				// Now lets try and write the buffered image out to a file
-				String file = System.getenv("RED5_HOME")              
-						+ "\\webapps\\oculus\\images\\framegrab.png"; 
 				if (JavaImage != null) {
 					// If you sent a jpeg to the server, just change PNG to JPEG
 					// and Red5ScreenShot.png to .jpeg
-					ImageIO.write(JavaImage, "PNG", new File(file));
+					ImageIO.write(JavaImage, "PNG", new File(Settings.framefile));
 					if (emailgrab) {
 						emailgrab = false;
-						new developer.SendMail("Oculus Screen Shot", "image attached", file, this);
+						new developer.SendMail("Oculus Screen Shot", "image attached", Settings.framefile, this);
 					}
 				}
 			} catch (IOException e) {
@@ -795,6 +798,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 				System.out.println("IO Error " + e);
 			}
 		}
+		
+		// toggle flag
+		//TODO: brad
+		// message(null, "done frame grab", null);
+		
+		/*
+		System.out.println("----- done grab ------------");
+		state.dump();
+		state.set("busy", false);
+		state.dump();
+		*/
+		
+		framgrabbusy = false;
+		
 	}
 
 	private void messageplayer(String str, String status, String value) {
@@ -1230,11 +1247,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		// TODO: BRAD 
 		loginrecords.beDriver();
-		// read setting every time in case settings changed by client
 		
-		if (settings.getBoolean(Settings.loginnotify)) {
-			speech.mluv("lawg inn");
-		}
+		// read setting every time in case settings changed by client
+		if (settings.getBoolean(Settings.loginnotify)) 
+			speech.mluv("lawg inn " + state.get(State.user));
 
 		System.out.println("...after assumeControl(): " + loginrecords);
 	}

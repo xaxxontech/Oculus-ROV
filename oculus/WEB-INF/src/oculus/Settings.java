@@ -2,13 +2,15 @@ package oculus;
 
 import java.io.*;
 import java.util.Properties;
+import java.util.Vector;
 
 public class Settings {
 
-	static final String loginactivity = System.getenv("RED5_HOME") + "\\log\\loginactivity.txt";
-	static final String filename = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
-	static final String movesfile = System.getenv("RED5_HOME") + "\\log\\moves.txt";
-
+	public static final String loginactivity = System.getenv("RED5_HOME") + "\\log\\loginactivity.txt";
+	public static final String filename = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
+	public static final String movesfile = System.getenv("RED5_HOME") + "\\log\\moves.txt";
+	public static final String framefile = System.getenv("RED5_HOME") + "\\webapps\\oculus\\images\\framegrab.png"; 
+	
 	// put all constants here
 	public static final String emailalerts = "emailalerts";
 	public static final String volume = "volume";
@@ -145,7 +147,7 @@ public class Settings {
 
 	/**
 	 * @return the settings file in a parsed list
-	 */
+	 
 	public synchronized static Properties getProperties() {
 		Properties result = new Properties();
 		try {
@@ -161,8 +163,28 @@ public class Settings {
 			e.printStackTrace();
 		}
 		return result;
-	}
+	} */
 
+	public String toString(){
+		String result = new String();
+		for (FactorySettings factory : FactorySettings.values()) {
+			String val = readSetting(factory.toString());
+			if (val != null) 
+				if( ! val.equalsIgnoreCase("null"))
+					result += factory.toString() + " " + val + "\r\n";
+		}
+	
+		for (OptionalSettings ops : OptionalSettings.values()) {
+			String val = readSetting(ops.toString());
+			if (val != null)
+				if( ! val.equalsIgnoreCase("null"))
+					if( ! ops.equals(OptionalSettings.emailpassword))
+						result += ops.toString() + " " + val + "\r\n";
+		}
+		
+		return result;
+	}
+	
 	/**
 	 * Organize the settings file into 3 sections. Use Enums's to order the file
 	 */
@@ -200,9 +222,6 @@ public class Settings {
 				fw.append("pass" + j + " " + users[j][1] + "\r\n");
 			}
 
-			//if(State.getReference().getBoolean(State.developer))
-				//fw.append("# written on: " + new java.util.Date().toString() + "\r\n");
-			
 			fw.close();
 			
 			// now swap temp for real file
@@ -272,6 +291,8 @@ public class Settings {
 		
 		// TODO: WHOA BAD, USE VECTOR 
 		// what the heck is a Vector, Victor?
+		//Vector<String> lines = new Vector();
+		
 		String[] lines = new String[999];
 		try {
 

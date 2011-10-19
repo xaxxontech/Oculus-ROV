@@ -64,7 +64,7 @@ public class AutoDock implements Docker {
 		this.light = light;
 		if(settings.getBoolean(Settings.developer)){
 			moves = new LogManager();
-			moves.open(System.getenv("RED5_HOME")+"\\log\\moves.log");
+			moves.open(Settings.movesfile);
 		}
 	}
 	
@@ -297,6 +297,7 @@ public class AutoDock implements Docker {
 
 	/** */ 
 	private void autoDockNav(int x, int y, int w, int h, float slope) {
+		
 		x =x+(w/2); //convert to center from upper left
 		y=y+(h/2);  //convert to center from upper left
 		String s[] = docktarget.split("_");
@@ -316,13 +317,21 @@ public class AutoDock implements Docker {
 		if (w*h < s1) { 
 			if (Math.abs(x-160) > 10 || Math.abs(y-120) > 25) { // clicksteer and go (y was >50)
 				comport.clickSteer((x-160)*rescomp+" "+(y-120)*rescomp);
-				new Thread(new Runnable() { public void run() { try {
+				new Thread(new Runnable() { 
+
+				public void run() { try {
 					Thread.sleep(1500); // was 1500 w/ dockgrab following
 					comport.speedset("fast");
 					comport.goForward();
-					Thread.sleep(1500);
+					
+					Thread.sleep(500);
 					comport.stopGoing();
-					Thread.sleep(500); // let deaccelerate
+					// TODO: breaking?
+
+					// look is set for fast bots
+					int delay = settings.getInteger(OptionalSettings.stopdelay.toString());
+					if(delay==Settings.ERROR) delay = 500;
+					// let deaccelerate
 					
 					app.dockGrab();
 					//app.playerCallServer(PlayerCommands.dockgrab, null);
@@ -335,7 +344,7 @@ public class AutoDock implements Docker {
 					comport.goForward();
 					Thread.sleep(1500);
 					comport.stopGoing();
-					Thread.sleep(500); // let deaccelerate
+					Thread.sleep(1500); // let deaccelerate
 					app.dockGrab();
 					//app.playerCallServer(PlayerCommands.dockgrab, null);
 

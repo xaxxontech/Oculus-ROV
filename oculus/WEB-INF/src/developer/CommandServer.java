@@ -4,9 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
-//import javax.imageio.ImageIO;
-//import javax.imageio.stream.ImageOutputStream;
-
 import oculus.ArduinoCommDC;
 import oculus.Docker;
 import oculus.LoginRecords;
@@ -136,7 +133,13 @@ public class CommandServer {
 					
 					if(str.equals("tcp")) out.println("tcp connections: " + printers.size());
 
-					if(str.equals("reboot")) app.restart();
+					if(str.equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
+					
+					if(str.equals("restart")) app.restart();
+					
+					if(str.startsWith("stop")) port.stopGoing();
+
+					if(str.equals("settings")) out.println(settings.toString());
 					
 					if(str.equals("image")) {
 						
@@ -200,69 +203,18 @@ public class CommandServer {
 					
 					if(str.startsWith("state")){
 						String[] cmd = str.split(" ");
-						
-						System.out.println("cmd: "+cmd.length);
-						
-						//if(cmd.length==2)
-							//if(cmd[1]!=null)
-								//if(cmd[1].equals("get"))
-									//out.println(state.toString());
-					
-									
-						if(cmd.length==3){
-							state.set(cmd[1], cmd[2]);
-						}
+						if(cmd.length==3) state.set(cmd[1], cmd[2]);
 					}
 					
 					if(str.startsWith("move")){
 						String[] cmd = str.split(" ");
 						if(cmd[1].equals("forward")) port.goForward();
 						else if(cmd[1].equals("backwards")) port.goBackward();
+						else if(cmd[1].equals("left")) port.turnLeft();
+						else if(cmd[1].equals("right")) port.turnRight();
 					}
 					
-					if(str.startsWith("busy")){
-					
-						if( ! state.getBoolean("busy")){
-							state.set("busy", true);
-							state.dump();
-						} else {
-
-							System.out.println("... cant, am busy");
-							return;
-							
-						}
-						
-					}
-
-
-					if(str.startsWith("stop")){
-						out.println("---- stop -----");
-						state.set("busy", false);
-						port.stopGoing();
-						out.println(state.toString());
-					}
-
-					if(str.startsWith("not")){	
-						state.set("busy", false);
-						state.dump();
-					}
-					
-					if(str.equals("settings")){
-						out.println(settings.toString());
-					}
-					
-				/*	
-					if(str.startsWith("settings")){
-						String[] cmd = str.split(" ");
-						if(cmd[1].equals("get")){
-							System.out.println("getting..." + cmd[2]);
-							out.println(settings.readSetting(cmd[2]));
-						}
-					*/	
-						
-			
-					
-					if(str.equals("cam")){
+					if(str.equals("publish")){
 						app.publish("camera");
 						port.camHoriz();
 						port.camCommand("down");
@@ -273,15 +225,9 @@ public class CommandServer {
 					if(str.equals("bye")) {
 						out.close();
 						in.close();
+						clientSocket.close();
 						return;
 					}
-					
-					/*
-					if(str.equals("dump")) {
-						for (int c = 0; c < printers.size(); c++) printers.get(c).close();
-						printers.clear();
-					}
-					*/
 					
 					if(str.equals("find")) app.dockGrab();	
 					
@@ -398,7 +344,7 @@ public class CommandServer {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				//while(true)
+				while(true)
 					go();
 			}
 		}).start();

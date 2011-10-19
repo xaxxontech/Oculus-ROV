@@ -31,7 +31,7 @@ public class XMLCommandManager {
 ///	public static boolean busy = false;
 
 
-	private CommandServer channel = null;
+//	private CommandServerSave channel = null;
 
 	public XMLCommandManager(Application a, ArduinoCommDC p) {
 		app = a;

@@ -21,7 +21,7 @@ public class Terminal {
 			// login on connect 
 			out.println(user + ":" + pass);
 				
-			System.out.println("logging in...");
+			// System.out.println("logging in...");
 			
 			for(int i = 0 ; i < commands.length ; i++){
 				out.println(commands[i]);
@@ -29,8 +29,9 @@ public class Terminal {
 					running=false;
 			}
 			
-			// boolean running = true;
-			while (running) {
+			System.out.println(user + " is logged in.");
+
+			while (running) {				
 				try {
 	
 					input = stdin.readLine();

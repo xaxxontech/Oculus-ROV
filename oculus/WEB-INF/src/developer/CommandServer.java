@@ -4,13 +4,13 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
-import oculus.ArduinoCommDC;
 import oculus.Docker;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
 import oculus.Settings;
 import oculus.Util;
+import oculus.commport.ArduioPort;
 
 /**
  * Start the chat server. Start new threads for a each connection on the given
@@ -23,7 +23,7 @@ import oculus.Util;
 public class CommandServer {
 	
 	private static Docker docker = null;
-	private static ArduinoCommDC port = null;
+	private static ArduioPort port = null;
 	private static oculus.Application app = null;
 	//private static State state = State.getReference();
 	private static oculus.Settings settings = new Settings(); 
@@ -317,7 +317,7 @@ public class CommandServer {
 	}
 	
 	/** */
-	public CommandServer(oculus.Application a, ArduinoCommDC p) {
+	public CommandServer(oculus.Application a, ArduioPort p) {
 
 		if(app != null) {
 			System.out.println("allready configured");

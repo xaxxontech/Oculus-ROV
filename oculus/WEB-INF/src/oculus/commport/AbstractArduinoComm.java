@@ -1,206 +1,137 @@
-package oculus;
+package oculus.commport;
 
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import oculus.Application;
+import oculus.FactorySettings;
+import oculus.OptionalSettings;
+import oculus.Settings;
+import oculus.State;
+import oculus.Util;
+
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
+import gnu.io.SerialPort;
 
-public class ArduinoCommDC implements SerialPortEventListener {
+public abstract class AbstractArduinoComm implements ArduioPort {
 
-	private Logger log = Red5LoggerFactory.getLogger(ArduinoCommDC.class, "oculus");
-
-	// shared state variables
-	private State state = State.getReference();
-
-	// if watchdog'n, re-connect if not seen input since this long ago
-	public static final long DEAD_TIME_OUT = 30000;
-	public static final int SETUP = 2000;
-	public static final int SONAR_DELAY = 3000; 
-	public static final int WATCHDOG_DELAY = 5000;
-
-	// these commands require arguments from current state
-	public static final byte FORWARD = 'f';
-	public static final byte BACKWARD = 'b';
-	public static final byte LEFT = 'l';
-	public static final byte RIGHT = 'r';
-	public static final byte COMP = 'c';
-	public static final byte CAM = 'v';
-	public static final byte ECHO = 'e';
-
-	// ready to be sent
-	public static final byte[] SONAR = { 'd' };
-	public static final byte[] STOP = { 's' };
-	public static final byte[] GET_VERSION = { 'y' };
-	public static final byte[] CAMRELEASE = { 'w' };
-	private static final byte[] ECHO_ON = { 'e', '1' };
-	private static final byte[] ECHO_OFF = { 'e', '0' };
-
-	// comm channel
-	private SerialPort serialPort = null;
-	private InputStream in;
-	private OutputStream out;
-
-	// will be discovered from the device
-	protected String version = null;
-
-	// input buffer
-	private byte[] buffer = new byte[32];
-	private int buffSize = 0;
-
-	// track write times
-	private long lastSent = System.currentTimeMillis();
-	private long lastRead = System.currentTimeMillis();
-	
-	private Settings settings = new Settings();
-	protected int speedslow = settings.getInteger("speedslow");
-	protected int speedmed = settings.getInteger("speedmed");
-	protected int camservohoriz = settings.getInteger("camservohoriz");
-	protected int camposmax = settings.getInteger("camposmax");
-	protected int camposmin = settings.getInteger("camposmin");
-	protected int nudgedelay = settings.getInteger("nudgedelay");
-	protected int maxclicknudgedelay = settings.getInteger("maxclicknudgedelay");
-	protected int maxclickcam = settings.getInteger("maxclickcam");
-	protected double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
-	protected int steeringcomp = settings.getInteger("steeringcomp");
-	protected boolean sonarEnabled = settings.getBoolean(OptionalSettings.sonarenabled.toString());
-	protected boolean holdservo = settings.getBoolean(FactorySettings.holdservo.toString());
-
-	protected int camservodirection = 0;
-	protected int camservopos = camservohoriz;
-	protected int camwait = 400;
-	protected int camdelay = 50; // for smooth continuous motion
-	protected int speedfast = 255;
-	protected int turnspeed = 255;
-	protected int speed = speedfast; // set default to max
-	
-	protected String direction = null;
+	protected Logger log = Red5LoggerFactory.getLogger(AbstractArduinoComm.class, "oculus");
+	protected State state = State.getReference();
+	protected SerialPort serialPort = null;
+	protected InputStream in;
+	protected OutputStream out;
+	public String version = null;
+	public byte[] buffer = new byte[32];
+	public int buffSize = 0;
+	public long lastSent = System.currentTimeMillis();
+	public long lastRead = System.currentTimeMillis();
+	public Settings settings = new Settings();
+	public int speedslow = settings.getInteger("speedslow");
+	public int speedmed = settings.getInteger("speedmed");
+	public int camservohoriz = settings.getInteger("camservohoriz");
+	public int camposmax = settings.getInteger("camposmax");
+	public int camposmin = settings.getInteger("camposmin");
+	public int nudgedelay = settings.getInteger("nudgedelay");
+	public int maxclicknudgedelay = settings.getInteger("maxclicknudgedelay");
+	public int maxclickcam = settings.getInteger("maxclickcam");
+	public double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
+	public int steeringcomp = settings.getInteger("steeringcomp");
+	public boolean sonarEnabled = settings.getBoolean(OptionalSettings.sonarenabled.toString());
+	public boolean holdservo = settings.getBoolean(FactorySettings.holdservo.toString());
+	public int camservodirection = 0;
+	public int camservopos = camservohoriz;
+	public int camwait = 400;
+	public int camdelay = 50;
+	public int speedfast = 255;
+	public int turnspeed = 255;
+	public int speed = speedfast;
+	public String direction = null;
 	public boolean moving = false;
-	volatile boolean sliding = false;
+	public volatile boolean sliding = false;
 	public volatile boolean movingforward = false;
-	
-	// TODO: what are these ?? can't be in methods instead? 
-	int tempspeed = 999;
-	int clicknudgedelay = 0;
-	String tempstring = null;
-	int tempint = 0;
+	public int tempspeed = 999;
+	public int clicknudgedelay = 0;
+	public String tempstring = null;
+	public int tempint = 0;
+	public volatile boolean isconnected = false;
+	public Application application = null;
 
-	// make sure all threads know if connected
-	private volatile boolean isconnected = false;
-
-	// call back
-	private Application application = null;
-
-	/**
-	 * Constructor but call connect to configure
-	 * 
-	 * @param app
-	 *            is the main oculus application, we need to call it on Serial
-	 *            events like restet
-	 */
-	public ArduinoCommDC(Application app) {
+	public AbstractArduinoComm(Application app) {
 
 		// call back to notify on reset events etc
 		application = app;
-		
+
 		if (state.get(State.serialport) != null) {
 			new Thread(new Runnable() {
 				public void run() {
 
 					connect();
 					Util.delay(SETUP);
-					//new Sender(GET_VERSION);
-					
-					// camHoriz(); //causing null pointer reading holdservo, do manually instead: 
 					byte[] cam = { CAM, (byte) camservopos };
 					sendCommand(cam);
 					Util.delay(camwait);
 					sendCommand(CAMRELEASE);
-					
-					// check for lost connection
-					new WatchDog().start();
-
 				}
 			}).start();
 		}
 	}
 
-	/** open port, enable read and write, enable events */
-	public void connect() {
-		try {
+	/** inner class to send commands as a seperate thread each */
+	class Sender extends Thread {
+		private byte[] command = null;
 
-			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
-					state.get(State.serialport)).open(
-					ArduinoCommDC.class.getName(), SETUP);
-			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8,
-					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+		public Sender(final byte[] cmd) {
+			// do connection check
+			if (!isconnected)
+				log.error("not connected");
+			else {
+				command = cmd;
+				this.start();
+			}
+		}
 
-			// open streams
-			out = serialPort.getOutputStream();
-			in = serialPort.getInputStream();
-
-			// register for serial events
-			serialPort.addEventListener(this);
-			serialPort.notifyOnDataAvailable(true);
-
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			return;
+		public void run() {
+			sendCommand(command);
 		}
 	}
 
-	/** @return True if the serial port is open */
+	/** inner class to check if getting responses in timely manor */
+	public class WatchDog extends Thread {
+		public WatchDog() {
+			this.setDaemon(true);
+		}
+
+		public void run() {
+			Util.delay(SETUP);
+			while (true) {
+
+				if (getReadDelta() > DEAD_TIME_OUT) {
+					log.error("arduino watchdog time out");
+					return; // die, no point living?
+				}
+
+					if (getReadDelta() > WATCHDOG_DELAY) {
+						new Sender(GET_VERSION);
+						Util.delay(WATCHDOG_DELAY);
+					}
+				}
+			
+		}
+	}
+
+	public abstract void connect();
+	
+	@Override
 	public boolean isConnected() {
 		return isconnected;
 	}
 
-	@Override
-	/** 
-	 * buffer input on event and trigger parse on '>' charter  
-	 * 
-	 * Note, all feedback must be in single xml tags like: <feedback 123>
-	 */
-	public void serialEvent(SerialPortEvent event) {
-		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-			try {
-				byte[] input = new byte[32];
-				int read = in.read(input);
-				for (int j = 0; j < read; j++) {
-					// print() or println() from arduino code
-					if ((input[j] == '>') || (input[j] == 13)
-							|| (input[j] == 10)) {
-						// do what ever is in buffer
-						if (buffSize > 0)
-							execute();
-						// reset
-						buffSize = 0;
-						// track input from arduino
-						lastRead = System.currentTimeMillis();
-					} else if (input[j] == '<') {
-						// start of message
-						buffSize = 0;
-					} else {
-						// buffer until ready to parse
-						buffer[buffSize++] = input[j];
-					}
-				}
-			} catch (IOException e) {
-				log.error("event : " + e.getMessage());
-			}
-		}
-	}
-
-	// act on feedback from arduino
-	private void execute() {
+	public abstract void execute(); /* {
 		String response = "";
 		for (int i = 0; i < buffSize; i++)
 			response += (char) buffer[i];
-		
+
 		// System.out.println("in: " + response);
 
 		// take action as arduino has just turned on
@@ -215,100 +146,75 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		} else if (response.startsWith("version:")) {
 			if (version == null) {
 				// get just the number
-				version = response.substring(response.indexOf("version:") + 8, response.length());
-				application.message("arduinoculus version: " + version, null, null);
-			} else return;
+				version = response.substring(response.indexOf("version:") + 8,
+						response.length());
+				application.message("arduinoculus version: " + version, null,
+						null);
+			} else
+				return;
 
 			// don't bother showing watch dog pings to user screen
 		} else if (response.charAt(0) != GET_VERSION[0]) {
 
 			// if sonar enabled will get <sonar back|left|right xxx> as watchdog
-			if (response.startsWith("sonar")) {				
+			if (response.startsWith("sonar")) {
 				final String[] param = response.split(" ");
-				final int range = Integer.parseInt(param[2]);	
-				
-				if(param[1].equals("back")){
-					if (Math.abs(range - state.getInteger(State.sonarback)) > 1) 
+				final int range = Integer.parseInt(param[2]);
+
+				if (param[1].equals("back")) {
+					if (Math.abs(range - state.getInteger(State.sonarback)) > 1)
 						state.set(State.sonarback, range);
-				} else if(param[1].equals("right")){
-					if (Math.abs(range - state.getInteger(State.sonarright)) > 1) 
+				} else if (param[1].equals("right")) {
+					if (Math.abs(range - state.getInteger(State.sonarright)) > 1)
 						state.set(State.sonarright, range);
 				}
-				
-				// must be an echo 
-			} else application.message("arduinoculus: " + response, null, null); 
+
+				// must be an echo
+			} else
+				application.message("arduinoculus: " + response, null, null);
 		}
 	}
-
-	/** @return the time since last write() operation */
+*/
+	
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#getWriteDelta()
+	 */
+	@Override
 	public long getWriteDelta() {
 		return System.currentTimeMillis() - lastSent;
 	}
 
-	/** @return this device's firmware version */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#getVersion()
+	 */
+	@Override
 	public String getVersion() {
 		return version;
 	}
 
-	/** @return the time since last read operation */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#getReadDelta()
+	 */
+	@Override
 	public long getReadDelta() {
 		return System.currentTimeMillis() - lastRead;
 	}
 
-	/** inner class to send commands as a seperate thread each */
-	private class Sender extends Thread {
-		private byte[] command = null;
-		public Sender(final byte[] cmd) {
-			// do connection check
-			if(!isconnected) log.error("not connected");
-			else {
-				command = cmd;
-				this.start();
-			}
-		}
-		public void run() {
-			sendCommand(command);
-		}
-	}
-
-	/**
-	 * @param update
-	 *            is set to true to turn on echo'ing of serial commands
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#setEcho(boolean)
 	 */
+	@Override
 	public void setEcho(boolean update) {
-		if (update) new Sender(ECHO_ON);
-		else new Sender(ECHO_OFF);
+		if (update)
+			new Sender(ECHO_ON);
+		else
+			new Sender(ECHO_OFF);
 	}
 
-	/** inner class to check if getting responses in timely manor */
-	private class WatchDog extends Thread {
-		public WatchDog() {
-			this.setDaemon(true);
-		}
-		public void run() {
-			Util.delay(SETUP);
-			while (true) {
-				
-				if (getReadDelta() > DEAD_TIME_OUT) {
-					log.error("arduino watchdog time out");
-					return; // die, no point living?
-				}
-				
-				if (sonarEnabled){ 
-					if (getReadDelta() > SONAR_DELAY){ 
-						new Sender(SONAR);
-						Util.delay(SONAR_DELAY);						
-					}
-				} else {
-					if (getReadDelta() > WATCHDOG_DELAY){
-						new Sender(GET_VERSION);
-						Util.delay(WATCHDOG_DELAY);
-					}
-				}
-			}
-		}
-	}
-
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#reset()
+	 */
+	@Override
 	public void reset() {
 		if (isconnected) {
 			new Thread(new Runnable() {
@@ -339,7 +245,7 @@ public class ArduinoCommDC implements SerialPortEventListener {
 	 * @param command
 	 *            is a byte array of messages to send
 	 */
-	private synchronized void sendCommand(final byte[] command) {
+	protected synchronized void sendCommand(final byte[] command) {
 
 		if (!isconnected)
 			return;
@@ -361,61 +267,82 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		lastSent = System.currentTimeMillis();
 	}
 
-	/** */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#stopGoing()
+	 */
+	@Override
 	public void stopGoing() {
-		
-		if (application.muteROVonMove && moving) { application.unmuteROVMic(); }
-		
-		//TODO: BRAD BREAKING
-		/*
-		if(movingforward) {
-			
 
-			new Sender(STOP);
-			new Sender(new byte[] { BACKWARD, (byte)180 });
-			Util.delay(40);
-			
-		} else {
-			
-			
-			
-			
+		if (application.muteROVonMove && moving) {
+			application.unmuteROVMic();
 		}
-		*/
-		
-		//nudge("backward");
-		//else nudge("forward");
-	
+
+		// TODO: BRAD BREAKING
+		/*
+		 * if(movingforward) {
+		 * 
+		 * 
+		 * new Sender(STOP); new Sender(new byte[] { BACKWARD, (byte)180 });
+		 * Util.delay(40);
+		 * 
+		 * } else {
+		 * 
+		 * 
+		 * 
+		 * 
+		 * }
+		 */
+
+		// nudge("backward");
+		// else nudge("forward");
+
 		new Sender(STOP);
 		moving = false;
 		movingforward = false;
-					
+
 	}
 
-	/** */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#goForward()
+	 */
+	@Override
 	public void goForward() {
 		new Sender(new byte[] { FORWARD, (byte) speed });
 		moving = true;
 		movingforward = true;
-		
-		if (application.muteROVonMove) { application.muteROVMic(); }
+
+		if (application.muteROVonMove) {
+			application.muteROVMic();
+		}
 	}
 
-	/** */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#pollSensor()
+	 */
+	@Override
 	public void pollSensor() {
-		if (sonarEnabled) new Sender(SONAR);
+		if (sonarEnabled)
+			new Sender(SONAR);
 	}
 
-	/** */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#goBackward()
+	 */
+	@Override
 	public void goBackward() {
 		new Sender(new byte[] { BACKWARD, (byte) speed });
 		moving = true;
 		movingforward = false;
-		
-		if (application.muteROVonMove) { application.muteROVMic(); }
+
+		if (application.muteROVonMove) {
+			application.muteROVMic();
+		}
 	}
 
-	/** */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#turnRight()
+	 */
+	@Override
 	public void turnRight() {
 		int tmpspeed = turnspeed;
 		int boost = 10;
@@ -424,11 +351,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 		new Sender(new byte[] { RIGHT, (byte) tmpspeed });
 		moving = true;
-		
-		if (application.muteROVonMove) { application.muteROVMic(); }
+
+		if (application.muteROVonMove) {
+			application.muteROVMic();
+		}
 	}
 
-	/** */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#turnLeft()
+	 */
+	@Override
 	public void turnLeft() {
 		int tmpspeed = turnspeed;
 		int boost = 10;
@@ -437,10 +369,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 
 		new Sender(new byte[] { LEFT, (byte) tmpspeed });
 		moving = true;
-		
-		if (application.muteROVonMove) { application.muteROVMic(); }
+
+		if (application.muteROVonMove) {
+			application.muteROVMic();
+		}
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#camGo()
+	 */
+	@Override
 	public void camGo() {
 		new Thread(new Runnable() {
 			public void run() {
@@ -457,12 +395,16 @@ public class ArduinoCommDC implements SerialPortEventListener {
 						camservodirection = 0;
 					}
 				}
-				
+
 				checkForHoldServo();
 			}
 		}).start();
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#camCommand(java.lang.String)
+	 */
+	@Override
 	public void camCommand(String str) {
 		if (str.equals("stop")) {
 			camservodirection = 0;
@@ -496,15 +438,18 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					checkForHoldServo();
 				}
 			}).start();
-		} 
-//		else if (str.equals("hold")) {
-//			new Thread(new Runnable() {  public void run() {
-//					sendCommand(new byte[] { CAM, (byte) camservopos });
-//				} }).start();
-//		}
+		}
+		// else if (str.equals("hold")) {
+		// new Thread(new Runnable() { public void run() {
+		// sendCommand(new byte[] { CAM, (byte) camservopos });
+		// } }).start();
+		// }
 	}
 
-	/** level the camera servo */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#camHoriz()
+	 */
+	@Override
 	public void camHoriz() {
 		camservopos = camservohoriz;
 		new Thread(new Runnable() {
@@ -521,6 +466,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}).start();
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#camToPos(java.lang.Integer)
+	 */
+	@Override
 	public void camToPos(Integer n) {
 		camservopos = n;
 		new Thread(new Runnable() {
@@ -535,7 +484,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}).start();
 	}
 
-	/** Set the speed on the bot */
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#speedset(java.lang.String)
+	 */
+	@Override
 	public void speedset(String str) {
 		if (str.equals("slow")) {
 			speed = speedslow;
@@ -551,6 +503,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#nudge(java.lang.String)
+	 */
+	@Override
 	public void nudge(String dir) {
 		direction = dir;
 		new Thread(new Runnable() {
@@ -571,9 +527,9 @@ public class ArduinoCommDC implements SerialPortEventListener {
 					goBackward();
 					n *= 4;
 				}
-		
+
 				Util.delay(n);
-		
+
 				if (movingforward == true) {
 					goForward();
 				} else {
@@ -583,6 +539,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}).start();
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#slide(java.lang.String)
+	 */
+	@Override
 	public void slide(String dir) {
 		if (sliding == false) {
 			sliding = true;
@@ -630,6 +590,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#slidecancel()
+	 */
+	@Override
 	public void slidecancel() {
 		if (sliding == true) {
 			if (tempspeed != 999) {
@@ -639,6 +603,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#clickSteer(java.lang.String)
+	 */
+	@Override
 	public Integer clickSteer(String str) {
 		tempstring = str;
 		tempint = 999;
@@ -664,6 +632,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		return tempint;
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#clickNudge(java.lang.Integer)
+	 */
+	@Override
 	public void clickNudge(Integer x) {
 		if (x > 0) {
 			direction = "right";
@@ -705,6 +677,10 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}).start();
 	}
 
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#clickCam(java.lang.Integer)
+	 */
+	@Override
 	public Integer clickCam(Integer y) {
 		Integer n = maxclickcam * y / 240;
 		camservopos -= n;
@@ -728,9 +704,12 @@ public class ArduinoCommDC implements SerialPortEventListener {
 		}).start();
 		return camservopos;
 	}
-	
-	/** turn off the servo holding the mirror */ 
-	public void releaseCameraServo(){
+
+	/* (non-Javadoc)
+	 * @see oculus.ArduioPort#releaseCameraServo()
+	 */
+	@Override
+	public void releaseCameraServo() {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -741,21 +720,23 @@ public class ArduinoCommDC implements SerialPortEventListener {
 			}
 		}).start();
 	}
-	
-	private void checkForHoldServo() { 
-		
-		if(application.stream==null) return;
-	
-		if(!holdservo || application.stream.equals("stop") ||
-				application.stream.equals("mic") || application.stream == null) {
+
+	public void checkForHoldServo() {
+
+		if (application.stream == null) return;
+
+		if (!holdservo || application.stream.equals("stop")
+				|| application.stream.equals("mic")
+				|| application.stream == null) {
 			Util.delay(camwait);
 			sendCommand(CAMRELEASE);
 		}
 	}
 
-	/** send steering compensation values to the arduino */
+	@Override
 	public void updateSteeringComp() {
 		byte[] command = { COMP, (byte) steeringcomp };
 		new Sender(command);
 	}
+
 }

@@ -1,5 +1,7 @@
 package oculus;
 
+import oculus.commport.AbstractArduinoComm;
+
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.service.IServiceCapableConnection;
@@ -44,20 +46,18 @@ public class AutoDock implements Docker {
 	private static Logger log = Red5LoggerFactory.getLogger(AutoDock.class, "oculus");
 	private State state = State.getReference();
 	private Settings settings = new Settings();
-///	private final boolean debug = settings.getBoolean(Settings.developer);
 	private BatteryLife life = BatteryLife.getReference();
 	private LogManager moves = null; 
 	private IConnection grabber = null;
 	private String docktarget = null;
-	private ArduinoCommDC comport = null;
+	private AbstractArduinoComm comport = null;
 	private LightsComm light = null;
 	private Application app = null;
 	
 	private boolean autodockingcamctr = false;
-	//private int autodockgrabattempts;
 	private int autodockctrattempts;
 	
-	public AutoDock(Application theapp, IConnection thegrab, ArduinoCommDC com, LightsComm light){
+	public AutoDock(Application theapp, IConnection thegrab, AbstractArduinoComm com, LightsComm light){
 		this.app = theapp;
 		this.grabber = thegrab;
 		this.comport = com;

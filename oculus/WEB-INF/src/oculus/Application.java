@@ -12,6 +12,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
+
+import oculus.commport.AbstractArduinoComm;
+import oculus.commport.ArduinoCommDC;
+import oculus.commport.ArduinoCommSonar;
+
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.Red5;
@@ -25,13 +30,12 @@ import org.slf4j.Logger;
 public class Application extends MultiThreadedApplicationAdapter {
 
     private static final int STREAM_CONNECT_DELAY = 2000;
-//	private static final Settings framegstate = null;
     private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
     private Logger log = Red5LoggerFactory.getLogger(Application.class, "oculus");
     private static String salt; 
     private IConnection grabber = null;
     private IConnection player = null;
-    private ArduinoCommDC comport = null;
+    private AbstractArduinoComm comport = null;
     private LightsComm light = null;
     private developer.LogManager moves = new developer.LogManager();
     private BatteryLife battery = null;
@@ -224,9 +228,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 		settings.writeFile(); // needs to be below salt set
 		
 		// must be blocking search of all ports, but only once!
-		new Discovery().search();
-		comport = new ArduinoCommDC(this);
+		new Discovery();
+		
+		// create matching class based on firmware 
+		if(state.get(State.firmware).equals(Discovery.OCULUS_DC)){
+			comport = new ArduinoCommDC(this);
+		} else if(state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
+			comport = new ArduinoCommSonar(this);
+		}
+	
 		light = new LightsComm(this);
+		
+		System.out.println(state.toString());
 
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");

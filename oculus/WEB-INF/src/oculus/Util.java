@@ -17,20 +17,16 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
+import oculus.commport.ArduioPort;
 
 import developer.SendMail;
-import developer.XMLCommandManager;
 
-//import org.red5.logging.Red5LoggerFactory;
-//import org.slf4j.Logger;
 
 public class Util {
 
 	private static final int PRECISION = 2;
 
-	private static Settings settings = new Settings();
+	// private static Settings settings = new Settings();
 	// private final boolean debug = settings.getBoolean(Settings.developer);
 	// private final boolean alerts = settings.getBoolean(Settings.emailalerts);
     // private static final boolean notify = settings.getBoolean(Settings.loginnotify);
@@ -420,25 +416,25 @@ public class Util {
 	
 	
 	/** */ 
-	public static void dockingTest(final Application app, final ArduinoCommDC port, final Docker docker) {
+	public static void dockingTest(final Application app, final ArduioPort port, final Docker docker) {
 
-		Logger log = Red5LoggerFactory.getLogger(XMLCommandManager.class, "oculus");
+	//	Logger log = Red5LoggerFactory.getLogger(XMLCommandManager.class, "oculus");
 		State state = State.getReference();
 
 		if (docker == null || port == null || app == null) {
-			log.error("not configured");
+		//	log.error("not configured");
 			return;
 		}
 
 		if (state.getBoolean(State.autodocking)) {
-			log.error("can't auto dock twice");
+		//	log.error("can't auto dock twice");
 			return;
 		}
 
 		if( ! state.getBoolean("busy")){
 			state.set("busy", true);
 		} else {
-			log.error("can't auto dock twice, busy");
+		//	log.error("can't auto dock twice, busy");
 			return;
 		}
 		

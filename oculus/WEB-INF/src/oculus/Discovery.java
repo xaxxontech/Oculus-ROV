@@ -6,9 +6,6 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
-//import org.red5.logging.Red5LoggerFactory;
-//import org.slf4j.Logger;
-
 import gnu.io.*;
 
 public class Discovery {
@@ -24,7 +21,7 @@ public class Discovery {
 	public static final int FLOWCONTROL = SerialPort.FLOWCONTROL_NONE;
 
 	/* add known devices here, strings returned from the firmware */
-	public static final String OCULUS_SERVO = "<id:oculusServo>";
+	public static final String OCULUS_SONAR = "<id:oculusSonar>";
 	public static final String OCULUS_DC = "<id:oculusDC>";
 	public static final String LIGHTS = "<id:oculusLights>";
 	public static final long RESPONCE_DELAY = 300;
@@ -40,6 +37,7 @@ public class Discovery {
 	/* constructor makes a list of available ports */
 	public Discovery() {
 		getAvailableSerialPorts();
+		search();
 	}
 
 	/** */
@@ -121,9 +119,15 @@ public class Discovery {
 				} else if (id.equalsIgnoreCase(OCULUS_DC)) {
 
 					state.set(State.serialport, ports.get(i));
+					state.set(State.firmware, OCULUS_SONAR);
+
+				} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
+
+					state.set(State.serialport, ports.get(i));
+					state.set(State.firmware, OCULUS_SONAR);
 					
-				} 				
-			
+				} 	
+				
 				// other devices here if grows 
 			
 			}

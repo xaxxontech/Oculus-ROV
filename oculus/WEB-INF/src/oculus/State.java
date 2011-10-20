@@ -46,6 +46,7 @@ public class State {
 	public static final String docked = "docked";
 	public static final String undocked = "undocked";
 	public static final String undock = "undock";
+	public static final String firmware = "firmware";
 //	public static final String holdservo = "holdservo";
 	public static final String unknown = "unknown";	
 	public static final String frameGrabBusy = "frameGrabBusy";
@@ -65,7 +66,6 @@ public class State {
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
-
 
 	/** properties object to hold configuration */
 	private Properties props = new Properties();

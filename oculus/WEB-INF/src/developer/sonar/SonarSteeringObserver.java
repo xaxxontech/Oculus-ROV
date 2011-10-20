@@ -4,10 +4,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import oculus.Application;
-import oculus.ArduinoCommDC;
 import oculus.Observer;
 //import oculus.PlayerCommands;
 import oculus.State;
+import oculus.commport.AbstractArduinoComm;
+import oculus.commport.ArduinoCommDC;
 
 /** Stop the robot before hitting the wall */
 public class SonarSteeringObserver implements Observer {
@@ -20,10 +21,10 @@ public class SonarSteeringObserver implements Observer {
 	
 	// private Settings settings = new Settings();
 	private Application app = null;
-	private ArduinoCommDC comm = null;
+	private AbstractArduinoComm comm = null;
 
 	/** register for state changes */
-	public SonarSteeringObserver(Application a, ArduinoCommDC port) {
+	public SonarSteeringObserver(Application a, AbstractArduinoComm port) {
 		app = a;
 		comm = port;
 		state.addObserver(this);
@@ -31,7 +32,7 @@ public class SonarSteeringObserver implements Observer {
 		// refresh on timer too
 		timer.scheduleAtFixedRate(new SonarTast(), State.ONE_MINUTE, 1800);
 	}
-
+	
 	@Override
 	public void updated(final String key) {
 		if (key.equals(State.sonarright)) {

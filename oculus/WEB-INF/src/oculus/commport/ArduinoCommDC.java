@@ -1,9 +1,6 @@
 package oculus.commport;
 
-import java.io.IOException;
-
 import oculus.Application;
-import oculus.Discovery;
 import oculus.State;
 
 import gnu.io.CommPortIdentifier;
@@ -45,31 +42,7 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 
 	public void serialEvent(SerialPortEvent event) {
 		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-			try {
-				byte[] input = new byte[32];
-				int read = in.read(input);
-				for (int j = 0; j < read; j++) {
-					// print() or println() from arduino code
-					if ((input[j] == '>') || (input[j] == 13)
-							|| (input[j] == 10)) {
-						// do what ever is in buffer
-						if (buffSize > 0)
-							execute();
-						// reset
-						buffSize = 0;
-						// track input from arduino
-						lastRead = System.currentTimeMillis();
-					} else if (input[j] == '<') {
-						// start of message
-						buffSize = 0;
-					} else {
-						// buffer until ready to parse
-						buffer[buffSize++] = input[j];
-					}
-				}
-			} catch (IOException e) {
-				log.error("event : " + e.getMessage());
-			}
+			manageInput();
 		}
 	}
 	
@@ -94,17 +67,18 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 			if (version == null) {
 				// get just the number
 				version = response.substring(response.indexOf("version:") + 8, response.length());
-				application.message(Discovery.OCULUS_DC + " : " + version, null, null);
-			} else return;
-
-			// don't bother showing watch dog pings to user screen
+				application.message("oculusDC: " + version, null, null);
+			} 
 		} else if (response.charAt(0) != GET_VERSION[0]) {
-			application.message(Discovery.OCULUS_DC + " : " + response, null, null);
+			// don't bother showing watch dog pings to user screen
+			application.message("oculusDC: " + response, null, null);
 		}
 	}
 
+	/*
 	@Override
 	public String getFirmware() {
 		return Discovery.OCULUS_DC;
-	}
+	}*/
+	
 }

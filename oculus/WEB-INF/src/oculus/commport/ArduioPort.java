@@ -96,6 +96,6 @@ public interface ArduioPort {
 	/** send steering compensation values to the arduino */
 	public abstract void updateSteeringComp();
 
-	public abstract String getFirmware();
+	// public abstract String getFirmware();
 	
 }

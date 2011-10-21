@@ -1,5 +1,6 @@
 package oculus.commport;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -176,9 +177,34 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	}
 */
 	
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#getWriteDelta()
-	 */
+	public void manageInput(){
+		try {
+			byte[] input = new byte[32];
+			int read = in.read(input);
+			for (int j = 0; j < read; j++) {
+				// print() or println() from arduino code
+				if ((input[j] == '>') || (input[j] == 13)
+						|| (input[j] == 10)) {
+					// do what ever is in buffer
+					if (buffSize > 0)
+						execute();
+					// reset
+					buffSize = 0;
+					// track input from arduino
+					lastRead = System.currentTimeMillis();
+				} else if (input[j] == '<') {
+					// start of message
+					buffSize = 0;
+				} else {
+					// buffer until ready to parse
+					buffer[buffSize++] = input[j];
+				}
+			}
+		} catch (IOException e) {
+			log.error("event : " + e.getMessage());
+		}
+	}
+	
 	@Override
 	public long getWriteDelta() {
 		return System.currentTimeMillis() - lastSent;

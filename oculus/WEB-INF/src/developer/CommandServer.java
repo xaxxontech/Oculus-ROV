@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
+import oculus.Application;
 import oculus.Docker;
 import oculus.LoginRecords;
 import oculus.Observer;
@@ -24,7 +25,7 @@ public class CommandServer {
 	
 	private static Docker docker = null;
 	private static ArduioPort port = null;
-	private static oculus.Application app = null;
+	private static Application app = null;
 	//private static State state = State.getReference();
 	private static oculus.Settings settings = new Settings(); 
 	private static ServerSocket serverSocket = null; 
@@ -223,10 +224,14 @@ public class CommandServer {
 					}
 					
 					if(str.equals("bye")) {
+						/*
 						out.close();
 						in.close();
 						clientSocket.close();
 						return;
+						*/ 
+						shutDown();
+						
 					}
 					
 					if(str.equals("find")) app.dockGrab();	
@@ -245,6 +250,7 @@ public class CommandServer {
 						//else System.out.println(logs);
 						
 						out.println("active users: " + records.getActive());
+						out.println(records.toString());
 						
 						/*
 						if(records.getActive()>0){

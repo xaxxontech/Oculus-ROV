@@ -330,11 +330,12 @@ public class AutoDock implements Docker {
 
 					// look is set for fast bots
 					int delay = settings.getInteger(OptionalSettings.stopdelay.toString());
+					System.out.println("stop delay:" + delay);
 					if(delay==Settings.ERROR) delay = 500;
+					Util.delay(delay);
 					// let deaccelerate
 					
 					app.dockGrab();
-					//app.playerCallServer(PlayerCommands.dockgrab, null);
 					
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
@@ -346,8 +347,6 @@ public class AutoDock implements Docker {
 					comport.stopGoing();
 					Thread.sleep(1500); // let deaccelerate
 					app.dockGrab();
-					//app.playerCallServer(PlayerCommands.dockgrab, null);
-
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 		} // end of S1 check

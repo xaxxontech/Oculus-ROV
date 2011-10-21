@@ -3,22 +3,19 @@ package developer;
 import oculus.Application;
 import oculus.Observer;
 import oculus.State;
-import oculus.Util;
 
 /** Manage auto docking events like timeout and lost target */
 public class DockingObserver implements Observer {
 
 	private State state = State.getReference();
 	private Application app = null;
-
-	private long start = 0; // System.currentTimeMillis();
-	private long end = 0; // System.currentTimeMillis();
 	private boolean docking = false;
+	private long start = 0;
+	private long end = 0; 
 
 	/** register for state changes */
 	public DockingObserver(Application a) {
 		app = a;
-		System.out.println("docking observer started...");
 		state.addObserver(this);
 	}
 

@@ -50,8 +50,8 @@ public class CommandServer {
 				System.out.println("fail aquire tcp streams: " + e.getMessage());
 				try {
 					
-					//in.close();
-					//out.close();
+					in.close();
+					out.close();
 					clientSocket.close();
 					clientSocket = null;
 					
@@ -66,6 +66,7 @@ public class CommandServer {
 
 			// first thing better be user:pass
 			try {
+				
 				final String salted = in.readLine();
 				final String user = salted.substring(0, salted.indexOf(':'));
 				final String pass = salted.substring(salted.indexOf(':')+1, salted.length());
@@ -75,8 +76,8 @@ public class CommandServer {
 				if(app.logintest(user, pass)==null){
 					sendToGroup("login failure: " + user);
 					out.println("login fail -- please drop dead");
-					//out.flush();
-					//out.close();
+					out.flush();
+					out.close();
 					clientSocket.close();
 					return;
 				}
@@ -88,8 +89,8 @@ public class CommandServer {
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 				try {
-					//if(in!=null)in.close();
-					//if(out!=null)out.close();
+					if(in!=null)in.close();
+					if(out!=null)out.close();
 					clientSocket.close();
 					return;
 				} catch (IOException e) {
@@ -144,14 +145,8 @@ public class CommandServer {
 					
 					if(str.equals("image")) {
 						
-						//out.println("------image----------");
-						//System.out.println("-------------------------");
-						
-						// app.framgrabbusy = true;
 						app.frameGrab();
-						//Util.delay(100);
-						// state.set("frameGrabBusy", true);
-						state.dump();
+						// state.dump();
 
 						while(app.framgrabbusy){//state.getBoolean("busy")){
 							out.println("waiting....");
@@ -165,32 +160,7 @@ public class CommandServer {
 						    img = ImageIO.read(new File(Settings.framefile));
 						} catch (IOException e) {
 						}	
-						*/
-						
-					//	ImageIO.write(img, "PNG", (ImageOutputStream) out);
-
-						/*
-						FileReader file = new FileReader(Settings.framefile);
-						BufferedReader reader = new BufferedReader(file);
-						String input = null;
-						byte[] bytes = new byte[1024];
-						while(true){
-							
-						
-							input = reader.readLine();
-						
-							if(input == null) break;
-							
-							out.println(input);
-							
-						//while(file.available()>0){
-						
-							//bytes = new byte[1024];
-							//file.read(bytes);
-							//out.w
-							
-						//}
-						
+					
 						}
 						*/
 						out.println("...done...");
@@ -223,16 +193,7 @@ public class CommandServer {
 						port.camCommand("stop");
 					}
 					
-					if(str.equals("bye")) {
-						/*
-						out.close();
-						in.close();
-						clientSocket.close();
-						return;
-						*/ 
-						shutDown();
-						
-					}
+					if(str.equals("bye")) shutDown();
 					
 					if(str.equals("find")) app.dockGrab();	
 					
@@ -245,22 +206,8 @@ public class CommandServer {
 					if(str.equals("home") && docker!=null) Util.dockingTest(app, port, docker);
 										
 					if(str.equals("users")){
-						//String logs = records.toString();
-						//if(logs==null) return;
-						//else System.out.println(logs);
-						
 						out.println("active users: " + records.getActive());
-						out.println(records.toString());
-						
-						/*
-						if(records.getActive()>0){
-							String[] list = records.getActiveList();
-							System.out.println("------------------"+ list.length);
-							for(int i = 0; i < list.length ; i++)
-								System.out.println(i + " " + list[i] + " ");
-							
-						}*/
-						
+						if(records.toString()!=null) out.println(records.toString());
 					}
 				}
 			} catch (Exception e) {
@@ -279,8 +226,8 @@ public class CommandServer {
 			try {
 				// close resources
 				printers.remove(out);
-				//in.close();
-				//out.close();
+				if(in!=null) in.close();
+				if(out!=null) out.close();
 				clientSocket.close();
 			} catch (Exception e) {
 				e.printStackTrace();

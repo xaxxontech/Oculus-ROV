@@ -82,8 +82,6 @@ public class AutoDock implements Docker {
 		}
 		if (cmd[0].equals("go")) {
 			if (state.getBoolean(State.motionenabled)) { 
-				
-				// TODO: ISSUE#6
 				if(state.getBoolean(State.autodocking)){
 					app.message("auto-dock in progress", null, null);
 					return;
@@ -117,27 +115,14 @@ public class AutoDock implements Docker {
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 			
 				if (cmd[4].equals("0")) { // width==0, failed to find target
-					
-				/*
-					if (autodockgrabattempts < 0) { 
-						
-						// TODO: remove this condition if unused
-						// TODO: remove this??
-						
-						// if(debug) new SendMail("Oculus Message", "auto dock fail, line 109 is being used!"); 
-						 System.out.println("line 109... auto dock");
-						// autodockgrabattempts ++;						
-						// app.playerCallServer(PlayerCommands.dockgrab, null);
+				
+					state.set(State.autodocking, false);	
+					state.set(State.docking, false);	
+					state.set(State.losttarget, true);	
+					app.message("auto-dock target not found, try again","multiple", 
+							/*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
+					log.info("target lost");
 
-					} else { 
-					*/	
-						state.set(State.autodocking, false);	
-						state.set(State.docking, false);	
-						state.set(State.losttarget, true);	
-						app.message("auto-dock target not found, try again","multiple", 
-								/*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
-						log.info("target lost");
-//					}
 				}
 				else {
 					//autodockgrabattempts++;
@@ -233,9 +218,6 @@ public class AutoDock implements Docker {
 								counter += 1;
 								if (counter >12) { // failed
 									
-									//TODO: failed, give up... send email??
-									///if(debug) new SendMail("Oculus Message", "auto dock failed, too many attempts: " + counter); 
-									
 									state.set(State.docking, false);
 									state.set(State.timeout, true);
 
@@ -254,7 +236,6 @@ public class AutoDock implements Docker {
 											Thread.sleep(2000);
 											comport.stopGoing();
 											app.dockGrab();
-											/// app.playerCallServer(PlayerCommands.dockgrab, null);
 										} catch (Exception e) { e.printStackTrace(); } } }).start();
 									}
 									break;
@@ -273,7 +254,6 @@ public class AutoDock implements Docker {
 				return;
 			}
 			
-			// System.out.println("...undock called.... in java");
 			state.set(State.motionenabled, true);
 			comport.speedset("fast");
 			comport.goBackward();
@@ -334,7 +314,6 @@ public class AutoDock implements Docker {
 					if(delay==Settings.ERROR) delay = 500;
 					Util.delay(delay);
 					// let deaccelerate
-					
 					app.dockGrab();
 					
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
@@ -370,8 +349,6 @@ public class AutoDock implements Docker {
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
 						app.dockGrab();
-					//	app.playerCallServer(PlayerCommands.dockgrab, null);
-
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 				else { // go only 
@@ -382,8 +359,6 @@ public class AutoDock implements Docker {
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
 						app.dockGrab();
-						//app.playerCallServer(PlayerCommands.dockgrab, null);
-
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 			}
@@ -393,17 +368,11 @@ public class AutoDock implements Docker {
 					comport.clickSteer((x-dockx)*rescomp+" "+(y-120)*rescomp);
 					new Thread(new Runnable() { public void run() { try {
 						Thread.sleep(1500);
-
 						app.dockGrab();
-						//app.playerCallServer(PlayerCommands.dockgrab, null);
-
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
 				else {
-
 					app.dockGrab();
-				//	app.playerCallServer(PlayerCommands.dockgrab, null);
-
 				}
 			}
 		}
@@ -414,7 +383,6 @@ public class AutoDock implements Docker {
 				new Thread(new Runnable() { public void run() { try {
 					Thread.sleep(1500);
 					app.dockGrab();
-					//app.playerCallServer(PlayerCommands.dockgrab, null);
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else {
@@ -433,7 +401,6 @@ public class AutoDock implements Docker {
 						comport.stopGoing();
 						Thread.sleep(500); // let deaccelerate
 						app.dockGrab();
-						// app.playerCallServer(PlayerCommands.dockgrab, null);
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 					log.info("autodock backup");
 				}

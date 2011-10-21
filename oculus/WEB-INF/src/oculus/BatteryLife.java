@@ -223,12 +223,14 @@ public class BatteryLife {
 		while (enumVariant.hasMoreElements()) { 
 			item = enumVariant.nextElement().toDispatch();
 			result[0] = Dispatch.call(item,"EstimatedChargeRemaining").getInt();
-			result [1] = Dispatch.call(item,"BatteryStatus").getInt();
+			result[1] = Dispatch.call(item,"BatteryStatus").getInt();
 		}
 		
 		// update in state for sending to listeners 
 		state.set(State.batterylife, result[0]);
-		state.set(State.batterystatus, result[1]);
+		
+		if(result[1]==1)state.set(State.batterystatus, State.undocked);
+		else if(result[2]==2) state.set(State.batterystatus, State.docked);
 		
 		return result;
 	}

@@ -1,8 +1,5 @@
 package developer.ftp;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import oculus.Application;
 import oculus.Observer;
 import oculus.Settings;
@@ -20,7 +17,7 @@ public class FTPObserver implements Observer {
 	
 	private static Logger log = Red5LoggerFactory.getLogger(FTPObserver.class, "oculus");
 	private State state = State.getReference();
-	private java.util.Timer timer = new Timer();
+	// private java.util.Timer timer = new Timer();
 	private Settings settings = new Settings();
 	private boolean configured = true;
 	private String folderName = null;
@@ -128,6 +125,7 @@ public class FTPObserver implements Observer {
 	}
 
 	/** run on timer */
+	/*
 	private class FtptTask extends TimerTask {
 		
 		@Override
@@ -146,17 +144,10 @@ public class FTPObserver implements Observer {
 		
 			ftpFile("address.php", "http://" + Util.getExternalIPAddress() 
 					+ ":" + settings.readRed5Setting("http.port") + "/oculus/");
-*/
 			
 		}
 	}
 
-	/*
-	@Override
-	public void removed(String key) {
-		System.out.println("...ftp removed: " + key);
-		state.dump();
-	}
-	*/
+*/
 	
 }

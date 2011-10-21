@@ -2,7 +2,6 @@ package oculus;
 
 import java.io.*;
 import java.util.Properties;
-import java.util.Vector;
 
 public class Settings {
 

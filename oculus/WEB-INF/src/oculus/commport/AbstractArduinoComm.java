@@ -22,12 +22,19 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	protected SerialPort serialPort = null;
 	protected InputStream in;
 	protected OutputStream out;
-	public String version = null;
-	public byte[] buffer = new byte[32];
-	public int buffSize = 0;
-	public long lastSent = System.currentTimeMillis();
-	public long lastRead = System.currentTimeMillis();
-	public Settings settings = new Settings();
+	protected String version = null;
+	protected byte[] buffer = new byte[32];
+	protected int buffSize = 0;
+	protected long lastSent = System.currentTimeMillis();
+	protected long lastRead = System.currentTimeMillis();
+	protected Settings settings = new Settings();
+	protected int tempspeed = 999;
+	protected int clicknudgedelay = 0;
+	protected String tempstring = null;
+	protected int tempint = 0;
+	protected volatile boolean isconnected = false;
+	protected Application application = null;
+	
 	public int speedslow = settings.getInteger("speedslow");
 	public int speedmed = settings.getInteger("speedmed");
 	public int camservohoriz = settings.getInteger("camservohoriz");
@@ -47,26 +54,18 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	public int speedfast = 255;
 	public int turnspeed = 255;
 	public int speed = speedfast;
-	public String direction = null;
+	protected String direction = null;
 	public boolean moving = false;
 	public volatile boolean sliding = false;
 	public volatile boolean movingforward = false;
-	public int tempspeed = 999;
-	public int clicknudgedelay = 0;
-	public String tempstring = null;
-	public int tempint = 0;
-	public volatile boolean isconnected = false;
-	public Application application = null;
 
 	public AbstractArduinoComm(Application app) {
 
-		// call back to notify on reset events etc
 		application = app;
 
 		if (state.get(State.serialport) != null) {
 			new Thread(new Runnable() {
 				public void run() {
-
 					connect();
 					Util.delay(SETUP);
 					byte[] cam = { CAM, (byte) camservopos };
@@ -121,6 +120,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}
 	}
 
+	@Override
 	public abstract void connect();
 	
 	@Override
@@ -128,55 +128,9 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		return isconnected;
 	}
 
-	public abstract void execute(); /* {
-		String response = "";
-		for (int i = 0; i < buffSize; i++)
-			response += (char) buffer[i];
-
-		// System.out.println("in: " + response);
-
-		// take action as arduino has just turned on
-		if (response.equals("reset")) {
-
-			// might have new firmware after reseting
-			isconnected = true;
-			version = null;
-			new Sender(GET_VERSION);
-			updateSteeringComp();
-
-		} else if (response.startsWith("version:")) {
-			if (version == null) {
-				// get just the number
-				version = response.substring(response.indexOf("version:") + 8,
-						response.length());
-				application.message("arduinoculus version: " + version, null,
-						null);
-			} else
-				return;
-
-			// don't bother showing watch dog pings to user screen
-		} else if (response.charAt(0) != GET_VERSION[0]) {
-
-			// if sonar enabled will get <sonar back|left|right xxx> as watchdog
-			if (response.startsWith("sonar")) {
-				final String[] param = response.split(" ");
-				final int range = Integer.parseInt(param[2]);
-
-				if (param[1].equals("back")) {
-					if (Math.abs(range - state.getInteger(State.sonarback)) > 1)
-						state.set(State.sonarback, range);
-				} else if (param[1].equals("right")) {
-					if (Math.abs(range - state.getInteger(State.sonarright)) > 1)
-						state.set(State.sonarright, range);
-				}
-
-				// must be an echo
-			} else
-				application.message("arduinoculus: " + response, null, null);
-		}
-	}
-*/
+	public abstract void execute(); 
 	
+	/** */
 	public void manageInput(){
 		try {
 			byte[] input = new byte[32];
@@ -210,25 +164,16 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		return System.currentTimeMillis() - lastSent;
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#getVersion()
-	 */
 	@Override
 	public String getVersion() {
 		return version;
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#getReadDelta()
-	 */
 	@Override
 	public long getReadDelta() {
 		return System.currentTimeMillis() - lastRead;
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#setEcho(boolean)
-	 */
 	@Override
 	public void setEcho(boolean update) {
 		if (update)
@@ -237,9 +182,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			new Sender(ECHO_OFF);
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#reset()
-	 */
 	@Override
 	public void reset() {
 		if (isconnected) {
@@ -293,9 +235,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		lastSent = System.currentTimeMillis();
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#stopGoing()
-	 */
 	@Override
 	public void stopGoing() {
 
@@ -303,34 +242,11 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			application.unmuteROVMic();
 		}
 
-		// TODO: BRAD BREAKING
-		/*
-		 * if(movingforward) {
-		 * 
-		 * 
-		 * new Sender(STOP); new Sender(new byte[] { BACKWARD, (byte)180 });
-		 * Util.delay(40);
-		 * 
-		 * } else {
-		 * 
-		 * 
-		 * 
-		 * 
-		 * }
-		 */
-
-		// nudge("backward");
-		// else nudge("forward");
-
 		new Sender(STOP);
 		moving = false;
 		movingforward = false;
-
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#goForward()
-	 */
 	@Override
 	public void goForward() {
 		new Sender(new byte[] { FORWARD, (byte) speed });
@@ -342,18 +258,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#pollSensor()
-	 */
-	@Override
-	public void pollSensor() {
-		if (sonarEnabled)
-			new Sender(SONAR);
-	}
-
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#goBackward()
-	 */
 	@Override
 	public void goBackward() {
 		new Sender(new byte[] { BACKWARD, (byte) speed });
@@ -365,9 +269,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#turnRight()
-	 */
 	@Override
 	public void turnRight() {
 		int tmpspeed = turnspeed;

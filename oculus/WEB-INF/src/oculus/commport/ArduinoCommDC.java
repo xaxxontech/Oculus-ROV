@@ -56,13 +56,10 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 
 		// take action as arduino has just turned on
 		if (response.equals("reset")) {
-
-			// might have new firmware after reseting
 			isconnected = true;
 			version = null;
 			new Sender(GET_VERSION);
 			updateSteeringComp();
-
 		} else if (response.startsWith("version:")) {
 			if (version == null) {
 				// get just the number
@@ -74,11 +71,4 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 			application.message("oculusDC: " + response, null, null);
 		}
 	}
-
-	/*
-	@Override
-	public String getFirmware() {
-		return Discovery.OCULUS_DC;
-	}*/
-	
 }

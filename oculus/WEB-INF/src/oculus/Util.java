@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -14,52 +13,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.Properties;
-
 import oculus.commport.ArduioPort;
-
 import developer.SendMail;
-
 
 public class Util {
 
 	private static final int PRECISION = 2;
-
-	// private static Settings settings = new Settings();
-	// private final boolean debug = settings.getBoolean(Settings.developer);
-	// private final boolean alerts = settings.getBoolean(Settings.emailalerts);
-    // private static final boolean notify = settings.getBoolean(Settings.loginnotify);
-	
-
-	/**
-	 * @param props is the list of values to send to disk 
-	 * @param path, is the file to write the state value pairs too
-	 */ 
-	public static void writeFile(Properties props, final String path, final String comment){
-		
-		System.out.println("state writing to: " + path);
-	
-		try {
-			
-			FileWriter out = new FileWriter(path);
-			out.append("# "+ comment + "\r\n");
-			Enumeration<Object> keys = props.keys();
-			while(keys.hasMoreElements()){
-				String key = (String) keys.nextElement();
-				String value = (String) props.getProperty(key);
-				
-				System.out.println(key + " " + value);
-				out.write(key + " " + value + "\r\n");
-			}
- 			
-			out.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} 	
-	}
-	
 	
 	/**
 	 * Delays program execution for the specified delay.
@@ -408,13 +367,11 @@ public class Util {
 	 * 
 	 * @param str
 	 * 				is the phrase to turn from text to speech 
-	 
+	 */
 	public static void beep() {
 		systemCall("nircmdc.exe beep 500 1000");
 	}
-	*/
-	
-	
+
 	/** */ 
 	public static void dockingTest(final Application app, final ArduioPort port, final Docker docker) {
 

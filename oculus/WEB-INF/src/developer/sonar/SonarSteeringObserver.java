@@ -1,14 +1,9 @@
 package developer.sonar;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import oculus.Application;
 import oculus.Observer;
-//import oculus.PlayerCommands;
 import oculus.State;
 import oculus.commport.AbstractArduinoComm;
-import oculus.commport.ArduinoCommDC;
 
 /** Stop the robot before hitting the wall */
 public class SonarSteeringObserver implements Observer {
@@ -17,8 +12,7 @@ public class SonarSteeringObserver implements Observer {
 	
 	private static final int TOO_CLOSE = 42; // cm 
 	private State state = State.getReference();
-	private java.util.Timer timer = new Timer();
-	
+	//private java.util.Timer timer = new Timer();
 	// private Settings settings = new Settings();
 	private Application app = null;
 	private AbstractArduinoComm comm = null;
@@ -30,7 +24,7 @@ public class SonarSteeringObserver implements Observer {
 		state.addObserver(this);
 
 		// refresh on timer too
-		timer.scheduleAtFixedRate(new SonarTast(), State.ONE_MINUTE, 1800);
+		// timer.scheduleAtFixedRate(new SonarTast(), State.ONE_MINUTE, 1800);
 	}
 	
 	@Override
@@ -50,18 +44,5 @@ public class SonarSteeringObserver implements Observer {
 				app.message("carefull, sonar is: " + value, null, null);
 			}
 		}
-	}
-
-	/**	 */
-	private class SonarTast extends TimerTask {
-	
-		@Override 
-		public void run() {
-	
-			comm.pollSensor();
-			
-			// System.out.println("poll sonar");
-		
-		} 
 	}
 }

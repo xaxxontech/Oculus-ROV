@@ -55,9 +55,6 @@ public interface ArduioPort {
 	public abstract void goForward();
 
 	/** */
-	public abstract void pollSensor();
-
-	/** */
 	public abstract void goBackward();
 
 	/** */

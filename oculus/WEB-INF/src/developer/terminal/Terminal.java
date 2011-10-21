@@ -12,7 +12,7 @@ public class Terminal {
 	
 		Socket socket = new Socket(ip, Integer.parseInt(port));
 		if(socket != null){
-			// startReader(socket);
+			// 
 			String input = null;
 			BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 			PrintWriter out = new PrintWriter(new BufferedWriter(
@@ -31,6 +31,8 @@ public class Terminal {
 			
 			System.out.println(user + " is logged in.");
 
+			startReader(socket);
+			
 			while (running) {				
 				try {
 	
@@ -38,7 +40,6 @@ public class Terminal {
 					if (input == null) running=false;
 					if (out == null) running=false;
 					if (input.equalsIgnoreCase("bye") || input.equalsIgnoreCase("quit")) running=false;
-
 					out.println(input);
 	
 				} catch (Exception e) {
@@ -69,25 +70,28 @@ public class Terminal {
 				}
 			
 				String input = null;
-			
-				try {
-										
-					input = in.readLine();
-					
-				} catch (IOException e) {
+				while(running){
 					try {
-						in.close();
-					} catch (IOException e1) {
-						System.out.println(e.getMessage());
+											
+						input = in.readLine();
+						
+					} catch (IOException e) {
+						
+						/*
+						try {
+							in.close();
+						} catch (IOException e1) {
+							System.out.println(e.getMessage());
+						}
+						*/
+						
+						// return;
+						// System.exit(-1);
 					}
-
-					// return;
-					System.exit(-1);
-				}
-
-				if (input == null) System.exit(-1);
-				else System.out.println(input);
 				
+					System.out.println(input);
+					
+				}
 			}
 		}).start();
 	}
@@ -98,8 +102,6 @@ public class Terminal {
 		String[] cmd = new String[args.length-4];
 		for(int i = 0 ; i < (args.length-4); i++)
 			cmd[i] = args[i+4];
-		
-		// Terminal terminal = 
 		
 		new Terminal(args[0], args[1], args[2], args[3], cmd);
 		

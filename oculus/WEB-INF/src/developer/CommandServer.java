@@ -5,32 +5,33 @@ import java.net.*;
 import java.util.Vector;
 
 import oculus.Application;
+import oculus.BatteryLife;
 import oculus.Docker;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
 import oculus.Settings;
+import oculus.Updater;
 import oculus.Util;
 import oculus.commport.ArduioPort;
 
 /**
- * Start the chat server. Start new threads for a each connection on the given
- * port
+ * Start the chat server. Start new threads for a each connection on the given port
  * 
  * Created: 2007.11.3
  * 
- * @author Brad Zdanivsky
  */
 public class CommandServer {
 	
+	private static BatteryLife battery = BatteryLife.getReference();
 	private static Docker docker = null;
 	private static ArduioPort port = null;
 	private static Application app = null;
-	//private static State state = State.getReference();
 	private static oculus.Settings settings = new Settings(); 
 	private static ServerSocket serverSocket = null; 
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static LoginRecords records = new LoginRecords();
+	private String user = null;
 
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread implements Observer {
@@ -41,26 +42,29 @@ public class CommandServer {
 		private PrintWriter out = null;
 
 		public ConnectionHandler(Socket socket) {
-			super();
+		
 			clientSocket = socket;
+			
 			try {
+			
 				in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 				out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
+			
 			} catch (IOException e) {
+				
 				System.out.println("fail aquire tcp streams: " + e.getMessage());
+				
 				try {
 					
-					in.close();
-					out.close();
-					clientSocket.close();
-					clientSocket = null;
+					if(in!=null) in.close();
+					if(out!=null) out.close();
+					if(clientSocket!=null) clientSocket.close();
 					
 				} catch (IOException e1) {
 					System.out.println(e1.getMessage());
 					return;
 				}
 
-				clientSocket = null;
 				return;
 			}
 
@@ -68,7 +72,7 @@ public class CommandServer {
 			try {
 				
 				final String salted = in.readLine();
-				final String user = salted.substring(0, salted.indexOf(':'));
+				user = salted.substring(0, salted.indexOf(':'));
 				final String pass = salted.substring(salted.indexOf(':')+1, salted.length());
 				
 				sendToGroup(clientSocket.getInetAddress() + " attempt by " + user);
@@ -76,22 +80,21 @@ public class CommandServer {
 				if(app.logintest(user, pass)==null){
 					sendToGroup("login failure: " + user);
 					out.println("login fail -- please drop dead");
-					out.flush();
 					out.close();
 					clientSocket.close();
 					return;
 				}
 		
 				// tell new user what is up 
-				out.println(state.toString());
+				out.println("oculus version " + new Updater().getCurrentVersion() + " ready"); 
 				app.message("tcp connection " + user + clientSocket.getInetAddress(), null, null);
 
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 				try {
-					if(in!=null)in.close();
-					if(out!=null)out.close();
-					clientSocket.close();
+					if(in!=null) in.close();
+					if(out!=null) out.close();
+					if(clientSocket!=null) clientSocket.close();
 					return;
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
@@ -109,8 +112,8 @@ public class CommandServer {
 		@Override
 		public void run() {
 			
-			System.out.println(clientSocket.getInetAddress() + " connected");
-			sendToGroup(clientSocket.getInetAddress() + " connected");
+			System.out.println(user+ clientSocket.getInetAddress() + " connected");
+			sendToGroup(user + clientSocket.getInetAddress() + " connected");
 			sendToGroup(printers.size() + " tcp connections active");
 			
 			try {
@@ -118,6 +121,13 @@ public class CommandServer {
 				// loop on input from the client
 				while (true) {
 
+					// been closed ?
+					if(out.checkError()) {
+						System.out.println("output stream is closed, close.");
+						shutDown();
+						return;
+					}
+					
 					// blocking read from the client stream up to a '\n'
 					String str = in.readLine();
 
@@ -146,23 +156,11 @@ public class CommandServer {
 					if(str.equals("image")) {
 						
 						app.frameGrab();
-						// state.dump();
-
-						while(app.framgrabbusy){//state.getBoolean("busy")){
-							out.println("waiting....");
-							Util.delay(100);
+						while(app.framgrabbusy){
+							// out.println("waiting....");
+							Util.delay(500);
 						}
 
-						//ImageIO.writ.framefile,"png" out);
-						/*
-						BufferedImage img = null;
-						try {
-						    img = ImageIO.read(new File(Settings.framefile));
-						} catch (IOException e) {
-						}	
-					
-						}
-						*/
 						out.println("...done...");
 						System.out.println("...done...");
 					}
@@ -195,7 +193,11 @@ public class CommandServer {
 					
 					if(str.equals("bye")) shutDown();
 					
+					// if(str.equals("kill")) killGroup();
+					
 					if(str.equals("find")) app.dockGrab();	
+					
+					if(str.equals("battery")) battery.battStats();
 					
 					if(str.startsWith("state")) out.println(state.toString());
 										
@@ -211,7 +213,7 @@ public class CommandServer {
 					}
 				}
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				//System.out.println(e.getMessage());
 				shutDown();
 			}
 		}
@@ -259,14 +261,23 @@ public class CommandServer {
 			} else pw.println(str);
 		}
 	}
+
+	/** kill all the clients currently connected 
+	public void killGroup() {
+		for (int c = 0; c < printers.size(); c++) 
+			printers.get(c).close();
 		
+		printers.clear();
+		System.out.println("kill all...");
+	}*/
+	
 	public void chat(String str){
 		sendToGroup(str);
 	}
 	
 	public void setDocker(Docker d) {
 		docker = d;
-		System.out.println("CommandManager: new docker created.... ");
+		///System.out.println("CommandManager: new docker created.... ");
 	}
 	
 	/** */
@@ -280,7 +291,7 @@ public class CommandServer {
 		app = a;
 		port = p;
 		
-		/** register shutdown hook */
+		/** register shutdown hook 
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -291,13 +302,14 @@ public class CommandServer {
 					e.printStackTrace();
 				}
 			}
-		}));
+		}));*/
 		
 		// do long time
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while(true)
+				// while(true)
+					battery.battStats();
 					go();
 			}
 		}).start();
@@ -321,9 +333,7 @@ public class CommandServer {
 			try {
 
 				// new user has connected
-				Socket socket = serverSocket.accept();
-				System.out.println("server: connection accepted [" + socket + "]");
-				new ConnectionHandler(socket);
+				new ConnectionHandler(serverSocket.accept());
 
 			} catch (Exception e) {
 				

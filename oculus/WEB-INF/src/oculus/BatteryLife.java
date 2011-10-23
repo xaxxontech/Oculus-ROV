@@ -109,6 +109,7 @@ public class BatteryLife {
 					if (s == 1) {
 						status = "draining";
 						str = "battery " + life + "%," + status;
+						state.set(State.batterystatus, status);
 						if (!state.getBoolean(State.motionenabled)) {
 							state.set(State.motionenabled, true);
 							str += " motion enabled";
@@ -132,7 +133,10 @@ public class BatteryLife {
 							str += " dock docked";
 						}
 						app.message(null, "multiple", str);
-					}
+						state.set(State.batterystatus, "charging");
+					}						
+				
+					state.set(State.batterylife, life);
 				}
 			}
 		}).start();
@@ -225,12 +229,6 @@ public class BatteryLife {
 			result[0] = Dispatch.call(item,"EstimatedChargeRemaining").getInt();
 			result[1] = Dispatch.call(item,"BatteryStatus").getInt();
 		}
-		
-		// update in state for sending to listeners 
-		state.set(State.batterylife, result[0]);
-		
-		if(result[1]==1)state.set(State.batterystatus, State.undocked);
-		else if(result[2]==2) state.set(State.batterystatus, State.docked);
 		
 		return result;
 	}

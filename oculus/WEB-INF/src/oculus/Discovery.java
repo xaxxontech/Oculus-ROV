@@ -21,9 +21,9 @@ public class Discovery {
 	public static final int FLOWCONTROL = SerialPort.FLOWCONTROL_NONE;
 
 	/* add known devices here, strings returned from the firmware */
-	public static final String OCULUS_SONAR = "<id:oculusSonar>";
-	public static final String OCULUS_DC = "<id:oculusDC>";
-	public static final String LIGHTS = "<id:oculusLights>";
+	public static final String OCULUS_SONAR = "id:oculusSonar";
+	public static final String OCULUS_DC = "id:oculusDC";
+	public static final String LIGHTS = "id:oculusLights";
 	public static final long RESPONCE_DELAY = 300;
 
 	/* reference to the underlying serial port */
@@ -112,6 +112,9 @@ public class Discovery {
 				Util.delay(TIMEOUT);
 				
 				String id = getProduct();
+				// trim delimiters "<xxxxx>"
+				id = id.substring(1, id.length()-1);
+				
 				if (id.equalsIgnoreCase(LIGHTS)) {
 
 					state.set(State.lightport, ports.get(i));
@@ -119,7 +122,7 @@ public class Discovery {
 				} else if (id.equalsIgnoreCase(OCULUS_DC)) {
 
 					state.set(State.serialport, ports.get(i));
-					state.set(State.firmware, OCULUS_SONAR);
+					state.set(State.firmware, OCULUS_DC);
 
 				} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
 

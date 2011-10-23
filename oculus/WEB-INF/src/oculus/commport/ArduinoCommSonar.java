@@ -1,5 +1,6 @@
 package oculus.commport;
 
+import developer.SendMail;
 import oculus.Application;
 import oculus.State;
 import oculus.Util;
@@ -12,7 +13,7 @@ import gnu.io.SerialPortEventListener;
 public class ArduinoCommSonar extends AbstractArduinoComm implements
 		SerialPortEventListener, ArduioPort {
 
-	public static final int SONAR_DELAY = 1300;
+	public static final int SONAR_DELAY = 700;
 
 	public ArduinoCommSonar(Application app) {
 		super(app);
@@ -32,8 +33,12 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 			while (true) {
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
+					
 					log.error("arduino watchdog time out");
-					return; // die, no point living?
+					new SendMail("oculus debug", "sonar port, saying watch doging..");
+					Util.beep();
+					
+					// return; // die, no point living?
 				}
 
 				if (getReadDelta() > SONAR_DELAY) {
@@ -80,10 +85,11 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 				final String[] param = response.split(" ");
 				final int range = Integer.parseInt(param[2]);
 
-				if (param[1].equals("back")) {
-					if (Math.abs(range - state.getInteger(State.sonarback)) > 1)
-						state.set(State.sonarback, range);
-				} else if (param[1].equals("right")) {
+				//if (param[1].equals("back")) {
+				//	if (Math.abs(range - state.getInteger(State.sonarback)) > 1)
+				//		state.set(State.sonarback, range);
+				//} else 
+				if (param[1].equals("right")) {
 					if (Math.abs(range - state.getInteger(State.sonarright)) > 1)
 						state.set(State.sonarright, range);
 				}

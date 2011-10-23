@@ -315,7 +315,8 @@ public class AutoDock implements Docker {
 					Util.delay(delay);
 					// let deaccelerate
 					app.dockGrab();
-					
+					Thread.sleep(500);
+
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
 			else { // go only 

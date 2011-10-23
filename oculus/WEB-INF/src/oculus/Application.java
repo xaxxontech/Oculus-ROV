@@ -238,9 +238,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	
 		light = new LightsComm(this);
-		
-		System.out.println(state.toString());
-
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 		new SystemWatchdog();
@@ -250,6 +247,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			moves.open(Settings.movesfile);
 			
 			// TODO: Brad added, removable with single comment line here 
+			// moving this all to cmd server, external proc 
 			new developer.DockingObserver(this);
 			new developer.sonar.SonarSteeringObserver(this, comport);
 			//new developer.ftp.FTPObserver(this);
@@ -1264,8 +1262,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// read setting every time in case settings changed by client
 		if (settings.getBoolean(Settings.loginnotify)) 
 			speech.mluv("lawg inn " + state.get(State.user));
-
-		System.out.println("...after assumeControl(): " + loginrecords);
+		
 	}
 
 	/** */ 
@@ -1292,7 +1289,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 		//TODO: brad
 		loginrecords.bePassenger();
-		System.out.println("....after bePassenger(): " + loginrecords);
 	}
 
 	private void playerBroadCast(String str) {

@@ -6,7 +6,6 @@ import java.io.OutputStream;
 
 import oculus.Application;
 import oculus.FactorySettings;
-import oculus.OptionalSettings;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
@@ -45,7 +44,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	public int maxclickcam = settings.getInteger("maxclickcam");
 	public double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 	public int steeringcomp = settings.getInteger("steeringcomp");
-	public boolean sonarEnabled = settings.getBoolean(OptionalSettings.sonarenabled.toString());
 	public boolean holdservo = settings.getBoolean(FactorySettings.holdservo.toString());
 	public int camservodirection = 0;
 	public int camservopos = camservohoriz;

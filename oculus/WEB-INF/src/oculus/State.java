@@ -313,6 +313,11 @@ public class State {
 		if(b) props.put(key, "true");
 		else props.put(key, "false");
 	}
+	
+	/** */
+	public synchronized boolean exists(String key) {
+		return props.contains(key);
+	}
 
 	/** */ 
 	public synchronized void delete(String key) {
@@ -320,7 +325,18 @@ public class State {
 		for(int i = 0 ; i < observers.size() ; i++)
 			observers.get(i).updated(key);	
 	}
+
+	public void delete(PlayerCommands cmd) {
+		delete(cmd.toString());
+	}
+
+	public void set(PlayerCommands cmd, String str) {
+		set(cmd.toString(), str);
+	}
 	
+	public String get(PlayerCommands cmd){ //, String str) {
+		return get(cmd.toString()); // , str);
+	}
 
 	//  public static final String enable = "enable";
     //	public static final String disable = "disable";

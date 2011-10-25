@@ -4,13 +4,17 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
+import org.jasypt.util.password.ConfigurablePasswordEncryptor;
+
 import oculus.Application;
 import oculus.BatteryLife;
 import oculus.Docker;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
+import oculus.PlayerCommands;
 import oculus.Settings;
+import oculus.State;
 import oculus.Updater;
 import oculus.Util;
 import oculus.commport.ArduioPort;
@@ -33,7 +37,9 @@ public class CommandServer {
 	private static ServerSocket serverSocket = null; 
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static LoginRecords records = new LoginRecords();
-	private String user = null;
+	
+	
+	//private String user = null;
 
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread implements Observer {
@@ -73,23 +79,38 @@ public class CommandServer {
 			// first thing better be user:pass
 			try {
 				
-				final String salted = in.readLine();
-				user = salted.substring(0, salted.indexOf(':'));
-				final String pass = salted.substring(salted.indexOf(':')+1, salted.length());
+				final String inputstr = in.readLine();
+				final String user = inputstr.substring(0, inputstr.indexOf(':')).trim();
+				final String pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
 				
 				sendToGroup(clientSocket.getInetAddress() + " attempt by " + user);
 
 				if(app.logintest(user, pass)==null){
-					sendToGroup("login failure: " + user);
-					out.println("login fail -- please drop dead");
-					out.close();
-					clientSocket.close();
-					return;
+					
+					// was plain text password?
+					System.out.println("plain text pawwsord sent from: " + clientSocket.getInetAddress());
+				    ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
+					passwordEncryptor.setAlgorithm("SHA-1");
+					passwordEncryptor.setPlainDigest(true);
+					String encryptedPassword = (passwordEncryptor
+							.encryptPassword( user + settings.readSetting("salt") + pass)).trim();
+					
+					if(app.logintest(user, encryptedPassword)==null){
+						sendToGroup("login failure : " + user);
+						out.println("login failure, please drop dead");
+						out.close();
+						new Exception("login failure");
+						
+						//out.close();
+						//clientSocket.close();
+						//return;
+					}
 				}
 		
 				// tell new user what is up 
-				out.println("oculus version " + new Updater().getCurrentVersion() + " ready"); 
-				app.message("tcp connection " + user + clientSocket.getInetAddress(), null, null);
+				out.println("oculus version : " + new Updater().getCurrentVersion() + " ready"); 
+				
+				// app.message("tcp connection " + user + clientSocket.getInetAddress(), null, null);
 
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
@@ -114,8 +135,8 @@ public class CommandServer {
 		@Override
 		public void run() {
 			
-			System.out.println(user+ clientSocket.getInetAddress() + " connected");
-			sendToGroup(user + clientSocket.getInetAddress() + " connected");
+			// System.out.println(user+ clientSocket.getInetAddress() + " connected");
+			// sendToGroup(user + clientSocket.getInetAddress() + " connected");
 			sendToGroup(printers.size() + " tcp connections active");
 			
 			try {
@@ -125,7 +146,7 @@ public class CommandServer {
 
 					// been closed ?
 					if(out.checkError()) {
-						System.out.println("output stream is closed, close.");
+						System.out.println("...output stream is closed, close.");
 						shutDown();
 						return;
 					}
@@ -134,88 +155,17 @@ public class CommandServer {
 					String str = in.readLine();
 
 					// client is terminating?
-					if (str == null) {
-						shutDown();
-						break;
-					}
-						
+					if (str == null) break;
+					
+					// parse and run it 
 					str = str.trim();
 					System.out.println("address [" + clientSocket + "] message [" + str + "]");
-					app.message(clientSocket.getInetAddress() + " " + str, null, null);
-			
-					if(str.equals("factory")) app.factoryReset();
+					// app.message(clientSocket.getInetAddress() + " " + str, null, null);
+					manageCommand(str);
 					
-					if(str.equals("tcp")) out.println("tcp connections: " + printers.size());
-
-					if(str.equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
-					
-					if(str.equals("restart")) app.restart();
-					
-					if(str.startsWith("stop")) port.stopGoing();
-
-					if(str.equals("settings")) out.println(settings.toString());
-					
-					if(str.equals("image")) {
-						
-						app.frameGrab();
-						while(app.framgrabbusy){
-							// out.println("waiting....");
-							Util.delay(500);
-						}
-
-						out.println("...done...");
-						System.out.println("...done...");
-					}
-					
-					if(str.startsWith("nudge")){
-						String[] cmd = str.split(" ");
-						port.nudge(cmd[1]);
-					}
-					
-					if(str.startsWith("state")){
-						String[] cmd = str.split(" ");
-						if(cmd.length==3) state.set(cmd[1], cmd[2]);
-					}
-					
-					if(str.startsWith("move")){
-						String[] cmd = str.split(" ");
-						if(cmd[1].equals("forward")) port.goForward();
-						else if(cmd[1].equals("backwards")) port.goBackward();
-						else if(cmd[1].equals("left")) port.turnLeft();
-						else if(cmd[1].equals("right")) port.turnRight();
-					}
-					
-					if(str.equals("publish")){
-						app.publish("camera");
-						port.camHoriz();
-						port.camCommand("down");
-						Util.delay(1500);
-						port.camCommand("stop");
-					}
-					
-					if(str.equals("bye")) shutDown();
-					
-					// if(str.equals("kill")) killGroup();
-					
-					if(str.equals("find")) app.dockGrab();	
-					
-					if(str.equals("battery")) battery.battStats();
-					
-					if(str.startsWith("state")) out.println(state.toString());
-										
-					if(str.equals("dock") && docker!=null) docker.autoDock("go");
-					
-					if(str.equals("undock") && docker!=null) docker.dock("undock");
-					
-					if(str.equals("home") && docker!=null) Util.dockingTest(app, port, docker);
-										
-					if(str.equals("users")){
-						out.println("active users: " + records.getActive());
-						if(records.toString()!=null) out.println(records.toString());
-					}
 				}
 			} catch (Exception e) {
-				//System.out.println(e.getMessage());
+				System.out.println(e.getMessage());
 				shutDown();
 			}
 		}
@@ -232,7 +182,7 @@ public class CommandServer {
 				printers.remove(out);
 				if(in!=null) in.close();
 				if(out!=null) out.close();
-				clientSocket.close();
+				if(clientSocket!=null) clientSocket.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 				return;
@@ -245,13 +195,142 @@ public class CommandServer {
 		}
 
 		@Override
+		/** send to socket on state change */ 
 		public void updated(String key) {
 			String value = state.get(key);
-			if(value==null) out.println(key + " was deleted");
-			else out.println(key + " : " + value);
+			if(value==null) out.println("deleted " + SEPERATOR + key);
+			else out.println(key + SEPERATOR + value);
+		}
+		
+		/** try to parse, look up, exec comand */
+		public void playerCommand(final String str){
+			final String[] cmd = str.split(" ");
+			PlayerCommands ply = null;
+			try {
+				ply = PlayerCommands.valueOf(cmd[0]);
+			} catch (Exception e) {
+				System.out.println("Command Server, command not found:" + str);
+				return;
+			}
+			if(ply!=null){
+				
+				// TODO: COLIN, ASK.... 
+				System.out.println(".. cmd server, plyer cmd: " + cmd[0]);
+			
+				app.playerCallServer(ply, str);
+
+
+				switch (ply) {
+				
+				case dockgrab: app.dockGrab(); break;
+				
+				case writesetting: 
+					System.out.println("write setting: " + str);
+					if(settings.readSetting(cmd[0]) == null) {
+						settings.newSetting(cmd[0], cmd[1]);
+					} else {
+						settings.writeSettings(cmd[0], cmd[1]);
+					}
+					settings.writeFile();
+					break;
+						
+				case publish:
+					app.publish(str);
+					break;
+					
+
+				// case disconnectotherconnections: app.disconnectOtherConnections(); break;
+				case monitor: app.monitor(str); break;
+				// case showlog: app.showlog(); break;
+				case autodock: docker.autoDock(str); break;
+				// case autodockcalibrate: docker.autoDock("calibrate " + str); break;
+				case restart: app.restart(); break;
+				// case softwareupdate: app.softwareUpdate(str); break;
+				}
+				
+				
+				//if(str.equals("restart")) app.restart();
+				
+			}
+		}
+		
+		/** add extra commands, macros here */ 
+		public void manageCommand(final String str){
+
+			// try player commands first 
+			playerCommand(str);
+			
+			// do exta commands below 
+			final String[] cmd = str.split(" ");
+			
+			///if(str.equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
+			
+			//if(str.equals("restart")) app.restart();
+			
+			///if(str.startsWith("stop")) port.stopGoing();
+	
+			if(str.equals("settings")) out.println(settings.toString());
+			
+			if(str.equals("image")) {
+				
+				app.frameGrab();
+				while(app.framgrabbusy){
+					// out.println("waiting....");
+					Util.delay(500);
+				}
+	
+				out.println("...done...");
+				System.out.println("...done...");
+			}
+			
+			if(str.startsWith("nudge")) port.nudge(cmd[1]);
+			
+			/*
+			if(str.startsWith("move")){
+				if(cmd[1].equals("forward")) port.goForward();
+				else if(cmd[1].equals("backwards")) port.goBackward();
+				else if(cmd[1].equals("left")) port.turnLeft();
+				else if(cmd[1].equals("right")) port.turnRight();
+			}*/
+			
+			if(str.equals("cam")){
+				app.publish("camera");
+				port.camHoriz();
+				port.camCommand("down");
+				Util.delay(1500);
+				port.camCommand("stop");
+			}
+			
+			if(str.equals("bye")) shutDown();
+						
+			if(str.equals("find")) app.dockGrab();	
+			
+			if(str.equals("battery")) battery.battStats();
+								
+			if(str.equals("dock") && docker!=null) docker.autoDock("go");
+			
+			if(str.equals("undock") && docker!=null) docker.dock("undock");
+									
+			if(str.equals("beep")) Util.beep();
+				
+			if(str.equals("beep")) Util.beep();
+			
+			if(str.equals("tcp")) out.println("tcp connections : " + printers.size());
+	
+			if(str.equals("users")){
+				out.println("active users : " + records.getActive());
+				if(records.toString()!=null) out.println(records.toString());
+			}
+
+			if(str.equals("settings")) out.println(settings.toString());
+
+			if(str.startsWith("state")) {
+				if(cmd.length==3) state.set(cmd[1], cmd[2]);
+				else out.println(state.toString());
+			}		
 		}
 	}
-		
+	
 	/** send input back to all the clients currently connected */
 	public void sendToGroup(String str) {
 		PrintWriter pw = null;
@@ -263,22 +342,10 @@ public class CommandServer {
 			} else pw.println(str);
 		}
 	}
-
-	/** kill all the clients currently connected 
-	public void killGroup() {
-		for (int c = 0; c < printers.size(); c++) 
-			printers.get(c).close();
-		
-		printers.clear();
-		System.out.println("kill all...");
-	}*/
-	
-	public void chat(String str){
-		sendToGroup(str);
-	}
 	
 	public void setDocker(Docker d) {
 		docker = d;
+		// this gets called often 
 		///System.out.println("CommandManager: new docker created.... ");
 	}
 	
@@ -293,7 +360,7 @@ public class CommandServer {
 		app = a;
 		port = p;
 		
-		/** register shutdown hook 
+		/** register shutdown hook */ 
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -304,15 +371,16 @@ public class CommandServer {
 					e.printStackTrace();
 				}
 			}
-		}));*/
+		}));
 		
 		// do long time
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				// while(true)
+				while(true) {
 					battery.battStats();
 					go();
+				}
 			}
 		}).start();
 	}
@@ -330,7 +398,6 @@ public class CommandServer {
 		System.out.println("listening with socket [" + serverSocket + "] ");
 		
 		// serve new connections until killed
-		
 		while (true) {
 			try {
 
@@ -338,15 +405,15 @@ public class CommandServer {
 				new ConnectionHandler(serverSocket.accept());
 
 			} catch (Exception e) {
-				
-				System.out.println("failed to open client socket: " + e.getMessage());
-				
 				try {				
 					serverSocket.close();
 				} catch (IOException e1) {
 					System.out.println("failed to open client socket: " + e1.getMessage());
 					return;					
-				}				
+				}	
+				
+				System.out.println("failed to open client socket: " + e.getMessage());
+				Util.delay(State.ONE_MINUTE);
 			}
 		}
 	}

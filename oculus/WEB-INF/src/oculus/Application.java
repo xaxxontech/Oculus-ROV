@@ -183,7 +183,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 
 		// eliminate any other grabbers
-		//int i = 0;
 		Collection<Set<IConnection>> concollection = getConnections();
 		for (Set<IConnection> cc : concollection) {
 			for (IConnection con : cc) {
@@ -191,9 +190,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 						&& con != player
 						&& (con.getRemoteAddress()).equals("127.0.0.1")) {
 							con.close();
-		//					i++;
-		// TODO: NOT USED?
-							
 				}
 			}
 		}
@@ -231,27 +227,28 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new Discovery();
 		
 		// create matching class based on firmware 
-//		if(state.get(State.firmware).equals(Discovery.OCULUS_DC)){
-		comport = new ArduinoCommDC(this);
-//		} else if(state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
-//			comport = new ArduinoCommSonar(this);
-//		}
+		if(state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
+			comport = new ArduinoCommSonar(this);
+		} else comport = new ArduinoCommDC(this);
 	
 		light = new LightsComm(this);
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 		new SystemWatchdog();
 		
-		if (settings.getBoolean(State.developer)){
+		if(settings.readSetting(OptionalSettings.commandport)!=null)
 			commandServer = new developer.CommandServer(this, comport);
+
+		if (settings.getBoolean(State.developer)){
 			moves.open(Settings.movesfile);
 			
 			// TODO: Brad added, removable with single comment line here 
 			// moving this all to cmd server, external proc 
-			new developer.DockingObserver(this);
+			// new developer.DockingObserver(this);
 			new developer.sonar.SonarSteeringObserver(this, comport);
 			//new developer.ftp.FTPObserver(this);
 			new developer.EmailAlerts(this);
+			
 		}
 		
 		Util.setSystemVolume(settings.getInteger(Settings.volume));
@@ -427,18 +424,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 * @param fn to call in flash player [file name].swf
 	 * @param str is the argument string to pass along 
 	 */
-	private void playerCallServer(final PlayerCommands fn, final String str) {
+	public void playerCallServer(final PlayerCommands fn, final String str) {
 
-		if(state.getBoolean(State.developer))
-			if(!fn.equals(PlayerCommands.statuscheck))
-				System.out.println("playerCallServer(): " + fn + " " + str);
+		//if(state.getBoolean(State.developer))
+		//	if(!fn.equals(PlayerCommands.statuscheck))
+		//		System.out.println("playerCallServer(): " + fn + " " + str);
 		
 		switch (fn) {	
 		case chat: chat(str); return;
 		case beapassenger: beAPassenger(str); return;
 		case assumecontrol: assumeControl(str); return;
-	// TODO : remove from java script
-	//	case docktest: commandManager.dockingTest(); return;
 		}
 
 		// must be driver/non-passenger for all commands below 
@@ -448,13 +443,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 
 		switch (fn) {
-		
-		case dockgrab: dockGrab();
-			/*if (grabber instanceof IServiceCapableConnection) {
-				IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-				sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
-			}*/
-			break;
 		
 		case writesetting: 
 			System.out.println("setting: " + str);
@@ -469,11 +457,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeFile();
 			break;
 				
-		case publish:
-			// System.out.println("publish:  " + str);
-			publish(str);
-			break;
-	
 		case speedset:
 			comport.speedset(str);
 			messageplayer("speed set: " + str, "speed", str.toUpperCase());
@@ -495,25 +478,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 	
 			case systemcall:
-			//	if(admin){
 					System.out.println("received: " + str);
 					messageplayer("system command received", null, null);
 					Util.systemCall(str);
-			//	}
 				break;
 	
 			case relaunchgrabber:
-				//if (admin) {
 					grabber_launch();
 					messageplayer("relaunching grabber", null, null);
-				//}
 				break;
 	
 			case docklineposupdate:
-				//if (admin) {
 					settings.writeSettings("vidctroffset", str);
 					messageplayer("vidctroffset set to : " + str, null, null);
-				// }
 				break;
 	
 			case arduinoecho:
@@ -556,6 +533,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			case disconnectotherconnections: disconnectOtherConnections(); break;
 			case monitor: monitor(str); break;
 			case showlog: showlog(); break;
+			case dockgrab: dockGrab(); break;
+			case publish: publish(str); break;
 			case autodock: docker.autoDock(str); break;
 			case autodockcalibrate: docker.autoDock("calibrate " + str); break;
 			case restart: restart(); break;
@@ -645,8 +624,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			restart();
 			break;
 		}
-
-
 	}
 
 	private void grabberSetStream(String str) {
@@ -660,6 +637,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		if (str.equals("stop") || str.equals("mic")) {
 			if(comport!=null && comport.holdservo) comport.releaseCameraServo();
+			state.delete(PlayerCommands.publish);
 		}
 		
 		// messageplayer("streaming "+str,"stream",stream);
@@ -712,6 +690,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("publish", new Object[] { str, width, height, fps, quality });
 				// messageGrabber("stream "+str);
 				messageplayer("command received: publish " + str, null, null);
+				state.set(PlayerCommands.publish, str);
 			}
 		} catch (NumberFormatException e) {
 			System.out.println("publish() " + e.getMessage());
@@ -755,12 +734,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** */
 	public void frameGrab(){
-		//state.set("frameGrabBusy", true);
-		
-		if(framgrabbusy){ // framegstate.getBoolean("framgrabbusy"){
+	
+		/*
+		if(framgrabbusy){ 
 			System.out.println("...still waiting for a result from framegrab");
 			return;
 		}
+		*/
 		
 		if (grabber instanceof IServiceCapableConnection) {
 			framgrabbusy = true;
@@ -811,16 +791,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		// toggle flag
-		//TODO: brad
-		// message(null, "done frame grab", null);
-		
-		/*
-		System.out.println("----- done grab ------------");
-		state.dump();
-		state.set("busy", false);
-		state.dump();
-		*/
-		
 		framgrabbusy = false;
 		
 	}
@@ -1529,7 +1499,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		log.info("(chat) " + str);
 		messageGrabber("<CHAT>" + str, null);
-		commandServer.chat(str);
+		if(commandServer!=null) commandServer.sendToGroup(str);
 	}
 
 	private void showlog() {
@@ -1692,67 +1662,58 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageGrabber(result, null);
 	}
 
-	private void softwareUpdate(String str) {
-		
-		System.out.println("sw: " + str);
+	public void softwareUpdate(String str) {
 	
-		//if (admin) {
-			if (str.equals("check")) {
-				messageplayer("checking for new software...", null, null);
-				Updater updater = new Updater();
-				int currver = updater.getCurrentVersion();
-				String fileurl = updater.checkForUpdateFile();
-				int newver = updater.versionNum(fileurl);
-				if (newver > currver) {
-					String message = "New version available: v." + newver + "\n";
-					if (currver == -1) {
-						message += "Current software version unknown\n";
-					} else {
-						message += "Current software is v." + currver + "\n";
-					}
-					message += "Do you want to download and install?";
-					messageplayer("new version available", "softwareupdate", message);
+		if (str.equals("check")) {
+			messageplayer("checking for new software...", null, null);
+			Updater updater = new Updater();
+			int currver = updater.getCurrentVersion();
+			String fileurl = updater.checkForUpdateFile();
+			int newver = updater.versionNum(fileurl);
+			if (newver > currver) {
+				String message = "New version available: v." + newver + "\n";
+				if (currver == -1) {
+					message += "Current software version unknown\n";
 				} else {
-					messageplayer("no new version available", null, null);
+					message += "Current software is v." + currver + "\n";
 				}
+				message += "Do you want to download and install?";
+				messageplayer("new version available", "softwareupdate", message);
+			} else {
+				messageplayer("no new version available", null, null);
 			}
-			if (str.equals("download")) {
-				messageplayer("downloading software update...", null, null);
-				new Thread(new Runnable() {
-					public void run() {
-						String fileurl = new Updater().checkForUpdateFile();
-						System.out.println("downloading url: " + fileurl);
-						Downloader dl = new Downloader();
-						if (dl.FileDownload(fileurl, "update.zip", "download")) {
-							messageplayer("update download complete, unzipping...", null, null);
-							if (dl.unzipFolder("download\\update.zip", "webapps")) 
-								messageplayer("done.", "softwareupdate", "downloadcomplete");
-							
-							// Util.delay(1000);
-							dl.deleteFile("download\\update.zip");
-							
-						} else { messageplayer("update download failed", null, null); }
-					}
-				}).start();
-			}
-			if (str.equals("versiononly")) {
-				int currver = new Updater().getCurrentVersion();
-				String msg = "";
-				if (currver == -1) msg = "version unknown";
-				else msg = "version: v." + currver; 
-				messageplayer(msg, null, null);
-			}
-	//	}
+		}
+		if (str.equals("download")) {
+			messageplayer("downloading software update...", null, null);
+			new Thread(new Runnable() {
+				public void run() {
+					String fileurl = new Updater().checkForUpdateFile();
+					System.out.println("downloading url: " + fileurl);
+					Downloader dl = new Downloader();
+					if (dl.FileDownload(fileurl, "update.zip", "download")) {
+						messageplayer("update download complete, unzipping...", null, null);
+						if (dl.unzipFolder("download\\update.zip", "webapps")) 
+							messageplayer("done.", "softwareupdate", "downloadcomplete");
+						
+						// Util.delay(1000);
+						dl.deleteFile("download\\update.zip");
+						
+					} else { messageplayer("update download failed", null, null); }
+				}
+			}).start();
+		}
+		if (str.equals("versiononly")) {
+			int currver = new Updater().getCurrentVersion();
+			String msg = "";
+			if (currver == -1) msg = "version unknown";
+			else msg = "version: v." + currver; 
+			messageplayer(msg, null, null);
+		}
 	}
 	
-	
-	
-	//
-	// TODO: use input string to create different types of config files?/?
-	//
 	public void factoryReset(){
 				
-		final String backup = Settings.filename + "bak";
+		final String backup = Settings.filename + ".bak";
 
 		// backup
 		new File(Settings.filename).renameTo(new File(backup));

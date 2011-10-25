@@ -9,7 +9,7 @@ public enum FactorySettings {
 
 	/** these settings must be available in basic configuration */
 
-	skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
+	salt, skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
 	docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay, 
 	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, mute_rov_on_move, 
 	videoscale, volume, holdservo, loginnotify, reboot;
@@ -96,10 +96,15 @@ public enum FactorySettings {
 
 		new File(Settings.filename+".tmp").renameTo(new File(Settings.filename));
 	}
-
+/*
 	@Override
 	public String toString() {
 		return super.toString();
 	}
-
+*/
+	
+	//public void valueOf(String jj){
+		
+	//}
+	
 }

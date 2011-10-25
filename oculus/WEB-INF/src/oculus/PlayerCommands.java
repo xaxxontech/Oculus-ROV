@@ -14,8 +14,7 @@ public enum PlayerCommands {
 
 	// sub-set that are restricted to "user0" 
 	public enum AdminCommands {
-		
-		
+			
 		//TODO: CHECK THESE 
 		new_user_add, user_list, delete_user, extrauser_password_update, restart,
 		disconnectotherconnections, showlog, softwareupdate, relaunchgrabber, systemcall

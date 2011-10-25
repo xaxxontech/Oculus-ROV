@@ -40,8 +40,8 @@ public class Terminal {
 					if(input.length()>1) out.println(input);
 					
 				} catch (Exception e) {
+					stdin.close();
 					socket.close();
-					System.exit(-1);
 				}
 			}
 		}
@@ -67,6 +67,7 @@ public class Terminal {
 						else System.out.println(input);
 					
 					} catch (IOException e) {
+						System.out.println(e.getMessage());
 						break;
 					}
 				}
@@ -74,13 +75,12 @@ public class Terminal {
 				System.out.println(".. server closed socket, logged out.");
 				
 				try {
+					in.close();
 					socket.close();
+					System.exit(-1);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				
-				// die hard, kill process 
-				System.exit(-1);
 			}
 		}).start();
 	}

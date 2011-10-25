@@ -5,7 +5,7 @@ import java.net.*;
 
 import developer.CommandServer;
 
-import oculus.Observer;
+//import oculus.Observer;
 import oculus.State;
 import oculus.Util;
 
@@ -14,7 +14,7 @@ import oculus.Util;
  */
 public class FindHome {
 
-	State state = State.getReference();
+	//State state = State.getReference();
 	private long start = System.currentTimeMillis();
 
 	/** share on read, write threads */
@@ -84,13 +84,14 @@ public class FindHome {
 				// System.out.println(".. server closed socket, logged out.");
 				
 				try {
+					in.close();
 					socket.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				
 				// die hard, kill process 
-				System.exit(-1);
+				//System.exit(-1);
 			}
 		}).start();
 	}
@@ -118,7 +119,9 @@ public class FindHome {
 		
 		if(input.contains(CommandServer.SEPERATOR)){
 			String[] cmd = input.split(CommandServer.SEPERATOR);
-			state.set(cmd[0], cmd[1]);
+			
+			
+			// state.set(cmd[0], cmd[1]);
 			
 			/*
 			if(cmd[0].equals(State.dockdensity)){
@@ -150,16 +153,18 @@ public class FindHome {
 						
 						System.out.println("........docked!");
 					
-						if(!state.get(State.batterystatus).equals("charging")){
-							out.println("battery");
-							System.out.println("testing battery... ");
-							Util.delay(2500);
-						}
+						//if(cmd[0].equals(State.batterystatus)){
+						//	.equals("charging")){
+						
+						//	out.println("battery");
+						//	System.out.println("testing battery... ");
+						//	Util.delay(2500);
+						//}
 							
 						System.out.println("--------done!");
 						out.println("bye");
 						//Util.delay(500);
-						state.dump();
+						//state.dump();
 						
 					}
 				}

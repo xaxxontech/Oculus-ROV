@@ -465,4 +465,15 @@ public class Settings {
 			e.printStackTrace();
 		}
 	}
+
+	public String readSetting(OptionalSettings key) {
+		return readSetting(key.toString());
+	}
+	
+
+	public String readSetting(FactorySettings key) {
+		return readSetting(key.toString());
+	}
+	
+	
 }

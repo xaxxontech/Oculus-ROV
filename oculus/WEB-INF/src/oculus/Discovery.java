@@ -138,6 +138,11 @@ public class Discovery {
 			// close on each loop
 			close();
 		}
+		
+		// could not find, no hardware attached 
+		if( ! state.exists(State.firmware)) 
+			state.set(State.firmware, "unknown");
+		
 	}
 
 	/** send command to get product id */

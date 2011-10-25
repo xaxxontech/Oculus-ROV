@@ -96,6 +96,8 @@ function message(message,status) {
 		stream = b[1]; 
 	}
 	if (message=="shutdown") { shutdownwindow(); } 
+	if (message=="playing player stream") { screensize("full"); }
+	if (message=="player stream stopped") { screensize("reduced"); }
 	if (status != null && !initialize) { setstatus(status); } 
 }
 
@@ -212,7 +214,10 @@ function populatevalues(values) {
 			a = document.getElementById("lightport");
 			var str = splitstr[n+1];
 			if (str == "nil") { a.innerHTML="not found <a href=\"http://www.xaxxon.com/shop\" target=\"_blank\">buy now</a>"; }
-			else { a.innerHTML = "found on "+str; }
+			else {
+				document.getElementById("lightdiv").style.display = "";
+				a.innerHTML = "found on "+str; 
+			}
 		}
 		if (splitstr[n]=="lanaddress") {
 			a = document.getElementById("lanaddress");
@@ -296,4 +301,42 @@ function factoryreset(){
 	if(confirm("Restore factory default settings?\n(A backup file will be created and application restarted)")){
 		callServer('factoryreset','');
 	}
+}
+
+function screensize(mode) {
+	var l = document.getElementById('leftsidebar')
+	var r = document.getElementById('rightsidebar');
+	var a = document.getElementById('videocontainer');
+	var w;
+	var h;
+	if (mode == "full") {
+		l.style.display = "none";
+		l.style.width = "0px";
+		r.style.display = "none";
+		r.style.width = "0px";
+		document.getElementById('reducevidlink').style.display = "";
+		document.getElementById('enlargevidlink').style.display = "none";
+		document.getElementById('topbar').style.height = "0px";
+		document.getElementById('topbar').style.display = "none";
+		h = document.getElementById("maintable").offsetHeight;
+		h = Math.floor(h/3)*3-2;
+		w = h*4/3;
+		a.style.width = w +"px";
+		a.style.height = h+"px";
+	}
+	else {
+		l.style.display = "";
+		l.style.width = "180px";
+		r.style.display = "";
+		r.style.width = "180px";
+		w = 400;
+		h = 300;
+		a.style.width = w +"px";
+		a.style.height = h+"px";
+		document.getElementById('reducevidlink').style.display = "none";
+		document.getElementById('enlargevidlink').style.display = "none"; // disabled
+		document.getElementById('topbar').style.display = "";
+		document.getElementById('topbar').style.height = "30px";
+	}
+	getFlashMovie("oculus_grabber").sizeChanged(w, h);
 }

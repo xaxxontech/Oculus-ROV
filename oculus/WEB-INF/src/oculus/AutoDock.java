@@ -294,6 +294,12 @@ public class AutoDock implements Docker {
 		int s1 = dockw*dockh * 20/100 *  w/h; // was 15/100 w/ taller marker
 		int s2 = (int) (dockw*dockh * 65.5/100 * w/h);   // was 92/100 w/ taller marker
 		// System.out.println(dockslopedeg+" "+slopedeg);
+		
+		// optionally set breaking delay longer for fast bots
+		int bd = settings.getInteger(OptionalSettings.stopdelay.toString());
+		if(bd==Settings.ERROR) bd = 500;
+		final int stopdelay = bd;
+		
 		if (w*h < s1) { 
 			if (Math.abs(x-160) > 10 || Math.abs(y-120) > 25) { // clicksteer and go (y was >50)
 				comport.clickSteer((x-160)*rescomp+" "+(y-120)*rescomp);
@@ -303,19 +309,10 @@ public class AutoDock implements Docker {
 					Thread.sleep(1500); // was 1500 w/ dockgrab following
 					comport.speedset("fast");
 					comport.goForward();
-					
-					Thread.sleep(500);
+					Thread.sleep(1500);
 					comport.stopGoing();
-					// TODO: breaking?
-
-					// look is set for fast bots
-					int delay = settings.getInteger(OptionalSettings.stopdelay.toString());
-					System.out.println("stop delay:" + delay);
-					if(delay==Settings.ERROR) delay = 500;
-					Util.delay(delay);
-					// let deaccelerate
+					Thread.sleep(stopdelay);
 					app.dockGrab();
-					Thread.sleep(500);
 
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
@@ -325,7 +322,7 @@ public class AutoDock implements Docker {
 					comport.goForward();
 					Thread.sleep(1500);
 					comport.stopGoing();
-					Thread.sleep(1500); // let deaccelerate
+					Thread.sleep(stopdelay); // let deaccelerate
 					app.dockGrab();
 				} catch (Exception e) { e.printStackTrace(); } } }).start();
 			}
@@ -348,7 +345,7 @@ public class AutoDock implements Docker {
 						comport.goForward();
 						Thread.sleep(450);
 						comport.stopGoing();
-						Thread.sleep(500); // let deaccelerate
+						Thread.sleep(stopdelay); // let deaccelerate
 						app.dockGrab();
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
@@ -358,7 +355,7 @@ public class AutoDock implements Docker {
 						comport.goForward();
 						Thread.sleep(500);
 						comport.stopGoing();
-						Thread.sleep(500); // let deaccelerate
+						Thread.sleep(stopdelay); // let deaccelerate
 						app.dockGrab();
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 				}
@@ -400,7 +397,7 @@ public class AutoDock implements Docker {
 						comport.goBackward();
 						Thread.sleep(1500); 
 						comport.stopGoing();
-						Thread.sleep(500); // let deaccelerate
+						Thread.sleep(stopdelay); // let deaccelerate
 						app.dockGrab();
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
 					log.info("autodock backup");

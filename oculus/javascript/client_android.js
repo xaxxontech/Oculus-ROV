@@ -36,7 +36,8 @@ function rtmpPortReturned() { //xmlhttp event handler
 			getFlashMovie("oculus_android").setRtmpPort(xmlhttp.responseText);
 			var user = window.OCULUSANDROID.getUser();
 			var pass = window.OCULUSANDROID.getPass();
-			loginsend(user, pass);
+			//setTimeout("loginsend("+user+","+pass+");", 1000);
+			loginsend(user,pass);
 		}
 	}
 }
@@ -88,6 +89,7 @@ function setstatus(status, value) {
 	if (status == "user") { 
 		username = value; 
 		window.OCULUSANDROID.message(username+ " signed in");
+		// callServer('speedset','fast');
 	}
 	if (status == "hijacked") { window.location.reload(); }
 	if (status == "light") { window.OCULUSANDROID.lightPresent(); }

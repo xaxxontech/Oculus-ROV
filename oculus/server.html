@@ -7,8 +7,8 @@
 <meta http-equiv="Expires" content="-1">
 
 <style type="text/css">
-
-body { background-color: #ffffff; }
+html, body {height: 100%;}
+body, div { background-color: #ffffff; padding: 0px; margin: 0px; border: 0px}
 body, p, ol, ul, td, tr {
 font-family: verdana, arial, helvetica, sans-serif;
 font-size:   13px;
@@ -45,12 +45,10 @@ var requiredRevision = 0;
 </script>
 </head>
 <body onload="server_loaded();">
-
-<table><tr><td style="height:30px"></td></tr></table>
-
-<table align="center"><tr valign="top"> <!--  main 3 column ctr table -->
-
-<td style="padding-right: 5px; width: 180px;">
+<table id="maintable" align="center" style="height: 100%;"> <!--  main 3 column ctr table -->
+<tr valign="top"><td id="topbar" colspan="3" style="height: 30px"></td></tr>
+<tr valign="top"> 
+<td id="leftsidebar" style="padding-right: 5px; width: 180px; overflow: hidden">
 <img src="images/oculus_logo.gif"><br>
 &nbsp;<span style="color: #888888;">SERVER</span>
 <br><br>
@@ -74,6 +72,9 @@ broadcast text: <br>
 onKeyPress="if (keypress(event)==13) { chat(); }" style="width: 150px; ">
 <a href="javascript: chat();">send</a><br>
 <br>
+<div id="enlargevidlink" style="display: none;">
+<a href="javascript: screensize('full');">max video layout</a>
+</div>
 <a href="initialize.html">change settings</a><br>
 <a href="index.html" target="_blank">launch controls</a><br>
 <a href="javascript: restart();">restart</a><br>
@@ -81,9 +82,8 @@ onKeyPress="if (keypress(event)==13) { chat(); }" style="width: 150px; ">
 
 </td>
 
-<td >
-<div style="width: 400px; height: 300px; overflow: hidden; ">
-<div id="video">
+<td style="">
+<div id="videocontainer" style="width: 400px; height: 300px; overflow: hidden ">
 <script language="JavaScript" type="text/javascript">
 <!--
 // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
@@ -103,8 +103,8 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	AC_FL_RunContent(
 		"src", "playerProductInstall",
 		"FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
-		"width", "400",
-		"height", "300",
+		"width", "100%",
+		"height", "100%",
 		"align", "left",
 		"id", "oculus_grabber",
 		"quality", "high",
@@ -112,6 +112,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 		"bgcolor", "#869ca7",
 		"name", "oculus_grabber",
 		"allowScriptAccess","sameDomain",
+		"allowFullScreen","true",
 		"type", "application/x-shockwave-flash",
 		"pluginspage", "http://www.adobe.com/go/getflashplayer"
 	);
@@ -120,14 +121,15 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	// embed the Flash Content SWF when all tests are passed
 	AC_FL_RunContent(
 			"src", "flash/oculus_grabber?="+ new Date().getTime(),
-			"width", "400",
-			"height", "300",
+			"width", "100%",
+			"height", "100%",
 			"id", "oculus_grabber",
 			"quality", "high",
 			"wmode","transparent",
 			"bgcolor", "#869ca7",
 			"name", "oculus_grabber",
 			"allowScriptAccess","sameDomain",
+			"allowFullScreen","true",
 			"type", "application/x-shockwave-flash",
 			"pluginspage", "http://www.adobe.com/go/getflashplayer"
 	);
@@ -143,6 +145,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
   	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 			id="oculus_grabber" width="100%" height="100%"
 			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+			<param name="allowFullScreen" value="true" />
 			<param name="movie" value="flash/oculus_grabber.swf" />
 			<param name="quality" value="high" />
 			<param name="bgcolor" value="#869ca7" />
@@ -160,18 +163,19 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	</object>
 </noscript>
 </div>
-<!-- <div id="flashoverlay" style="position: relative; top: -300px; width: 400px; height: 300px"><img 
-src="images/eyeball_background_server.gif" alt=""></div>  -->
-</div>
+
 </td>
 
-<td style="width: 180px; padding-left: 8px"> 
+<td id="rightsidebar" style="width: 180px; padding-left: 8px"> 
 <span style="color: #888888;">COMM LOG:</span>
 <div id="messagebox"> </div>
 </td>
 
 </tr></table>
 
+<div id="reducevidlink" style="display: none; position: absolute; left: 5px; top: 5px">
+<a href="javascript: screensize('reduced');">default<br>layout</a>
+</div>
 
 <div style="position: fixed; bottom: 5px; right: 40px">
 <a href="http://www.xaxxon.com" style="color: #999999; font-size: 11px" target="_blank">

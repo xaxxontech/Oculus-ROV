@@ -14,7 +14,7 @@ body, p, ol, ul, td, tr {
 font-family: verdana, arial, helvetica, sans-serif;
 font-size:   13px;
 line-height: 18px; 
-color: #cccccc;
+color: #9096cd; /* #cccccc; */
 padding: 0px; margin: 0px;}
 TABLE {   border: 0px; border-collapse: collapse; padding: 0px }
 TR { border: 0px; }
@@ -25,7 +25,7 @@ a:visited { color: #4c56fe; background-color: transparent; text-decoration: none
 a:hover { color: #ffffff; background-color: transparent; text-decoration: none; } /* #0711AF */
 .keycmds { color: #777777; font-size: 11px; }
 .status { font-size: 11px; line-height: 15px; text-transform: uppercase}
-.status_title { font-size: 13px; line-height: 18px;}
+.status_title { font-size: 11px; line-height: 18px; text-transform: uppercase; color: #28872f;   }
 .status_unknown { font-size: 11px; line-height: 15px; color: #666666; text-transform: lowercase;}
 .crosshair { border: 2px solid #61f383; 	filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
 .videocursor { border: 1px solid #45F239; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
@@ -55,6 +55,9 @@ a:hover { color: #ffffff; background-color: transparent; text-decoration: none; 
 .facebox { border: 1px solid #4c56fe; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; line-height: 0px}
 .popupmenu_underlay { background-color: #20246d; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; } /* 20246d 2d2f5f */
 .popupcontents { background-color: #171900; filter:alpha(opacity=75); opacity: 0.75; -moz-opacity:0.75; }
+.mousecontrolshighlitebox { width: 38px; height: 40px; z-index: -1}
+.forwardhighlitebox { width: 38px; height: 40px; z-index: -1; }
+.grey { color: #666666; }
 </style>
 <script src="javascript/client.js" type="text/javascript"></script>
 <script src="flash/AC_OETags.js" type="text/javascript"></script>
@@ -75,7 +78,7 @@ var requiredRevision = 0;
 <body id="thebody" onkeydown= "keyBoardPressed(event);" onkeyup = "keyBoardReleased(event);" 
 onload="loaded();" onunload="playerexit();" onresize="browserwindowresized();">
 
-<table><tr><td id="topgap" style="height: 30px"> </td></tr></table>
+<table width="100%"><tr><td id="topgap" style="height: 30px"> </td></tr></table>
 
 <!-- visible page div -->
 <div id="visiblepagediv">  
@@ -90,8 +93,8 @@ MENU</a><br>
 </div></td>
 <td style="padding-left: 5px;">
 
-<table><tr valign="bottom"><td style="text-align: right">
-<div id="video" style="position: relative; z-index: 0">
+<table><tr valign="top"><td style="text-align: right">
+<div id="video" style="position: relative; z-index: 0; width: 640px; height: 480px;">
 <script language="JavaScript" type="text/javascript">
 
 // Version check based upon the values defined in globals
@@ -119,8 +122,7 @@ if (hasRequestedVersion) {
    	+ '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
     document.write(alternateContent);  // insert non-flash content
   }
-// -->
-</script>
+ </script>
 <noscript>
   	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 			id="oculus_player" width="100%" height="100%" 
@@ -146,64 +148,64 @@ if (hasRequestedVersion) {
 </td>
 
 <td style="padding-left: 0px">
-<div style="line-height: 15px; padding-left: 7px">
-<span class="status_title" id="connection_title">connection:
+
+<div style="line-height: 15px; padding-left: 7px; padding-top: 10px">
+<span class="status_title" id="connection_title">uplink<span class="grey">:</span>
 <span class="status" id="connection_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="lag_title">ping:
+<span class="status_title" id="lag_title">ping<span class="grey">:</span>
 <span class="status" id="lag_status" style="color: #45F239; background-color: #262626;
 text-transform: none;">
 <span class="status_unknown">unknown</span></span>
 <span id="pingcountmeter" style="color: green"></span>&nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="motion_title">motion:
+<span class="status_title" id="motion_title">motion<span class="grey">:</span>
 <span class="status" id="motion_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
 <span class="status_title" id="stream_title">
-<span style="font-variant: small-caps;">rov</span> stream:
+rov stream<span class="grey">:</span>
 <span class="status" id="stream_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="selfstream_title">self stream:
+<span class="status_title" id="selfstream_title">self stream<span class="grey">:</span>
 <span class="status" id="selfstream_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="speed_title">speed:
+<span class="status_title" id="speed_title">speed<span class="grey">:</span>
 <span class="status" id="speed_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="cameratilt_title">camera tilt:
+<span class="status_title" id="cameratilt_title">camera tilt<span class="grey">:</span>
 <span class="status" id="cameratilt_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="battery_title">battery:
+<span class="status_title" id="battery_title">battery<span class="grey">:</span>
 <span class="status" id="battery_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="dock_title">dock:
+<span class="status_title" id="dock_title">dock<span class="grey">:</span>
 <span class="status" id="dock_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="keyboard_title">keyboard input:
+<span class="status_title" id="keyboard_title">keyboard input<span class="grey">:</span>
 <span class="status" id="keyboard_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">enabled</span></span>
 &nbsp; &nbsp;</span><br>
 
-<span class="status_title" id="user_title">user:
+<span class="status_title" id="user_title">user<span class="grey">:</span>
 <span class="status" id="user_status" style="color: #45F239; background-color: #262626">
 <span class="status_unknown">unknown</span></span>
 &nbsp; &nbsp;</span><br>
-<table><tr><td style="height: 15px"></td></tr></table>
 </div>
 <!-- 
 <div style="padding-left: 7px">
@@ -214,8 +216,8 @@ MENU <img src="images/wrench.gif" border=0 style="vertical-align: middle;"></a><
 <table><tr><td style="height: 25px"></td></tr></table>
 
 <div style="padding-left: 3px; width: 195px">
-<table class="boxcolor" style="background-image: url('images/steering_icons.gif'); background-repeat: no-repeat;
-background-position: top; width: 190px; height: 200px; background-color: #262626">
+<table style="background-image: url('images/steering_icons.png'); background-repeat: no-repeat;
+background-position: top; width: 190px; height: 200px; background-color: transparent">
 
 <tr>
 <td class="steering_button" id="camera up" onmouseover="steeringmouseover(this.id, 'R')" 
@@ -283,11 +285,11 @@ onmouseout="steeringmouseout(this.id);" onmousedown="steeringmousedown(this.id);
 onmouseup="steeringmouseup(this.id);"> </td>
 </tr>
 <tr><td colspan="5" style="text-align: center; height: 12px; line-height: 12px; 
-font-size: 11px; background-color: #262626;"
-id="steering_textbox"></td></tr>
+font-size: 11px; background-color: #262626; padding-top: 5px"
+id="steering_textbox"> </td></tr>
 <tr><td colspan="5" class="keycmds" style="text-align: center; height: 18px;
 background-color: #262626;"
-id="steeringkeytextbox"></td></tr>
+id="steeringkeytextbox"> </td></tr>
 </table>
 </div>
 
@@ -451,6 +453,9 @@ border-top: none; border-right: none; border-left: none; height: 1px;"></div>
 position: absolute"> </div>
 
 <div id="facebox" class="facebox" style="display: none; position: absolute;"> </div>
+
+<div id="mousecontrolshighlitebox" class="mousecontrolshighlitebox" style="display: none; position: absolute;"> </div>
+<div id="forwardhighlitebox" class="forwardhighlitebox" style="display: none; position: absolute;"> </div>
 
 <!-- video overlay invisible -->
 <div id="videooverlay" style="position: absolute; background-color: #000000; z-index: 4;
@@ -881,16 +886,16 @@ sonar enabled <a class="blackbg" href="javascript: writesetting('sonarenabled tr
 
 <!--  overlay -->
 <div id="overlay" class="overlay" 
-style="position: fixed; display: none; z-index: 7; left: 0px; top: 0px; width: 100%; height: 100%"> </div>
+style="position: fixed; z-index: 7; left: 0px; top: 0px; width: 100%; height: 100%"> </div>
 
 <!--  overlay contents -->
 <div id="overlaycontents" 
-style="position: absolute; display: none; z-index: 8;left: 0px; top: 0px; width: 100%;">
+style="position: absolute; z-index: 8;left: 0px; top: 0px; width: 100%;">
 <table align="center" style="height: 100%"><tr valign="top">
 <td>
 
 <!--  overlaydefault -->
-<div id="overlaydefault" style="padding-top: 150px;">communicating with OCULUS...</div>
+<div id="overlaydefault" style="padding-top: 150px;">COMMUNICATING WITH <span style="font-size: 16px">OCULUS</span>...</div>
 
 <!--  login -->
 <div id="login" style="display: none; line-height: 25px; padding-top: 150px;">

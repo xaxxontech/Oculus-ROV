@@ -74,9 +74,8 @@ function loaded() {
 	b.src = 'images/steering_icon_selected.gif';
 	bworig= document.body.clientWidth;
 	var a = document.getElementById("blorg");
-	
-//	openxmlhttp("xmlhttpHandler",xmlhttpreturned);
-//	debug("request sent");
+
+//	debug("<a href='javascript: displaymessages();'>show msg</a>"); // message recording
 }
 
 function flashloaded() {
@@ -264,6 +263,9 @@ function publish(str) {
 }
 
 function message(message, colour, status, value) {
+	
+//	recordmessage(message, colour, status, value); // message recording, dev only
+	
 	if (message != null) {
 		var tempmessage = message;
 		var d = new Date();
@@ -1606,8 +1608,13 @@ function playerexit() {
 
 function steeringmouseover(id, str) {
 	if (!(id == "forward" && steeringmode == "forward")) {
-		document.getElementById(id).style.backgroundImage = "url(images/steering_icon_highlight.gif)";
-
+		//document.getElementById(id).style.backgroundImage = "url(images/steering_icon_highlight.gif)";
+		var xy = findpos(document.getElementById(id));
+		var highlitebox = document.getElementById("mousecontrolshighlitebox");
+		highlitebox.style.left = xy[0]+"px";
+		highlitebox.style.top = xy[1]+"px";
+		highlitebox.style.backgroundColor = "#444444";
+		highlitebox.style.display = "";
 	}
 	document.getElementById("steering_textbox").innerHTML = id.toUpperCase();
 	if (str) {
@@ -1617,7 +1624,8 @@ function steeringmouseover(id, str) {
 
 function steeringmouseout(id) {
 	if (!(id == "forward" && steeringmode == "forward")) {
-		document.getElementById(id).style.backgroundImage = "none";
+		//document.getElementById(id).style.backgroundImage = "none";
+		document.getElementById("mousecontrolshighlitebox").style.display = "none";
 		if (
 			(id == "backward" && steeringmode == "backward") || 
 			(id == "rotate right" && steeringmode == "rotate right") ||
@@ -1638,26 +1646,29 @@ function steeringmouseout(id) {
 	document.getElementById("steeringkeytextbox").innerHTML = "";
 }
 
+//forwardhighlitebox
 function steeringmousedown(id) {
 	if (id != "forward" && id != "nudge left" && id != "nudge right" 
 		&& id != "camera up" && id != "camera down" && id != "camera horizontal"
 		&& id != "speed slow" && id != "speed medium" && id != "speed fast"
 		&& steeringmode == "forward") {
-		document.getElementById("forward").style.backgroundImage = "none";
+		//document.getElementById("forward").style.backgroundImage = "none";
+		document.getElementById("forwardhighlitebox").style.display = "none";
 	}
-	/*
-	if (id == "forward") {
-		if (steeringmode == "forward") {
-			move("stop");
-			steeringmode="stop";
-			id = null;
-			document.getElementById(id).style.backgroundImage = "url(images/steering_icon_highlight.gif)";
-		}
-		else { move("forward"); }
-	}
-	*/
-	document.getElementById(id).style.backgroundImage = "url(images/steering_icon_selected.gif)";
-	if (id == "forward") { move("forward"); } // comment out if above uncommented
+
+	//document.getElementById(id).style.backgroundImage = "url(images/steering_icon_selected.gif)";
+	var highlitebox = document.getElementById("mousecontrolshighlitebox");
+	highlitebox.style.backgroundColor = "#cccccc";
+	
+	if (id == "forward") { 
+		move("forward");
+		var xy = findpos(document.getElementById("forward"));
+		var fwhighlitebox = document.getElementById("forwardhighlitebox");
+		fwhighlitebox.style.left = xy[0]+"px";
+		fwhighlitebox.style.top = xy[1]+"px";
+		fwhighlitebox.style.backgroundColor = "#999999";
+		fwhighlitebox.style.display = "";
+		} 
 	if (id == "backward") { move("backward"); }
 	if (id == "rotate right") { move("right"); }
 	if (id == "rotate left") { move("left"); }
@@ -1687,7 +1698,10 @@ function steeringmouseup(id) {
 	if (steeringmode != "forward" || (id == "nudge left" || id == "nudge right"
 		|| id=="camera up" || id=="camera down" || id=="camera horizontal"
 		|| id=="speed slow" || id=="speed medium" || id=="speed fast" )) {
-		document.getElementById(id).style.backgroundImage = "url(images/steering_icon_highlight.gif)";
+		//document.getElementById(id).style.backgroundImage = "url(images/steering_icon_highlight.gif)";
+		var highlitebox = document.getElementById("mousecontrolshighlitebox");
+		highlitebox.style.backgroundColor = "#444444";
+
 		if (
 			(id == "backward" && steeringmode == "backward") || 
 			(id == "rotate right" && steeringmode == "rotate right") ||
@@ -2146,4 +2160,33 @@ function framegrabbed() {
 	document.getElementById("framegrabbox").style.display = "";
 	document.getElementById('framegrabpic').src = 'images/framegrab.png'+ '?' + (new Date()).getTime();
 }
+
+
+/* message recording utils 
+ * also line in loaded(), message()
+ * */
+
+var messages = []
+var messagesstart = new Date().getTime();
+
+function recordmessage(message, colour, status, value) {
+	var d = new Date().getTime();
+	d -= messagesstart;
+	messages.push([message, colour, status, value,d]);
+}
+
+function displaymessages() {
+	var str = "";
+	for (var i = 0; i < messages.length; i++) {
+		for (var n = 0; n < messages[i].length; n++) {
+			str += "&quot;"+messages[i][n] + "&quot,";
+		}
+		str +=  "<br>";
+	}
+	document.write(str);
+}
+
+/* end of message recording utils */
+
+
 

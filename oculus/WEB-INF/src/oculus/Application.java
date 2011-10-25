@@ -231,11 +231,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new Discovery();
 		
 		// create matching class based on firmware 
-		if(state.get(State.firmware).equals(Discovery.OCULUS_DC)){
-			comport = new ArduinoCommDC(this);
-		} else if(state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
-			comport = new ArduinoCommSonar(this);
-		}
+//		if(state.get(State.firmware).equals(Discovery.OCULUS_DC)){
+		comport = new ArduinoCommDC(this);
+//		} else if(state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
+//			comport = new ArduinoCommSonar(this);
+//		}
 	
 		light = new LightsComm(this);
 		httpPort = settings.readRed5Setting("http.port");
@@ -1295,7 +1295,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			if (!str.equals("off")) {
-				sc.invoke("publish", new Object[] { str, 160, 120, 8, 85 });
+				String vals[] = (settings.readSetting("vself")).split("_");
+				int width = Integer.parseInt(vals[0]);
+				int height = Integer.parseInt(vals[1]);
+				int fps = Integer.parseInt(vals[2]);
+				int quality = Integer.parseInt(vals[3]);
+				sc.invoke("publish", new Object[] { str, width, height, fps, quality });
+				//sc.invoke("publish", new Object[] { str, 160, 120, 8, 85 });
 				new Thread(new Runnable() {
 					public void run() {
 						try {

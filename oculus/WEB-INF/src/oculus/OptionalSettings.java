@@ -5,13 +5,15 @@ import java.util.Properties;
 /** place extensions to settings here */
 public enum OptionalSettings {
 	
-	emailalerts, emailaddress, emailpassword, developer, commandport, sonarenabled, stopdelay;
+	emailalerts, emailaddress, emailpassword, developer, commandport, sonarenabled, stopdelay,
+		vself;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
 		Properties config = FactorySettings.createDeaults();
 		config.setProperty(developer.toString(), "false");
 		config.setProperty(commandport.toString(), "4444");
+		config.setProperty(vself.toString(), "320_240_8_85");
 		return config;
 	}
 

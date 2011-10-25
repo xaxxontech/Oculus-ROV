@@ -129,6 +129,7 @@ public class Discovery {
 					state.set(State.serialport, ports.get(i));
 					state.set(State.firmware, OCULUS_SONAR);
 					
+					// state.dump();
 				} 	
 				
 				// other devices here if grows 
@@ -140,8 +141,14 @@ public class Discovery {
 		}
 		
 		// could not find, no hardware attached 
-		if( ! state.exists(State.firmware)) 
+		if(state.get(State.firmware)==null){ 
+		
 			state.set(State.firmware, "unknown");
+		
+			System.out.println("...... no hardware");
+			state.dump();
+		
+		}
 		
 	}
 

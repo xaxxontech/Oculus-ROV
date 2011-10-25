@@ -23,6 +23,8 @@ import oculus.commport.ArduioPort;
  */
 public class CommandServer {
 	
+	public static final String SEPERATOR = " : ";
+	
 	private static BatteryLife battery = BatteryLife.getReference();
 	private static Docker docker = null;
 	private static ArduioPort port = null;

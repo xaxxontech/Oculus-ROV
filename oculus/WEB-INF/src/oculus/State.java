@@ -6,6 +6,8 @@ import java.util.Vector;
 
 public class State {
 
+	public static final String SEPERATOR = " : ";
+
 	private Settings settings = new Settings();
 
 	public static final String user = "user";
@@ -80,8 +82,6 @@ public class State {
 	/** private constructor for this singleton class */
 	private State() {
 		props.put(boottime, String.valueOf(System.currentTimeMillis()));
-		// not required
-		// props.put(userisconnected, false);
 		props.put(localaddress, Util.getLocalAddress());
 		new Thread(new Runnable() {
 			@Override
@@ -165,7 +165,7 @@ public class State {
 		while(keys.hasMoreElements()){
 			String key = (String) keys.nextElement();
 			String value = (String) props.getProperty(key);			
-			System.out.println(key + " = " + value);
+			System.out.println(key + SEPERATOR + value);
 		}
 	}
 	
@@ -177,7 +177,7 @@ public class State {
 		while(keys.hasMoreElements()){
 			String key = (String) keys.nextElement();
 			String value = (String) props.getProperty(key);					
-			str += key + " : " + value + "\r\n";
+			str += key + SEPERATOR + value + "\r\n";
 		}	
 		return str;
 	}
@@ -223,9 +223,6 @@ public class State {
 		
 		for(int i = 0 ; i < observers.size() ; i++)
 			observers.get(i).updated(key.trim());	
-		
-		if(State.getReference().getBoolean(State.developer))
-			System.out.println("__state: " + key + " = " + value);
 	}
 
 	/** Put a name/value pair into the config */

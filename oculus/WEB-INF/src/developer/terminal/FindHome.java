@@ -12,7 +12,7 @@ import oculus.Util;
 /**
  * Bare bones terminal client for Oculus. 
  */
-public class FindHome implements Observer {
+public class FindHome {
 
 	State state = State.getReference();
 	private long start = System.currentTimeMillis();
@@ -33,7 +33,8 @@ public class FindHome implements Observer {
 			
 			out.println(user + ":" + pass);
 			startReader(socket);
-			state.addObserver(this);
+			
+			// state.addObserver(this);
 			
 			out.println("state motionenabled true");
 			out.println("publish");
@@ -43,7 +44,7 @@ public class FindHome implements Observer {
 			
 			out.println("undock");
 			
-			Util.delay(15000);
+			Util.delay(5000);
 			
 			out.println("undock");
 
@@ -166,15 +167,6 @@ public class FindHome implements Observer {
 		}
 	}
 	
-	@Override
-	public void updated(String key) {
-		System.out.println("find home updated:" + key);
-	}
-	
-	@Override
-	public String[] getList() {
-		return new String[] { State.batterylife, State.dockstatus, State.dockxpos };
-	}
 	
 	/** parameters: ip, port, user name, password [commands] */ 
 	public static void main(String args[]) throws IOException {

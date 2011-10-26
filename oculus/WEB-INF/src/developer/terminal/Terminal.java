@@ -72,7 +72,7 @@ public class Terminal {
 					}
 				}
 				
-				System.out.println(".. server closed socket, logged out.");
+				// System.out.println(".. server closed socket, logged out.");
 				
 				try {
 					in.close();

@@ -22,11 +22,6 @@ public class State {
 	public static final String batterylife = "batterylife";
 	public static final String batterystatus = "batterstatus";
 
-	//public static final String sonarenabled = "sonarenabled";
-	//public static final String sonardistance = "sonardistance";
-	//public static final String sonardebug = "sonardebug";
-	public static final String sonar = "sonar";
-
 	public static final String sonarback = "sonarback";
 	public static final String sonarright = "sonarright";
 	public static final String sonarleft = "sonarleft";
@@ -49,7 +44,6 @@ public class State {
 	public static final String undocked = "undocked";
 	public static final String undock = "undock";
 	public static final String firmware = "firmware";
-//	public static final String holdservo = "holdservo";
 	public static final String unknown = "unknown";	
 	public static final String frameGrabBusy = "frameGrabBusy";
 
@@ -334,8 +328,8 @@ public class State {
 		set(cmd.toString(), str);
 	}
 	
-	public String get(PlayerCommands cmd){ //, String str) {
-		return get(cmd.toString()); // , str);
+	public String get(PlayerCommands cmd){ 
+		return get(cmd.toString()); 
 	}
 
 	//  public static final String enable = "enable";

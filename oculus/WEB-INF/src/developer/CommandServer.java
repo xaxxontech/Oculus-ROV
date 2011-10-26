@@ -37,9 +37,6 @@ public class CommandServer {
 	private static ServerSocket serverSocket = null; 
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static LoginRecords records = new LoginRecords();
-	
-	
-	//private String user = null;
 
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread implements Observer {
@@ -76,6 +73,9 @@ public class CommandServer {
 				return;
 			}
 
+			// send banner 
+			out.println("oculus version " + new Updater().getCurrentVersion() + " ready for login."); 
+
 			// first thing better be user:pass
 			try {
 				
@@ -100,18 +100,8 @@ public class CommandServer {
 						out.println("login failure, please drop dead");
 						out.close();
 						new Exception("login failure");
-						
-						//out.close();
-						//clientSocket.close();
-						//return;
 					}
 				}
-		
-				// tell new user what is up 
-				out.println("oculus version : " + new Updater().getCurrentVersion() + " ready"); 
-				
-				// app.message("tcp connection " + user + clientSocket.getInetAddress(), null, null);
-
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 				try {
@@ -135,8 +125,6 @@ public class CommandServer {
 		@Override
 		public void run() {
 			
-			// System.out.println(user+ clientSocket.getInetAddress() + " connected");
-			// sendToGroup(user + clientSocket.getInetAddress() + " connected");
 			sendToGroup(printers.size() + " tcp connections active");
 			
 			try {
@@ -146,9 +134,9 @@ public class CommandServer {
 
 					// been closed ?
 					if(out.checkError()) {
-						System.out.println("...output stream is closed, close.");
+						System.out.println("...output stream is closed, close client.");
 						shutDown();
-						return;
+						break;
 					}
 					
 					// blocking read from the client stream up to a '\n'
@@ -160,7 +148,6 @@ public class CommandServer {
 					// parse and run it 
 					str = str.trim();
 					System.out.println("address [" + clientSocket + "] message [" + str + "]");
-					// app.message(clientSocket.getInetAddress() + " " + str, null, null);
 					manageCommand(str);
 					
 				}

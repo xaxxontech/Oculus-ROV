@@ -106,14 +106,13 @@ public class Discovery {
 	 * Loop through all available serial ports and ask for product id's
 	 */
 	public void search() {
-		
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (connect(ports.get(i))) {
 				Util.delay(TIMEOUT);
 				
 				String id = getProduct();
 				// trim delimiters "<xxxxx>"
-				id = id.substring(1, id.length()-1);
+				id = id.substring(1, id.length()-1).trim();
 				
 				if (id.equalsIgnoreCase(LIGHTS)) {
 
@@ -129,7 +128,6 @@ public class Discovery {
 					state.set(State.serialport, ports.get(i));
 					state.set(State.firmware, OCULUS_SONAR);
 					
-					// state.dump();
 				} 	
 				
 				// other devices here if grows 

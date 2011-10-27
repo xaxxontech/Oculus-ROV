@@ -272,13 +272,12 @@ public class CommandServer {
 			
 			if(str.startsWith("nudge")) port.nudge(cmd[1]);
 			
-			/*
 			if(str.startsWith("move")){
 				if(cmd[1].equals("forward")) port.goForward();
 				else if(cmd[1].equals("backwards")) port.goBackward();
 				else if(cmd[1].equals("left")) port.turnLeft();
 				else if(cmd[1].equals("right")) port.turnRight();
-			}*/
+			}
 			
 			if(str.equals("cam")){
 				app.publish("camera");
@@ -298,7 +297,7 @@ public class CommandServer {
 			
 			if(str.equals("undock") && docker!=null) docker.dock("undock");
 									
-			if(str.equals("beep")) Util.beep();
+			if(str.equals("stop")) port.stopGoing();
 				
 			if(str.equals("beep")) Util.beep();
 			

@@ -81,15 +81,16 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 		} else if (response.charAt(0) != GET_VERSION[0]) {
 
 			// if sonar enabled will get <sonar back|left|right xxx> inplace of watchdog
+			
+	
 			if (response.startsWith("sonar")) {
 				final String[] param = response.split(" ");
 				final int range = Integer.parseInt(param[2]);
 
-				//if (param[1].equals("back")) {
-				//	if (Math.abs(range - state.getInteger(State.sonarback)) > 1)
-				//		state.set(State.sonarback, range);
-				//} else 
-				if (param[1].equals("right")) {
+				if (param[1].equals("back")) {
+					if (Math.abs(range - state.getInteger(State.sonarback)) > 1)
+						state.set(State.sonarback, range);
+				} else if (param[1].equals("right")) {
 					if (Math.abs(range - state.getInteger(State.sonarright)) > 1)
 						state.set(State.sonarright, range);
 				}

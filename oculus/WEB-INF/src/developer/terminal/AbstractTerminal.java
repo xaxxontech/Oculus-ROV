@@ -31,7 +31,8 @@ public abstract class AbstractTerminal  {
 			out.println(user + ":" + pass);
 			
 			startReader(socket);
-			execute();
+			
+			// execute();
 		}
 	}
 	

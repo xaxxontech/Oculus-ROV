@@ -437,8 +437,7 @@ public class Settings {
 		String[] lines = new String[999];
 		try {
 			filein = new FileInputStream(filenm);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					filein));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			int i = 0;
 			while ((lines[i] = reader.readLine()) != null) {
 				String items[] = lines[i].split("=");

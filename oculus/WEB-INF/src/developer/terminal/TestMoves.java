@@ -3,6 +3,8 @@ package developer.terminal;
 import java.io.*;
 import java.net.*;
 
+import developer.CommandServer;
+
 //import oculus.State;
 import oculus.Util;
 
@@ -13,6 +15,7 @@ public class TestMoves extends AbstractTerminal {
 		super(ip, port, user, pass);
 	}
 
+	@Override
 	public void execute(){
 			
 		// send commands to get ready 
@@ -47,6 +50,15 @@ public class TestMoves extends AbstractTerminal {
 		// log out 
 		Util.delay(3000);
 		out.println("bye");
+	}
+	
+	@Override
+	public void parseInput(final String str){
+	
+		System.out.println(this.getClass().getName() + " parse: " + str);
+		String[] cmd = str.split(CommandServer.SEPERATOR);
+		if(cmd.length==2) state.set(cmd[0], cmd[1]);
+		
 	}
 	
 	/** parameters: ip, port, user name, password [commands] */ 

@@ -18,7 +18,7 @@ public enum FactorySettings {
 	public static Properties createDeaults() {
 		Properties config = new Properties();
 		config.setProperty(skipsetup.toString(), "no");
-		config.setProperty(speedslow.toString(), "115");
+		config.setProperty(speedslow.toString(), "130");
 		config.setProperty(speedmed.toString(), "180");
 		config.setProperty(steeringcomp.toString(), "128");
 		config.setProperty(camservohoriz.toString(), "68");

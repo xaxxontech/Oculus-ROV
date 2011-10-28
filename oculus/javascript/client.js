@@ -1028,12 +1028,15 @@ function autodockcalibrate(ev) {
 		var y = ev.clientY + document.body.scrollTop - document.body.clientTop;
 	}
 	var video = document.getElementById("video");
-	x -= video.offsetLeft;
-	y -= video.offsetTop;
-	x *= videoscale/100;
-	y *= videoscale/100;
-	x = Math.round(x);
-	y = Math.round(y);
+	scale = 2; // convert to 320
+	var xctroffset = x - (video.offsetLeft + (video.offsetWidth/scale)); 
+	var yctroffset = y - (video.offsetTop + (video.offsetHeight/scale)); 
+	if (!(xctroffset ==0 && yctroffset==0)) {
+		xctroffset /= videoscale/100;
+		yctroffset /= videoscale/100;
+	}
+	x = Math.round(xctroffset)+320;
+	y = Math.round(yctroffset)+240;
 	callServer("autodockcalibrate", x+" "+y);
 	message("sending autodock-calibrate: " + x+" "+y, sentcmdcolor);
 	lagtimer = new Date().getTime(); // has to be *after* message()
@@ -1472,8 +1475,8 @@ function videoOverlayClick(ev) {
 		if (Math.abs(yctroffset) < 15*videoscale/100) { yctroffset = 0; }
 		else { flashvidcursor("videocursor_left"); flashvidcursor("videocursor_right"); }
 		if (!(xctroffset ==0 && yctroffset==0)) {
-			xctroffset *= videoscale/100;
-			yctroffset *= videoscale/100;
+			xctroffset /= videoscale/100;
+			yctroffset /= videoscale/100;
 			var str = Math.round(xctroffset)+" "+Math.round(yctroffset);
 			callServer("clicksteer",str);
 			message("sending: clicksteer "+str, sentcmdcolor);
@@ -1481,6 +1484,9 @@ function videoOverlayClick(ev) {
 		}
 	}
 }
+
+//		ctroffset = Math.round(ctroffsettemp/(videoscale/100));
+
 
 function videoOverlayMouseOut() {
 	if (videomouseaction && clicksteeron) {

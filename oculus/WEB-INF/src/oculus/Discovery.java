@@ -112,23 +112,27 @@ public class Discovery {
 				
 				String id = getProduct();
 				// trim delimiters "<xxxxx>"
-				id = id.substring(1, id.length()-1).trim();
+				System.out.println("product : *"+id+"*");
+				if (id.length() > 0) {
 				
-				if (id.equalsIgnoreCase(LIGHTS)) {
-
-					state.set(State.lightport, ports.get(i));
+					id = id.substring(1, id.length()-1).trim();
 					
-				} else if (id.equalsIgnoreCase(OCULUS_DC)) {
-
-					state.set(State.serialport, ports.get(i));
-					state.set(State.firmware, OCULUS_DC);
-
-				} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
-
-					state.set(State.serialport, ports.get(i));
-					state.set(State.firmware, OCULUS_SONAR);
-					
-				} 	
+					if (id.equalsIgnoreCase(LIGHTS)) {
+	
+						state.set(State.lightport, ports.get(i));
+						
+					} else if (id.equalsIgnoreCase(OCULUS_DC)) {
+	
+						state.set(State.serialport, ports.get(i));
+						state.set(State.firmware, OCULUS_DC);
+	
+					} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
+	
+						state.set(State.serialport, ports.get(i));
+						state.set(State.firmware, OCULUS_SONAR);
+						
+					} 	
+				}
 				
 				// other devices here if grows 
 			

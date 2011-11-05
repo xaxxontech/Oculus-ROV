@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 
+import developer.CommandServer;
+
 import oculus.Util;
 
 public class ScriptServer extends AbstractTerminal {
@@ -18,6 +20,12 @@ public class ScriptServer extends AbstractTerminal {
 		
 		scriptFile = filename;
 		execute();
+	}
+	
+	public void parseInput(final String str){
+		System.out.println(this.getClass().getName() + " parse: " + str);
+		String[] cmd = str.split(CommandServer.SEPERATOR);
+		if(cmd.length==2) state.set(cmd[0], cmd[1]);	
 	}
 
 	/** loop through given file */

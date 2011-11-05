@@ -297,7 +297,6 @@ public class AutoDock implements Docker {
 		
 		// optionally set breaking delay longer for fast bots
 		int bd = settings.getInteger(OptionalSettings.stopdelay.toString());
-		
 		if(bd==Settings.ERROR) bd = 500;
 		final int stopdelay = bd;
 		

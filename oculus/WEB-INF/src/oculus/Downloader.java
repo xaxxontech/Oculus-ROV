@@ -97,7 +97,8 @@ public class Downloader {
 		// clean target 
 		if(new File(des).exists()) deleteDir(new File(des));
 		
-		if(!new File(zip).exists()){	
+		// 
+		if( ! new File(zip).exists()){	
 			System.out.println("no zip file found: " + zip);
 			return false;
 		}

@@ -8,8 +8,10 @@ import java.util.Properties;
 public enum FactorySettings {
 
 	/** these settings must be available in basic configuration */
-
-	salt, skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
+	
+	// salt is not listed and shouldn't be 
+	
+	skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
 	docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay, 
 	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, mute_rov_on_move, 
 	videoscale, volume, holdservo, loginnotify, reboot;

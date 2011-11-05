@@ -16,7 +16,7 @@ public class Settings {
 	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
 	public static final String developer = "developer";
-	public static final int ERROR = -1; // Integer.MIN_VALUE;
+	public static final int ERROR = -1; 
 	
 	/** create new file if missing */
 	public Settings(){
@@ -106,8 +106,7 @@ public class Settings {
 		try {
 
 			filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					filein));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			String line = "";
 			while ((line = reader.readLine()) != null) {
 				String items[] = line.split(" ");
@@ -115,12 +114,13 @@ public class Settings {
 					result = items[1];
 				}
 			}
+			reader.close();
 			filein.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-//		 if setting missing due to old config file version, try to create as needed from default on demand
+		// if setting missing due to old config file version, try to create as needed from default on demand
 		if (result == null) {
 			FactorySettings factory = null;
 			Properties fprops = FactorySettings.createDeaults();
@@ -188,9 +188,14 @@ public class Settings {
 	 * Organize the settings file into 3 sections. Use Enums's to order the file
 	 */
 	public synchronized void writeFile() {
+		
+		System.out.println("writeFile(), called...");
+		
 		try {
+			
 			final String temp = System.getenv("RED5_HOME") + "\\conf\\oculus_created.txt";
 			FileWriter fw = new FileWriter(new File(temp));
+			
 			// fw.append("# required settings \r\n");
 			for (FactorySettings factory : FactorySettings.values()) {
 
@@ -233,6 +238,53 @@ public class Settings {
 		}
 	}
 
+	/**
+	 * Organize the settings file into 3 sections. Use Enums's to order the file
+	 */
+	public synchronized void writeFile(String fname) {
+		
+		System.out.println("writeFile(" + fname + "), called...");
+		
+		try {
+			final String file = System.getenv("RED5_HOME") + "\\conf\\" + fname;
+			FileWriter fw = new FileWriter(new File(file));
+			
+			fw.append("# backup settings \r\n");
+			for (FactorySettings factory : FactorySettings.values()) {
+
+				// over write with user's settings
+				String val = readSetting(factory.toString());
+				if (val != null) 
+					if( ! val.equalsIgnoreCase("null"))
+						fw.append(factory.toString() + " " + val + "\r\n");
+			}
+			
+			fw.append("# manual settings \r\n");
+			for (OptionalSettings ops : OptionalSettings.values()) {
+
+				// over write with user's settings
+				String val = readSetting(ops.toString());
+				if (val != null)
+					if( ! val.equalsIgnoreCase("null"))
+						fw.append(ops.toString() + " " + val + "\r\n");
+			}
+
+			fw.append("# user list \r\n");
+			fw.append("salt " + readSetting("salt") + "\r\n");
+
+			String[][] users = getUsers();
+			for (int j = 0; j < users.length; j++) {
+				fw.append("user" + j + " " + users[j][0] + "\r\n");
+				fw.append("pass" + j + " " + users[j][1] + "\r\n");
+			}
+
+			fw.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		}
+	}
+	
 	/**
 	 * @return a list of user/pass values from the existing settings file
 	 */

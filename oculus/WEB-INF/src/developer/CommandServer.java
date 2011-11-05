@@ -88,7 +88,7 @@ public class CommandServer {
 				if(app.logintest(user, pass)==null){
 					
 					// was plain text password?
-					System.out.println("plain text pawwsord sent from: " + clientSocket.getInetAddress());
+					System.out.println("plain text pass word sent from: " + clientSocket.getInetAddress());
 				    ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 					passwordEncryptor.setAlgorithm("SHA-1");
 					passwordEncryptor.setPlainDigest(true);

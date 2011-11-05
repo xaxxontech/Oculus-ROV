@@ -3,8 +3,6 @@ package developer.terminal;
 import java.io.*;
 import java.net.*;
 
-import developer.CommandServer;
-
 import oculus.State;
 import oculus.Util;
 
@@ -29,22 +27,13 @@ public abstract class AbstractTerminal  {
 			
 			// login on connect 
 			out.println(user + ":" + pass);
-			
 			startReader(socket);
-			
-			// execute();
 		}
 	}
 	
 	public abstract void execute();
 	
-	public void parseInput(final String str){
-		
-		// System.out.println("parse: " + str);
-		String[] cmd = str.split(CommandServer.SEPERATOR);
-		if(cmd.length==2) state.set(cmd[0], cmd[1]);
-		
-	}
+	public abstract void parseInput(final String str);
 	
 	public void startReader(final Socket socket) {
 		new Thread(new Runnable() {

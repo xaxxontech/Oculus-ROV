@@ -203,10 +203,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getBoolean(State.developer)){
 
 			commandServer.setDocker(docker);
-			//commandManager.dockingTest();
 
 			//new developer.CommandManager(this, docker, comport);
-			//moves.open(Settings.movesfile);
+			
 		}
 		
 
@@ -218,10 +217,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		salt = settings.readSetting("salt");
 		if (salt == null) {
+			System.out.println("initialize(), has no salt!");
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
 		}
-		settings.writeFile(); // needs to be below salt set
+
+		// must call this here 
+		settings.writeFile();
+
+		
+		// TODO: need to test for a backup file ! 
+		
+		
+		
+		 // needs to be below salt set
 		
 		// must be blocking search of all ports, but only once!
 		new Discovery();
@@ -426,9 +435,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final PlayerCommands fn, final String str) {
 
-		//if(state.getBoolean(State.developer))
-		//	if(!fn.equals(PlayerCommands.statuscheck))
-		//		System.out.println("playerCallServer(): " + fn + " " + str);
+		if(state.getBoolean(State.developer))
+			if(!fn.equals(PlayerCommands.statuscheck))
+				System.out.println("playerCallServer(): " + fn + " " + str);
 		
 		switch (fn) {	
 		case chat: chat(str); return;
@@ -1687,16 +1696,22 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("downloading software update...", null, null);
 			new Thread(new Runnable() {
 				public void run() {
-					String fileurl = new Updater().checkForUpdateFile();
+					Updater up = new Updater();
+					final String fileurl = up.checkForUpdateFile();
 					System.out.println("downloading url: " + fileurl);
 					Downloader dl = new Downloader();
 					if (dl.FileDownload(fileurl, "update.zip", "download")) {
 						messageplayer("update download complete, unzipping...", null, null);
+						
+						// this is a blocking call 
 						if (dl.unzipFolder("download\\update.zip", "webapps")) 
 							messageplayer("done.", "softwareupdate", "downloadcomplete");
 						
-						// Util.delay(1000);
+						// not needed now is unpacked 
 						dl.deleteFile("download\\update.zip");
+						
+						// backup config 
+						settings.writeFile("oculus_settings_backup_" + up.getCurrentVersion() + ".txt");
 						
 					} else { messageplayer("update download failed", null, null); }
 				}
@@ -1713,7 +1728,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	public void factoryReset(){
 				
-		final String backup = Settings.filename + ".bak";
+		final String backup = "oculus_factory_reset.txt";
 
 		// backup
 		new File(Settings.filename).renameTo(new File(backup));

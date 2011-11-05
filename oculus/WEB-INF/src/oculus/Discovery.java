@@ -111,10 +111,10 @@ public class Discovery {
 				Util.delay(TIMEOUT);
 				
 				String id = getProduct();
-				// trim delimiters "<xxxxx>"
 				System.out.println("product : *"+id+"*");
 				if (id.length() > 0) {
 				
+					// trim delimiters "<xxxxx>" first
 					id = id.substring(1, id.length()-1).trim();
 					
 					if (id.equalsIgnoreCase(LIGHTS)) {
@@ -147,18 +147,17 @@ public class Discovery {
 		
 			state.set(State.firmware, "unknown");
 		
-			System.out.println("...... no hardware");
+			System.out.println("...... no hardware detected");
 			state.dump();
 		
 		}
-		
 	}
 
 	/** send command to get product id */
 	public String getProduct() {
 
 		byte[] buffer = new byte[32];
-		String device = "";
+		String device = new String();
 
 		// be sure there is no old bytes in our reply
 		try {

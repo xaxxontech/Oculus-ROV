@@ -743,14 +743,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** */
 	public void frameGrab(){
-	
-		/*
-		if(framgrabbusy){ 
-			System.out.println("...still waiting for a result from framegrab");
-			return;
-		}
-		*/
-		
+
 		if (grabber instanceof IServiceCapableConnection) {
 			framgrabbusy = true;
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
@@ -761,10 +754,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	/** */ 
 	public void frameGrabbed(ByteArray _RAWBitmapImage){ // , final String filename) {
-		// String str=
-		// "frame grabbed <a href='images/framegrab.png' target='_blank'>view</a>";
-		// String str=
-		// "frame grabbed <a href='javascript: framegrabbed();'>view</a>";
 		messageplayer(null, "framegrabbed", null);
 		// Use functionality in org.red5.io.amf3.ByteArray to get parameters of
 		// the ByteArray
@@ -787,7 +776,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (JavaImage != null) {
 					// If you sent a jpeg to the server, just change PNG to JPEG
 					// and Red5ScreenShot.png to .jpeg
-					ImageIO.write(JavaImage, "PNG", new File(Settings.framefile));
+					ImageIO.write(JavaImage, "JPEG", new File(Settings.framefile));
 					if (emailgrab) {
 						emailgrab = false;
 						new developer.SendMail("Oculus Screen Shot", "image attached", Settings.framefile, this);

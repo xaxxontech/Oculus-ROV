@@ -2164,7 +2164,7 @@ function emailgrab() {
 
 function framegrabbed() {
 	document.getElementById("framegrabbox").style.display = "";
-	document.getElementById('framegrabpic').src = 'images/framegrab.png'+ '?' + (new Date()).getTime();
+	document.getElementById('framegrabpic').src = 'images/framegrab.jpg'+ '?' + (new Date()).getTime();
 }
 
 

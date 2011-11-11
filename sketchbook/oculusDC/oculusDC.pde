@@ -1,7 +1,22 @@
 #include <Servo.h>
+/*
+ASCII Serial Commands
+All 2 byte pairs, except for STOP, GET_VERSION, and CAMRELEASE
+
+FORWARD = 'f', [0-255] (speed) 
+BACKWARD = 'b', [0-255] (speed)
+LEFT = 'l', [0-255] (speed)
+RIGHT = 'r', [0-255] (speed)
+COMP = 'c', [0 - 255] (DC motor comp: <128 is left, 128 is none, >128 is right)
+CAM = 'v', [0-255] (servo angle)  
+ECHO_ON = 'e', '1' (echo command back TRUE)
+ECHO_OFF = 'e', '0' (echo command back FALSE)
+STOP = 's' (DC motors stop)
+GET_VERSION = 'y'
+CAMRELEASE = 'w'
+*/
 
 // pins
-// const int analogInPin = 0;  
 const int motorA1Pin = 4;    // H-bridge pin 2         LEFT motor
 const int motorA2Pin = 2;    // H-bridge pin 7         LEFT motor
 const int motorB1Pin = 7;    // H-bridge pin 10        RIGHT motor
@@ -12,7 +27,7 @@ const int camservopin = 6;
 
 Servo camservo; // tilt
 
-// motor compensation 
+// DC motor compensation 
 int acomp = 0;
 int bcomp = 0;
 

@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.*;
 
 /**
- * Bare bones terminal client for Oculus. Stdin and Stdout get mapped to socket of given parameters.
+ * Bare bones telnet terminal client for Oculus. Stdin and Stdout get mapped to socket of given parameters.
  */
 public class Terminal {
 

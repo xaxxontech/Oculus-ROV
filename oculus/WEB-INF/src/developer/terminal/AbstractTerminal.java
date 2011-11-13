@@ -81,18 +81,22 @@ public abstract class AbstractTerminal  {
 						break;
 					}
 				}				
-				try {
+				
+				//try {
 					
-					in.close();
+				/*	in.close();
 					in = null;
 					out.close();
 					out.close();
-					socket.close();
+					socket.close();*/
 					System.out.println(".. clean exit...");
 					
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+					
+					shutdown();
+					
+				//} catch (IOException e) {
+				//	e.printStackTrace();
+				//}
 			}
 		}).start();
 	}

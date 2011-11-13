@@ -5,8 +5,6 @@ import java.net.*;
 
 import developer.CommandServer;
 
-//import oculus.State;
-//import oculus.PlayerCommands;
 import oculus.OptionalSettings;
 import oculus.State;
 import oculus.Util;
@@ -15,6 +13,7 @@ public class FindHome extends AbstractTerminal {
 
 	long start = System.currentTimeMillis();
 	boolean looking = true;
+	int fullspin = 605;
 
 	public FindHome(String ip, String port, final String user, final String pass)
 			throws NumberFormatException, UnknownHostException, IOException {
@@ -25,8 +24,9 @@ public class FindHome extends AbstractTerminal {
 	/** wait on the camera and battery, dock */
 	public void connect() {
 
+		out.println("settings");
 		out.println("state");
-		Util.delay(500);
+		Util.delay(2000);
 
 		while (true) {
 			if (state.get(State.batterystatus) == null) {
@@ -60,20 +60,22 @@ public class FindHome extends AbstractTerminal {
 
 				System.out.println(".. docked, so undocking.");
 				out.println("undock");
-				Util.delay(2500);
+				Util.delay(2300);
 				out.println("move backward");
-				Util.delay(1000);
+				Util.delay(700);
 				out.println("stop");
-				Util.delay(1000);
+				Util.delay(700);
 
 				// turn round some
 				
 				int nudges = state.getInteger(OptionalSettings.offcenter.toString());
-				if(nudges != State.ERROR) System.out.println("...found offest: " + nudges);
+				int aboutface = state.getInteger(OptionalSettings.aboutface.toString());
+				System.out.println("...found offest: " + nudges + " aboutface: " + aboutface);
 				
-				// find perfect 360 time 
+				if(fullspin<600) fullspin = 600;
+				
 				out.println("move left");
-				Util.delay(6300);
+				Util.delay(fullspin);
 				out.println("stop");
 				Util.delay(1000);
 			}
@@ -86,9 +88,9 @@ public class FindHome extends AbstractTerminal {
 
 		}
 			
-		out.println("settings nudgedelay 250");
-		out.println("settings stopdelay 300");
-		out.println("settings volume 100");	
+		out.println("settings nudgedelay 290");
+		out.println("settings stopdelay 100");
+		out.println("settings volume 90");	
 		out.println("state foo true");
 
 	}
@@ -99,7 +101,7 @@ public class FindHome extends AbstractTerminal {
 		connect();			
 
 		int nudges = spinFind();
-		
+		System.out.println("spin time = " + (fullspin/2));
 		out.println("settings " + OptionalSettings.offcenter.toString() +" "+ nudges);
 		
 		// hand over control, wait for docking... 
@@ -115,12 +117,16 @@ public class FindHome extends AbstractTerminal {
 
 			System.out.println("[" + (System.currentTimeMillis() - start) + "] ms into autodocking.");
 			if ((System.currentTimeMillis() - start) > State.TWO_MINUTES) {
-				System.out.println("FindHome, Aborting...");
 				
+				System.out.println("FindHome, Aborting...");
+				// nudges = spinFind();
+				
+				/*
 				out.println("beep");
 				out.println("beep");
 				out.println("beep");
-				shutdown();
+			*/	shutdown();
+				
 			}
 			
 
@@ -142,15 +148,15 @@ public class FindHome extends AbstractTerminal {
 		out.println("memory");
 		
 		// save scan setting 
+		out.println("settings " + OptionalSettings.aboutface.toString() + " " + ((double)fullspin/2));
 		
-		
-		
+		Util.delay(500);
 		// out.println("restart")
 		out.println("bye");
-
 		Util.delay(500);
-		System.out.println("find home closed its self??");
-		Util.delay(500);
+		
+		System.out.println("... find home closed its self??");
+		Util.delay(5000);
 		shutdown();
 	}
 	
@@ -191,19 +197,21 @@ public class FindHome extends AbstractTerminal {
 			}
 			
 			if(out==null) {
-				System.out.println("errrorrrrr: socket closed, shutdown");
-				shutdown();
+				if(out.checkError()){
+					System.out.println("errrorrrrr: socket closed, shutdown");
+					shutdown();
+				}
 			}
 			
 			// call every so often 
-			if ((i++ % 5) == 0) {
+			if ((i++ % 3) == 0) {
 
 				System.out.println(i + " : publish again, look back one" );
 				out.println("nudge right");
 				out.println("publish camera");
 				out.println("memory");
 				Util.delay(4000);
-				state.dump();
+				// state.dump();
 
 			}
 		

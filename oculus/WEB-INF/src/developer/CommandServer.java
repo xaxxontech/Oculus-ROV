@@ -2,6 +2,8 @@ package developer;
 
 import java.io.*;
 import java.net.*;
+// import java.nio.ByteBuffer;
+// import java.nio.channels.FileChannel;
 import java.util.Vector;
 
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
@@ -9,10 +11,11 @@ import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 import oculus.Application;
 import oculus.BatteryLife;
 import oculus.Docker;
+// import oculus.FactorySettings;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
-import oculus.PlayerCommands;
+// import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.State;
 import oculus.Updater;
@@ -27,6 +30,8 @@ import oculus.commport.ArduioPort;
  */
 public class CommandServer {
 	
+	// public static final String LOGIN = " : ";
+	public static final String WELCOME = "...greetings master, 1234d.... ";
 	public static final String SEPERATOR = " : ";
 	
 	private static BatteryLife battery = BatteryLife.getReference();
@@ -125,6 +130,7 @@ public class CommandServer {
 		@Override
 		public void run() {
 			
+			out.println(WELCOME);
 			sendToGroup(printers.size() + " tcp connections active");
 			
 			try {
@@ -147,9 +153,10 @@ public class CommandServer {
 					
 					// parse and run it 
 					str = str.trim();
-					System.out.println("address [" + clientSocket + "] message [" + str + "]");
-					manageCommand(str);
-					
+					if(str.length()>1){
+						System.out.println("address [" + clientSocket + "] message [" + str + "]");
+						manageCommand(str);
+					}
 				}
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
@@ -176,9 +183,7 @@ public class CommandServer {
 			}
 
 			// show this users is no longer in the group
-			System.out.println("currently [" + printers.size() + "] users are connected.");
-			app.message(printers.size() + " tcp connections active.", null, null);
-			sendToGroup(printers.size() + " tcp connections active.");
+			// app.message(printers.size() + " tcp connections active.", null, null);
 		}
 
 		@Override
@@ -189,7 +194,7 @@ public class CommandServer {
 			else out.println(key + SEPERATOR + value);
 		}
 		
-		/** try to parse, look up, exec comand */
+		/** try to parse, look up, exec comand 
 		public void playerCommand(final String str){
 			final String[] cmd = str.split(" ");
 			PlayerCommands ply = null;
@@ -202,9 +207,9 @@ public class CommandServer {
 			if(ply!=null){
 				
 				// TODO: COLIN, ASK.... 
-				System.out.println(".. cmd server, plyer cmd: " + cmd[0]);
+				// System.out.println(".. cmd server, plyer cmd: " + cmd[0]);
 			
-				app.playerCallServer(ply, str);
+				// app.playerCallServer(ply, str);
 
 
 				switch (ply) {
@@ -239,47 +244,82 @@ public class CommandServer {
 				//if(str.equals("restart")) app.restart();
 				
 			}
-		}
+			
+			
+		} */
 		
 		/** add extra commands, macros here */ 
 		public void manageCommand(final String str){
 
-			// try player commands first 
-			playerCommand(str);
-			
 			// do exta commands below 
 			final String[] cmd = str.split(" ");
 			
-			///if(str.equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
+			/*
+			if(cmd[0].equals("tail")) {
+				
+				final String file = System.getenv("RED5_HOME") + "\\log\\jvm.stdout";
+				ByteBuffer copy = ByteBuffer.allocate(12);
+
+				//FileChannel fc = FileChannel.open(file);
+				
+				   FileInputStream inFile = null;
+
+				    try {
+						inFile = new FileInputStream(file);
+
+						FileChannel inChannel = inFile.getChannel();
+						ByteBuffer buf = ByteBuffer.allocate(48);
+
+						while (inChannel.read(buf) != -1) {
+						  out.println("String read: " + ((ByteBuffer) (buf.flip())).asCharBuffer().get(0));
+						  buf.clear();
+						}
+						inFile.close();
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				*/
 			
-			//if(str.equals("restart")) app.restart();
 			
-			///if(str.startsWith("stop")) port.stopGoing();
-	
-			if(str.equals("settings")) out.println(settings.toString());
+			if(cmd[0].equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
+						
+			if(cmd[0].equals("stop")) port.stopGoing();
+				
+			if(cmd[0].equals("restart")) app.restart(); 
+		
+			if(cmd[0].equals("softwareupdate")) app.softwareUpdate("update"); 
 			
-			if(str.equals("image")) {
+			/*
+			if(cmd[0].equals("image")) {
 				
 				app.frameGrab();
-				while(app.framgrabbusy){
-					// out.println("waiting....");
+				while(app.framegrabbusy){
+					out.println("framr grab waiting....");
 					Util.delay(500);
 				}
 	
-				out.println("...done...");
-				System.out.println("...done...");
+				out.println("...done frame grab ...");
+				//System.out.println("...done...");
 			}
+				*/
 			
-			if(str.startsWith("nudge")) port.nudge(cmd[1]);
-			
-			if(str.startsWith("move")){
+			if(cmd[0].equals("move")){
+				// System.out.println("move.....");
 				if(cmd[1].equals("forward")) port.goForward();
-				else if(cmd[1].equals("backwards")) port.goBackward();
+				else if(cmd[1].equals("backward")) port.goBackward();
 				else if(cmd[1].equals("left")) port.turnLeft();
 				else if(cmd[1].equals("right")) port.turnRight();
 			}
 			
-			if(str.equals("cam")){
+			if(cmd[0].equals("nudge")) port.nudge(cmd[1]);
+			
+			if(cmd[0].equals("publish")) app.publish(cmd[1]); 
+			
+			if(cmd[0].equals("cam")){
 				app.publish("camera");
 				port.camHoriz();
 				port.camCommand("down");
@@ -287,33 +327,67 @@ public class CommandServer {
 				port.camCommand("stop");
 			}
 			
-			if(str.equals("bye")) shutDown();
-						
-			if(str.equals("find")) app.dockGrab();	
-			
-			if(str.equals("battery")) battery.battStats();
-								
-			if(str.equals("dock") && docker!=null) docker.autoDock("go");
-			
-			if(str.equals("undock") && docker!=null) docker.dock("undock");
-									
-			if(str.equals("stop")) port.stopGoing();
+			if(cmd[0].equals("memory")) {
 				
-			if(str.equals("beep")) Util.beep();
+				out.println("memory : " +
+						((double)Runtime.getRuntime().freeMemory()
+								/ (double)Runtime.getRuntime().totalMemory()) + "%");
+				
+				out.println("memorytotal : "+Runtime.getRuntime().totalMemory());    
+			    out.println("memoryfree : "+Runtime.getRuntime().freeMemory());
 			
-			if(str.equals("tcp")) out.println("tcp connections : " + printers.size());
+			}
+			
+			if(cmd[0].equals("bye")) shutDown();
+						
+			if(cmd[0].equals("find")) app.dockGrab();	
+			
+			if(cmd[0].equals("battery")) battery.battStats();
+								
+			if(cmd[0].equals("dock") && docker!=null) docker.autoDock("go");
+			
+			if(cmd[0].equals("undock") && docker!=null) docker.dock("undock");
+									
+			if(cmd[0].equals("stop")) port.stopGoing();
+				
+			if(cmd[0].equals("beep")) Util.beep();
+			
+			if(cmd[0].equals("email")) new SendMail("image", "body", Settings.framefile);
+			
+			if(cmd[0].equals("tcp")) out.println("tcp connections : " + printers.size());
 	
-			if(str.equals("users")){
+			if(cmd[0].equals("users")){
 				out.println("active users : " + records.getActive());
 				if(records.toString()!=null) out.println(records.toString());
 			}
 
-			if(str.equals("settings")) out.println(settings.toString());
-
-			if(str.startsWith("state")) {
-				if(cmd.length==3) state.set(cmd[1], cmd[2]);
+			if(cmd[0].equals("state")) {
+				if(cmd.length==2) state.set(cmd[1], cmd[2]);
 				else out.println(state.toString());
 			}		
+			
+			if(cmd[0].equals("settings")){
+				if(cmd.length==3) { 
+				
+					// System.out.println(".. write setting: " + str);
+					
+					if(settings.readSetting(cmd[1]) == null) {
+						settings.newSetting(cmd[1], cmd[2]);
+					} else {
+						settings.writeSettings(cmd[1], cmd[2]);
+					}
+					
+					// clean file afterwards 
+					settings.writeFile();
+					
+				} else if(cmd.length==2) {
+					
+					out.println(settings.readSetting(cmd[1])); 
+
+					System.out.println("setting value = " + settings.readSetting(cmd[1])); 
+					
+				} else out.println(settings.toString());
+			}
 		}
 	}
 	

@@ -18,7 +18,7 @@ public class LoginRecords {
 	// This should trigger an admin gmail warning if ppl share passwords?
 	
 	public LoginRecords() {
-		//System.out.println("login records started..");}
+		System.out.println("login records started..");
 	}
 	
 	public void beDriver() { 

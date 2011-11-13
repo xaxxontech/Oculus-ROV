@@ -1,4 +1,4 @@
-package oculus;
+package oculus.commport;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -8,6 +8,11 @@ import gnu.io.SerialPortEventListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import oculus.Application;
+import oculus.State;
+import oculus.Util;
+
 import org.red5.logging.Red5LoggerFactory;
 import org.slf4j.Logger;
 

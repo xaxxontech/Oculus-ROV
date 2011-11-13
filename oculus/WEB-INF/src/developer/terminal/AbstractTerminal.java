@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 
 import oculus.State;
-import oculus.Util;
 
 public abstract class AbstractTerminal  {
 	
@@ -35,6 +34,26 @@ public abstract class AbstractTerminal  {
 	
 	public abstract void parseInput(final String str);
 	
+	public void shutdown(){
+
+		try {
+			if(in!=null) in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if(out!=null) out.close();
+		
+		try {
+			if(socket!=null) socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	
+		System.out.println("-- forced exit --");
+		System.exit(0);
+	}
+	
 	public void startReader(final Socket socket) {
 		new Thread(new Runnable() {
 			@Override
@@ -42,7 +61,7 @@ public abstract class AbstractTerminal  {
 				try {
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				} catch (Exception e) {
-					return;
+					shutdown();
 				}
 			
 				String input = null;
@@ -55,7 +74,7 @@ public abstract class AbstractTerminal  {
 
 						if(out.checkError()){
 							System.out.println("..write end closed.");
-							break;
+							shutdown();
 						}
 					} catch (IOException e) {
 						System.out.println(e.getMessage());
@@ -63,13 +82,14 @@ public abstract class AbstractTerminal  {
 					}
 				}				
 				try {
+					
 					in.close();
+					in = null;
+					out.close();
 					out.close();
 					socket.close();
-					System.out.println("-- exit --");
-					System.out.println(state.toString());
-					Util.delay(300);
-					System.exit(-1);
+					System.out.println(".. clean exit...");
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

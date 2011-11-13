@@ -1,6 +1,6 @@
 package oculus.commport;
 
-import developer.SendMail;
+// import developer.SendMail;
 import oculus.Application;
 import oculus.State;
 import oculus.Util;
@@ -13,12 +13,11 @@ import gnu.io.SerialPortEventListener;
 public class ArduinoCommSonar extends AbstractArduinoComm implements
 		SerialPortEventListener, ArduioPort {
 
-	public static final int SONAR_DELAY = 1700;
-
-	public ArduinoCommSonar(Application app) {
+	public static final int SONAR_DELAY = 3000;
+	public static int sonarOffset = -1; 
+	
+	public ArduinoCommSonar(Application app) {	
 		super(app);
-
-		// check for lost connection
 		new WatchDog().start();
 	}
 
@@ -34,11 +33,10 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					
-					log.error("arduino watchdog time out");
-					new SendMail("oculus debug", "sonar port, saying watch doging..");
+					log.error("sonar arduino watchdog time out, reboot!");
 					Util.beep();
+					Util.systemCall("shutdown -r -f -t 01");				
 					
-					// return; // die, no point living?
 				}
 
 				if (getReadDelta() > SONAR_DELAY) {
@@ -81,7 +79,6 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 		} else if (response.charAt(0) != GET_VERSION[0]) {
 
 			// if sonar enabled will get <sonar back|left|right xxx> inplace of watchdog
-			
 	
 			if (response.startsWith("sonar")) {
 				final String[] param = response.split(" ");
@@ -90,9 +87,14 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 				if (param[1].equals("back")) {
 					if (Math.abs(range - state.getInteger(State.sonarback)) > 1)
 						state.set(State.sonarback, range);
+					
 				} else if (param[1].equals("right")) {
 					if (Math.abs(range - state.getInteger(State.sonarright)) > 1)
-						state.set(State.sonarright, range);
+						state.set(State.sonarright, range + sonarOffset);
+					
+				} else if (param[1].equals("left")) {
+					if (Math.abs(range - state.getInteger(State.sonarleft)) > 1)
+						state.set(State.sonarleft, range);
 				}
 
 				// must be an echo

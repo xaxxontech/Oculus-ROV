@@ -16,6 +16,8 @@ import javax.imageio.ImageIO;
 import oculus.commport.AbstractArduinoComm;
 import oculus.commport.ArduinoCommDC;
 import oculus.commport.ArduinoCommSonar;
+import oculus.commport.Discovery;
+import oculus.commport.LightsComm;
 
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 import org.red5.server.api.IConnection;
@@ -50,7 +52,6 @@ public class Application extends MultiThreadedApplicationAdapter {
     private boolean initialstatuscalled = false;
     private boolean pendingplayerisnull = true;
     private boolean emailgrab = false;
-    public boolean framgrabbusy = false;
     private boolean playerstream = false;
     
     // TODO: issue 24 
@@ -200,15 +201,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// TODO: BRAD
 		docker = new AutoDock(this, grabber, comport, light);
 		
-		if (settings.getBoolean(State.developer)){
-
-			commandServer.setDocker(docker);
-
-			//new developer.CommandManager(this, docker, comport);
+		///if(commandServer!=null) 
 			
-		}
-		
+		commandServer.setDocker(docker);
 
+		// TODO: WHY IS THIS NULL ? 
 		// System.out.println("grabber: " + grabber.getSessionId());
 	}
 
@@ -224,14 +221,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		// must call this here 
 		settings.writeFile();
-
-		
-		// TODO: need to test for a backup file ! 
-		
-		
-		
-		 // needs to be below salt set
-		
+	
 		// must be blocking search of all ports, but only once!
 		new Discovery();
 		
@@ -245,26 +235,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 		new SystemWatchdog();
 		
-		if(settings.readSetting(OptionalSettings.commandport)!=null)
-			commandServer = new developer.CommandServer(this, comport);
-
 		if (settings.getBoolean(State.developer)){
 			moves.open(Settings.movesfile);
-			
-			// TODO: Brad added, removable with single comment line here 
-			// moving this all to cmd server, external proc 
-			// new developer.DockingObserver(this);
-			new developer.sonar.SonarSteeringObserver(this, comport);
-			//new developer.ftp.FTPObserver(this);
-			new developer.EmailAlerts(this);
-			
+			new developer.EmailAlerts(this);	
 		}
+		
+		// open socket last 
+		if(settings.readSetting(OptionalSettings.commandport)!=null)
+			commandServer = new developer.CommandServer(this, comport);
 		
 		Util.setSystemVolume(settings.getInteger(Settings.volume));
 		
 		grabberInitialize();
 		battery = BatteryLife.getReference();
 		log.info("initialize");
+		
 	}
 
 	/**
@@ -741,11 +726,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 
-	/** */
-	public void frameGrab(){
-
+	/** starts new threads... */
+	public /*synchronized*/ void frameGrab(){
 		if (grabber instanceof IServiceCapableConnection) {
-			framgrabbusy = true;
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("framegrab", new Object[] {});
 			messageplayer("framegrab command received", null, null);
@@ -787,10 +770,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				System.out.println("IO Error " + e);
 			}
 		}
-		
-		// toggle flag
-		framgrabbusy = false;
-		
 	}
 
 	private void messageplayer(String str, String status, String value) {
@@ -1725,7 +1704,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// delete it, build on startup 
 		new File(Settings.filename).delete();
 		
-		// admin = true;
 		restart();
 	}
 }

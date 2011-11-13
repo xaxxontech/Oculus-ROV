@@ -1,10 +1,13 @@
-package oculus;
+package oculus.commport;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import oculus.State;
+import oculus.Util;
 
 import gnu.io.*;
 
@@ -36,6 +39,7 @@ public class Discovery {
 
 	/* constructor makes a list of available ports */
 	public Discovery() {
+		// System.out.println(".. searching ..");
 		getAvailableSerialPorts();
 		search();
 	}
@@ -108,10 +112,11 @@ public class Discovery {
 	public void search() {
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (connect(ports.get(i))) {
-				Util.delay(TIMEOUT);
 				
+				Util.delay(TIMEOUT);				
 				String id = getProduct();
 				System.out.println("product : *"+id+"*");
+				
 				if (id.length() > 0) {
 				
 					// trim delimiters "<xxxxx>" first

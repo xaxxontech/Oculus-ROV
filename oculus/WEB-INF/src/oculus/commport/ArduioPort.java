@@ -4,7 +4,7 @@ import gnu.io.SerialPortEvent;
 
 public interface ArduioPort {
 
-	public static final long DEAD_TIME_OUT = 30000;
+	public static final long DEAD_TIME_OUT = 20000;
 	public static final int SETUP = 2000;
 	public static final int WATCHDOG_DELAY = 5000;
 	public static final byte FORWARD = 'f';
@@ -91,8 +91,5 @@ public interface ArduioPort {
 	public abstract void releaseCameraServo();
 
 	/** send steering compensation values to the arduino */
-	public abstract void updateSteeringComp();
-
-	// public abstract String getFirmware();
-	
+	public abstract void updateSteeringComp();	
 }

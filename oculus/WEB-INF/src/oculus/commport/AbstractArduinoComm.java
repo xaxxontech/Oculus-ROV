@@ -60,6 +60,8 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	public AbstractArduinoComm(Application app) {
 
 		application = app;
+		
+		System.out.println(".. arduino abstract open port ..");
 
 		if (state.get(State.serialport) != null) {
 			new Thread(new Runnable() {
@@ -81,8 +83,17 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 		public Sender(final byte[] cmd) {
 			// do connection check
-			if (!isconnected)
-				log.error("not connected");
+			if (!isconnected){
+			
+				//
+				// TODO: error I'm getting 
+				//
+				log.error("not connected, rebooting");
+				
+				if(state.getBoolean("foo"))
+					Util.systemCall("shutdown -r -f -t 01");	
+				
+			}
 			else {
 				command = cmd;
 				this.start();

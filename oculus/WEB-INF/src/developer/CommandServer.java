@@ -24,14 +24,10 @@ import oculus.commport.ArduioPort;
 
 /**
  * Start the chat server. Start new threads for a each connection on the given port
- * 
- * Created: 2007.11.3
- * 
  */
 public class CommandServer {
 	
-	// public static final String LOGIN = " : ";
-	public static final String WELCOME = "...greetings master, 1234d.... ";
+	public static final String WELCOME = "... greetings master ... ";
 	public static final String SEPERATOR = " : ";
 	
 	private static BatteryLife battery = BatteryLife.getReference();
@@ -121,6 +117,7 @@ public class CommandServer {
 			}
 			
 			// keep track of all other user sockets output streams
+			
 			printers.add(out);	
 			state.addObserver(this);
 			this.start();
@@ -130,6 +127,7 @@ public class CommandServer {
 		@Override
 		public void run() {
 			
+			Util.beep();
 			out.println(WELCOME);
 			sendToGroup(printers.size() + " tcp connections active");
 			
@@ -181,9 +179,6 @@ public class CommandServer {
 				e.printStackTrace();
 				return;
 			}
-
-			// show this users is no longer in the group
-			// app.message(printers.size() + " tcp connections active.", null, null);
 		}
 
 		@Override

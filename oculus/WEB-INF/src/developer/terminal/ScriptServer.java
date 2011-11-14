@@ -29,7 +29,6 @@ public class ScriptServer extends AbstractTerminal {
 	}
 
 	/** loop through given file */
-	@Override
 	public void execute(){
 		
 		System.out.println("running file:" + scriptFile);

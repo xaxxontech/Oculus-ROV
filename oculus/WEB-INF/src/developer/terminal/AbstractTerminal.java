@@ -14,7 +14,7 @@ public abstract class AbstractTerminal  {
 	BufferedReader in;
 	PrintWriter out;
 	
-	/** */ 
+	/** telnet connect */ 
 	public AbstractTerminal(String ip, String port, final String user, final String pass) 
 		throws NumberFormatException, UnknownHostException, IOException {
 	
@@ -30,10 +30,12 @@ public abstract class AbstractTerminal  {
 		}
 	}
 	
-	public abstract void execute();
-	
+
+	/** each sub class will get notified when data comes in */
 	public abstract void parseInput(final String str);
 	
+	
+	/** */
 	public void shutdown(){
 
 		try {
@@ -50,7 +52,7 @@ public abstract class AbstractTerminal  {
 			e.printStackTrace();
 		}
 	
-		System.out.println("-- forced exit --");
+		// System.out.println("-- forced exit --");
 		System.exit(0);
 	}
 	
@@ -73,7 +75,7 @@ public abstract class AbstractTerminal  {
 						else parseInput(input);
 
 						if(out.checkError()){
-							System.out.println("..write end closed.");
+							System.out.println(".. abstract terminal ..write end closed.");
 							shutdown();
 						}
 					} catch (IOException e) {
@@ -89,7 +91,7 @@ public abstract class AbstractTerminal  {
 					out.close();
 					out.close();
 					socket.close();*/
-					System.out.println(".. clean exit...");
+					System.out.println(".. abstract terminal clean exit...");
 					
 					
 					shutdown();

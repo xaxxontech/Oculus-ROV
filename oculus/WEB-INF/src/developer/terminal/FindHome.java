@@ -217,7 +217,7 @@ public class FindHome extends AbstractTerminal {
 					Util.delay(4000);
 					if (state.getInteger(State.dockxpos) > 0) {
 
-						out.println("nudge forward");
+						out.println("nudge backward");
 						Util.delay(3000);
 						out.println("find");
 						Util.delay(3000);

@@ -75,12 +75,12 @@ public class CommandServer {
 
 				return;
 			}
-	/*
+	
 			// send banner 
 			out.println("oculus version " + new Updater().getCurrentVersion() + " ready for login."); 
 
 			// first thing better be user:pass
-		try {
+			try {
 				
 				final String inputstr = in.readLine();
 				final String user = inputstr.substring(0, inputstr.indexOf(':')).trim();
@@ -116,8 +116,7 @@ public class CommandServer {
 					return;
 				}
 			}
-		*/
-			
+	
 			// keep track of all other user sockets output streams
 			
 			printers.add(out);	
@@ -184,14 +183,16 @@ public class CommandServer {
 		public void updated(String key) {
 			
 			if(key.equals(oculus.State.dockdensity)){
-				System.out.println("dock density reply in.... ");
+				System.out.println("... dock density reply in.... ");
 				grabbusy = false;
 			}
 			
 			String value = state.get(key);
-			System.out.println("state updated: " + key + " " + value);
-			if(value==null) out.println("deleted " + SEPERATOR + key);
-			else out.println(key + SEPERATOR + value);
+			if(value==null) out.println("state deleted " + SEPERATOR + key);
+			else {
+				System.out.println("state updated: " + key + " " + value);
+				out.println(key + SEPERATOR + value);
+			}
 		}
 		
 		/** try to parse, look up, exec comand 
@@ -387,6 +388,8 @@ public class CommandServer {
 			if(cmd[0].equals("stop")) port.stopGoing();
 				
 			if(cmd[0].equals("beep")) Util.beep();
+			
+			if(cmd[0].equals("dump")) state.dump();
 			
 			if(cmd[0].equals("email")) new SendMail("image", "body", Settings.framefile);
 			

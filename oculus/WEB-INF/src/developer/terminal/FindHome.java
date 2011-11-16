@@ -137,14 +137,14 @@ public class FindHome extends AbstractTerminal {
 		// clear old failures
 		if (state.getBoolean(State.losttarget)) {
 			System.out.println("..... recovering from old attempt! ");
-			out.println("state " + State.losttarget + false);
+			out.println("state " + State.losttarget + " " + false);
 		}
 
 		int nudges = state.getInteger(OptionalSettings.offcenter.toString());
 		int aboutface = state.getInteger(OptionalSettings.aboutface.toString());
 		System.out.println("...found offest: " + nudges + " aboutface: " + aboutface);
 
-		//out.println("settings nudgedelay 300");
+		out.println("state autodocking false");
 		//	out.println("settings stopdelay 300");
 		///out.println("settings volume 90");
 		

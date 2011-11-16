@@ -8,6 +8,7 @@ public class State {
 
 	public static final String SEPERATOR = " : ";
 
+	// TODO: MUST GO AWAY 
 	private Settings settings = new Settings();
 
 	public static final String user = "user";
@@ -45,8 +46,10 @@ public class State {
 	public static final String undock = "undock";
 	public static final String firmware = "firmware";
 	public static final String unknown = "unknown";	
-	public static final String frameGrabBusy = "frameGrabBusy";
-
+	public static final String framegrabbusy = "framegrabbusy";
+	public static final String dockgrabbusy = "dockgrabbusy";
+	
+	
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
@@ -62,6 +65,7 @@ public class State {
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
+
 
 	/** properties object to hold configuration */
 	private Properties props = new Properties();
@@ -112,7 +116,8 @@ public class State {
 		return aa.equalsIgnoreCase(b);
 	}
 	
-	/** test for string equality against config file. any nulls will return false */ 
+	/** test for string equality against config file. any nulls will return false */
+	// TODO: BRAD REMOVE 
 	public boolean equalsSetting(final String a, final String b){
 		String aa = get(a);
 		if(aa==null) return false; 
@@ -304,8 +309,8 @@ public class State {
 
 	/** */
 	public synchronized void set(String key, boolean b) {
-		if(b) props.put(key, "true");
-		else props.put(key, "false");
+		if(b) set(key, "true");
+		else set(key, "false");
 	}
 	
 	/** */
@@ -331,22 +336,4 @@ public class State {
 	public String get(PlayerCommands cmd){ 
 		return get(cmd.toString()); 
 	}
-
-	//  public static final String enable = "enable";
-    //	public static final String disable = "disable";
-	//  private boolean locked = false
-	
-	
-	/*
-	public synchronized void lock() {
-		locked = true;
-	}
-
-	public synchronized void unlock() {
-		locked = false;
-	}
-
-	public synchronized boolean isLocked() {
-		return locked;
-	}*/
 }

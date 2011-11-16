@@ -406,10 +406,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void dockGrab(){
+		
+	//	if(state.getBoolean(oculus.State.dockgrabbusy)){
+	//		System.out.println("app.. dock grab busy..");
+	//		return;
+	//	}
+		
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("dockgrab", new Object[] {0,0,"find"}); 
-		} else log.error("failed to grab dock target");
+			state.set(oculus.State.dockgrabbusy, true);
+		} 
 	}
 	
 	/**
@@ -607,9 +614,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			state.set(State.dockxsize, arg[3]);
 			state.set(State.dockysize, arg[4]);
 			state.set(State.dockdensity, arg[5]);
+			state.set(State.dockgrabbusy, false);
 			break;
 		}
-		case autodock: docker.autoDock(str); break;
+		case autodock: {
+			System.out.println("grabberCallServer(): autodock: " + str);
+			docker.autoDock(str); break;
+		}
 		case checkforbattery: checkForBattery(str); break;
 		case factoryreset: factoryReset(); break;
 		case restart:
@@ -727,16 +738,26 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 
 	/** starts new threads... */
-	public /*synchronized*/ void frameGrab(){
+	public void frameGrab(){
+		
+	//	if(state.getBoolean(State.framegrabbusy)){
+	//		System.out.println(".. calling framegrab too often.");
+	//		return;
+	//	}
+		
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("framegrab", new Object[] {});
 			messageplayer("framegrab command received", null, null);
+			state.set(State.framegrabbusy, true);
 		}
 	}
 	
+	//TODO: BRAD.. 
 	/** */ 
 	public void frameGrabbed(ByteArray _RAWBitmapImage){ // , final String filename) {
+		
+		state.set(State.framegrabbusy, false);
 		messageplayer(null, "framegrabbed", null);
 		// Use functionality in org.red5.io.amf3.ByteArray to get parameters of
 		// the ByteArray

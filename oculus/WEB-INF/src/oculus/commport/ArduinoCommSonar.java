@@ -13,7 +13,7 @@ import gnu.io.SerialPortEventListener;
 public class ArduinoCommSonar extends AbstractArduinoComm implements
 		SerialPortEventListener, ArduioPort {
 
-	public static final int SONAR_DELAY = 3000;
+	public static final long SONAR_DELAY = DEAD_TIME_OUT/2 + 500;
 	public static int sonarOffset = -1; 
 	
 	public ArduinoCommSonar(Application app) {	
@@ -27,7 +27,8 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 			this.setDaemon(true);
 		}
 
-		public void run() {
+		public void run() {		
+			
 			Util.delay(SETUP);
 			while (true) {
 

@@ -90,7 +90,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 				//
 				log.error("not connected, rebooting");
 				
-				if(state.getBoolean("foo"))
+				if(state.getBoolean(oculus.State.developer))
 					Util.systemCall("shutdown -r -f -t 01");	
 				
 			}

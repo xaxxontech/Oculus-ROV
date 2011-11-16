@@ -4,7 +4,7 @@ import gnu.io.SerialPortEvent;
 
 public interface ArduioPort {
 
-	public static final long DEAD_TIME_OUT = 20000;
+	public static final long DEAD_TIME_OUT = 30000;
 	public static final int SETUP = 2000;
 	public static final int WATCHDOG_DELAY = 5000;
 	public static final byte FORWARD = 'f';

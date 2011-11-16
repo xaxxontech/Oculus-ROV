@@ -27,7 +27,7 @@ import oculus.commport.ArduioPort;
  */
 public class CommandServer {
 	
-	public static final String WELCOME = "... greetings master ... ";
+	public static final String WELCOME = "... greetings master blaster ... ";
 	public static final String SEPERATOR = " : ";
 	
 	private static BatteryLife battery = BatteryLife.getReference();
@@ -38,6 +38,8 @@ public class CommandServer {
 	private static ServerSocket serverSocket = null; 
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static LoginRecords records = new LoginRecords();
+	
+	private boolean grabbusy = false;
 
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread implements Observer {
@@ -46,7 +48,7 @@ public class CommandServer {
 		private Socket clientSocket = null;
 		private BufferedReader in = null;
 		private PrintWriter out = null;
-
+		
 		public ConnectionHandler(Socket socket) {
 		
 			clientSocket = socket;
@@ -73,19 +75,18 @@ public class CommandServer {
 
 				return;
 			}
-
+	/*
 			// send banner 
 			out.println("oculus version " + new Updater().getCurrentVersion() + " ready for login."); 
 
 			// first thing better be user:pass
-			try {
+		try {
 				
 				final String inputstr = in.readLine();
 				final String user = inputstr.substring(0, inputstr.indexOf(':')).trim();
 				final String pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
 				
 				sendToGroup(clientSocket.getInetAddress() + " attempt by " + user);
-
 				if(app.logintest(user, pass)==null){
 					
 					// was plain text password?
@@ -115,6 +116,7 @@ public class CommandServer {
 					return;
 				}
 			}
+		*/
 			
 			// keep track of all other user sockets output streams
 			
@@ -137,11 +139,7 @@ public class CommandServer {
 				while (true) {
 
 					// been closed ?
-					if(out.checkError()) {
-						System.out.println("...output stream is closed, close client.");
-						shutDown();
-						break;
-					}
+					if(out.checkError()) shutDown();			
 					
 					// blocking read from the client stream up to a '\n'
 					String str = in.readLine();
@@ -184,7 +182,14 @@ public class CommandServer {
 		@Override
 		/** send to socket on state change */ 
 		public void updated(String key) {
+			
+			if(key.equals(oculus.State.dockdensity)){
+				System.out.println("dock density reply in.... ");
+				grabbusy = false;
+			}
+			
 			String value = state.get(key);
+			System.out.println("state updated: " + key + " " + value);
 			if(value==null) out.println("deleted " + SEPERATOR + key);
 			else out.println(key + SEPERATOR + value);
 		}
@@ -288,19 +293,18 @@ public class CommandServer {
 		
 			if(cmd[0].equals("softwareupdate")) app.softwareUpdate("update"); 
 			
-			/*
 			if(cmd[0].equals("image")) {
 				
 				app.frameGrab();
-				while(app.framegrabbusy){
+				
+				while(state.getBoolean(oculus.State.framegrabbusy)){
 					out.println("framr grab waiting....");
 					Util.delay(500);
 				}
 	
-				out.println("...done frame grab ...");
-				//System.out.println("...done...");
+				out.println("done frame grab");
+				System.out.println("...done...");
 			}
-				*/
 			
 			if(cmd[0].equals("move")){
 				// System.out.println("move.....");
@@ -335,7 +339,44 @@ public class CommandServer {
 			
 			if(cmd[0].equals("bye")) shutDown();
 						
-			if(cmd[0].equals("find")) app.dockGrab();	
+			if(cmd[0].equals("find")) {
+				if(grabbusy){
+				
+					System.out.println(".. can't call again.. ");
+					out.println("busy");
+					return;
+					
+				} else {
+					
+					state.set(oculus.State.dockgrabbusy, true);
+					grabbusy = true;	
+					app.dockGrab();
+
+					new Thread(new Runnable() {
+						
+						@Override
+						public void run() {
+														
+							System.out.println("wait for grab to end... ");
+							
+							int i = 0;
+							while(grabbusy){
+								
+								System.out.println(" ... wait: " + i++);
+								Util.delay(3000);
+								
+								if(i>10) {
+									System.out.println("give up find: " + Thread.currentThread());
+									state.set(oculus.State.dockgrabbusy, false);
+									grabbusy = false;
+									break;
+								}
+								
+							}										
+						}
+					}).start();
+				 }
+			}
 			
 			if(cmd[0].equals("battery")) battery.battStats();
 								
@@ -400,8 +441,6 @@ public class CommandServer {
 	
 	public void setDocker(Docker d) {
 		docker = d;
-		// this gets called often 
-		///System.out.println("CommandManager: new docker created.... ");
 	}
 	
 	/** */
@@ -433,7 +472,6 @@ public class CommandServer {
 			@Override
 			public void run() {
 				while(true) {
-					battery.battStats();
 					go();
 				}
 			}

@@ -97,8 +97,10 @@ public class FindHome extends AbstractTerminal {
 				System.out.println("... found offest: " + nudges + " fullturn: " + fullturn);
 
 				// default if not 
-				if(fullturn==State.ERROR) 	
+				if(fullturn==State.ERROR) {	
 					out.println("settings " + OptionalSettings.aboutface.toString() + " 3000");
+					fullturn = 3000;
+				}
 				
 				out.println("move left");
 				Util.delay(fullturn); 
@@ -135,17 +137,18 @@ public class FindHome extends AbstractTerminal {
 		// clear old failures
 		if (state.getBoolean(State.losttarget)) {
 			System.out.println("..... recovering from old attempt! ");
-			out.println("state " + State.losttarget + " false");
+			out.println("state " + State.losttarget + false);
 		}
 
 		int nudges = state.getInteger(OptionalSettings.offcenter.toString());
 		int aboutface = state.getInteger(OptionalSettings.aboutface.toString());
 		System.out.println("...found offest: " + nudges + " aboutface: " + aboutface);
 
-		out.println("settings nudgedelay 300");
-		out.println("settings stopdelay 300");
-		out.println("settings volume 90");
-		out.println("state foo true");
+		//out.println("settings nudgedelay 300");
+		//	out.println("settings stopdelay 300");
+		///out.println("settings volume 90");
+		
+		// out.println("state foo true");
 
 	}
 	
@@ -176,22 +179,19 @@ public class FindHome extends AbstractTerminal {
 					break;
 			
 			if ((System.currentTimeMillis() - start) > State.TWO_MINUTES) {
-				System.out.println("FindHome, Aborting...");
+				System.out.println("FindHome, Aborting, time out..");
 				out.println("beep");
 				shutdown();
 			}
 
 			// detect new failures failures
 			if (state.getBoolean(State.losttarget)) {
-				System.out.println("..... target lost again.. ");
-				out.println("state " + State.losttarget);
+				System.out.println("FindHome, Aborting, target lost.. ");				
 				out.println("beep");
 				shutdown();
+				
 			}
 		}
-
-		//out.println("battery");
-		//out.println("memory");
 
 		System.out.println("autodocking, took [" + ((System.currentTimeMillis() - start) / 1000) + "] sec");
 	}
@@ -205,8 +205,6 @@ public class FindHome extends AbstractTerminal {
 
 			System.out.println("[" + (System.currentTimeMillis() - start) + "] ms into spinFind().");
 			
-			// out.println("memory");
-
 			if ((state.get(State.dockxpos) != null)) {
 				if (state.getInteger(State.dockxpos) > 0) {
 
@@ -214,7 +212,7 @@ public class FindHome extends AbstractTerminal {
 
 					// three checks
 					out.println("find");
-					Util.delay(4000);
+					Util.delay(3000);
 					if (state.getInteger(State.dockxpos) > 0) {
 
 						out.println("nudge backward");
@@ -223,9 +221,7 @@ public class FindHome extends AbstractTerminal {
 						Util.delay(3000);
 
 						// ok, dock lock must be good
-						if (state.getInteger(State.dockxpos) > 0)
-							looking = false;
-
+						if (state.getInteger(State.dockxsize) > 0) looking = false;
 					}
 				}
 			}
@@ -236,6 +232,7 @@ public class FindHome extends AbstractTerminal {
 			}
 
 			// call every so often
+			/*
 			
 			if(i>3){
 			if ((i++ % 3) == 0) {
@@ -244,20 +241,22 @@ public class FindHome extends AbstractTerminal {
 				out.println("nudge right");
 				out.println("publish camera");
 				out.println("memory");
-				Util.delay(4000);
-				// state.dump();
+				Util.delay(3000);
 
 			}}
-
+			 */
+			
 			if (looking) {
 
 				out.println("nudge left");
-				Util.delay(4000);
+				Util.delay(3000);
 				out.println("find");
-				Util.delay(4000);
+				Util.delay(3000);
 
 			}
 		}
+		
+		System.out.println("spins: " + i);
 
 		return i;
 	}

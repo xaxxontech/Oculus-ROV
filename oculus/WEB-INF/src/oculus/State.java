@@ -8,9 +8,6 @@ public class State {
 
 	public static final String SEPERATOR = " : ";
 
-	// TODO: MUST GO AWAY 
-	private Settings settings = new Settings();
-
 	public static final String user = "user";
 	public static final String logintime = "logintime";
 	public static final String userisconnected = "userisconnected";
@@ -116,7 +113,7 @@ public class State {
 		return aa.equalsIgnoreCase(b);
 	}
 	
-	/** test for string equality against config file. any nulls will return false */
+	/** test for string equality against config file. any nulls will return false 
 	// TODO: BRAD REMOVE 
 	public boolean equalsSetting(final String a, final String b){
 		String aa = get(a);
@@ -129,7 +126,7 @@ public class State {
 		
 		return aa.equalsIgnoreCase(bb);
 	}
-	
+	*/
 	
 	/** @param file is the properties file to configure the framework
 	public void parseFile(final String path) {
@@ -160,6 +157,10 @@ public class State {
 	
 	/** debug */
 	public void dump(){
+		System.out.println("state listeners: " + observers.size());
+		for(int i = 0 ; i < observers.size() ; i++) 
+			System.out.println(i + " " + observers.get(i).getClass().getName());
+		
 		Enumeration<Object> keys = props.keys();
 		while(keys.hasMoreElements()){
 			String key = (String) keys.nextElement();
@@ -170,8 +171,8 @@ public class State {
 	
 	/** */
 	@Override
-	public String toString(){
-		String str = new String();
+	public String toString(){	
+		String str = new String("state listeners: " + observers.size());
 		Enumeration<Object> keys = props.keys();
 		while(keys.hasMoreElements()){
 			String key = (String) keys.nextElement();
@@ -262,7 +263,7 @@ public class State {
 	}
 
 	/** */
-	public synchronized int getInteger(final String key) {
+	public int getInteger(final String key) {
 
 		String ans = null;
 		int value = ERROR;
@@ -280,7 +281,7 @@ public class State {
 	}
 	
 	/** */
-	public synchronized long getLong(final String key) {
+	public long getLong(final String key) {
 
 		String ans = null;
 		long value = ERROR;
@@ -336,4 +337,19 @@ public class State {
 	public String get(PlayerCommands cmd){ 
 		return get(cmd.toString()); 
 	}
+	
+	/*
+	public void purgeListeners(){
+		observers.clear();
+	}
+	*/
+	
+	// public void removeListener(Observer connectionHandler) {
+		// if(observers.contains(connectionHandler)){
+			//System.out.println("size is : " + observers.size() + " found guy to del.");
+	
+	//	observers.remove(connectionHandler);
+		
+		//System.out.println("listeners now: " + observers.size());
+	// }
 }

@@ -8,6 +8,7 @@ public class Settings {
 	public static final String loginactivity = System.getenv("RED5_HOME") + "\\log\\loginactivity.txt";
 	public static final String filename = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
 	public static final String movesfile = System.getenv("RED5_HOME") + "\\log\\moves.txt";
+	public static final String stdout = System.getenv("RED5_HOME") + "\\log\\jvm.stdout";
 	public static final String framefile = System.getenv("RED5_HOME") + "\\webapps\\oculus\\images\\framegrab.jpg"; 
 	
 	// put all constants here

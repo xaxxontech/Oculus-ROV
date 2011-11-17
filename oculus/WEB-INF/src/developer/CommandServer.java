@@ -2,8 +2,6 @@ package developer;
 
 import java.io.*;
 import java.net.*;
-// import java.nio.ByteBuffer;
-// import java.nio.channels.FileChannel;
 import java.util.Vector;
 
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
@@ -11,11 +9,10 @@ import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 import oculus.Application;
 import oculus.BatteryLife;
 import oculus.Docker;
-// import oculus.FactorySettings;
+import oculus.FactorySettings;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
-// import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.State;
 import oculus.Updater;
@@ -25,29 +22,31 @@ import oculus.commport.ArduioPort;
 /**
  * Start the chat server. Start new threads for a each connection on the given port
  */
-public class CommandServer {
+public class CommandServer implements Observer {
 	
-	public static final String WELCOME = "... greetings master blaster ... ";
 	public static final String SEPERATOR = " : ";
 	
-	private static BatteryLife battery = BatteryLife.getReference();
 	private static Docker docker = null;
 	private static ArduioPort port = null;
 	private static Application app = null;
-	private static oculus.Settings settings = new Settings(); 
 	private static ServerSocket serverSocket = null; 
-	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
-	private static LoginRecords records = new LoginRecords();
 	
-	private boolean grabbusy = false;
+	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
+	private static BatteryLife battery = BatteryLife.getReference();
+	private static oculus.State state = oculus.State.getReference();
+	private static LoginRecords records = new LoginRecords();
+	private static oculus.Settings settings = new Settings(); 
+	private static boolean grabbusy = false;
+	
 
 	/** Threaded client handler */
-	class ConnectionHandler extends Thread implements Observer {
+	class ConnectionHandler extends Thread {
 	
 		private oculus.State state = oculus.State.getReference();
 		private Socket clientSocket = null;
 		private BufferedReader in = null;
 		private PrintWriter out = null;
+		private String user, pass;
 		
 		public ConnectionHandler(Socket socket) {
 		
@@ -58,21 +57,9 @@ public class CommandServer {
 				in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 				out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
 			
-			} catch (IOException e) {
-				
-				System.out.println("fail aquire tcp streams: " + e.getMessage());
-				
-				try {
-					
-					if(in!=null) in.close();
-					if(out!=null) out.close();
-					if(clientSocket!=null) clientSocket.close();
-					
-				} catch (IOException e1) {
-					System.out.println(e1.getMessage());
-					return;
-				}
-
+			} catch (IOException e) {				
+				System.out.println("OCULUS: fail aquire tcp streams: " + e.getMessage());
+				shutDown();
 				return;
 			}
 	
@@ -83,14 +70,16 @@ public class CommandServer {
 			try {
 				
 				final String inputstr = in.readLine();
-				final String user = inputstr.substring(0, inputstr.indexOf(':')).trim();
-				final String pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
+				user = inputstr.substring(0, inputstr.indexOf(':')).trim();
+				pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
 				
-				sendToGroup(clientSocket.getInetAddress() + " attempt by " + user);
+				// sendToGroup(clientSocket.getInetAddress() + " attempt by " + user);
+				
 				if(app.logintest(user, pass)==null){
 					
 					// was plain text password?
-					System.out.println("plain text pass word sent from: " + clientSocket.getInetAddress());
+					// System.out.println("plain text pass word sent from: " + clientSocket.getInetAddress());
+					
 				    ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 					passwordEncryptor.setAlgorithm("SHA-1");
 					passwordEncryptor.setPlainDigest(true);
@@ -105,7 +94,10 @@ public class CommandServer {
 					}
 				}
 			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+				System.out.println("OCULUS: command server connection fail: " + ex.getMessage());
+				shutDown();
+				
+				/*
 				try {
 					if(in!=null) in.close();
 					if(out!=null) out.close();
@@ -114,13 +106,11 @@ public class CommandServer {
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
 					return;
-				}
+				}*/
 			}
 	
-			// keep track of all other user sockets output streams
-			
+			// keep track of all other user sockets output streams			
 			printers.add(out);	
-			state.addObserver(this);
 			this.start();
 		}
 
@@ -128,9 +118,8 @@ public class CommandServer {
 		@Override
 		public void run() {
 			
-			Util.beep();
-			out.println(WELCOME);
-			sendToGroup(printers.size() + " tcp connections active");
+			// Util.beep();
+			// sendToGroup(printers.size() + " tcp connections active");
 			
 			try {
 
@@ -149,12 +138,12 @@ public class CommandServer {
 					// parse and run it 
 					str = str.trim();
 					if(str.length()>1){
-						System.out.println("address [" + clientSocket + "] message [" + str + "]");
+						System.out.println("OCULUS: address [" + clientSocket + "] message [" + str + "]");
 						manageCommand(str);
 					}
 				}
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.out.println("OCULUS: command server read thread, " + e.getMessage());
 				shutDown();
 			}
 		}
@@ -163,131 +152,55 @@ public class CommandServer {
 		private void shutDown() {
 
 			// log to console, and notify other users of leaving
-			System.out.println("server: closing socket [" + clientSocket + "]");
-			sendToGroup(clientSocket.getInetAddress() + " has left the group.");
+			System.out.println("OCULUS: command server: closing socket [" + clientSocket + "]");
+			
+			// sendToGroup(clientSocket.getInetAddress() + " has left the group.");
 
 			try {
+
 				// close resources
 				printers.remove(out);
 				if(in!=null) in.close();
 				if(out!=null) out.close();
 				if(clientSocket!=null) clientSocket.close();
+			
 			} catch (Exception e) {
 				e.printStackTrace();
 				return;
 			}
 		}
-
-		@Override
-		/** send to socket on state change */ 
-		public void updated(String key) {
-			
-			if(key.equals(oculus.State.dockdensity)){
-				System.out.println("... dock density reply in.... ");
-				grabbusy = false;
-			}
-			
-			String value = state.get(key);
-			if(value==null) out.println("state deleted " + SEPERATOR + key);
-			else {
-				System.out.println("state updated: " + key + " " + value);
-				out.println(key + SEPERATOR + value);
-			}
-		}
-		
-		/** try to parse, look up, exec comand 
-		public void playerCommand(final String str){
-			final String[] cmd = str.split(" ");
-			PlayerCommands ply = null;
-			try {
-				ply = PlayerCommands.valueOf(cmd[0]);
-			} catch (Exception e) {
-				System.out.println("Command Server, command not found:" + str);
-				return;
-			}
-			if(ply!=null){
-				
-				// TODO: COLIN, ASK.... 
-				// System.out.println(".. cmd server, plyer cmd: " + cmd[0]);
-			
-				// app.playerCallServer(ply, str);
-
-
-				switch (ply) {
-				
-				case dockgrab: app.dockGrab(); break;
-				
-				case writesetting: 
-					System.out.println("write setting: " + str);
-					if(settings.readSetting(cmd[0]) == null) {
-						settings.newSetting(cmd[0], cmd[1]);
-					} else {
-						settings.writeSettings(cmd[0], cmd[1]);
-					}
-					settings.writeFile();
-					break;
-						
-				case publish:
-					app.publish(str);
-					break;
-					
-
-				// case disconnectotherconnections: app.disconnectOtherConnections(); break;
-				case monitor: app.monitor(str); break;
-				// case showlog: app.showlog(); break;
-				case autodock: docker.autoDock(str); break;
-				// case autodockcalibrate: docker.autoDock("calibrate " + str); break;
-				case restart: app.restart(); break;
-				// case softwareupdate: app.softwareUpdate(str); break;
-				}
-				
-				
-				//if(str.equals("restart")) app.restart();
-				
-			}
-			
-			
-		} */
+	
 		
 		/** add extra commands, macros here */ 
 		public void manageCommand(final String str){
-
-			// do exta commands below 
 			final String[] cmd = str.split(" ");
 			
-			/*
 			if(cmd[0].equals("tail")) {
 				
-				final String file = System.getenv("RED5_HOME") + "\\log\\jvm.stdout";
-				ByteBuffer copy = ByteBuffer.allocate(12);
-
-				//FileChannel fc = FileChannel.open(file);
+				// default if not set 
+				int lines = 30;
+				if(cmd.length==2) lines = Integer.parseInt(cmd[1]);
+				String log = Util.tail(new File(oculus.Settings.stdout), lines);
 				
-				   FileInputStream inFile = null;
-
-				    try {
-						inFile = new FileInputStream(file);
-
-						FileChannel inChannel = inFile.getChannel();
-						ByteBuffer buf = ByteBuffer.allocate(48);
-
-						while (inChannel.read(buf) != -1) {
-						  out.println("String read: " + ((ByteBuffer) (buf.flip())).asCharBuffer().get(0));
-						  buf.clear();
-						}
-						inFile.close();
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				*/
-			
+				if(log!=null)
+					if(log.length() > 1)
+						out.println(log);
+			}
 			
 			if(cmd[0].equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
-						
+					
+			//TODO: TEST 
+			if(cmd[0].equals("home")) 
+				Util.systemCall("java -classpath \"./webapps/oculus/WEB-INF/classes/\" developer.terminal.FindHome " 
+						+ state.get(oculus.State.localaddress) + " " + serverSocket.getLocalPort() +  " " + user + " " + pass); 
+	
+			//TODO: TEST 
+			if(cmd[0].equals("script")) 
+				Util.systemCall("java -classpath \"./webapps/oculus/WEB-INF/classes/\" developer.terminal.ScriptServer " 
+						+ state.get(oculus.State.localaddress) + " " + serverSocket.getLocalPort() + " " + user + " " + pass + " " + cmd[1]); 
+			
+			// if(cmd[0].equals("purge")) state.purgeListeners();
+			
 			if(cmd[0].equals("stop")) port.stopGoing();
 				
 			if(cmd[0].equals("restart")) app.restart(); 
@@ -298,13 +211,15 @@ public class CommandServer {
 				
 				app.frameGrab();
 				
+				// remove ?
 				while(state.getBoolean(oculus.State.framegrabbusy)){
-					out.println("framr grab waiting....");
-					Util.delay(500);
+					System.out.println("... cmd mgr, grab waiting....");
+					Util.delay(300);
 				}
 	
-				out.println("done frame grab");
-				System.out.println("...done...");
+				// state change will be seen anyway 
+				//out.println("done frame grab");
+				System.out.println("... done image grab ...");
 			}
 			
 			if(cmd[0].equals("move")){
@@ -353,10 +268,10 @@ public class CommandServer {
 					grabbusy = true;	
 					app.dockGrab();
 
-					new Thread(new Runnable() {
+				//	new Thread(new Runnable() {
 						
-						@Override
-						public void run() {
+				//		@Override
+				//		public void run() {
 														
 							System.out.println("wait for grab to end... ");
 							
@@ -374,8 +289,8 @@ public class CommandServer {
 								}
 								
 							}										
-						}
-					}).start();
+					//	}
+				//	}).start();
 				 }
 			}
 			
@@ -430,12 +345,31 @@ public class CommandServer {
 		}
 	}
 	
+	@Override
+	/** send to socket on state change */ 
+	public void updated(String key) {
+		
+		if(key.equals(oculus.State.dockdensity)){
+			System.out.println("... dock density reply in.... ");
+			grabbusy = false;
+		}
+		
+		String value = state.get(key);
+		if(value==null) System.out.println("state deleted " + SEPERATOR + key);
+		else {
+			System.out.println("state updated: " + key + " " + value);
+			sendToGroup(key + SEPERATOR + value); 
+			// out.println(key + SEPERATOR + value);
+		}
+	}
+	
 	/** send input back to all the clients currently connected */
 	public void sendToGroup(String str) {
 		PrintWriter pw = null;
 		for (int c = 0; c < printers.size(); c++) {
 			pw = printers.get(c);
-			if (pw.checkError()) {		
+			if (pw.checkError()) {	
+				System.out.println(".... sendtogroup(), found bad printer! ");
 				printers.remove(pw);
 				pw.close();
 			} else pw.println(str);
@@ -450,20 +384,28 @@ public class CommandServer {
 	public CommandServer(oculus.Application a, ArduioPort p) {
 
 		if(app != null) {
-			System.out.println("allready configured");
+			System.out.println(".... configured, don't do twice! ");
 			return;
 		}
 		
 		app = a;
 		port = p;
 		
+		/** register for updates, share state with all threads */  
+		state.addObserver(this);
+		
 		/** register shutdown hook */ 
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
+					
 					if(serverSocket!=null)
 						serverSocket.close();
+					
+					if(printers!=null) 
+						printers.clear();
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -487,11 +429,11 @@ public class CommandServer {
 		try {
 			serverSocket = new ServerSocket(settings.getInteger(OptionalSettings.commandport.toString()));
 		} catch (Exception e) {
-			System.out.println("server sock error: " + e.getMessage());
+			System.out.println("OCULUS: server sock error: " + e.getMessage());
 			return;
 		} 
 		
-		System.out.println("listening with socket [" + serverSocket + "] ");
+		System.out.println("OCULUS: listening with socket [" + serverSocket + "] ");
 		
 		// serve new connections until killed
 		while (true) {
@@ -504,11 +446,11 @@ public class CommandServer {
 				try {				
 					serverSocket.close();
 				} catch (IOException e1) {
-					System.out.println("failed to open client socket: " + e1.getMessage());
+					System.out.println("OCULUS: failed to open client socket: " + e1.getMessage());
 					return;					
 				}	
 				
-				System.out.println("failed to open client socket: " + e.getMessage());
+				System.out.println("OCULUS: failed to open client socket: " + e.getMessage());
 				Util.delay(State.ONE_MINUTE);
 			}
 		}

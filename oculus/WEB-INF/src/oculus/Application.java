@@ -352,7 +352,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer( state.get(State.user) + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
 
-			if(state.equalsSetting(State.user, "user0")) admin = true;
+			if(equalsSetting(State.user, "user0")) admin = true;
 			else admin = false;
 			
 			str =  state.get(State.user) + " connected from: " + player.getRemoteAddress();
@@ -372,6 +372,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 				Util.setSystemVolume(now);
 			}
 		}	
+	}
+	
+	//TODO: find new home! 
+	/** */
+	public boolean equalsSetting(final String a, final String b){
+		String aa = state.get(a);
+		if(aa==null) return false; 
+		if(aa.equals("")) return false;
+				
+		String bb = settings.readSetting(b);
+		if(bb==null) return false;
+		if(bb.equals("")) return false;
+		
+		return aa.equalsIgnoreCase(bb);
 	}
 
 	/**
@@ -1221,10 +1235,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		initialstatuscalled = false;
 		pendingplayerisnull = true;
 		
-		if (state.equalsSetting(State.user, "user0")) admin = true;
+		if (equalsSetting(State.user, "user0")) admin = true;
 		else admin = false;
 
-		// TODO: BRAD 
+		// combine with line above 
+		// TODO: BRAD .... take is admin from driver recoords!!
 		loginrecords.beDriver();
 		
 		// read setting every time in case settings changed by client

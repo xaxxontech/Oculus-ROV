@@ -38,6 +38,8 @@ boolean echo = false;
 const int MAX_BUFFER = 8;
 int buffer[MAX_BUFFER];
 int commandSize = 0;
+unsigned long lastcmd = 0;
+int timeout = 6000;
 
 void setup() { 
   pinMode(motorA1Pin, OUTPUT); 
@@ -56,14 +58,21 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println("<reset>");
+  lastcmd = millis();
 }
 
 void loop() {
   if( Serial.available() > 0 ){
     // commands take priority 
+	lastcmd = millis();
     manageCommand(); 
   } 
-
+  if (millis() - lastcmd > timeout) { // if no comm with host, stop motors
+	lastcmd = millis();
+	OCR2A = 0;
+	OCR2B = 0;
+	camservo.detach();
+  }
 }
 
 // buffer and/or execute commands from host controller 
@@ -127,7 +136,7 @@ void parseCommand(){
     Serial.println("<id:oculusDC>");
   }   
   else if(buffer[0] == 'y'){
-    Serial.println("<version:0.5.2>"); 
+    Serial.println("<version:0.5.3>"); 
   }   
   else if (buffer[0] == 's') { // stop
     OCR2A = 0;

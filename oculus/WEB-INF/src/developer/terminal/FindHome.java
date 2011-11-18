@@ -56,7 +56,13 @@ public class FindHome extends AbstractTerminal {
 				out.println("undock");
 				Util.delay(3000);
 				out.println("find");
-				Util.delay(3000);
+				while (state.getBoolean(State.dockgrabbusy)) {
+					
+					//out.println("publish camera");
+					System.out.println("... waiting on grab");
+					Util.delay(2000);
+					
+				}
 				
 				System.out.println( "dock x : " + state.get(State.dockxpos));
 				System.out.println( "dock y : " + state.get(State.dockypos));
@@ -134,6 +140,16 @@ public class FindHome extends AbstractTerminal {
 			} else if (state.get("publish").equals("camera")) break;
 		}
 
+		// get grabber going
+		out.println("find");
+		while (state.getBoolean(State.dockgrabbusy)) {
+			
+			//out.println("publish camera");
+			System.out.println("... waiting on grab");
+			Util.delay(2000);
+			
+		}
+		
 		// clear old failures
 		if (state.getBoolean(State.losttarget)) {
 			System.out.println("..... recovering from old attempt! ");
@@ -145,11 +161,16 @@ public class FindHome extends AbstractTerminal {
 		System.out.println("...found offest: " + nudges + " aboutface: " + aboutface);
 
 		out.println("state autodocking false");
+		
+		
 		//	out.println("settings stopdelay 300");
 		///out.println("settings volume 90");
 		
 		// out.println("state foo true");
+		// out.println("image");
+		// out.println("find");
 
+		// Util.delay(5000);
 	}
 	
 	/** */ 
@@ -199,6 +220,8 @@ public class FindHome extends AbstractTerminal {
 	/** spin until dock in view */
 	public int spinFind() {
 		
+		out.println("settings nudgedelay 320");
+		
 		int i = 0;
 		start = System.currentTimeMillis();
 		while (looking) {
@@ -212,13 +235,13 @@ public class FindHome extends AbstractTerminal {
 
 					// three checks
 					out.println("find");
-					Util.delay(3000);
+					Util.delay(5000);
 					if (state.getInteger(State.dockxpos) > 0) {
 
 						out.println("nudge backward");
-						Util.delay(3000);
+						Util.delay(5000);
 						out.println("find");
-						Util.delay(3000);
+						Util.delay(5000);
 
 						// ok, dock lock must be good
 						if (state.getInteger(State.dockxsize) > 0) looking = false;
@@ -231,28 +254,20 @@ public class FindHome extends AbstractTerminal {
 				shutdown();
 			}
 
-			// call every so often
-			/*
-			
-			if(i>3){
-			if ((i++ % 3) == 0) {
-
-				System.out.println(i + " : publish again, look back one");
-				out.println("nudge right");
-				out.println("publish camera");
-				out.println("memory");
-				Util.delay(3000);
-
-			}}
-			 */
-			
 			if (looking) {
 
 				out.println("nudge left");
 				Util.delay(3000);
+				
+				// get grabber going
 				out.println("find");
-				Util.delay(3000);
-
+				while (state.getBoolean(State.dockgrabbusy)) {
+					
+					//out.println("publish camera");
+					System.out.println("... waiting on grab inside spin");
+					Util.delay(2000);
+					
+				}
 			}
 		}
 		

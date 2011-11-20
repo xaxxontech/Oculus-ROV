@@ -201,10 +201,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// TODO: BRAD
 		docker = new AutoDock(this, grabber, comport, light);
 		
-		///if(commandServer!=null) 
-			
-		commandServer.setDocker(docker);
-
+		if(commandServer!=null) {
+			commandServer.setDocker(docker);
+		}
 		// TODO: WHY IS THIS NULL ? 
 		// System.out.println("grabber: " + grabber.getSessionId());
 	}
@@ -241,8 +240,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		// open socket last 
-		if(settings.readSetting(OptionalSettings.commandport)!=null)
+		//if(settings.readSetting(OptionalSettings.commandport)!=null)
+		if (settings.getInteger(OptionalSettings.commandport.toString()) != 0) {
 			commandServer = new developer.CommandServer(this, comport);
+		}
 		
 		Util.setSystemVolume(settings.getInteger(Settings.volume));
 		
@@ -516,7 +517,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 			case arduinoreset:
 				comport.reset();
-				messageplayer("resetting arduino", null, null);
+				messageplayer("resetting arduinoculus", null, null);
 				break;
 	
 			case move:move(str);break;
@@ -786,8 +787,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		ByteArrayInputStream db = new ByteArrayInputStream(c);
 
 		if (BCurrentlyAvailable > 0) {
-			System.out.println("The byte Array currently has "
-					+ BCurrentlyAvailable + " bytes. The Buffer has " + db.available());
+			//System.out.println("The byte Array currently has "
+			//		+ BCurrentlyAvailable + " bytes. The Buffer has " + db.available());
 			try {
 				BufferedImage JavaImage = ImageIO.read(db);
 				// Now lets try and write the buffered image out to a file

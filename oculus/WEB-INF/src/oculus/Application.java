@@ -633,14 +633,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		}
 		case autodock: {
-			System.out.println("grabberCallServer(): autodock: " + str);
+			System.out.println("OCULUS: grabberCallServer(): autodock: " + str);
 			docker.autoDock(str); break;
 		}
 		case checkforbattery: checkForBattery(str); break;
 		case factoryreset: factoryReset(); break;
 		case restart:
 			//admin = true;
-			System.out.println("restart command received from grabber");
+			System.out.println("OCULUS: restart command received from grabber");
 			restart();
 			break;
 		}

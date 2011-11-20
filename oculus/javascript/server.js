@@ -188,7 +188,7 @@ function init() {
 		getFlashMovie("oculus_grabber").playlocal();
 		callServer("populatesettings","");
 	}
-	//else { callServer("autodock","getdocktarget"); };
+	else { callServer("autodock","getdocktarget"); } // sets variables
 }
 
 function populatevalues(values) {

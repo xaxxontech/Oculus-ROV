@@ -197,14 +197,22 @@ public class Settings {
 			final String temp = System.getenv("RED5_HOME") + "\\conf\\oculus_created.txt";
 			FileWriter fw = new FileWriter(new File(temp));
 			
-			// fw.append("# required settings \r\n");
+			fw.append("# required settings \r\n");
 			for (FactorySettings factory : FactorySettings.values()) {
 
 				// over write with user's settings
 				String val = readSetting(factory.toString());
-				if (val != null) 
-					if( ! val.equalsIgnoreCase("null"))
+				if (val != null){
+					if( ! val.equalsIgnoreCase("null")){
 						fw.append(factory.toString() + " " + val + "\r\n");
+					}
+				} else {
+		
+					// try reading it commented 
+					if(readSetting("# " + factory.toString()) !=null)
+						fw.append("# " + factory.toString());
+					
+				}
 			}
 			
 			// optional
@@ -213,9 +221,17 @@ public class Settings {
 
 				// over write with user's settings
 				String val = readSetting(ops.toString());
-				if (val != null)
-					if( ! val.equalsIgnoreCase("null"))
+				if (val != null){
+					if( ! val.equalsIgnoreCase("null")){
 						fw.append(ops.toString() + " " + val + "\r\n");
+					}
+				} else {
+					
+					// try reading it commented 
+					if(readSetting("# " + ops.toString()) != null)
+						fw.append("# " + ops.toString());
+					
+				}	
 			}
 
 			fw.append("# user list \r\n");

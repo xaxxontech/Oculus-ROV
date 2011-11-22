@@ -1,8 +1,5 @@
 package oculus;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
-
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Dispatch;
 import com.jacob.com.EnumVariant;
@@ -16,8 +13,6 @@ public class BatteryLife {
 	 * 
 	 * [CA] originally found here: http://www.dreamincode.net/code/snippet3300.htm
 	 */
-
-	private static Logger log = Red5LoggerFactory.getLogger(BatteryLife.class, "oculus");
 
 	private String host;
 	private String connectStr;
@@ -82,12 +77,12 @@ public class BatteryLife {
 	public void battStats() { 
 		
 		if(app == null){
-			log.error("app not yet configured");
+			System.out.println("app not yet configured");
 			return;
 		}
 		
 		if(batterypresent == false){
-			log.error("no battery found");
+			System.out.println("no battery found");
 			return;
 		}
 		
@@ -95,7 +90,7 @@ public class BatteryLife {
 			public void run() {
 			
 				if (batterypresent == false) {
-					log.error("no batery found in thread");
+					System.out.println("no batery found in thread");
 					return;
 				}
 				
@@ -173,7 +168,7 @@ public class BatteryLife {
 	public int batteryStatus() {
 
 		if(app == null){
-			log.debug("app not yet configured");
+			System.out.println("app not yet configured");
 			return 999;
 		}
 	
@@ -196,7 +191,7 @@ public class BatteryLife {
 			}
 			
 		} catch (Exception e) {
-			log.error(e.getMessage()); 
+			System.out.println(e.getMessage()); 
 			// e.printStackTrace();
 		}
 	
@@ -211,12 +206,12 @@ public class BatteryLife {
 	public int[] battStatsCombined() {
 
 		if(app == null){
-			log.debug("app not yet configured");
+			System.out.println("app not yet configured");
 			return null;
 		}
 		
 		if(!batterypresent){
-			log.debug("no battery found");
+			System.out.println("no battery found");
 			return null;
 		}
 	

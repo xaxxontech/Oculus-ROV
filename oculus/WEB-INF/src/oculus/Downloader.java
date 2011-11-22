@@ -3,17 +3,8 @@ package oculus;
 import java.io.*;
 import java.net.*;
 
-//import java.util.Enumeration;
-//import java.util.zip.ZipEntry;
-//import java.util.zip.ZipFile;
-
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
-
 public class Downloader {
 	
-	private static Logger log = Red5LoggerFactory.getLogger(Downloader.class, "oculus");
-
 	/**
 	 * 
 	 * Down load a given URL to the local disk. Will delete existing file first, and create directory if required. 
@@ -44,7 +35,7 @@ public class Downloader {
 
 		// test is really gone
 		if (new File(path).exists()) {
-			log.error("can't delete existing file: " + path);
+			System.out.println("OCULUS: can't delete existing file: " + path);
 			return false;
 		}
 
@@ -63,19 +54,19 @@ public class Downloader {
 				ByteWritten += ByteRead;
 			}
 
-			log.info("saved to local file: " + path + " bytes: " + ByteWritten);
+			System.out.println("OCULUS: saved to local file: " + path + " bytes: " + ByteWritten);
 			System.out.println("download took: "+ (System.currentTimeMillis()-start) + " ms");
 			System.out.println("downloaded " + ByteWritten + " bytes to: " + path);
 
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			System.out.println("OCULUS: " + e.getMessage());
 			return false;
 		} finally {
 			try {
 				is.close();
 				os.close();
 			} catch (IOException e) {
-				log.error(e.getMessage());
+				System.out.println("OCULUS: " + e.getMessage());
 				return false;
 			}
 		}

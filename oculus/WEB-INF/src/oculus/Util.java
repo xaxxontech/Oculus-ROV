@@ -13,8 +13,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.Date;
-import oculus.commport.ArduioPort;
-import developer.SendMail;
 
 public class Util {
 

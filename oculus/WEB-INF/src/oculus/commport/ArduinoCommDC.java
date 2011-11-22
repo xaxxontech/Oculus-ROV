@@ -35,7 +35,7 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 			serialPort.notifyOnDataAvailable(true);
 
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			// log.error(e.getMessage());
 			return;
 		}
 	}

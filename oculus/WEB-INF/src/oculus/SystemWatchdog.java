@@ -8,12 +8,9 @@ import oculus.Settings;
 import oculus.State;
 import oculus.Util;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
-
 public class SystemWatchdog {
 	
-	private static Logger log = Red5LoggerFactory.getLogger(SystemWatchdog.class, "oculus");
+	// private static Logger log = Red5LoggerFactory.getLogger(SystemWatchdog.class, "oculus");
 	private final Settings settings = new Settings();
 	private final boolean reboot = settings.getBoolean(State.reboot);
 	//private final boolean debug = settings.getBoolean(State.developer);
@@ -32,7 +29,6 @@ public class SystemWatchdog {
 		if (reboot){
 			Timer timer = new Timer();
 			timer.scheduleAtFixedRate(new Task(), State.TEN_MINUTES, DELAY);
-			//if(debug) log.info("system watchdog starting");
 		}	
 	}
 	
@@ -43,39 +39,8 @@ public class SystemWatchdog {
 			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ 
 				
 				String boot = new Date(state.getLong(State.boottime)).toString();				
-				log.info("rebooting, last was: " + boot);
-				log.info("user logged in for: " + state.getLoginSince() + " ms");
-			/*
-				if(debug){
-					
-					// copy stdout log and email it 
-					String oculus = System.getenv("RED5_HOME")+"\\log\\oculus.log";
-					String logfile = System.getenv("RED5_HOME")+"\\log\\jvm.stdout";
-					String temp = System.getenv("RED5_HOME")+"\\log\\debug.txt";
-			
-					// delete if exists from before 
-					new File(temp).delete();
-					
-					// write current state to file
-					Util.writeFile(state.getProperties(), temp, "watchdog written");
-					
-					if(Util.copyfile(logfile, temp)){
-						if(Util.copyfile(oculus, temp)){
-											
-							// blocking send 
-							new SendMail("Oculus Rebooting", "been awake since: " + boot, temp);
-						
-							// now delete it 
-							// Util.delay(State.ONE_MINUTE);
-							// new File(temp).delete();
-						
-							// does not work 
-							// new File(log).deleteOnExit();
-					
-						} else log.error("error on file copy: " + oculus);
-					} else log.error("error on file copy: " + logfile);
-				} 
-				*/
+				System.out.println("OCULUS: rebooting, last was: " + boot);
+				System.out.println("OCULUS: user logged in for: " + state.getLoginSince() + " ms");
 				
 				// reboot  
 				Util.systemCall("shutdown -r -f -t 01");				

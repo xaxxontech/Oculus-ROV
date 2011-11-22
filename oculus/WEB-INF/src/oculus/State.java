@@ -25,7 +25,7 @@ public class State {
 	public static final String sonarleft = "sonarleft";
 	
 	public static final String motionenabled = "motionenabled";
-	public static final String dockdensity = "dockdensity";
+	public static final String dockslope = "dockslope";
 	public static final String dockxpos = "dockxpos";
 	public static final String dockypos = "dockypos";
 	public static final String externaladdress = "externaladdress";

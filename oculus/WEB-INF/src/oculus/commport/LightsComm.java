@@ -13,12 +13,7 @@ import oculus.Application;
 import oculus.State;
 import oculus.Util;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
-
 public class LightsComm implements SerialPortEventListener {
-
-	private Logger log = Red5LoggerFactory.getLogger(LightsComm.class, "oculus");
 
 	// shared state variables 
 	private State state = State.getReference();
@@ -100,7 +95,7 @@ public class LightsComm implements SerialPortEventListener {
 			serialPort.notifyOnDataAvailable(true);
 			
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			System.out.println(e.getMessage());
 			return;
 		}
 	}
@@ -147,7 +142,7 @@ public class LightsComm implements SerialPortEventListener {
 					}
 				}
 			} catch (IOException e) {
-				log.error("event : " + e.getMessage());
+				System.out.println("event : " + e.getMessage());
 			}
 		}
 	}
@@ -283,7 +278,7 @@ public class LightsComm implements SerialPortEventListener {
 			
 		} catch (Exception e) {
 			reset();
-			log.error(e.getMessage());
+			System.out.println(e.getMessage());
 		}
 
 		// track last write

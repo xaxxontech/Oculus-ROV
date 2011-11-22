@@ -10,13 +10,11 @@ import oculus.Settings;
 import oculus.State;
 import oculus.Util;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
 import gnu.io.SerialPort;
 
 public abstract class AbstractArduinoComm implements ArduioPort {
 
-	protected Logger log = Red5LoggerFactory.getLogger(AbstractArduinoComm.class, "oculus");
+	// protected Logger log = Red5LoggerFactory.getLogger(AbstractArduinoComm.class, "oculus");
 	protected State state = State.getReference();
 	protected SerialPort serialPort = null;
 	protected InputStream in;
@@ -88,7 +86,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 				//
 				// TODO: error I'm getting 
 				//
-				log.error("not connected, rebooting");
+				//log.error("not connected, rebooting");
 				
 				if(state.getBoolean(oculus.State.developer))
 					Util.systemCall("shutdown -r -f -t 01");	
@@ -116,7 +114,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			while (true) {
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
-					log.error("arduino watchdog time out");
+					System.out.println("OCULUS: arduino watchdog time out");
 					return; // die, no point living?
 				}
 
@@ -164,7 +162,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 				}
 			}
 		} catch (IOException e) {
-			log.error("event : " + e.getMessage());
+			System.out.println("event : " + e.getMessage());
 		}
 	}
 	
@@ -211,7 +209,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			isconnected = false;
 			version = null;
 		} catch (Exception e) {
-			log.error("disconnect(): " + e.getMessage());
+			System.out.println("disconnect(): " + e.getMessage());
 		}
 		serialPort.close();
 	}
@@ -237,7 +235,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 		} catch (Exception e) {
 			reset();
-			log.error(e.getMessage());
+			//log.error(e.getMessage());
 		}
 
 		// track last write

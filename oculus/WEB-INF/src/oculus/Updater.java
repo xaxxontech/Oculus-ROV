@@ -5,18 +5,14 @@ import java.net.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
-
 public class Updater {
+		
+	public static final String path = "http://code.google.com/p/oculus/downloads/list";
+	// "http://dev.xaxxon.com/files/");
 	
-	private static Logger log = Red5LoggerFactory.getLogger(Downloader.class, "oculus");
-	
-	/**
-	* @return number of current version, or -1 if unknown
-	* */
+	/** @return number of current version, or -1 if unknown */
 	public int getCurrentVersion() {
-		log.info("reading current version");
+		// log.info("reading current version");
 		int currentVersion = -1;
 
 		// get current version info from txt file in root folder
@@ -37,7 +33,7 @@ public class Updater {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		log.info("read current version: "+currentVersion);
+		// log.info("read current version: "+currentVersion);
 		return currentVersion;	
 	}
 	
@@ -50,9 +46,9 @@ public class Updater {
 		//pull download list into string
 		String downloadListPage = "";
 		try {
-			URL url = new URL("http://code.google.com/p/oculus/downloads/list");
+			//URL url = new URL("http://code.google.com/p/oculus/downloads/list");
 			//URL url = new URL("http://dev.xaxxon.com/files/");
-			URLConnection con = url.openConnection();
+			URLConnection con = new URL(path).openConnection();
 			String charset = "ISO-8859-1";
 			Reader r = new InputStreamReader(con.getInputStream(), charset);
 			StringBuilder buf = new StringBuilder();

@@ -3,10 +3,8 @@ package oculus;
 import oculus.commport.AbstractArduinoComm;
 import oculus.commport.LightsComm;
 
-import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.service.IServiceCapableConnection;
-import org.slf4j.Logger;
 
 import developer.LogManager;
 
@@ -44,7 +42,8 @@ public class AutoDock implements Docker {
 	 * 
 	 */
 
-	private static Logger log = Red5LoggerFactory.getLogger(AutoDock.class, "oculus");
+	// private static Logger log = Red5LoggerFactory.getLogger(AutoDock.class, "oculus");
+
 	private State state = State.getReference();
 	private Settings settings = new Settings();
 	private BatteryLife life = BatteryLife.getReference();
@@ -56,7 +55,7 @@ public class AutoDock implements Docker {
 	private Application app = null;
 	
 	private boolean autodockingcamctr = false;
-	private int autodockctrattempts;
+	private int autodockctrattempts = 0;
 	
 	public AutoDock(Application theapp, IConnection thegrab, AbstractArduinoComm com, LightsComm light){
 		this.app = theapp;
@@ -79,7 +78,7 @@ public class AutoDock implements Docker {
 		if (cmd[0].equals("cancel")) {
 			state.set(State.autodocking, false);
 			app.message("auto-dock ended","multiple","cameratilt " +app.camTiltPos()+" autodockcancelled blank motion stopped");
-			log.info("autodock cancelled");
+			System.out.println("OCULUS: autodock cancelled");
 		}
 		if (cmd[0].equals("go")) {
 			if (state.getBoolean(State.motionenabled)) { 
@@ -106,7 +105,7 @@ public class AutoDock implements Docker {
 				//autodockgrabattempts = 0;
 				autodockctrattempts = 0;
 				app.message("auto-dock in progress", "motion", "moving");
-				log.info("autodock started");
+				System.out.println("OCULUS: autodock started");
 				
 			}
 			else { app.message("motion disabled","autodockcancelled", null); }
@@ -122,7 +121,7 @@ public class AutoDock implements Docker {
 					state.set(State.losttarget, true);	
 					app.message("auto-dock target not found, try again","multiple", 
 							/*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
-					log.info("target lost");
+					System.out.println("OCULUS: target lost");
 
 				}
 				else {
@@ -152,7 +151,7 @@ public class AutoDock implements Docker {
 		if (cmd[0].equals("getdocktarget")) {
 			docktarget = settings.readSetting("docktarget");
 			app.messageGrabber("docksettings", docktarget);
-			// log.info("got dock target: " + docktarget);
+			// System.out.println("OCULUS: got dock target: " + docktarget);
 		}
 	}
 	
@@ -203,7 +202,7 @@ public class AutoDock implements Docker {
 										
 									}
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
-									log.info(state.get(State.user) +" docked successfully");
+									System.out.println("OCULUS: " + state.get(State.user) +" docked successfully");
 									state.set(State.motionenabled, false);
 									state.set(State.dockstatus, State.docked);
 									// needs to be before battStats()
@@ -228,7 +227,7 @@ public class AutoDock implements Docker {
 										s += " motion stopped";
 									} 
 									app.message("docking timed out", "multiple", s);
-									log.info(state.get(State.user) +" docking timed out");
+									System.out.println("OCULUS: " + state.get(State.user) +" docking timed out");
 									state.set(State.dockstatus, State.undocked);
 									if (state.getBoolean(State.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
@@ -262,15 +261,11 @@ public class AutoDock implements Docker {
 			state.set(State.dockstatus, State.undocked);
 			new Thread(new Runnable() {
 				public void run() {
-					try {
-						Thread.sleep(2000);
-						comport.stopGoing();
-						app.message("disengaged from dock", "motion", "stopped");
-						log.info(state.get(State.user) + " un-docked");
-						life.battStats();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					Util.delay(2000);
+					comport.stopGoing();
+					app.message("disengaged from dock", "motion", "stopped");
+					System.out.println("OCULUS: " + state.get(State.user) + " un-docked");
+					life.battStats();
 				}
 			}).start();
 		}
@@ -401,7 +396,7 @@ public class AutoDock implements Docker {
 						Thread.sleep(stopdelay); // let deaccelerate
 						app.dockGrab();
 					} catch (Exception e) { e.printStackTrace(); } } }).start();
-					log.info("autodock backup");
+					System.out.println("OCULUS: autodock backup");
 				}
 				else { 
 //					System.out.println("dock "+dockslopedeg+" "+slopedeg);

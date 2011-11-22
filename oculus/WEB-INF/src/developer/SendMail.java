@@ -12,17 +12,12 @@ import oculus.Application;
 import oculus.OptionalSettings;
 import oculus.Settings;
 
-import org.red5.logging.Red5LoggerFactory;
-import org.slf4j.Logger;
-
 /**
  * Send yourself an email from your gmail account
  * 
  * @author brad.zdanivsk@gmail.com
  */
 public class SendMail {
-
-	private static Logger log = Red5LoggerFactory.getLogger(SendMail.class, "oculus");
 
 	// TODO: take this from properties on startup if we want any smtp server
 	private static int SMTP_HOST_PORT = 587;
@@ -100,8 +95,7 @@ public class SendMail {
 	private void sendMessage() {
 
 		if (user == null || pass == null) {
-			log.error("no email and password found in settings");
-			// if(debug) System.out.println("no email and password found in settings");
+			System.out.println("no email and password found in settings");
 			return;
 		}
 		
@@ -131,7 +125,7 @@ public class SendMail {
 			if(application!=null) application.message("email has been sent", null, null);
 
 		} catch (Exception e) {
-			log.error(e.getMessage() + "error sending email, check settings");
+			//log.error(e.getMessage() + "error sending email, check settings");
 			if(application!=null) application.message("error sending email", null, null);
 		}
 	}
@@ -142,8 +136,8 @@ public class SendMail {
 	private void sendAttachment() {
 
 		if (user == null || pass == null) {
-			log.error("no email and password found in settings");
-			// if(debug) System.out.println("no email and password found in settings");
+			// log.error("no email and password found in settings");
+			System.out.println("OCULUS: no email and password found in settings");
 			return;
 		}
 		
@@ -186,7 +180,7 @@ public class SendMail {
 			if(application!=null) application.message("email has been sent", null, null);
 
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			// log.error(e.getMessage());
 			System.out.println("error sending email, check settings");
 			if(application!=null) application.message("error sending email", null, null);
 		}

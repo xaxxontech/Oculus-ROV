@@ -34,7 +34,7 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					
-					log.error("sonar arduino watchdog time out, reboot!");
+					//log.error("sonar arduino watchdog time out, reboot!");
 					Util.beep();
 					Util.systemCall("shutdown -r -f -t 01");				
 					
@@ -122,7 +122,7 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 			serialPort.notifyOnDataAvailable(true);
 
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			//log.error(e.getMessage());
 			return;
 		}
 	}

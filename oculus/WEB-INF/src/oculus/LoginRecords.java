@@ -8,17 +8,27 @@ import java.util.Vector;
 
 public class LoginRecords {
 
-	public static Vector<Record> list = new Vector<Record>();
-	public static State state = State.getReference();
 	public static final String PASSENGER = "passenger";
 	public static final String DRIVER = "driver";
 	public static final int MAX_RECORDS = 20;
 	
+	public static Vector<Record> list = new Vector<Record>();
+	public static State state = State.getReference();
+	public static Settings settings = new Settings();
+	private static Application app = null; 
+	
+	
 	// TODO: only allow user to sign in once from a given ip??
 	// This should trigger an admin gmail warning if ppl share passwords?
 	
-	public LoginRecords() {
-		System.out.println("login records started..");
+	
+	public LoginRecords(){ 
+		System.out.println("OCULUS: login records started..");
+	}
+	
+	public void setApplication(Application a) {
+		app = a;
+		System.out.println("OCULUS: login records set application");
 	}
 	
 	public void beDriver() { 
@@ -26,6 +36,10 @@ public class LoginRecords {
 		list.add(new Record(state.get(State.user), DRIVER)); 
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
+		
+		if (settings.getBoolean(Settings.loginnotify))
+			if(app!=null)
+				app.saySpeech("lawg inn " + state.get(State.user));
 
 		if(state.getBoolean(State.developer)) System.out.println(this);
 		
@@ -33,8 +47,14 @@ public class LoginRecords {
 	}
 	
 	public void bePassenger() {		
+	
 		list.add(new Record(state.get(State.user), PASSENGER)); // "xxx.xxx.xxx.xxx"));
 		state.set(State.userisconnected, true);
+		
+		if (settings.getBoolean(Settings.loginnotify))
+			if(app!=null)
+				app.saySpeech("lawg inn " + state.get(State.user));
+
 		
 		if(state.getBoolean(State.developer)) System.out.println(this);
 		
@@ -55,6 +75,17 @@ public class LoginRecords {
 		
 		return false;
 	}*/
+	
+	
+	/** is the current user the admin? */
+	public boolean isAdmin() {
+		String user = state.get(State.user);
+		if (user == null) return false;
+		if (user.equals("")) return false;
+		Settings settings = new Settings();
+		String admin = settings.readSetting("user0").toLowerCase();
+		return admin.equals(user.toLowerCase());
+	}
 	
 	
 	public void signout() {
@@ -143,7 +174,7 @@ public class LoginRecords {
 		return list.size();
 	}
 
-	/** create snap shot of current use to disk */
+	/** create snap shot of current use to disk 
 	public static boolean save(){
 		
 		if(new File(Settings.loginactivity).exists()) 
@@ -169,12 +200,11 @@ public class LoginRecords {
 		}
 		
 		return true;
-	}
+	}*/
 
 	public String toString() {
 
-		if (list.isEmpty())
-			return null;
+		if (list.isEmpty()) return null;
 
 		String str = "current users:\r\n";
 		for (int i = 0; i < list.size(); i++)
@@ -245,7 +275,7 @@ public class LoginRecords {
 		public void logout() {
 			if(timeout==0){
 				timeout = System.currentTimeMillis();
-				System.out.println("logged out : " + toString());
+				System.out.println("OCULUS: logged out : " + toString());
 			} else System.out.println("__error: trying to logout twice");	
 		}
 	}

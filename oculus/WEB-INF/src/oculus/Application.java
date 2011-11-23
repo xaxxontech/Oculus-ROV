@@ -97,7 +97,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		String str = "login from: " + connection.getRemoteAddress() + " failed";
 		System.out.println("OCULUS: appConnect(): " + str);
-		// log.info(str);
 		messageGrabber(str, "");
 		return false;
 	}
@@ -352,21 +351,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str += " streamsettings " + streamSettings();
 			messageplayer(state.get(State.user) + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
-
-			/*
-			
-			if (equalsSetting(State.user, "user0"))
-				admin = true;
-			else
-				admin = false;
-
-			*/
-			
-			//admin = loginRecords.isAdmin();
 			
 			str = state.get(State.user) + " connected from: " + player.getRemoteAddress();
 			messageGrabber(str, "connection " + state.get(State.user) + "&nbsp;connected");
-			System.out.println(str);
+			System.out.println("OCULUS: playersignin(), " + str);
 			loginRecords.beDriver();
 		}
 	}
@@ -1871,10 +1859,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		final String backup = "oculus_factory_reset.txt";
 
 		// backup
-		new File(Settings.filename).renameTo(new File(backup));
+		new File(Settings.settingsfile).renameTo(new File(backup));
 
 		// delete it, build on startup
-		new File(Settings.filename).delete();
+		new File(Settings.settingsfile).delete();
 
 		restart();
 	}

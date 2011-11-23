@@ -55,6 +55,8 @@ public class Input extends JTextField implements KeyListener {
 			
 			if (userInput.equalsIgnoreCase("quit")) System.exit(-1);
 
+			if (userInput.equalsIgnoreCase("bye")) System.exit(-1);
+
 		} catch (Exception e) {
 			System.exit(-1);
 		}
@@ -86,7 +88,7 @@ public class Input extends JTextField implements KeyListener {
 			
 			setText(cmds[ptr].toString() + " ");
 			
-			setCaretPosition(getText().length() + 2);
+			setCaretPosition(getText().length());
 
 		} else if(e.getKeyCode() == KeyEvent.VK_DOWN){
 				
@@ -94,7 +96,7 @@ public class Input extends JTextField implements KeyListener {
 			
 			setText(cmds[ptr].toString() + " ");
 			
-			setCaretPosition(getText().length() + 2);
+			setCaretPosition(getText().length());
 			
 		} else if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			

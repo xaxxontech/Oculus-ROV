@@ -39,7 +39,6 @@ public class Discovery {
 
 	/* constructor makes a list of available ports */
 	public Discovery() {
-		// System.out.println(".. searching ..");
 		getAvailableSerialPorts();
 		search();
 	}
@@ -71,7 +70,7 @@ public class Discovery {
 			outputStream = serialPort.getOutputStream();
 
 		} catch (Exception e) {
-			System.out.println("error connecting to: " + address);
+			System.out.println("OCULUS: Discovery, error connecting to: " + address);
 			close();
 			return false;
 		}
@@ -115,7 +114,7 @@ public class Discovery {
 				
 				Util.delay(TIMEOUT);				
 				String id = getProduct();
-				System.out.println("product : *"+id+"*");
+				System.out.println("OCULUS: Discovery, product :"+id);
 				
 				if (id.length() > 0) {
 				
@@ -149,12 +148,9 @@ public class Discovery {
 		
 		// could not find, no hardware attached 
 		if(state.get(State.firmware)==null){ 
-		
-			state.set(State.firmware, "unknown");
-		
-			System.out.println("...... no hardware detected");
-			state.dump();
-		
+			state.set(State.firmware, State.unknown);
+			System.out.println("OCULUS: Discovery, no hardware detected");
+			// state.dump();
 		}
 	}
 

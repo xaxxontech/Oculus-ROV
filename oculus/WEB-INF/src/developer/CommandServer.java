@@ -77,12 +77,11 @@ public class CommandServer implements Observer {
 					passwordEncryptor.setAlgorithm("SHA-1");
 					passwordEncryptor.setPlainDigest(true);
 					String encryptedPassword = (passwordEncryptor
-							.encryptPassword( user + settings.readSetting("salt") + pass)).trim();
+							.encryptPassword(user + settings.readSetting("salt") + pass)).trim();
 					
 					if(app.logintest(user, encryptedPassword)==null){
-						sendToGroup("login failure : " + user);
+						// sendToGroup("login failure : " + user);
 						out.println("login failure, please drop dead");
-						shutDown();
 						new Exception("login failure for user: " + user);
 					}
 				}
@@ -109,7 +108,7 @@ public class CommandServer implements Observer {
 				while (true) {
 
 					// been closed ?
-					if(out.checkError()) shutDown();			
+					if(out!=null) if(out.checkError()) shutDown();			
 					
 					// blocking read from the client stream up to a '\n'
 					String str = in.readLine();
@@ -121,15 +120,15 @@ public class CommandServer implements Observer {
 					str = str.trim();
 					if(str.length()>1){
 						
-						if(settings.getBoolean(Settings.developer))
+						if(settings.getBoolean(Settings.developer))	
 							System.out.println("OCULUS: address [" + clientSocket + "] message [" + str + "]");
-						
-						// call app player commands 
-						app.playerCallServer(str.substring(0, str.indexOf(" ")), 
-								str.substring(str.indexOf(" ")+1, str.length()));
 						
 						// do both for now 
 						manageCommand(str);
+						
+						// 
+						doPlayer(str);
+				
 					}
 				}
 			} catch (Exception e) {
@@ -138,6 +137,36 @@ public class CommandServer implements Observer {
 			}
 		}
 
+		public void doPlayer(String str){
+
+			// call app player commands 
+			//System.out.println( "... cmd: "+str.substring(0, str.indexOf(" ")));
+					
+			
+			int index = str.indexOf(" ");
+		
+			if(index < 0){
+				
+				System.out.println("... doplayer: " + str);
+			
+				//app.playerCallServer(str, null);
+
+				
+			}
+			
+			//String cmd = str.substring(str.indexOf(" ")+1, str.length());
+			
+		
+			//pp.playerCallServer();
+			
+			//str.substring(0, str.indexOf(" ")), 
+					//			str.substring(str.indexOf(" ")+1 str.length()));
+						
+		//	app.playerCallServer(str.substring(0, str.indexOf(" ")), 
+		//			str.substring(str.indexOf(" ")+1 str.length()));
+			
+		}
+		
 		// close resources
 		private void shutDown() {
 
@@ -194,7 +223,7 @@ public class CommandServer implements Observer {
 			
 			// if(cmd[0].equals("stop")) port.stopGoing();
 				
-			// if(cmd[0].equals("restart")) app.restart(); 
+			if(cmd[0].equals("restart")) app.restart(); 
 		
 			// if(cmd[0].equals("softwareupdate")) app.softwareUpdate("update"); 
 			
@@ -320,7 +349,6 @@ public class CommandServer implements Observer {
 				else out.println(state.toString());
 			}		
 			
-			/*
 			if(cmd[0].equals("settings")){
 				if(cmd.length==3) { 
 				
@@ -343,7 +371,7 @@ public class CommandServer implements Observer {
 					
 				} else out.println(settings.toString());
 			}
-			*/
+		
 			
 			
 		}

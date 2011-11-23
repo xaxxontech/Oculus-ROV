@@ -14,7 +14,6 @@ import gnu.io.SerialPort;
 
 public abstract class AbstractArduinoComm implements ArduioPort {
 
-	// protected Logger log = Red5LoggerFactory.getLogger(AbstractArduinoComm.class, "oculus");
 	protected State state = State.getReference();
 	protected SerialPort serialPort = null;
 	protected InputStream in;
@@ -59,8 +58,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 		application = app;
 		
-		System.out.println(".. arduino abstract open port ..");
-
 		if (state.get(State.serialport) != null) {
 			new Thread(new Runnable() {
 				public void run() {
@@ -78,21 +75,17 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	/** inner class to send commands as a seperate thread each */
 	class Sender extends Thread {
 		private byte[] command = null;
-
 		public Sender(final byte[] cmd) {
-			// do connection check
 			if (!isconnected){
 			
-				//
-				// TODO: error I'm getting 
-				//
-				//log.error("not connected, rebooting");
+				// TAKE IT DOWN! 
+				if(state.get(oculus.State.firmware) != oculus.State.unknown)
+					if(state.getBoolean(oculus.State.developer)){
+						System.out.println("OCULUS: AbstractArduinoComm, not connected, rebooting");		
+						Util.systemCall("shutdown -r -f -t 01");	
+					}
 				
-				if(state.getBoolean(oculus.State.developer))
-					Util.systemCall("shutdown -r -f -t 01");	
-				
-			}
-			else {
+			} else {
 				command = cmd;
 				this.start();
 			}
@@ -114,16 +107,16 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			while (true) {
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
-					System.out.println("OCULUS: arduino watchdog time out");
+					System.out.println("OCULUS: AbstractArduinoComm.WatchDog(), "
+							+"arduino watchdog time out");
 					return; // die, no point living?
 				}
 
-					if (getReadDelta() > WATCHDOG_DELAY) {
-						new Sender(GET_VERSION);
-						Util.delay(WATCHDOG_DELAY);
-					}
+				if (getReadDelta() > WATCHDOG_DELAY) {
+					new Sender(GET_VERSION);
+					Util.delay(WATCHDOG_DELAY);
 				}
-			
+			}		
 		}
 	}
 
@@ -183,10 +176,8 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 	@Override
 	public void setEcho(boolean update) {
-		if (update)
-			new Sender(ECHO_ON);
-		else
-			new Sender(ECHO_OFF);
+		if (update) new Sender(ECHO_ON);
+		else new Sender(ECHO_OFF);
 	}
 
 	@Override
@@ -235,7 +226,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 		} catch (Exception e) {
 			reset();
-			//log.error(e.getMessage());
+			System.out.println("OCULUS: sendCommand(), " + e.getMessage());
 		}
 
 		// track last write
@@ -291,9 +282,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#turnLeft()
-	 */
 	@Override
 	public void turnLeft() {
 		int tmpspeed = turnspeed;
@@ -308,10 +296,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			application.muteROVMic();
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#camGo()
-	 */
+	
 	@Override
 	public void camGo() {
 		new Thread(new Runnable() {
@@ -335,9 +320,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}).start();
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#camCommand(java.lang.String)
-	 */
 	@Override
 	public void camCommand(String str) {
 		if (str.equals("stop")) {
@@ -380,9 +362,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		// }
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#camHoriz()
-	 */
 	@Override
 	public void camHoriz() {
 		camservopos = camservohoriz;
@@ -400,9 +379,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}).start();
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#camToPos(java.lang.Integer)
-	 */
 	@Override
 	public void camToPos(Integer n) {
 		camservopos = n;
@@ -418,9 +394,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}).start();
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#speedset(java.lang.String)
-	 */
 	@Override
 	public void speedset(String str) {
 		if (str.equals("slow")) {
@@ -437,9 +410,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#nudge(java.lang.String)
-	 */
 	@Override
 	public void nudge(String dir) {
 		direction = dir;
@@ -473,9 +443,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}).start();
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#slide(java.lang.String)
-	 */
 	@Override
 	public void slide(String dir) {
 		if (sliding == false) {
@@ -524,9 +491,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#slidecancel()
-	 */
 	@Override
 	public void slidecancel() {
 		if (sliding == true) {
@@ -537,9 +501,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#clickSteer(java.lang.String)
-	 */
 	@Override
 	public Integer clickSteer(String str) {
 		tempstring = str;
@@ -566,9 +527,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		return tempint;
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#clickNudge(java.lang.Integer)
-	 */
 	@Override
 	public void clickNudge(Integer x) {
 		if (x > 0) {
@@ -611,9 +569,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}).start();
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#clickCam(java.lang.Integer)
-	 */
 	@Override
 	public Integer clickCam(Integer y) {
 		Integer n = maxclickcam * y / 240;
@@ -639,9 +594,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		return camservopos;
 	}
 
-	/* (non-Javadoc)
-	 * @see oculus.ArduioPort#releaseCameraServo()
-	 */
 	@Override
 	public void releaseCameraServo() {
 		new Thread(new Runnable() {

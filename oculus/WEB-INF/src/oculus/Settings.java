@@ -5,11 +5,11 @@ import java.util.Properties;
 
 public class Settings {
 
+	public static final String framefile = System.getenv("RED5_HOME") + "\\webapps\\oculus\\images\\framegrab.jpg"; 
 	public static final String loginactivity = System.getenv("RED5_HOME") + "\\log\\loginactivity.txt";
-	public static final String filename = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
+	public static final String settingsfile = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
 	public static final String movesfile = System.getenv("RED5_HOME") + "\\log\\moves.txt";
 	public static final String stdout = System.getenv("RED5_HOME") + "\\log\\jvm.stdout";
-	public static final String framefile = System.getenv("RED5_HOME") + "\\webapps\\oculus\\images\\framegrab.jpg"; 
 	
 	// put all constants here
 	public static final String emailalerts = "emailalerts";
@@ -21,7 +21,7 @@ public class Settings {
 	
 	/** create new file if missing */
 	public Settings(){
-		if( ! new File(filename).exists()) 
+		if( ! new File(settingsfile).exists()) 
 			FactorySettings.createFile();
 	}
 
@@ -106,7 +106,7 @@ public class Settings {
 		String result = null;
 		try {
 
-			filein = new FileInputStream(filename);
+			filein = new FileInputStream(settingsfile);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			String line = "";
 			while ((line = reader.readLine()) != null) {
@@ -188,9 +188,9 @@ public class Settings {
 	/**
 	 * Organize the settings file into 3 sections. Use Enums's to order the file
 	 */
-	public synchronized void writeFile() {
+	public synchronized void writeFile(String path) {
 		
-		System.out.println("writeFile(), called...");
+		// System.out.println("writeFile(), called...");
 		
 		try {
 			
@@ -246,8 +246,8 @@ public class Settings {
 			fw.close();
 			
 			// now swap temp for real file
-			new File(filename).delete();
-			new File(temp).renameTo(new File(filename));
+			new File(path).delete();
+			new File(temp).renameTo(new File(settingsfile));
 			new File(temp).delete();
 
 		} catch (Exception e) {
@@ -258,48 +258,8 @@ public class Settings {
 	/**
 	 * Organize the settings file into 3 sections. Use Enums's to order the file
 	 */
-	public synchronized void writeFile(String fname) {
-		
-		System.out.println("writeFile(" + fname + "), called...");
-		
-		try {
-			final String file = System.getenv("RED5_HOME") + "\\conf\\" + fname;
-			FileWriter fw = new FileWriter(new File(file));
-			
-			fw.append("# backup settings \r\n");
-			for (FactorySettings factory : FactorySettings.values()) {
-
-				// over write with user's settings
-				String val = readSetting(factory.toString());
-				if (val != null) 
-					if( ! val.equalsIgnoreCase("null"))
-						fw.append(factory.toString() + " " + val + "\r\n");
-			}
-			
-			fw.append("# manual settings \r\n");
-			for (OptionalSettings ops : OptionalSettings.values()) {
-
-				// over write with user's settings
-				String val = readSetting(ops.toString());
-				if (val != null)
-					if( ! val.equalsIgnoreCase("null"))
-						fw.append(ops.toString() + " " + val + "\r\n");
-			}
-
-			fw.append("# user list \r\n");
-			fw.append("salt " + readSetting("salt") + "\r\n");
-
-			String[][] users = getUsers();
-			for (int j = 0; j < users.length; j++) {
-				fw.append("user" + j + " " + users[j][0] + "\r\n");
-				fw.append("pass" + j + " " + users[j][1] + "\r\n");
-			}
-
-			fw.close();
-			
-		} catch (Exception e) {
-			e.printStackTrace(System.out);
-		}
+	public synchronized void writeFile() {
+		writeFile(settingsfile);
 	}
 	
 	/**
@@ -364,7 +324,7 @@ public class Settings {
 		String[] lines = new String[999];
 		try {
 
-			filein = new FileInputStream(filename);
+			filein = new FileInputStream(settingsfile);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			int i = 0;
 			while ((lines[i] = reader.readLine()) != null) {
@@ -381,7 +341,7 @@ public class Settings {
 
 		FileOutputStream fileout;
 		try {
-			fileout = new FileOutputStream(filename);
+			fileout = new FileOutputStream(settingsfile);
 			for (int n = 0; n < lines.length; n++) {
 				if (lines[n] != null) {
 					new PrintStream(fileout).println(lines[n]);
@@ -407,7 +367,7 @@ public class Settings {
 		FileInputStream filein;
 		String[] lines = new String[999];
 		try {
-			filein = new FileInputStream(filename);
+			filein = new FileInputStream(settingsfile);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					filein));
 			int i = 0;
@@ -424,7 +384,7 @@ public class Settings {
 
 		FileOutputStream fileout;
 		try {
-			fileout = new FileOutputStream(filename);
+			fileout = new FileOutputStream(settingsfile);
 			for (int n = 0; n < lines.length; n++) {
 				if (lines[n] != null) {
 					new PrintStream(fileout).println(lines[n]);
@@ -443,7 +403,7 @@ public class Settings {
 		FileInputStream filein;
 		String[] lines = new String[999];
 		try {
-			filein = new FileInputStream(filename);
+			filein = new FileInputStream(settingsfile);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					filein));
 			int i = 0;
@@ -461,7 +421,7 @@ public class Settings {
 
 		FileOutputStream fileout;
 		try {
-			fileout = new FileOutputStream(filename);
+			fileout = new FileOutputStream(settingsfile);
 			for (int n = 0; n < lines.length; n++) {
 				if (lines[n] != null) {
 					new PrintStream(fileout).println(lines[n]);

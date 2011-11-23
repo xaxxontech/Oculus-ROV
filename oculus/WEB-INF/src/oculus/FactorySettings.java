@@ -69,7 +69,7 @@ public enum FactorySettings {
 		
 		FileWriter fw = null;
 		try {
-			fw = new FileWriter(new File(Settings.filename+".tmp"));
+			fw = new FileWriter(new File(Settings.settingsfile+".tmp"));
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			return;
@@ -94,9 +94,9 @@ public enum FactorySettings {
 			}
 		}
 		
-		if (new File(Settings.filename).exists()) new File(Settings.filename).delete();
+		if (new File(Settings.settingsfile).exists()) new File(Settings.settingsfile).delete();
 
-		new File(Settings.filename+".tmp").renameTo(new File(Settings.filename));
+		new File(Settings.settingsfile+".tmp").renameTo(new File(Settings.settingsfile));
 	}
 /*
 	@Override

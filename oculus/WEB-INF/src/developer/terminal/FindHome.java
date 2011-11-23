@@ -6,6 +6,7 @@ import java.net.*;
 import developer.CommandServer;
 
 import oculus.OptionalSettings;
+import oculus.PlayerCommands;
 import oculus.State;
 import oculus.Util;
 
@@ -31,7 +32,7 @@ public class FindHome extends AbstractTerminal {
 			System.out.println(".. bot is not docked! lost in space...");
 			spinFind();
 			
-			out.println("dock");
+			out.println(PlayerCommands.autodock.toString() + " go");
 			
 		}
 	
@@ -54,8 +55,14 @@ public class FindHome extends AbstractTerminal {
 
 				System.out.println(".. docked, so undocking.");
 				out.println("undock");
+				
+				out.println(PlayerCommands.autodock.toString() + " " + State.undock);
+				
 				Util.delay(3000);
 				out.println("find");
+				
+				/*
+				
 				while (state.getBoolean(State.dockgrabbusy)) {
 					
 					//out.println("publish camera");
@@ -112,7 +119,8 @@ public class FindHome extends AbstractTerminal {
 				Util.delay(fullturn); 
 				out.println("stop");
 				return true;
-
+*/
+				
 			}
 		}
 		return false;
@@ -128,7 +136,7 @@ public class FindHome extends AbstractTerminal {
 
 		while (true) {
 			if (state.get(State.batterystatus) == null) {
-				out.println("battery");
+				out.println(PlayerCommands.battStats.toString());
 				Util.delay(2000);
 			} else break;
 		}

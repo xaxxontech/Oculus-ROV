@@ -112,8 +112,8 @@ public class LoginRecords {
 		if(list.size() > MAX_RECORDS) list.remove(0);
 		
 		if(state.getBoolean(State.developer)){
-			System.out.println("-_logging out: " + state.get(State.user));
-			System.out.println("_waiting now:" + getPassengers());
+			System.out.println("OCULUS: -_logging out: " + state.get(State.user));
+			System.out.println("OCULUS: _waiting now:" + getPassengers());
 			System.out.println(toString());
 		}
 	
@@ -229,7 +229,7 @@ public class LoginRecords {
 			// this.id = id;
 			
 			if(state.getBoolean(State.developer))
-				System.out.println("ceated login: " + toString());
+				System.out.println("OCULUS: ceated login: " + toString());
 		}
 
 		public String getUser() {
@@ -273,7 +273,7 @@ public class LoginRecords {
 			if(timeout==0){
 				timeout = System.currentTimeMillis();
 				System.out.println("OCULUS: logged out : " + toString());
-			} else System.out.println("__error: trying to logout twice");	
+			} else System.out.println("OCULUS: __error: trying to logout twice");	
 		}
 	}
 }

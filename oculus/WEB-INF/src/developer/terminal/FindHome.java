@@ -84,7 +84,7 @@ public class FindHome extends AbstractTerminal {
 				System.out.println( "second dock y : " + state.get(State.dockypos));
 				System.out.println( "second size x : " + state.get(State.dockxsize));
 				System.out.println( "second size y : " + state.get(State.dockysize));
-				System.out.println( "second dense  : " + state.get(State.dockslope));
+				System.out.println( "second slope  : " + state.get(State.dockslope));
 				
 				int deltadockx = dockx - state.getInteger(State.dockxpos);
 				int deltadocky = docky - state.getInteger(State.dockysize);

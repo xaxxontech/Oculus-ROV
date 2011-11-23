@@ -19,34 +19,34 @@ public class State {
 	public static final String boottime = "boottime";
 	public static final String batterylife = "batterylife";
 	public static final String batterystatus = "batterstatus";
-
-	public static final String sonarback = "sonarback";
-	public static final String sonarright = "sonarright";
-	public static final String sonarleft = "sonarleft";
-	
 	public static final String motionenabled = "motionenabled";
-	public static final String dockslope = "dockslope";
-	public static final String dockxpos = "dockxpos";
-	public static final String dockypos = "dockypos";
 	public static final String externaladdress = "externaladdress";
 	public static final String localaddress = "localaddress";
 	public static final String autodocktimeout = "autodocktimeout";
 	public static final String autodocking = "autodocking";
+	public static final String timeout = "timeout";
+	public static final String losttarget = "losttarget";
+	public static final String firmware = "firmware";
+	public static final String unknown = "unknown";	
+	public static final String framegrabbusy = "framegrabbusy";
+	
+	public static final String sonarback = "sonarback";
+	public static final String sonarright = "sonarright";
+	public static final String sonarleft = "sonarleft";
+	
+	public static final String dockgrabbusy = "dockgrabbusy";
 	public static final String docking = "docking";
 	public static final String dockxsize = "dockxsize";	
 	public static final String dockysize = "dockysize";
 	public static final String dockstatus = "dockstatus";
-	public static final String timeout = "timeout";
-	public static final String losttarget = "losttarget";
+	public static final String dockgrabtime = "dockgrabtime";
+	public static final String dockslope = "dockslope";
+	public static final String dockxpos = "dockxpos";
+	public static final String dockypos = "dockypos";
 	public static final String docked = "docked";
 	public static final String undocked = "undocked";
 	public static final String undock = "undock";
-	public static final String firmware = "firmware";
-	public static final String unknown = "unknown";	
-	public static final String framegrabbusy = "framegrabbusy";
-	public static final String dockgrabbusy = "dockgrabbusy";
-	
-	
+		
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
@@ -113,53 +113,11 @@ public class State {
 		return aa.equalsIgnoreCase(b);
 	}
 	
-	/** test for string equality against config file. any nulls will return false 
-	// TODO: BRAD REMOVE 
-	public boolean equalsSetting(final String a, final String b){
-		String aa = get(a);
-		if(aa==null) return false; 
-		if(aa.equals("")) return false;
-				
-		String bb = settings.readSetting(b);
-		if(bb==null) return false;
-		if(bb.equals("")) return false;
-		
-		return aa.equalsIgnoreCase(bb);
-	}
-	*/
-	
-	/** @param file is the properties file to configure the framework
-	public void parseFile(final String path) {
-
-		if (path == null) {
-			System.err.println("called parseConfigFile() with null arg!");
-			return;
-		}
-
-		try {
-
-			FileInputStream propFile = new FileInputStream(path);
-			props.load(propFile);
-			propFile.close();
-
-			// now be sure no white space is in any properties!
-			Enumeration<Object> keys = props.keys();
-			while (keys.hasMoreElements()) {
-				String key = (String) keys.nextElement();
-				String value = (String) props.get(key);
-				props.put(key, value.trim());
-			}
-		} catch (Exception e) {
-			System.out.println("can't parse config file [" + path + "], terminate.");
-			return;
-		}
-	}*/
-	
 	/** debug */
 	public void dump(){
-		System.out.println("state listeners: " + observers.size());
+		System.out.println("state number of listeners: " + observers.size());
 		for(int i = 0 ; i < observers.size() ; i++) 
-			System.out.println(i + " " + observers.get(i).getClass().getName());
+			System.out.println(i + " " + observers.get(i).getClass().getName() + "\n");
 		
 		Enumeration<Object> keys = props.keys();
 		while(keys.hasMoreElements()){
@@ -181,37 +139,6 @@ public class State {
 		}	
 		return str;
 	}
-	
-	/**
-	 * @param props is the list of values to send to disk 
-	 * @param path, is the file to write the state value pairs too
- 
-	public static void writeFile(Properties props, String path){
-		
-		System.out.println("state writing to: " + path);
-	
-		try {
-			
-			FileWriter out = new FileWriter(path);
-			
-			//out.write("state as of: " + new Date().toString() + "\n");
-			//out.write("state writing to: " + path + "\n");
-			
-			Enumeration<Object> keys = props.keys();
-			while(keys.hasMoreElements()){
-				String key = (String) keys.nextElement();
-				String value = (String) props.getProperty(key);
-				
-				System.out.println(key + " " + value);
-				out.write(key + " " + value + "\r\n");
-			}
- 			
-			out.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} 		
-	}*/
 	
 	/** Put a name/value pair into the configuration */
 	public synchronized void set(final String key, final String value) {

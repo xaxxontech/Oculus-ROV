@@ -20,12 +20,12 @@ public class LoginRecords {
 	
 	
 	public LoginRecords(){ 
-		System.out.println("OCULUS: login records started..");
+		// System.out.println("OCULUS: login records started..");
 	}
 	
 	public void setApplication(Application a) {
 		app = a;
-		System.out.println("OCULUS: login records set application");
+		// System.out.println("OCULUS: login records set application");
 	}
 	
 	public void beDriver() { 
@@ -36,7 +36,8 @@ public class LoginRecords {
 		
 		if (settings.getBoolean(Settings.loginnotify))
 			if(app!=null)
-				app.saySpeech("lawg inn " + state.get(State.user));
+				app.speech.mluv("lawg inn " + state.get(State.user));
+				// accessing 'Speech.mluv' directly so doesn't display text in client window on login 
 
 		if(state.getBoolean(State.developer)) System.out.println(this);
 		

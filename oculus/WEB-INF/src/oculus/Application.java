@@ -46,7 +46,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private String httpPort;
 	private Docker docker = null;
 	private State state = State.getReference();
-	//	private Speech speech = new Speech();
+	public Speech speech = new Speech();
 	private boolean initialstatuscalled = false;
 	private boolean pendingplayerisnull = true;
 	private boolean emailgrab = false;
@@ -913,7 +913,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void saySpeech(String str) {
 		messageplayer("synth voice: " + str, null, null);
 		messageGrabber("synth voice: " + str, null);
-		Speech speech = new Speech();
+		//Speech speech = new Speech();   // DONT initialize each time here, takes too long
 		speech.mluv(str);
 		// Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
 		// log.info("voice synth: '" + str + "'");

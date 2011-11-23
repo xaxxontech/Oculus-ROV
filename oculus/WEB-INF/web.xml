@@ -33,6 +33,19 @@
 		<servlet-name>rtmpPortRequest</servlet-name>
 		<url-pattern>/rtmpPortRequest</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>frameGrabHTTP</servlet-name>
+		<servlet-class>
+			oculus.FrameGrabHTTP
+		</servlet-class>
+		<load-on-startup>4</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>frameGrabHTTP</servlet-name>
+		<url-pattern>/frameGrabHTTP</url-pattern>
+	</servlet-mapping>
 	<!-- end of added by colin adamson-->
 	
 	<servlet-mapping>

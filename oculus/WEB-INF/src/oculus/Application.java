@@ -53,6 +53,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
 	private developer.CommandServer commandServer = null;
+	//public FrameGrabHTTP frameGrabServlet = null; 
 
 	// try to make private
 	public boolean muteROVonMove = false;
@@ -64,6 +65,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		super();
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
+		FrameGrabHTTP.setApp(this);
 		initialize();
 	}
 
@@ -427,11 +429,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			return;
 		}
 
-		// must be driver/non-passenger for all commands below
-		// if (Red5.getConnectionLocal() != player) {
-		// System.out.println("passenger, command dropped: " + fn.toString());
-		// return;
-		// }
+		 // must be driver/non-passenger for all commands below (or cmdMgr user)
+		 if (Red5.getConnectionLocal() != player && player != null) {
+			 System.out.println("passenger, command dropped: " + fn.toString());
+			 return;
+		 }
 
 		switch (fn) {
 		/*
@@ -853,7 +855,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/** */
 	public void frameGrabbed(ByteArray _RAWBitmapImage) { // , final String
 															// filename) {
-
+		/*
 		state.set(State.framegrabbusy, false);
 		messageplayer(null, "framegrabbed", null);
 		// Use functionality in org.red5.io.amf3.ByteArray to get parameters of
@@ -890,6 +892,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 				System.out.println("OCULUS: IO Error " + e);
 			}
 		}
+		*/
+		FrameGrabHTTP.img = _RAWBitmapImage;
 	}
 
 	private void messageplayer(String str, String status, String value) {

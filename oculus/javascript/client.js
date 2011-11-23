@@ -417,7 +417,8 @@ function setstatus(status, value) {
 		else { videoscale = vs; }
 	}
 	if (status == "developer") { document.getElementById("developermenu").style.display = ""; }
-
+	if (status == "debug") { debug(value); }
+ 
 }
 
 function setstatusmultiple(value) {

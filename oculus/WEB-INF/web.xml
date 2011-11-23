@@ -95,6 +95,7 @@
 		<auth-constraint />
 	</security-constraint>
 	
+	<!-- 
 	<listener>
 	    <listener-class>org.red5.logging.ContextLoggingListener</listener-class>
 	</listener>
@@ -108,5 +109,6 @@
 	    <filter-name>LoggerContextFilter</filter-name>
 	    <url-pattern>/*</url-pattern>
 	</filter-mapping>
-	
+	 -->
+	 
 </web-app>

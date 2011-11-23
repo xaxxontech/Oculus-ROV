@@ -53,7 +53,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
 	private developer.CommandServer commandServer = null;
-	//public FrameGrabHTTP frameGrabServlet = null; 
 
 	// try to make private
 	public boolean muteROVonMove = false;
@@ -836,19 +835,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	/** starts new threads... */
-	public void frameGrab() {
+	public boolean frameGrab() {
 
-		// if(state.getBoolean(State.framegrabbusy)){
-		// System.out.println(".. calling framegrab too often.");
-		// return;
-		// }
+		 if(state.getBoolean(State.framegrabbusy)){
+			 System.out.println("OCULUS: framegrab busy, command dropped");
+			 return false;
+		 }
 
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("framegrab", new Object[] {});
-			messageplayer("framegrab command received", null, null);
+			// messageplayer("framegrab command received", null, null);
 			state.set(State.framegrabbusy, true);
 		}
+		return true;
 	}
 
 	// TODO: BRAD..
@@ -856,8 +856,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void frameGrabbed(ByteArray _RAWBitmapImage) { // , final String
 															// filename) {
 		/*
-		state.set(State.framegrabbusy, false);
-		messageplayer(null, "framegrabbed", null);
 		// Use functionality in org.red5.io.amf3.ByteArray to get parameters of
 		// the ByteArray
 		int BCurrentlyAvailable = _RAWBitmapImage.bytesAvailable();
@@ -893,6 +891,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		*/
+		state.set(State.framegrabbusy, false);
 		FrameGrabHTTP.img = _RAWBitmapImage;
 	}
 

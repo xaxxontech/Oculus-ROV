@@ -405,7 +405,7 @@ function setstatus(status, value) {
 		if (value=="downloadcomplete") { softwareupdate("downloadcomplete",""); }
 		else { softwareupdate("available",value); }
 	}
-	if (status == "framegrabbed") { framegrabbed(); }
+	// if (status == "framegrabbed") { framegrabbed(); }
 	if (status == "rovvolume") { rovvolume = parseInt(value); }
 	if (status == "light") { spotlightlevel = parseInt(value); }
 	if (status == "videoscale") { 
@@ -2163,10 +2163,15 @@ function emailgrab() {
 //	}
 //}
 
-function framegrabbed() {
-	document.getElementById("framegrabbox").style.display = "";
-	document.getElementById('framegrabpic').src = 'images/framegrab.jpg'+ '?' + (new Date()).getTime();
-}
+//function framegrab() {
+////	document.getElementById("framegrabbox").style.display = "";
+////	document.getElementById('framegrabpic').src = 'images/framegrab.jpg'+ '?' + (new Date()).getTime();
+//	var str = "image<br><img id='framgegrabimg' src='' alt=''>";
+//    var xy = findpos(document.getElementById('video'));
+//    popupmenu("context", "show", xy[0] + 250, xy[1] + 100, str, null, 1, 0);
+//    document.getElementById('framgegrabimg').src = "frameGrabHTTP"; 
+//    popupmenu("context","resize");
+//}
 
 
 /* message recording utils 

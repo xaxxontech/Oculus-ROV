@@ -375,7 +375,7 @@ public class Util {
 		
 		Vector<String> lines = new Vector<String>();
 				
-		String info = tail(file, 100);
+		String info = tail(file, 1000);
 		String[] capture = info.split("\n");
 		for(int i=0 ; i < capture.length ; i++)
 			if(capture[i].startsWith(match))

@@ -11,10 +11,10 @@ import org.red5.io.amf3.ByteArray;
 public class FrameGrabHTTP extends HttpServlet {
 	
 	private static Application app = null;
-	public static ByteArray img  = null;
+	public static byte[] img  = null;
+	private State state = State.getReference();
 	
 	public static void setApp(Application a) {
-		System.out.println("OCULUS: calling setApp FrameGrabHTTP ");
 		if(app != null) return;
 		app = a;
 	}
@@ -35,18 +35,26 @@ public class FrameGrabHTTP extends HttpServlet {
 			if (app.frameGrab()) {
 				
 				int n = 0;
-				while (img == null) {
+				while (state.getBoolean(State.framegrabbusy)) {
+//				while (img == null) {
 					try {
 						Thread.sleep(5);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					} 
 					n++;
+					if (n> 2000) {  // give up after 10 seconds 
+						state.set(State.framegrabbusy, false);
+						break;
+					}
 				}
+//				System.out.println("OCULUS: frame byte size: "+img.length());
 				System.out.println("OCULUS: frame grabbing done in "+n*5+" ms");
 				
-				for (int i=0; i<img.length(); i++) {
-					out.write(img.readByte());
+				if (img != null) {
+					for (int i=0; i<img.length; i++) {
+						out.write(img[i]);
+					}
 				}
 			    out.close();
 			}

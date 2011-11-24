@@ -1281,8 +1281,8 @@ function usersyscommanddivShow() {
 }
 
 function arduinoReset() {
-	message("resetting arduino ",sentcmdcolor);
-	callServer('arduinoreset');
+	message("resetting arduinoculus ",sentcmdcolor);
+	callServer("arduinoreset","");
 //	overlay('off');
 }
 

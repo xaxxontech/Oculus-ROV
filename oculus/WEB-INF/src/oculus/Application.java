@@ -46,7 +46,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private String httpPort;
 	private Docker docker = null;
 	private State state = State.getReference();
-	public Speech speech = new Speech();
 	private boolean initialstatuscalled = false;
 	private boolean pendingplayerisnull = true;
 	private boolean emailgrab = false;
@@ -58,6 +57,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public boolean muteROVonMove = false;
 	//public boolean admin = false;
 	public String stream = null;
+	public Speech speech = new Speech();
 
 	/** */
 	public Application() {
@@ -837,8 +837,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/** starts new threads... */
 	public boolean frameGrab() {
 
-		 if(state.getBoolean(State.framegrabbusy)){
-			 System.out.println("OCULUS: framegrab busy, command dropped");
+		 if(state.getBoolean(State.framegrabbusy) || !(stream.equals("camera") || stream.equals("camandmic"))) {
+			 System.out.println("OCULUS: framegrab busy or unavailable, command dropped");
 			 return false;
 		 }
 
@@ -891,8 +891,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		*/
-		state.set(State.framegrabbusy, false);
-		FrameGrabHTTP.img = _RAWBitmapImage;
+		int BCurrentlyAvailable = _RAWBitmapImage.bytesAvailable();
+		int BWholeSize = _RAWBitmapImage.length(); // Put the Red5 ByteArray
+													// into a standard Java
+													// array of bytes
+		byte c[] = new byte[BWholeSize];
+		_RAWBitmapImage.readBytes(c);
+		if (BCurrentlyAvailable > 0) {
+			state.set(State.framegrabbusy, false);
+			FrameGrabHTTP.img = c;
+		}
 	}
 
 	private void messageplayer(String str, String status, String value) {
@@ -1622,14 +1630,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private void showlog() {
 	
-		System.out.println(".... showlog....");
+		System.out.println("OCULUS: showlog");
 		
 		String[] tail = Util.tail(new File(Settings.stdout), "OCULUS");
 		String str = null;
 		if(tail!=null){
 			
 			// debug ... 
-			str = "&bull; tail got: "+ tail.length + "<br>";
+			str = "&bull; returned: "+ tail.length + "lines<br>";
 			
 			for(int i = 0 ; i < tail.length ; i++)
 				str += "&bull; " + tail[i].substring(

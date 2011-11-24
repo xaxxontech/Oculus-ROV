@@ -370,9 +370,29 @@ public class Util {
 		systemCall("nircmdc.exe beep 500 1000");
 	}
 	
+	public static String tail ( File file, String match ){
+		
+		// messagePlayer("","debug","test");
+		
+		String info = tail(file, 100);
+		String res = new String();		
+		String[] lines = info.split("\n");
+		int j = 0;
+		for(int i=0 ; i < lines.length ; i++){		
+			if(lines[i].startsWith(match)){
+				res += lines[i] + " \n\r";
+				j++;
+			}
+		}
+	
+		//System.out.println("matches: " + j);
+		
+		return res;
+		
+	}
 	
 	/** */ 
-	 public static String tail( File file, int lines) {
+	public static String tail( File file, int lines) {
 		    try {
 		        java.io.RandomAccessFile fileHandler = new java.io.RandomAccessFile( file, "r" );
 		        long fileLength = file.length() - 1;

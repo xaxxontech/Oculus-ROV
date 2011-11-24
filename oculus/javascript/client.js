@@ -808,8 +808,8 @@ function keypress(e) {
 }
 
 function battStats() {
-	message("sending command: battStats", sentcmdcolor);
-	callServer("battStats", "");
+	message("sending command: battstats", sentcmdcolor);
+	callServer("battstats", "");
 	lagtimer = new Date().getTime();
 }
 

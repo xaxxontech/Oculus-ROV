@@ -10,6 +10,7 @@ import oculus.Application;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
+import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.State;
 import oculus.Updater;
@@ -82,7 +83,7 @@ public class CommandServer implements Observer {
 					if(app.logintest(user, encryptedPassword)==null){
 						// sendToGroup("login failure : " + user);
 						out.println("login failure, please drop dead");
-						new Exception("login failure for user: " + user);
+						shutDown();
 					}
 				}
 			} catch (Exception ex) {
@@ -133,6 +134,7 @@ public class CommandServer implements Observer {
 				}
 			} catch (Exception e) {
 				System.out.println("OCULUS: command server read thread, " + e.getMessage());
+				e.printStackTrace(System.out);
 				shutDown();
 			}
 		}
@@ -145,11 +147,12 @@ public class CommandServer implements Observer {
 			
 			int index = str.indexOf(" ");
 		
-			if(index < 0){
+			if(index == -1){
 				
 				System.out.println("... doplayer: " + str);
 			
-				//app.playerCallServer(str, null);
+			//	app.playerCallServer(/*PlayerCommands.battstats.toString()*/ 
+				//		str, null);
 
 				
 			}
@@ -192,9 +195,7 @@ public class CommandServer implements Observer {
 		/** add extra commands, macros here */ 
 		public void manageCommand(final String str){
 			final String[] cmd = str.split(" ");
-			
-			
-			
+				
 			if(cmd[0].equals("tail")) {
 				
 				// default if not set 
@@ -304,10 +305,10 @@ public class CommandServer implements Observer {
 							int i = 0;
 							while(grabbusy){
 								
-								// System.out.println(" ... wait: " + i++);
+								// System.out.println(" ... wait: " + i);
 								Util.delay(100);
 								
-								if(i>300) {
+								if(i++>500) {
 									System.out.println("OCULUS: CommandServer, give up on finding dock"); 
 									state.set(oculus.State.dockgrabbusy, false);
 									grabbusy = false;

@@ -136,7 +136,7 @@ public class FindHome extends AbstractTerminal {
 
 		while (true) {
 			if (state.get(State.batterystatus) == null) {
-				out.println(PlayerCommands.battStats.toString());
+				out.println(PlayerCommands.battstats.toString());
 				Util.delay(2000);
 			} else break;
 		}

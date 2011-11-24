@@ -79,11 +79,12 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			if (!isconnected){
 			
 				// TAKE IT DOWN! 
-				if(state.get(oculus.State.firmware) != oculus.State.unknown)
+				if(state.get(oculus.State.firmware).equals(oculus.State.unknown)){
 					if(state.getBoolean(oculus.State.developer)){
 						System.out.println("OCULUS: AbstractArduinoComm, not connected, rebooting");		
 						Util.systemCall("shutdown -r -f -t 01");	
 					}
+				}
 				
 			} else {
 				command = cmd;
@@ -108,7 +109,10 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					System.out.println("OCULUS: AbstractArduinoComm.WatchDog(), "
-							+"arduino watchdog time out");
+							+"arduino watchdog time out.. doing nada about it too!");
+					
+					state.set(oculus.State.commwatchdog, true);
+					
 					return; // die, no point living?
 				}
 

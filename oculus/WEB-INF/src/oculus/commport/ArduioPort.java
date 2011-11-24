@@ -31,6 +31,7 @@ public interface ArduioPort {
 
 	public abstract void execute();
 
+	
 	/** @return the time since last write() operation */
 	public abstract long getWriteDelta();
 

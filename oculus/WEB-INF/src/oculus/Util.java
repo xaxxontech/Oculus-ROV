@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Vector;
 
 public class Util {
 
@@ -370,69 +371,78 @@ public class Util {
 		systemCall("nircmdc.exe beep 500 1000");
 	}
 	
-	public static String tail ( File file, String match ){
+	public static String[] tail ( File file, String match ){
 		
-		// messagePlayer("","debug","test");
-		
+		Vector<String> lines = new Vector<String>();
+				
 		String info = tail(file, 100);
-		String res = new String();		
-		String[] lines = info.split("\n");
-		int j = 0;
-		for(int i=0 ; i < lines.length ; i++){		
-			if(lines[i].startsWith(match)){
-				res += lines[i] + " \n\r";
-				j++;
-			}
-		}
+		String[] capture = info.split("\n");
+		for(int i=0 ; i < capture.length ; i++)
+			if(capture[i].startsWith(match))
+				lines.add(capture[i]);
+			
+		// System.out.println("matches: " + lines.size());
+		
+		String[] result = new String[lines.size()];
+		for (int c = 0 ; c < lines.size() ; c++) 
+			result[c] = lines.get(c);
+			
+		return result;
+	}
 	
-		//System.out.println("matches: " + j);
-		
-		return res;
-		
+	public static String tail(){
+		String info = tail(new File(Settings.stdout), 100);
+		String[] capture = info.split("\n");
+		String result = null;
+		for(int i=0 ; i < capture.length ; i++)
+			if(capture[i].startsWith("OCULUS:"))
+				result += (capture[i]) + " \n";
+			
+		return result;
 	}
 	
 	/** */ 
-	public static String tail( File file, int lines) {
-		    try {
-		        java.io.RandomAccessFile fileHandler = new java.io.RandomAccessFile( file, "r" );
-		        long fileLength = file.length() - 1;
-		        StringBuilder sb = new StringBuilder();
-		        int line = 0;
+	public static String tail( File file, int lines) {  
+		try {
+	        java.io.RandomAccessFile fileHandler = new java.io.RandomAccessFile( file, "r" );
+	        long fileLength = file.length() - 1;
+	        StringBuilder sb = new StringBuilder();
+	        int line = 0;
 
-		        for( long filePointer = fileLength; filePointer != -1; filePointer-- ) {
-		            fileHandler.seek( filePointer );
-		            int readByte = fileHandler.readByte();
+	        for( long filePointer = fileLength; filePointer != -1; filePointer-- ) {
+	            fileHandler.seek( filePointer );
+	            int readByte = fileHandler.readByte();
 
-		            if( readByte == 0xA ) {
-		                if (line == lines) {
-		                    if (filePointer == fileLength) {
-		                        continue;
-		                    } else {
-		                        break;
-		                    }
-		                }
-		            } else if( readByte == 0xD ) {
-		                line = line + 1;
-		                if (line == lines) {
-		                    if (filePointer == fileLength - 1) {
-		                        continue;
-		                    } else {
-		                        break;
-		                    }
-		                }
-		            }
-		           sb.append( ( char ) readByte );
-		        }
+	            if( readByte == 0xA ) {
+	                if (line == lines) {
+	                    if (filePointer == fileLength) {
+	                        continue;
+	                    } else {
+	                        break;
+	                    }
+	                }
+	            } else if( readByte == 0xD ) {
+	                line = line + 1;
+	                if (line == lines) {
+	                    if (filePointer == fileLength - 1) {
+	                        continue;
+	                    } else {
+	                        break;
+	                    }
+	                }
+	            }
+	           sb.append( ( char ) readByte );
+	        }
 
-		        sb.deleteCharAt(sb.length()-1);
-		        String lastLine = sb.reverse().toString();
-		        return lastLine;
-		    } catch( java.io.FileNotFoundException e ) {
-		        e.printStackTrace();
-		        return null;
-		    } catch( java.io.IOException e ) {
-		        e.printStackTrace();
-		        return null;
-		    }
+	        sb.deleteCharAt(sb.length()-1);
+	        String lastLine = sb.reverse().toString();
+	        return lastLine;
+	    } catch( java.io.FileNotFoundException e ) {
+	        e.printStackTrace();
+	        return null;
+	    } catch( java.io.IOException e ) {
+	        e.printStackTrace();
+	        return null;
+	    }
 	 }
 }

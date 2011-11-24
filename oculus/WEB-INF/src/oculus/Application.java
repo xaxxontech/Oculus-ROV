@@ -519,7 +519,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case dock:
 			docker.dock(str);
 			break;
-		case battStats:
+		case battstats:
 			battery.battStats();
 			break;
 		case cameracommand:
@@ -1611,8 +1611,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				if (con instanceof IServiceCapableConnection && con != grabber
 						&& !(con == pendingplayer && !pendingplayerisnull)) {
 					IServiceCapableConnection n = (IServiceCapableConnection) con;
-					n.invoke("message", new Object[] { str, "yellow", null,
-							null });
+					n.invoke("message", new Object[] { str, "yellow", null, null });
 				}
 			}
 		}
@@ -1622,26 +1621,45 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void showlog() {
-		if (loginRecords.isAdmin()) {
+	
+		System.out.println(".... showlog....");
+		
+		String[] tail = Util.tail(new File(Settings.stdout), "OCULUS");
+		String str = null;
+		if(tail!=null){
 			
-			// String filename = System.getenv("RED5_HOME") + "\\log\\oculus.log";
+			// debug ... 
+			str = "&bull; tail got: "+ tail.length + "<br>";
 			
-			FileInputStream filein;
-			String str = "";
-			try {
-				filein = new FileInputStream(oculus.Settings.stdout);
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(filein));
-				String line = "";
-				while ((line = reader.readLine()) != null) {
-					str = "&bull; " + line + "<br>" + str;
-				}
-				filein.close();
-				sendplayerfunction("showserverlog", str);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			for(int i = 0 ; i < tail.length ; i++)
+				str += "&bull; " + tail[i].substring(
+						"OCULUS:".length(), tail[i].length()) + "<br>";
+			
+			sendplayerfunction("showserverlog", str);
+
 		}
+		
+		
+		//if (loginRecords.isAdmin()) {
+						
+		//	FileInputStream filein;
+		//	String str = "";
+		//	try {
+		//		filein = new FileInputStream(oculus.Settings.stdout);
+		//		BufferedReader reader = new BufferedReader(
+		//				new InputStreamReader(filein));
+		//		String line = "";
+		//		while ((line = reader.readLine()) != null) {
+		//			str = "&bull; " + line + "<br>" + str;
+		//		}
+		
+		//		filein.close();
+		//		sendplayerfunction("showserverlog", str);
+		//	} catch (Exception e) {
+		//		e.printStackTrace();
+		//	}
+			
+		// }
 	}
 
 	private void saveAndLaunch(String str) {

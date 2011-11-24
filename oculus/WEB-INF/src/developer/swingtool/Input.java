@@ -74,7 +74,7 @@ public class Input extends JTextField implements KeyListener {
 				// clear input screen 
 				setText("");
 			}
-		}
+		} 
 	}
 
 	@Override
@@ -114,9 +114,13 @@ public class Input extends JTextField implements KeyListener {
 				
 				
 			}
-		}
+		} 
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {}
+	public void keyReleased(KeyEvent e) {
+		
+		// System.out.println("............ " + e.toString());
+
+	}
 }

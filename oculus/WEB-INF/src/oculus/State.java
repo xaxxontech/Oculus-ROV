@@ -28,6 +28,7 @@ public class State {
 	public static final String losttarget = "losttarget";
 	public static final String firmware = "firmware";
 	public static final String unknown = "unknown";	
+	public static final String commwatchdog = "commwatchdog";
 	public static final String framegrabbusy = "framegrabbusy";
 	
 	public static final String sonarback = "sonarback";
@@ -62,7 +63,6 @@ public class State {
 	
 	/** reference to this singleton class */
 	private static State singleton = null;
-
 
 	/** properties object to hold configuration */
 	private Properties props = new Properties();

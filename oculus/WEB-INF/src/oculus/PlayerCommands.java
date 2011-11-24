@@ -3,7 +3,7 @@ package oculus;
 public enum PlayerCommands {
 
 	// all valid commands
-	publish, move, nudge, slide, dockgrab, framegrab, battStats, restart, docklineposupdate, autodock, autodockcalibrate, 
+	publish, move, nudge, slide, dockgrab, framegrab, battstats, restart, docklineposupdate, autodock, autodockcalibrate, 
 	speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate, 
 	tilttest, speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
 	streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
@@ -43,6 +43,17 @@ public enum PlayerCommands {
 		return false;
 	}
 
+	public static String match(String str) {
+		for (AdminCommands admin : AdminCommands.values()) {
+			if (admin.toString().startsWith(str))
+				return admin.toString();
+		}
+
+		return null;
+	}
+
+
+	
 	@Override
 	public String toString() {
 		return super.toString();

@@ -62,11 +62,15 @@ public class AuthGrab extends HttpServlet {
         final String mode = req.getParameter("mode");
 
         if(login(user, pass)) {	
+        
+        	// ready a responce 
+    		res.setContentType("image/jpeg");
+    		OutputStream out = res.getOutputStream();
         	
         	// only get new if ask ... could be faster to send the last one if was just taken 
         	if(mode!=null) if(mode.equals("update")) getImage();
         	
-        	sendImage(res);
+        	sendImage(out);
         
         } else {
           
@@ -79,7 +83,8 @@ public class AuthGrab extends HttpServlet {
 	}
 	
 	public void getImage(){
-		long start = System.currentTimeMillis();		
+		
+		// long start = System.currentTimeMillis();		
 		
 		if(state.get(PlayerCommands.publish)==null){
     		
@@ -96,34 +101,26 @@ public class AuthGrab extends HttpServlet {
     		}
     	}
 		
+		// wait for result
+		img = null;
 		if (app.frameGrab()) {
-
-			// wait for result
-			if( ! state.block(State.framegrabbusy, "false", 1000)){
-				Util.debug("getImage(), couldn't get image, waited 3sec", this);
+			if( ! state.block(State.framegrabbusy, "false", 500)){
+				Util.debug("getImage(), couldn't get image, waited...", this);
 				return;
 			}
 			
-			Util.debug("frame grab done in " + (System.currentTimeMillis() - start) + " ms", this);
-		
-		} else {
-			Util.debug("frame grab busy?", this);
-		}
+			// Util.debug("frame grab done in " + (System.currentTimeMillis() - start) + " ms", this);
+		} // else { Util.debug("frame grab busy?", this); }
 	}
 	
-	public void sendImage(HttpServletResponse res) throws IOException{
-		
+	public void sendImage(OutputStream out) throws IOException {
+	
 		if(img==null) return;
 		
-		long start = System.currentTimeMillis();
-  	
-		res.setContentType("image/jpeg");
-		OutputStream out = res.getOutputStream();
-			
-		start = System.currentTimeMillis();
+		// long start = System.currentTimeMillis();
 		for (int i=0; i<img.length; i++) out.write(img[i]);
 		out.close();
 		   
-		Util.debug("frame grab done sending in " + (System.currentTimeMillis() - start) + " ms", this);			
+		// Util.debug("frame grab done sending in " + (System.currentTimeMillis() - start) + " ms", this);			
 	}
 }

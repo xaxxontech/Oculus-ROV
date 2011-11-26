@@ -157,7 +157,7 @@ public class State {
 			//
 			// TODO: FIX ?? 
 			//
-			Util.delay(10);
+			Util.delay(5);
 			if (System.currentTimeMillis()-start > timeout){ 
 				return false;
 			}

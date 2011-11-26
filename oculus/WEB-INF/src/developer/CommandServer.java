@@ -133,7 +133,7 @@ public class CommandServer implements Observer {
 				}
 			} catch (Exception e) {
 				System.out.println("OCULUS: command server read thread, " + e.getMessage());
-				e.printStackTrace(System.out);
+				// e.printStackTrace(System.out);
 				shutDown();
 			}
 		}

@@ -827,7 +827,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	/** starts new threads... */
+	/**  */
 	public boolean frameGrab() {
 
 		 if(state.getBoolean(State.framegrabbusy) || !(stream.equals("camera") || stream.equals("camandmic"))) {
@@ -844,7 +844,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		return true;
 	}
 
-	// TODO: BRAD..
 	/** */
 	public void frameGrabbed(ByteArray _RAWBitmapImage) { // , final String
 															// filename) {
@@ -892,13 +891,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		_RAWBitmapImage.readBytes(c);
 		if (BCurrentlyAvailable > 0) {
 			state.set(State.framegrabbusy, false);
+			// state.set("framegrablast", false);
+			
 			FrameGrabHTTP.img = c;
-			
-			// state.set("buffer", c.toString());
-			
 			AuthGrab.img = c;
 
-			// TODO: BRAD FIX!!
+			// TODO: BRAD !!
 		}
 	}
 

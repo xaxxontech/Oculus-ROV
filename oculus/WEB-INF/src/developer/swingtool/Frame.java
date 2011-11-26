@@ -18,6 +18,13 @@ public class Frame extends JFrame implements Runnable {
 		getContentPane().add(chatScroller, BorderLayout.NORTH);
 		getContentPane().add(in, BorderLayout.PAGE_END);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		chatScroller.setFocusable(false);
+		in.setFocusable(true);
+		in.requestFocus();
+		
+		// this.setFocusable(false);
+		
 	}
 
 	// swing will call us when ready 

@@ -373,16 +373,15 @@ public class Util {
 	
 	public static String[] tail ( File file, String match ){
 		
+		// store all lines, then filter 
 		Vector<String> lines = new Vector<String>();
 				
-		String info = tail(file, 1000);
+		String info = tail(file, 500);
 		String[] capture = info.split("\n");
 		for(int i=0 ; i < capture.length ; i++)
 			if(capture[i].startsWith(match))
 				lines.add(capture[i]);
-			
-		// System.out.println("matches: " + lines.size());
-		
+					
 		String[] result = new String[lines.size()];
 		for (int c = 0 ; c < lines.size() ; c++) 
 			result[c] = lines.get(c);
@@ -391,7 +390,7 @@ public class Util {
 	}
 	
 	public static String tail(){
-		String info = tail(new File(Settings.stdout), 100);
+		String info = tail(new File(Settings.stdout), 500);
 		String[] capture = info.split("\n");
 		String result = null;
 		for(int i=0 ; i < capture.length ; i++)
@@ -445,4 +444,13 @@ public class Util {
 	        return null;
 	    }
 	 }
+	
+
+	public static void debug(String str, Object c) {
+		System.out.println("DEBUG: " + c.getClass().getName() + ", " +str);
+	}
+
+	public static void log(String str, Object c) {
+		System.out.println("OCULUS: " + c.getClass().getName() + ", " +str);
+	}
 }

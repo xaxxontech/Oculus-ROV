@@ -81,7 +81,6 @@ public class CommandServer implements Observer {
 							.encryptPassword(user + settings.readSetting("salt") + pass)).trim();
 					
 					if(app.logintest(user, encryptedPassword)==null){
-						// sendToGroup("login failure : " + user);
 						out.println("login failure, please drop dead");
 						shutDown();
 					}
@@ -228,9 +227,7 @@ public class CommandServer implements Observer {
 		
 			// if(cmd[0].equals("softwareupdate")) app.softwareUpdate("update"); 
 			
-			// if(cmd[0].equals("image")) {
-				
-			//	app.frameGrab();
+			if(cmd[0].equals("image")) { app.frameGrab(); }
 				
 				// remove ?
 				// while(state.getBoolean(oculus.State.framegrabbusy)){
@@ -241,7 +238,7 @@ public class CommandServer implements Observer {
 				// state change will be seen anyway 
 				//out.println("done frame grab");
 				//System.out.println("... done image grab ...");
-			//}
+				// }
 			
 			/*
 			if(cmd[0].equals("move")){
@@ -257,8 +254,7 @@ public class CommandServer implements Observer {
 			if(cmd[0].equals("publish")) app.publish(cmd[1]); 
 			*/
 			
-			//if(cmd[0].equals("cam")){
-			//	app.publish("camera");
+			if(cmd[0].equals("cam")){ app.publish("camera"); }
 			//	port.camHoriz();
 			//	port.camCommand("down");
 			//	Util.delay(1500);

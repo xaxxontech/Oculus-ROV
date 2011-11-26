@@ -36,6 +36,8 @@ public class Input extends JTextField implements KeyListener {
 		
 		// listen for key input 
 		addKeyListener(this);
+		// requestFocus();
+
 	}
 	
 	// Manager user input

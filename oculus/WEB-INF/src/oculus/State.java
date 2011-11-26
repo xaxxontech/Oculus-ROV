@@ -57,7 +57,6 @@ public class State {
 
 
 
-
 	/** notify these on change events */
 	public Vector<Observer> observers = new Vector<Observer>();
 	
@@ -130,7 +129,7 @@ public class State {
 	/** */
 	@Override
 	public String toString(){	
-		String str = new String("state listeners: " + observers.size());
+		String str = "";// new String("state listeners: " + observers.size());
 		Enumeration<Object> keys = props.keys();
 		while(keys.hasMoreElements()){
 			String key = (String) keys.nextElement();
@@ -138,6 +137,31 @@ public class State {
 			str += key + SEPERATOR + value + "\r\n";
 		}	
 		return str;
+	}
+	
+	public boolean block(final String member, final String target, int timeout){
+		
+		long start = System.currentTimeMillis();
+		String current = null;
+		while(true){
+			
+			// keep checking 
+			current = get(member); 
+			
+			if(current!=null){
+				if(target.equals("*")) return true;	
+				if(target.equals(current)) return true;
+				if(target.startsWith(current)) return true;
+			}
+				
+			//
+			// TODO: FIX ?? 
+			//
+			Util.delay(10);
+			if (System.currentTimeMillis()-start > timeout){ 
+				return false;
+			}
+		}
 	}
 	
 	/** Put a name/value pair into the configuration */

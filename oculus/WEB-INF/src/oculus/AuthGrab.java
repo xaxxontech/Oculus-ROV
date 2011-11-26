@@ -1,0 +1,129 @@
+package oculus;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+import org.jasypt.util.password.ConfigurablePasswordEncryptor;
+
+public class AuthGrab extends HttpServlet {
+	
+	/** eclispse or jdk wants?? */
+	private static final long serialVersionUID = 1L;
+
+	private static Application app = null;
+	private static State state = State.getReference();
+	private static Settings settings = new Settings();
+	static byte[] img  = null;
+
+	public static void setApp(Application a) {
+		if(app != null) return;
+		app = a;
+	}
+	
+	public boolean login(String user, String pass){
+		
+        if(user==null || pass==null) return false;
+        
+        long start = System.currentTimeMillis();
+        
+		if(app.logintest(user, pass)==null){
+			
+			// fail.. so see if was a plain text password
+		    ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
+			passwordEncryptor.setAlgorithm("SHA-1");
+			passwordEncryptor.setPlainDigest(true);
+			String encryptedPassword = (passwordEncryptor
+					.encryptPassword(user + settings.readSetting("salt") + pass)).trim();
+			
+			if(app.logintest(user, encryptedPassword)==null){
+				Util.debug("login failure, took " + (System.currentTimeMillis() - start) + " ms", this);
+				return false;
+			}
+		}
+		
+		Util.debug("login done in " + (System.currentTimeMillis() - start) + " ms", this);
+		
+		return true;
+	}
+	
+	public void doGet(HttpServletRequest req, HttpServletResponse res)
+			throws ServletException, IOException {
+		doPost(req,res);
+	}
+	
+	public void doPost(HttpServletRequest req, HttpServletResponse res)
+			throws ServletException, IOException {
+				
+        final String user = req.getParameter("user");
+        final String pass = req.getParameter("pass");
+        final String mode = req.getParameter("mode");
+
+        if(login(user, pass)) {	
+        	
+        	// only get new if ask ... could be faster to send the last one if was just taken 
+        	if(mode!=null) if(mode.equals("update")) getImage();
+        	
+        	sendImage(res);
+        
+        } else {
+          
+        	// debug message for bad auth 
+    		res.setContentType("text/html");
+    		OutputStream out = res.getOutputStream();
+    		out.write("<b>loging failure </b> ".getBytes());
+    		out.close();
+        }  
+	}
+	
+	public void getImage(){
+		long start = System.currentTimeMillis();		
+		
+		if(state.get(PlayerCommands.publish)==null){
+    		
+    		Util.debug("cam was off, turned on", this);
+    		
+    		// doesn't work 
+    		// app.playerCallServer(PlayerCommands.publish, "camera");
+    		app.publish("camera");
+    		
+    		// wait for any value in state for 'publish'
+    		if( ! state.block(PlayerCommands.publish.toString(), "cam", 3000)){
+    			Util.log("timeout trying to turn on camera", this);
+    			return;
+    		}
+    	}
+		
+		if (app.frameGrab()) {
+
+			// wait for result
+			if( ! state.block(State.framegrabbusy, "false", 1000)){
+				Util.debug("getImage(), couldn't get image, waited 3sec", this);
+				return;
+			}
+			
+			Util.debug("frame grab done in " + (System.currentTimeMillis() - start) + " ms", this);
+		
+		} else {
+			Util.debug("frame grab busy?", this);
+		}
+	}
+	
+	public void sendImage(HttpServletResponse res) throws IOException{
+		
+		if(img==null) return;
+		
+		long start = System.currentTimeMillis();
+  	
+		res.setContentType("image/jpeg");
+		OutputStream out = res.getOutputStream();
+			
+		start = System.currentTimeMillis();
+		for (int i=0; i<img.length; i++) out.write(img[i]);
+		out.close();
+		   
+		Util.debug("frame grab done sending in " + (System.currentTimeMillis() - start) + " ms", this);			
+	}
+}

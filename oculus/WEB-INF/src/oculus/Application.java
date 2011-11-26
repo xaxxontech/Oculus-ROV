@@ -1,17 +1,9 @@
 package oculus;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.imageio.ImageIO;
 
 import oculus.commport.AbstractArduinoComm;
 import oculus.commport.ArduinoCommDC;
@@ -37,7 +29,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private IConnection player = null;
 	private AbstractArduinoComm comport = null;
 	private LightsComm light = null;
-	///private developer.LogManager moves = new developer.LogManager();
 	private BatteryLife battery = null;
 	private Settings settings = new Settings();
 	private String pendinguserconnected = null;
@@ -48,14 +39,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private State state = State.getReference();
 	private boolean initialstatuscalled = false;
 	private boolean pendingplayerisnull = true;
-	private boolean emailgrab = false;
+//	private boolean emailgrab = false;
 	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
 	private developer.CommandServer commandServer = null;
 
 	// try to make private
 	public boolean muteROVonMove = false;
-	//public boolean admin = false;
 	public String stream = null;
 	public Speech speech = new Speech();
 
@@ -65,6 +55,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		FrameGrabHTTP.setApp(this);
+		AuthGrab.setApp(this);
 		initialize();
 	}
 
@@ -576,10 +567,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case framegrab:
 			frameGrab();
 			break;
-		case emailgrab:
+		/*case emailgrab:
 			frameGrab();
 			emailgrab = true;
-			break;
+			break;*/ 
+		//TODO: disabled currently 
 		case extrauser_password_update:
 			account("extrauser_password_update", str);
 			break;
@@ -642,7 +634,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** put all commands here */
 	public enum grabberCommands {
-		streammode, saveandlaunch, populatesettings, systemcall, chat, dockgrabbed, autodock, restart, checkforbattery, factoryreset;
+		streammode, saveandlaunch, populatesettings, systemcall, chat, dockgrabbed, autodock, 
+		restart, checkforbattery, factoryreset;
 		@Override
 		public String toString() {
 			return super.toString();
@@ -900,6 +893,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (BCurrentlyAvailable > 0) {
 			state.set(State.framegrabbusy, false);
 			FrameGrabHTTP.img = c;
+			
+			// state.set("buffer", c.toString());
+			
+			AuthGrab.img = c;
+
+			// TODO: BRAD FIX!!
 		}
 	}
 
@@ -1630,14 +1629,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private void showlog() {
 	
-		System.out.println("OCULUS: showlog");
+		//System.out.println
+		messageplayer("", "debug", "OCULUS: showlog");
 		
 		String[] tail = Util.tail(new File(Settings.stdout), "OCULUS");
 		String str = null;
 		if(tail!=null){
 			
 			// debug ... 
-			str = "&bull; returned: "+ tail.length + "lines<br>";
+			str = "&bull; returned: " + tail.length + "lines from: " + 
+				Settings.stdout + "<br>";
 			
 			for(int i = 0 ; i < tail.length ; i++)
 				str += "&bull; " + tail[i].substring(

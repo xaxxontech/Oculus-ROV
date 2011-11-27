@@ -30,7 +30,8 @@ public class CommandServer implements Observer {
 	private static oculus.State state = oculus.State.getReference();
 	private static LoginRecords records = new LoginRecords();
 	private static oculus.Settings settings = new Settings(); 
-	private static boolean grabbusy = false;
+	
+	// private static boolean grabbusy = false;
 	
 
 	/** Threaded client handler */
@@ -99,7 +100,10 @@ public class CommandServer implements Observer {
 		@Override
 		public void run() {
 			
-			// Util.beep();
+			//out.println("state override true");
+			state.set(oculus.State.override, true);
+		
+			Util.beep();
 			sendToGroup(printers.size() + " tcp connections active");
 			
 			try {
@@ -120,13 +124,13 @@ public class CommandServer implements Observer {
 					str = str.trim();
 					if(str.length()>1){
 						
-						if(settings.getBoolean(Settings.developer))	
-							System.out.println("OCULUS: address [" + clientSocket + "] message [" + str + "]");
+						//if(settings.getBoolean(Settings.developer))	
+						Util.debug("address [" + clientSocket + "] message [" + str + "]", this);
 						
 						// do both for now 
 						manageCommand(str);
 						
-						// 
+						// TODO: COLIN  
 						doPlayer(str);
 				
 					}
@@ -139,34 +143,20 @@ public class CommandServer implements Observer {
 		}
 
 		public void doPlayer(String str){
-
-			// call app player commands 
-			//System.out.println( "... cmd: "+str.substring(0, str.indexOf(" ")));
-					
-			
+			Util.log("doplayer(), " + str, this);			
 			int index = str.indexOf(" ");
-		
 			if(index == -1){
-				
-				System.out.println("... doplayer: " + str);
+				app.playerCallServer(str, null);
+			} else {
 			
-			//	app.playerCallServer(/*PlayerCommands.battstats.toString()*/ 
-				//		str, null);
-
+				String cmd = str.substring(0, str.indexOf(' '));
+				String param = str.substring(str.indexOf(' '), str.length());
+				
+				System.out.println("cmd: " + cmd);
+				System.out.println("par: " + param);
+				app.playerCallServer(cmd, param);
 				
 			}
-			
-			//String cmd = str.substring(str.indexOf(" ")+1, str.length());
-			
-		
-			//pp.playerCallServer();
-			
-			//str.substring(0, str.indexOf(" ")), 
-					//			str.substring(str.indexOf(" ")+1 str.length()));
-						
-		//	app.playerCallServer(str.substring(0, str.indexOf(" ")), 
-		//			str.substring(str.indexOf(" ")+1 str.length()));
-			
 		}
 		
 		// close resources
@@ -275,16 +265,14 @@ public class CommandServer implements Observer {
 			if(cmd[0].equals("bye")) { out.print("bye"); shutDown(); }
 						
 			if(cmd[0].equals("find")) {
-				if(grabbusy){
+				if(state.getBoolean(oculus.State.dockgrabbusy)){
 				
-					System.out.println(".. can't call again.. ");
-					out.println("busy");
+					Util.log("calling _find_ too often.", this);
 					return;
 					
 				} else {
 					
-					state.set(oculus.State.dockgrabbusy, true);
-					grabbusy = true;
+		//			state.set(oculus.State.dockgrabbusy, true);
 					
 					new Thread(new Runnable() {
 						
@@ -297,10 +285,14 @@ public class CommandServer implements Observer {
 							// are the same thing 
 							// app.playerCallServer(PlayerCommands.dockgrab, null);
 							app.dockGrab();
-
-							int i = 0;
+							if( ! state.block(oculus.State.dockgrabbusy, "false", 30000))
+								Util.log("timed out waiting on dock grab ", this);
+							
+							
+							/*
+							// int i = 0;
 							while(grabbusy){
-								
+					
 								// System.out.println(" ... wait: " + i);
 								Util.delay(100);
 								
@@ -311,7 +303,8 @@ public class CommandServer implements Observer {
 									break;
 								}
 							}	
-							
+							*/
+								
 							// put results in state for any that care 
 							state.set(oculus.State.dockgrabtime, (System.currentTimeMillis() - start));
 							
@@ -379,7 +372,9 @@ public class CommandServer implements Observer {
 	public void updated(String key) {
 		
 		// track local boolean flags 
-		if(key.equals(oculus.State.dockslope)) grabbusy = false;
+		// if(key.equals(oculus.State.dockslope)){
+		//	grabbusy = false;
+		//}
 		
 		String value = state.get(key);
 		if(value==null) {

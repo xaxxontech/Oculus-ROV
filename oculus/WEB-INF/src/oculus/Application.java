@@ -369,14 +369,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 		try {
 			cmd = PlayerCommands.valueOf(fn);
 		} catch (Exception e) {
-			System.out.println("playerCallServer() command not found:" + fn);
+			Util.debug("playerCallServer() command not found:" + fn, this);
 			return;
 		}
 		if (cmd != null) {
 			if (cmd.requiresAdmin())
-				if (loginRecords.isAdmin()){ //!admin) {
-					message("must be an admin", null, null);
-					System.out.println("OCULUS: playerCallServer(), must be an admin to do: " + fn.toString());
+				if (loginRecords.isAdmin()){ 
+					// message("must be an admin", null, null);
+					Util.debug("playerCallServer(), must be an admin to do: " + fn, this);
 					return;
 				}
 			playerCallServer(cmd, str);
@@ -420,11 +420,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 
 		 // must be driver/non-passenger for all commands below (or cmdMgr user)
+		
+		// temp 'solution' 
+		if( ! state.getBoolean(oculus.State.override)){
 		 if (Red5.getConnectionLocal() != player && player != null) {
 			 System.out.println("passenger, command dropped: " + fn.toString());
 			 return;
 		 }
-
+		}
+		
+		
 		switch (fn) {
 		/*
 		 * case tail: int lines = 30; if(cmd.length==2) lines =
@@ -688,10 +693,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case chat:
 			chat(str);
 			break;
-		case dockgrabbed: {
+		case dockgrabbed: 
 			docker.autoDock("dockgrabbed " + str);
-			// System.out.println("grabberCallServer(): " + str);
-			// find xx yy xSize ySize, 0.xxxx
 			String[] arg = str.split(" ");
 			state.set(State.dockxpos, arg[1]);
 			state.set(State.dockypos, arg[2]);
@@ -700,12 +703,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			state.set(State.dockslope, arg[5]);
 			state.set(State.dockgrabbusy, false);
 			break;
-		}
-		case autodock: {
-			// System.out.println("OCULUS: grabberCallServer(): autodock: " + str);
+		case autodock: 
 			docker.autoDock(str);
 			break;
-		}
 		case checkforbattery:
 			checkForBattery(str);
 			break;
@@ -713,8 +713,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			factoryReset();
 			break;
 		case restart:
-			// admin = true;
-			System.out.println("OCULUS: restart command received from grabber");
 			restart();
 			break;
 		}
@@ -783,11 +781,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 				int height = Integer.parseInt(vals[1]);
 				int fps = Integer.parseInt(vals[2]);
 				int quality = Integer.parseInt(vals[3]);
-				sc.invoke("publish", new Object[] { str, width, height, fps,
-						quality });
+				sc.invoke("publish", new Object[] { str, width, height, fps, quality });
 				// messageGrabber("stream "+str);
 				messageplayer("command received: publish " + str, null, null);
 				state.set(PlayerCommands.publish, str);
+				System.out.println("PUBLISHED:" + state.get(PlayerCommands.publish));
 			}
 		} catch (NumberFormatException e) {
 			System.out.println("publish() " + e.getMessage());

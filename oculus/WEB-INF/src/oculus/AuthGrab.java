@@ -10,13 +10,11 @@ import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 
 public class AuthGrab extends HttpServlet {
 	
-	/** eclispse or jdk wants?? */
 	private static final long serialVersionUID = 1L;
-
 	private static Application app = null;
 	private static State state = State.getReference();
 	private static Settings settings = new Settings();
-	static byte[] img  = null;
+	public static byte[] img  = null;
 
 	public static void setApp(Application a) {
 		if(app != null) return;
@@ -27,9 +25,9 @@ public class AuthGrab extends HttpServlet {
 		
         if(user==null || pass==null) return false;
         
-        long start = System.currentTimeMillis();
+        // long start = System.currentTimeMillis();
         
-		if(app.logintest(user, pass)==null){
+		//if(app.logintest(user, pass)==null){
 			
 			// fail.. so see if was a plain text password
 		    ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
@@ -39,13 +37,12 @@ public class AuthGrab extends HttpServlet {
 					.encryptPassword(user + settings.readSetting("salt") + pass)).trim();
 			
 			if(app.logintest(user, encryptedPassword)==null){
-				Util.debug("login failure, took " + (System.currentTimeMillis() - start) + " ms", this);
+//				Util.debug("login failure, took " + (System.currentTimeMillis() - start) + " ms", this);
 				return false;
 			}
-		}
+		//}
 		
-		Util.debug("login done in " + (System.currentTimeMillis() - start) + " ms", this);
-		
+//		Util.debug("login done in " + (System.currentTimeMillis() - start) + " ms", this);	
 		return true;
 	}
 	
@@ -79,6 +76,7 @@ public class AuthGrab extends HttpServlet {
     		OutputStream out = res.getOutputStream();
     		out.write("<b>loging failure </b> ".getBytes());
     		out.close();
+    		
         }  
 	}
 	
@@ -86,26 +84,26 @@ public class AuthGrab extends HttpServlet {
 		
 		// long start = System.currentTimeMillis();		
 		
+		/*
 		if(state.get(PlayerCommands.publish)==null){
     		
-    		Util.debug("cam was off, turned on", this);
+    		Util.debug("cam was off, turned on..... ", this);
     		
     		// doesn't work 
     		// app.playerCallServer(PlayerCommands.publish, "camera");
     		app.publish("camera");
     		
     		// wait for any value in state for 'publish'
-    		if( ! state.block(PlayerCommands.publish.toString(), "cam", 3000)){
-    			Util.log("timeout trying to turn on camera", this);
+    		if( ! state.block(PlayerCommands.publish.toString(), "cam", 10000)){
+    			Util.log("timeout trying to turn on camera...", this);
     			return;
     		}
     	}
-		
+		*/
 		// wait for result
-		img = null;
 		if (app.frameGrab()) {
-			if( ! state.block(State.framegrabbusy, "false", 500)){
-				Util.debug("getImage(), couldn't get image, waited...", this);
+			if( ! state.block(State.framegrabbusy, "false", 700)){
+				Util.debug("getImage(), timeout ", this);
 				return;
 			}
 			

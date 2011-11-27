@@ -219,12 +219,12 @@ public class Util {
 					new InputStreamReader(proc.getInputStream()));
 
 			String line = null;
-			System.out.println(proc.hashCode() + "OCULUS exec(): " + args);
+			System.out.println(proc.hashCode() + "OCULUS: exec(): " + args);
 			while ((line = procReader.readLine()) != null)
 				System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
 			
-			System.out.println(proc.hashCode() + "OCULUS: process exit value = " + proc.exitValue());
-			System.out.println(proc.hashCode() + "OCULUS: bocking run time = " + (System.currentTimeMillis()-start) + " ms");
+			System.out.println("OCULUS: process exit value = " + proc.exitValue());
+			System.out.println("OCULUS: bocking run time = " + (System.currentTimeMillis()-start) + " ms");
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -249,7 +249,7 @@ public class Util {
 					String line = null;
 					System.out.println("OCULUS: process exit value = " + str);
 					while ((line = procReader.readLine()) != null)
-						System.out.println("systemCall() : " + line);
+						System.out.println("OCULUS: systemCall(), " + line);
 					
 					System.out.println("OCULUS: process exit value = " + proc.exitValue());
 				

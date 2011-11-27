@@ -28,6 +28,8 @@ public class State {
 	public static final String losttarget = "losttarget";
 	public static final String firmware = "firmware";
 	public static final String unknown = "unknown";	
+	public static final String override = "override";
+
 	public static final String commwatchdog = "commwatchdog";
 	public static final String framegrabbusy = "framegrabbusy";
 	
@@ -157,8 +159,10 @@ public class State {
 			//
 			// TODO: FIX ?? 
 			//
-			Util.delay(5);
+			Util.delay(50);
+			//System.out.print(".");
 			if (System.currentTimeMillis()-start > timeout){ 
+				//System.out.println();
 				return false;
 			}
 		}

@@ -187,7 +187,7 @@ void parseCommand()
   else 
   if(buffer[0] == 'y')
   {
-    Serial.println("<version:0.5.3>"); 
+    Serial.println("<version:0.5.4>"); 
   }   
   else 
   if (buffer[0] == 's') 

@@ -41,7 +41,8 @@ int commandSize = 0;
 unsigned long lastcmd = 0;
 int timeout = 6000;
 
-void setup() { 
+void setup() 
+{ 
   pinMode(motorA1Pin, OUTPUT); 
   pinMode(motorA2Pin, OUTPUT); 
   pinMode(enablePinA, OUTPUT);
@@ -61,110 +62,172 @@ void setup() {
   lastcmd = millis();
 }
 
-void loop() {
-  if( Serial.available() > 0 ){
+void loop() 
+{
+  if( Serial.available() > 0 )
+  {
     // commands take priority 
-	lastcmd = millis();
+    lastcmd = millis();
     manageCommand(); 
   } 
-  if (millis() - lastcmd > timeout) { // if no comm with host, stop motors
-	lastcmd = millis();
-	OCR2A = 0;
-	OCR2B = 0;
-	camservo.detach();
+  if (millis() - lastcmd > timeout) 
+  { 
+  			// if no comm with host, stop motors
+        lastcmd = millis();
+        OCR2A = 0;
+        OCR2B = 0;
+        camservo.detach();
   }
 }
 
 // buffer and/or execute commands from host controller 
-void manageCommand(){
-
+void manageCommand()
+{
   int input = Serial.read();
 
   // end of command -> exec buffered commands 
-  if((input == 13) || (input == 10)){
-    if(commandSize > 0){
+  if((input == 13) || (input == 10))
+  {
+    if(commandSize > 0)
+    {
       parseCommand();
       commandSize = 0; 
     }
-  } else {
-
+  } 
+  else 
+  {
     // buffer it 
     buffer[commandSize++] = input;
 
     // protect buffer
-    if(commandSize >= MAX_BUFFER){
+    if(commandSize >= MAX_BUFFER)
+    {
       commandSize = 0;
     }
   }
 }
 
 // do multi byte 
-void parseCommand(){
+void parseCommand()
+{
+  if (buffer[0] == 'm')
+  {
+    int mB = buffer[1]&255;
+    int mA = buffer[2]&255;
+    
+    OCR2A =  (mB&127)<<1;
+    OCR2B =  (mA&127)<<1;
+    
+    if (mB<128)
+    {
+      digitalWrite(motorB1Pin, LOW);  
+      digitalWrite(motorB2Pin, HIGH); 
+    }
+    else
+    {
+      digitalWrite(motorB1Pin, HIGH);   
+      digitalWrite(motorB2Pin, LOW);  
+    }
+
+    if (mA<128)
+    {
+      digitalWrite(motorA1Pin, LOW);  
+      digitalWrite(motorA2Pin, HIGH); 
+    }
+    else
+    {
+      digitalWrite(motorA1Pin, HIGH);   
+      digitalWrite(motorA2Pin, LOW);  
+    }
+    
+    return;
+  }
 
   // always set speed on each move command 
-  if((buffer[0] == 'f') || (buffer[0] == 'b') || (buffer[0] == 'l') || (buffer[0] == 'r')){
+  if((buffer[0] == 'f') || (buffer[0] == 'b') || (buffer[0] == 'l') || (buffer[0] == 'r'))
+  {
     OCR2A =  buffer[1] - acomp*( (float) buffer[1] / 254.0);
     OCR2B =  buffer[1] - bcomp*( (float) buffer[1] / 254.0);    
     // Serial.println("<speed " + (String)buffer[1] + ">");
   } 
 
-  if (buffer[0] == 'f') { // forward
+  if (buffer[0] == 'f') 
+  { // forward
     digitalWrite(motorA1Pin, HIGH);   
     digitalWrite(motorA2Pin, LOW);  
     digitalWrite(motorB1Pin, HIGH); 
     digitalWrite(motorB2Pin, LOW);
   }
-  else if (buffer[0] == 'b') { // backward
+  else if (buffer[0] == 'b') 
+  { // backward
     digitalWrite(motorA1Pin, LOW);  
     digitalWrite(motorA2Pin, HIGH); 
     digitalWrite(motorB1Pin, LOW);  
     digitalWrite(motorB2Pin, HIGH);
   }
-  else if (buffer[0] == 'r') { // right
+  else if (buffer[0] == 'r') 
+  { // right
     digitalWrite(motorA1Pin, HIGH);   
     digitalWrite(motorA2Pin, LOW); 
     digitalWrite(motorB1Pin, LOW);  
     digitalWrite(motorB2Pin, HIGH);
   }
-  else if (buffer[0] == 'l') { // left
+  else if (buffer[0] == 'l') 
+  { // left
     digitalWrite(motorA1Pin, LOW);  
     digitalWrite(motorA2Pin, HIGH); 
     digitalWrite(motorB1Pin, HIGH); 
     digitalWrite(motorB2Pin, LOW);
   } 
-  if(buffer[0] == 'x'){
+  else
+  if(buffer[0] == 'x')
+  {
     Serial.println("<id:oculusDC>");
   }   
-  else if(buffer[0] == 'y'){
+  else 
+  if(buffer[0] == 'y')
+  {
     Serial.println("<version:0.5.3>"); 
   }   
-  else if (buffer[0] == 's') { // stop
+  else 
+  if (buffer[0] == 's') 
+  { // stop
     OCR2A = 0;
     OCR2B = 0;
   }
-  else if(buffer[0] == 'v'){ // camtilt
+  else 
+  if(buffer[0] == 'v')
+  { // camtilt
     camservo.attach(camservopin);
     camservo.write(buffer[1]);
   }
-  else if(buffer[0]== 'w'){ // camrelease
+  else if(buffer[0]== 'w')
+  { // camrelease
     camservo.detach();
   }
-  else if(buffer[0] == 'c'){
+  else 
+  if(buffer[0] == 'c')
+  {
     // 128 = 0, > 128 = acomp, < 128 = bcomp
-    if (buffer[1] == 128) {
+    if (buffer[1] == 128) 
+    {
       acomp = 0;
       bcomp = 0;
     }
-    if (buffer[1] > 128) {
+    if (buffer[1] > 128) 
+    {
       bcomp = 0;
       acomp = (buffer[1]-128)*2;
     }
-    if (buffer[1] < 128) {
+    if (buffer[1] < 128) 
+    {
       acomp = 0;
       bcomp = (128-buffer[1])*2;
     }
   } 
-  else if(buffer[0] == 'e'){
+  else 
+  if(buffer[0] == 'e')
+  {
     if(buffer[1] == '1')
       echo = true;
     if(buffer[1] == '0')
@@ -172,14 +235,16 @@ void parseCommand(){
   } 
 
   // echo the command back 
-  if(echo) { 
+  if(echo) 
+  { 
     Serial.print("<");
     Serial.print((char)buffer[0]);
 
     if(commandSize > 1)
       Serial.print(',');    
 
-    for(int b = 1 ; b < commandSize ; b++){
+    for(int b = 1 ; b < commandSize ; b++)
+    {
       Serial.print((String)buffer[b]);  
       if(b<(commandSize-1)) 
         Serial.print(',');    

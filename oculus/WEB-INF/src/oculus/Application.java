@@ -1626,7 +1626,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void showlog() {
 	
 		//System.out.println
-		messageplayer("", "debug", "OCULUS: showlog");
+		// messageplayer("", "debug", "OCULUS: showlog");
 		
 		String[] tail = Util.tail(new File(Settings.stdout), "OCULUS");
 		String str = null;

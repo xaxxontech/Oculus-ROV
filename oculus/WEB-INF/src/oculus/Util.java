@@ -390,7 +390,7 @@ public class Util {
 	}
 	
 	public static String tail(){
-		String info = tail(new File(Settings.stdout), 500);
+		String info = tail(new File(Settings.stdout), 1000);
 		String[] capture = info.split("\n");
 		String result = null;
 		for(int i=0 ; i < capture.length ; i++)

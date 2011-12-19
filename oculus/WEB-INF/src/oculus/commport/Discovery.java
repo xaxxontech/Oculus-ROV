@@ -24,6 +24,7 @@ public class Discovery {
 	public static final int FLOWCONTROL = SerialPort.FLOWCONTROL_NONE;
 
 	/* add known devices here, strings returned from the firmware */
+	public static final String OCULUS_TILT = "id:oculusTilt";
 	public static final String OCULUS_SONAR = "id:oculusSonar";
 	public static final String OCULUS_DC = "id:oculusDC";
 	public static final String LIGHTS = "id:oculusLights";
@@ -134,6 +135,11 @@ public class Discovery {
 	
 						state.set(State.serialport, ports.get(i));
 						state.set(State.firmware, OCULUS_SONAR);
+						
+					}  else if (id.equalsIgnoreCase(OCULUS_TILT)) {
+	
+						state.set(State.serialport, ports.get(i));
+						state.set(State.firmware, OCULUS_TILT);
 						
 					} 	
 				}

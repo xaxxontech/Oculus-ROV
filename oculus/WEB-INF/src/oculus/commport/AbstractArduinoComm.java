@@ -72,7 +72,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		}
 	}
 
-	/** inner class to send commands as a seperate thread each */
+	/** inner class to send commands as a separate thread each */
 	class Sender extends Thread {
 		private byte[] command = null;
 		public Sender(final byte[] cmd) {

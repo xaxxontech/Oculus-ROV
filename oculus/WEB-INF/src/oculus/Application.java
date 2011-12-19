@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import oculus.commport.AbstractArduinoComm;
 import oculus.commport.ArduinoCommDC;
-import oculus.commport.ArduinoCommSonar;
 import oculus.commport.Discovery;
 import oculus.commport.LightsComm;
 
@@ -214,11 +213,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new Discovery();
 
 		// create matching class based on firmware
-		if (state.get(State.firmware).equals(Discovery.OCULUS_SONAR)) {
-			comport = new ArduinoCommSonar(this);
-		} else
+		// Todo: state.equals(state.firmware, DiscoveryOc...); 
+		if (state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
+			comport = new oculus.commport.ArduinoCommSonar(this);
+		} else if (state.get(State.firmware).equals(Discovery.OCULUS_TILT)){
+			comport = new oculus.commport.ArduinoTilt(this);
+		} else {
 			comport = new ArduinoCommDC(this);
-
+		}
+		
 		light = new LightsComm(this);
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");

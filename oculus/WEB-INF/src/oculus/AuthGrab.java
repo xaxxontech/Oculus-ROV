@@ -84,22 +84,22 @@ public class AuthGrab extends HttpServlet {
 		
 		// long start = System.currentTimeMillis();		
 		
-		/*
+		
 		if(state.get(PlayerCommands.publish)==null){
     		
     		Util.debug("cam was off, turned on..... ", this);
     		
-    		// doesn't work 
+    		//TODO:  doesn't work still..... COLIN
     		// app.playerCallServer(PlayerCommands.publish, "camera");
     		app.publish("camera");
     		
     		// wait for any value in state for 'publish'
-    		if( ! state.block(PlayerCommands.publish.toString(), "cam", 10000)){
+    		if( ! state.block(PlayerCommands.publish.toString(), "cam", 30000)){
     			Util.log("timeout trying to turn on camera...", this);
     			return;
     		}
     	}
-		*/
+		
 		// wait for result
 		if (app.frameGrab()) {
 			if( ! state.block(State.framegrabbusy, "false", 700)){

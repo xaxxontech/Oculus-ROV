@@ -29,10 +29,7 @@ public class CommandServer implements Observer {
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static oculus.State state = oculus.State.getReference();
 	private static LoginRecords records = new LoginRecords();
-	private static oculus.Settings settings = new Settings(); 
-	
-	// private static boolean grabbusy = false;
-	
+	private static oculus.Settings settings = new Settings(); 	
 
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread {

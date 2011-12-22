@@ -340,23 +340,22 @@ public class Util {
 
 	/**
 	 * write new value to user's screen and set it 
-	 */
-	public static void setSystemVolume(int percent, Application app){
-		setSystemVolume(percent);
-		app.message("ROV volume set to "+Integer.toString(percent)+"%", null, null);
-	}
-	
-	/**
-	 * 
 	 * change the host computer's volume 
 	 * 
 	 * @param percent
 	 */
-	public static void setSystemVolume(int percent) {
-		new Settings().writeSettings(Settings.volume, percent);
+	public static void setSystemVolume(int percent, Application app){
+		new Settings(app).writeSettings(Settings.volume, percent);
 		float vol = (float) percent / 100 * 65535;
-		String str = "nircmdc.exe setsysvolume "+ (int) vol;
-		Util.systemCall(str);
+		String str;
+		if (app.os.equals("linux")) {
+			str = ""; // TODO: linux set system volume
+		}
+		else {
+			str = "nircmdc.exe setsysvolume "+ (int) vol; //w in
+			Util.systemCall(str);					
+		}
+		//app.message("ROV volume set to "+Integer.toString(percent)+"%", null, null);
 	}
 
 	/**

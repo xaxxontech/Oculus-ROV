@@ -45,7 +45,7 @@ public class AutoDock implements Docker {
 	// private static Logger log = Red5LoggerFactory.getLogger(AutoDock.class, "oculus");
 
 	private State state = State.getReference();
-	private Settings settings = new Settings();
+	private Settings settings;
 	private BatteryLife life = BatteryLife.getReference();
 	private LogManager moves = null; 
 	private IConnection grabber = null;
@@ -62,6 +62,7 @@ public class AutoDock implements Docker {
 		this.grabber = thegrab;
 		this.comport = com;
 		this.light = light;
+		settings = new Settings(app);
 		if(settings.getBoolean(Settings.developer)){
 			moves = new LogManager();
 			moves.open(Settings.movesfile);

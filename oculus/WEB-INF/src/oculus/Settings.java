@@ -5,11 +5,11 @@ import java.util.Properties;
 
 public class Settings {
 
-	public static final String framefile = System.getenv("RED5_HOME") + "\\webapps\\oculus\\images\\framegrab.jpg"; 
-	public static final String loginactivity = System.getenv("RED5_HOME") + "\\log\\loginactivity.txt";
-	public static final String settingsfile = System.getenv("RED5_HOME") + "\\conf\\oculus_settings.txt";
-	public static final String movesfile = System.getenv("RED5_HOME") + "\\log\\moves.txt";
-	public static final String stdout = System.getenv("RED5_HOME") + "\\log\\jvm.stdout";
+	public static String framefile;
+	public static String loginactivity;
+	public static String settingsfile;
+	public static String movesfile;
+	public static String stdout;
 	
 	// put all constants here
 	public static final String emailalerts = "emailalerts";
@@ -18,9 +18,18 @@ public class Settings {
 	public static final String skipsetup = "skipsetup";
 	public static final String developer = "developer";
 	public static final int ERROR = -1; 
+	private String sep;
 	
 	/** create new file if missing */
-	public Settings(){
+	public Settings(Application app){
+		sep = "\\"; // windows
+		if (app.os.equals("linux")) { sep = "/"; }
+		framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
+		loginactivity = System.getenv("RED5_HOME") +sep+"log"+sep+"loginactivity.txt";
+		settingsfile = System.getenv("RED5_HOME") +sep+"conf"+sep+"oculus_settings.txt";
+		movesfile = System.getenv("RED5_HOME") +sep+"log"+sep+"moves.txt";
+		stdout = System.getenv("RED5_HOME") +sep+"log"+sep+"jvm.stdout";
+		
 		if( ! new File(settingsfile).exists()) 
 			FactorySettings.createFile();
 	}
@@ -194,7 +203,7 @@ public class Settings {
 		
 		try {
 			
-			final String temp = System.getenv("RED5_HOME") + "\\conf\\oculus_created.txt";
+			final String temp = System.getenv("RED5_HOME") + sep+"conf"+sep+"oculus_created.txt";
 			FileWriter fw = new FileWriter(new File(temp));
 			
 			fw.append("# required settings \r\n");
@@ -434,7 +443,7 @@ public class Settings {
 	}
 
 	public String readRed5Setting(String str) {
-		String filenm = System.getenv("RED5_HOME") + "\\conf\\red5.properties";
+		String filenm = System.getenv("RED5_HOME") + sep+"conf"+sep+"red5.properties";
 		FileInputStream filein;
 		String result = null;
 		try {
@@ -460,7 +469,7 @@ public class Settings {
 																	// existing
 																	// setting
 		// read whole file, replace line while you're at it, write whole file
-		String filenm = System.getenv("RED5_HOME") + "\\conf\\red5.properties";
+		String filenm = System.getenv("RED5_HOME") + sep+"conf"+sep+"red5.properties";
 		value = value.replaceAll("\\s+$", ""); // remove trailing whitespace
 		FileInputStream filein;
 		String[] lines = new String[999];

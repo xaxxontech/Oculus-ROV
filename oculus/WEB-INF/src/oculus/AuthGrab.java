@@ -13,12 +13,13 @@ public class AuthGrab extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static Application app = null;
 	private static State state = State.getReference();
-	private static Settings settings = new Settings();
+	private static Settings settings;
 	public static byte[] img  = null;
 
 	public static void setApp(Application a) {
 		if(app != null) return;
 		app = a;
+		settings = new Settings(a);		
 	}
 	
 	public boolean login(String user, String pass){

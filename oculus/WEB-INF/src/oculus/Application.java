@@ -29,7 +29,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private AbstractArduinoComm comport = null;
 	private LightsComm light = null;
 	private BatteryLife battery = null;
-	private Settings settings = new Settings();
+	private Settings settings;
 	private String pendinguserconnected = null;
 	private String remember = null;
 	private IConnection pendingplayer = null;
@@ -47,6 +47,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public boolean muteROVonMove = false;
 	public String stream = null;
 	public Speech speech = new Speech();
+	public String os = "windows"; // set os here linux, windows
 
 	/** */
 	public Application() {
@@ -54,7 +55,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		FrameGrabHTTP.setApp(this);
+		RtmpPortRequest.setApp(this);
 		AuthGrab.setApp(this);
+		settings = new Settings(this);
 		initialize();
 	}
 
@@ -225,7 +228,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		light = new LightsComm(this);
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
-		new SystemWatchdog();
+		new SystemWatchdog(this);
 
 		if (settings.getBoolean(State.developer)) {
 			moves.open(Settings.movesfile);
@@ -236,7 +239,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getInteger(OptionalSettings.commandport.toString()) > State.ERROR)
 			commandServer = new developer.CommandServer(this);
 
-		Util.setSystemVolume(settings.getInteger(Settings.volume));
+		Util.setSystemVolume(settings.getInteger(Settings.volume), this);
 
 		grabberInitialize();
 		battery = BatteryLife.getReference();
@@ -280,9 +283,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 				try {
 					// stream = null;
 					String address = "127.0.0.1:" + httpPort;
-					Runtime.getRuntime().exec(
-							"cmd.exe /c start http://" + address
-									+ "/oculus/initialize.html");
+					if (os.equals("linux")) {
+						Runtime.getRuntime().exec("xdg-open http://" + address + "/oculus/initialize.html");
+					}
+					else { // win
+						Runtime.getRuntime().exec("cmd.exe /c start http://" + address + "/oculus/initialize.html");
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -297,9 +303,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 					// stream = "stop";
 					String address = "127.0.0.1:" + httpPort;
-					Runtime.getRuntime().exec(
-							"cmd.exe /c start http://" + address
-									+ "/oculus/server.html");
+					if (os.equals("linux")) {
+						Runtime.getRuntime().exec("xdg-open http://" + address + "/oculus/server.html");
+					}
+					else { // win
+						Runtime.getRuntime().exec("cmd.exe /c start http://" + address + "/oculus/server.html");
+					}
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -615,6 +624,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		case setsystemvolume:
 			Util.setSystemVolume(Integer.parseInt(str), this);
+			messageplayer("ROV volume set to "+str+"%", null, null);
 			break;
 		case muterovmiconmovetoggle:
 			muteROVMicOnMoveToggle();
@@ -1816,7 +1826,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// rtmp port
 		result += "rtmpport " + settings.readRed5Setting("rtmp.port") + " ";
 
-		new Settings().writeFile();
+		new Settings(this).writeFile();
 		messageGrabber(result, null);
 	}
 

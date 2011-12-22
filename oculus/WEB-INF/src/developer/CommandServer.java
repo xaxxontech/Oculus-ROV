@@ -29,8 +29,8 @@ public class CommandServer implements Observer {
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static oculus.State state = oculus.State.getReference();
 	private static LoginRecords records = new LoginRecords();
-	private static oculus.Settings settings = new Settings(); 	
-
+	private static oculus.Settings settings;
+	
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread {
 	
@@ -404,6 +404,9 @@ public class CommandServer implements Observer {
 		if(app != null) return;
 		
 		app = a;
+		
+		settings = new Settings(app); 	
+
 		
 		/** register for updates, share state with all threads */  
 		state.addObserver(this);

@@ -10,9 +10,9 @@ import oculus.Util;
 
 public class SystemWatchdog {
 	
-	private final Settings settings = new Settings();
-	private final boolean reboot = settings.getBoolean(State.reboot);
-
+	private final Settings settings;
+	private final boolean reboot;
+	
 	// check every hour
 	public static final long DELAY = State.TWO_MINUTES;
 
@@ -23,7 +23,9 @@ public class SystemWatchdog {
 	private State state = State.getReference();
 	
     /** Constructor */
-	public SystemWatchdog() {
+	public SystemWatchdog(Application app) {
+		settings = new Settings(app);
+		reboot = settings.getBoolean(State.reboot);		
 		if (reboot){
 			Timer timer = new Timer();
 			timer.scheduleAtFixedRate(new Task(), State.TEN_MINUTES, DELAY);

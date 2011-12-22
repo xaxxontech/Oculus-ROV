@@ -23,7 +23,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	protected int buffSize = 0;
 	protected long lastSent = System.currentTimeMillis();
 	protected long lastRead = System.currentTimeMillis();
-	protected Settings settings = new Settings();
+	protected Settings settings;
 	protected int tempspeed = 999;
 	protected int clicknudgedelay = 0;
 	protected String tempstring = null;
@@ -31,17 +31,18 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	protected volatile boolean isconnected = false;
 	protected Application application = null;
 	
-	public int speedslow = settings.getInteger("speedslow");
-	public int speedmed = settings.getInteger("speedmed");
-	public int camservohoriz = settings.getInteger("camservohoriz");
-	public int camposmax = settings.getInteger("camposmax");
-	public int camposmin = settings.getInteger("camposmin");
-	public int nudgedelay = settings.getInteger("nudgedelay");
-	public int maxclicknudgedelay = settings.getInteger("maxclicknudgedelay");
-	public int maxclickcam = settings.getInteger("maxclickcam");
-	public double clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
-	public int steeringcomp = settings.getInteger("steeringcomp");
-	public boolean holdservo = settings.getBoolean(FactorySettings.holdservo.toString());
+	public int speedslow;
+	public int speedmed;
+	public int camservohoriz;
+	public int camposmax;
+	public int camposmin;
+	public int nudgedelay;
+	public int maxclicknudgedelay;
+	public int maxclickcam;
+	public double clicknudgemomentummult;
+	public int steeringcomp;
+	public boolean holdservo;
+	
 	public int camservodirection = 0;
 	public int camservopos = camservohoriz;
 	public int camwait = 400;
@@ -57,6 +58,19 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	public AbstractArduinoComm(Application app) {
 
 		application = app;
+		settings = new Settings(application);
+		
+		speedslow = settings.getInteger("speedslow");
+		speedmed = settings.getInteger("speedmed");
+		camservohoriz = settings.getInteger("camservohoriz");
+		camposmax = settings.getInteger("camposmax");
+		camposmin = settings.getInteger("camposmin");
+		nudgedelay = settings.getInteger("nudgedelay");
+		maxclicknudgedelay = settings.getInteger("maxclicknudgedelay");
+		maxclickcam = settings.getInteger("maxclickcam");
+		clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
+		steeringcomp = settings.getInteger("steeringcomp");
+		holdservo = settings.getBoolean(FactorySettings.holdservo.toString());
 		
 		if (state.get(State.serialport) != null) {
 			new Thread(new Runnable() {

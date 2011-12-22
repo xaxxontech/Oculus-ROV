@@ -23,7 +23,7 @@ public class SendMail {
 	private static int SMTP_HOST_PORT = 587;
 	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
 
-	private Settings settings = new Settings();
+	private Settings settings;
 	private final String user = settings.readSetting(OptionalSettings.emailaddress.toString()); 
 	private final String pass = settings.readSetting(OptionalSettings.emailpassword.toString()); 
 
@@ -36,7 +36,7 @@ public class SendMail {
 
 	/** */
 	public SendMail(final String sub, final String text, final String file) {
-
+		
 		subject = sub;
 		body = text;
 		fileName = file;
@@ -80,6 +80,8 @@ public class SendMail {
 	/** send messages to user */
 	public SendMail(final String sub, final String text, Application app) {
 		
+		settings = new Settings(app);
+
 		subject = sub;
 		body = text;
 		application = app;

@@ -13,13 +13,13 @@ public class EmailAlerts implements Observer {
 	// low power mode, need time to park it   
 	public static final int WARN_LEVEL = 35;
 	private Application app = null;
-	private Settings settings = new Settings();
+	private Settings settings;
 	private State state = State.getReference();
 	
 	/** Constructor */
 	public EmailAlerts(Application parent) {
 		app = parent;
-		
+		settings = new Settings(app);
 		if (settings.getBoolean(Settings.emailalerts)){
 			state.addObserver(this);
 			System.out.println("starting email alerts...");

@@ -48,8 +48,8 @@ public enum FactorySettings {
 	}
 
 	/** @returns true if all settings are in properties */
-	public static boolean validate(Properties conf) {
-		Settings fromfile = new Settings();
+	public static boolean validate(Properties conf, Application app) {
+		Settings fromfile = new Settings(app);
 		String value = null;
 		for (FactorySettings settings : FactorySettings.values()) {
 			value = fromfile.readSetting(settings.toString());

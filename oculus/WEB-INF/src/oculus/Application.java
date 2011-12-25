@@ -47,11 +47,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public boolean muteROVonMove = false;
 	public String stream = null;
 	public Speech speech = new Speech();
-	public String os = "windows"; // set os here linux, windows
+	public String os;  //  "linux" or "windows"
 
 	/** */
 	public Application() {
 		super();
+		
+		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
+		else { os = "windows"; }
+		System.out.println("OCULUS: OS = "+os);
+		
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		FrameGrabHTTP.setApp(this);

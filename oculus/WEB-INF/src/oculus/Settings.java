@@ -24,7 +24,7 @@ public class Settings {
 	public Settings(Application app){
 		sep = "\\"; // windows
 		if (app.os.equals("linux")) { sep = "/"; }
-		framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
+		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
 		loginactivity = System.getenv("RED5_HOME") +sep+"log"+sep+"loginactivity.txt";
 		settingsfile = System.getenv("RED5_HOME") +sep+"conf"+sep+"oculus_settings.txt";
 		movesfile = System.getenv("RED5_HOME") +sep+"log"+sep+"moves.txt";

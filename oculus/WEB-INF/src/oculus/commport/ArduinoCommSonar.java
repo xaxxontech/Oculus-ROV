@@ -2,6 +2,7 @@ package oculus.commport;
 
 // import developer.SendMail;
 import oculus.Application;
+import oculus.Observer;
 import oculus.State;
 import oculus.Util;
 
@@ -11,14 +12,15 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 public class ArduinoCommSonar extends AbstractArduinoComm implements
-		SerialPortEventListener, ArduioPort {
+		SerialPortEventListener, ArduioPort, Observer {
 
-	public static final long SONAR_DELAY = DEAD_TIME_OUT/2 + 500;
-	public static int sonarOffset = -1; 
+	public static final long SONAR_DELAY = 1500;
+	//public static int sonarOffset = -1; 
 	
 	public ArduinoCommSonar(Application app) {	
 		super(app);
 		new WatchDog().start();
+		state.addObserver(this);
 	}
 
 	/** inner class to check if getting responses in timely manor */
@@ -32,9 +34,9 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 			Util.delay(SETUP);
 			while (true) {
 
-				if (getReadDelta() > DEAD_TIME_OUT) {
+				if (getReadDelta() > SONAR_DELAY * 5) { // DEAD_TIME_OUT) {
 					
-					//log.error("sonar arduino watchdog time out, reboot!");
+					System.out.println("sonar arduino watchdog time out, reboot!");
 					Util.beep();
 					Util.systemCall("shutdown -r -f -t 01");				
 					
@@ -91,7 +93,7 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 					
 				} else if (param[1].equals("right")) {
 					if (Math.abs(range - state.getInteger(State.sonarright)) > 1)
-						state.set(State.sonarright, range + sonarOffset);
+						state.set(State.sonarright, range); // + sonarOffset);
 					
 				} else if (param[1].equals("left")) {
 					if (Math.abs(range - state.getInteger(State.sonarleft)) > 1)
@@ -124,6 +126,26 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 		} catch (Exception e) {
 			//log.error(e.getMessage());
 			return;
+		}
+	}
+
+	@Override
+	public void updated(String key) {
+
+		if(key.equals("laser")){
+		
+			System.out.println("updated.. " + key);
+		
+			String value = state.get(key);
+			if(value.equals("on")){
+				
+				new Sender(new byte[]{'q', '1'});
+				
+			} else if(value.equals("off")){
+				
+				new Sender(new byte[]{'q', '1'});
+
+			}
 		}
 	}
 }

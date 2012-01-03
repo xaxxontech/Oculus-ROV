@@ -17,8 +17,8 @@ public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventL
 		super(app);
 		
 		new Sender(new byte[]{ 'e', '1' });
-		new Sender(new byte[]{ 'p', (byte) pan });
-		new Sender(new byte[]{ 'v', (byte) tilt });
+		new Sender(new byte[]{ 'v', (byte) pan });
+		new Sender(new byte[]{ 't', (byte) tilt });
 		new Sender(new byte[]{ 'o', (byte) tilt });
 
 //		app.playerCallServer(PlayerCommands.dock, "undock");
@@ -59,7 +59,7 @@ public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventL
 		for (int i = 0; i < buffSize; i++)
 			response += (char) buffer[i];
 
-		System.out.println("in: " + response);
+		System.out.println("__ " + "in: " + response);
 
 		// take action as arduino has just turned on
 		if (response.equals("reset")) {
@@ -81,12 +81,7 @@ public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventL
 	
 	@Override
 	public void turnRight() {
-		
-		if(pan+5 > 170) return;
-		
-		pan+=3;
-		new Sender(new byte[]{ 'p', (byte) pan });
-		
+		new Sender(new byte[]{ 'l' }); 
 		//if (application.muteROVonMove) {
 		//	application.muteROVMic();
 		//}
@@ -95,11 +90,7 @@ public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventL
 
 	@Override
 	public void turnLeft() {
-		
-		if(pan-5 < 10) return;
-		
-		pan-=3;
-		new Sender(new byte[] { 'p', (byte) pan });
+		new Sender(new byte[] { 'r'});
 		
 		//if (application.muteROVonMove) {
 		//	application.muteROVMic();
@@ -113,62 +104,19 @@ public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventL
 
 		new Sender(new byte[] {'f'});
 		
-		/*
-		
-		new Thread(new Runnable() {
-			public void run() {
-				int n = nudgedelay;
-				if (direction.equals("right")) {
-					turnRight();
-				}
-				if (direction.equals("left")) {
-					turnLeft();
-				}
-				if (direction.equals("forward")) {
-					goForward();
-					// movingforward = false;
-					n *= 4;
-				}
-				if (direction.equals("backward")) {
-					goBackward();
-					n *= 4;
-				}
-
-				Util.delay(n);
-
-				//if (movingforward == true) {
-				//	goForward();
-				//} else {
-				//	stopGoing();
-				//}
-				
-			}
-		}).start();
-		*/
-		
 	}
 	
 	@Override
 	public void goForward() {	
 		
-		if(tilt-5 < 10) return;
+		new Sender(new byte[] { 'u' }); 
 		
-		//System.out.println("go frd....");
-		
-		tilt-=3;
-		new Sender(new byte[] { 'v', (byte) tilt });
-		
-}
+	}
 
 	@Override
 	public void goBackward() {
-	
-		if(tilt+5 > 190) return;
 
-		// System.out.println("go bkwrd....");
-
-		tilt+=3;
-		new Sender(new byte[] { 'v', (byte) tilt });
+		new Sender(new byte[] { 'd' } ); // , (byte) tilt });
 		
 	}
 
@@ -191,29 +139,8 @@ public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventL
 	public void slide(final String dir) {
 		
 		System.out.println("slide: " + dir);
-		
-		if(dir.equals("left")){
+		new Sender(new byte[]{'o'});
 
-			if(pan-15 < 10) return;
-		
-		
-			pan-=15;
-		
-			new Sender(new byte[] { 'p', (byte) pan });
-		
-
-		}
-		
-		if( dir.equals("right")){
-	
-			if(pan+15 < 10) return;
-		
-		
-			pan+=15;
-		
-			new Sender(new byte[] { 'p', (byte) pan });
-	
-		}
 	}
 
 	@Override
@@ -221,6 +148,32 @@ public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventL
 
 	@Override
 	public Integer clickSteer(String str) {
+		
+		System.out.println("_click steer: " + str);
+		String[] val = str.split(" ");
+		double x = Double.parseDouble(val[0]);
+		double y = Integer.parseInt(val[1]);
+		
+		if(y<-10){
+			new Sender(new byte[]{'u'});
+			if(y<-120) new Sender(new byte[]{'u'});
+			if(y<-200) new Sender(new byte[]{'u'});
+		} else if(y>10){
+			new Sender(new byte[] {'d'}); 
+			if(y>120) new Sender(new byte[] {'d'}); 
+			if(y>200) new Sender(new byte[] {'d'}); 
+		}
+		
+		if(x>10){
+			new Sender(new byte[]{'l'});
+			if(x>120) new Sender(new byte[]{'l'});
+			if(x>200) new Sender(new byte[]{'l'});
+		} else if(x<-10){
+			new Sender(new byte[] {'r'}); 
+			if(x<-120) new Sender(new byte[] {'r'}); 
+			if(x<-200) new Sender(new byte[] {'r'}); 
+		}
+		
 		return 0;
 	}
 

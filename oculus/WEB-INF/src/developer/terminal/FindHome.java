@@ -25,12 +25,13 @@ public class FindHome extends AbstractTerminal {
 		// if docked, run test... if not, just try getting home 
 		if( undock()) { 
 			
-			calibrate();
+			// calibrate();
 			
 		}else{
 			
 			System.out.println(".. bot is not docked! lost in space...");
-			spinFind();
+			
+			// spinFind();
 			
 			out.println(PlayerCommands.autodock.toString() + " go");
 			

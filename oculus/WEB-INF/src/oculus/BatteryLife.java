@@ -19,6 +19,8 @@ public class BatteryLife {
 	private String query; 
 	private ActiveXComponent axWMI;
 	
+	private final String os  = System.getProperty("os.name"); 
+	
 	private boolean battcharging = false;
 	private boolean batterypresent = false;
 	private static Application app = null;
@@ -48,12 +50,17 @@ public class BatteryLife {
 			// only initialize once 
 			app = parent;	
 			
-			// Technically you should be able to connect to other hosts, but it takes setup
-			host = "localhost"; 
-			connectStr = String.format("winmgmts:\\\\%s\\root\\CIMV2", host);
-			query = "Select * from Win32_Battery"; 
-			axWMI = new ActiveXComponent(connectStr);
-	
+			if(os.startsWith("windows")){
+				
+				//brad@ubuntu:~$ cat /proc/acpi/battery/BAT0/state
+			
+				// Technically you should be able to connect to other hosts, but it takes setup
+				host = "localhost"; 
+				connectStr = String.format("winmgmts:\\\\%s\\root\\CIMV2", host);
+				query = "Select * from Win32_Battery"; 
+				axWMI = new ActiveXComponent(connectStr);
+		
+			} else System.out.println("linux battery... ");
 		} 
 	}
 	

@@ -213,6 +213,8 @@ public class Util {
 	 */
 	public static String systemCallBlocking(final String args) {
 		
+		System.out.println("sys blk call: " + argg);
+		
 		String result = null;
 		
 		try {	
@@ -223,7 +225,7 @@ public class Util {
 					new InputStreamReader(proc.getInputStream()));
 
 			String line = null;
-			System.out.println(proc.hashCode() + "OCULUS: exec(): " + args);
+			System.out.println(proc.hashCode() + "OCULUS: exec():  " + args);
 			while ((line = procReader.readLine()) != null){
 				System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
 				result += line + "\n";

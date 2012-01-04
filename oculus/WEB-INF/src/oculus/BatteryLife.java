@@ -63,10 +63,12 @@ public class BatteryLife {
 				System.out.println("linux battery... ");
 				
 				// cat /proc/acpi/battery/BAT0/state 
-				String result[] = Util.systemCallBlocking(
-						"cat /proc/acpi/battery/BAT0/state | grep \"present\"").split(":");
+				String result= Util.systemCallBlocking(
+						"cat /proc/acpi/battery/BAT0/state | grep \"present\"");//.split(":");
 			
-				if(result[1].equals("yes")) batterypresent = true;			
+				//if(result[1].equals("yes")) batterypresent = true;			
+				System.out.println("result: " + result);
+				Util.log("battery: " + result);
 				
 			}
 		} 
@@ -106,6 +108,13 @@ public class BatteryLife {
 			
 				if (batterypresent == false) {
 					System.out.println("no batery found in thread");
+					return;
+				}
+		
+				//TODO: BRAD 
+				if(!os.startsWith("windows")){
+				
+					Util.log("battStatts.. linux", this);
 					return;
 				}
 				
@@ -188,6 +197,14 @@ public class BatteryLife {
 		}
 	
 		int result = 999;
+		
+
+		//TODO: BRAD 
+		if(!os.startsWith("windows")){
+		
+			Util.log("battStatts.. linux", this);
+			return result;
+		}
 		
 		try {
 			

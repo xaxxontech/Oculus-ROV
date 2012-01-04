@@ -17,6 +17,7 @@ import java.util.Vector;
 
 public class Util {
 
+	private static final String os  = System.getProperty("os.name"); 
 	private static final int PRECISION = 2;
 	
 	/**
@@ -210,7 +211,10 @@ public class Util {
 	 * @param str is the command to run, like: "restart
 	 * 
 	 */
-	public static void systemCallBlocking(final String args) {
+	public static String systemCallBlocking(final String args) {
+		
+		String result = null;
+		
 		try {	
 			
 			long start = System.currentTimeMillis();
@@ -220,15 +224,18 @@ public class Util {
 
 			String line = null;
 			System.out.println(proc.hashCode() + "OCULUS: exec(): " + args);
-			while ((line = procReader.readLine()) != null)
+			while ((line = procReader.readLine()) != null){
 				System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
-			
+				result += line;
+			}
 			System.out.println("OCULUS: process exit value = " + proc.exitValue());
 			System.out.println("OCULUS: bocking run time = " + (System.currentTimeMillis()-start) + " ms");
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		return result;
 	}
 
 	/**
@@ -367,7 +374,9 @@ public class Util {
 	 * 				is the phrase to turn from text to speech 
 	 */
 	public static void beep() {
-		systemCall("nircmdc.exe beep 500 1000");
+		if(os.startsWith("windows")){
+			systemCall("nircmdc.exe beep 500 1000");
+		}else log("need linux beep"); // TODO: 
 	}
 	
 	public static String[] tail ( File file, String match ){
@@ -451,5 +460,9 @@ public class Util {
 
 	public static void log(String str, Object c) {
 		System.out.println("OCULUS: " + c.getClass().getName() + ", " +str);
+	}
+
+	public static void log(String str) {
+		System.out.println("OCULUS: Util, " +str);
 	}
 }

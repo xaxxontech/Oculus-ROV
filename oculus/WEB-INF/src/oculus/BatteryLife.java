@@ -19,7 +19,7 @@ public class BatteryLife {
 	private String query; 
 	private ActiveXComponent axWMI;
 	
-	private final String os  = System.getProperty("os.name"); 
+	private static final String os  = System.getProperty("os.name"); 
 	
 	private boolean battcharging = false;
 	private boolean batterypresent = false;
@@ -60,7 +60,21 @@ public class BatteryLife {
 				query = "Select * from Win32_Battery"; 
 				axWMI = new ActiveXComponent(connectStr);
 		
-			} else System.out.println("linux battery... ");
+			} else /* if(.equals("linux")*/ {
+				
+				System.out.println("linux battery... ");
+				
+				// cat /proc/acpi/battery/BAT0/state 
+				String[] result = Util.systemCallBlocking("cat /proc/acpi/battery/BAT0/state").split(":");
+				
+				for(int i = 0 ; i < result.length ; i++){
+					if(result[i].equals("present")){
+						// if()
+					}
+				}
+				
+				
+			}
 		} 
 	}
 	

@@ -226,7 +226,7 @@ public class Util {
 			System.out.println(proc.hashCode() + "OCULUS: exec(): " + args);
 			while ((line = procReader.readLine()) != null){
 				System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
-				result += line;
+				result += line + "\n";
 			}
 			System.out.println("OCULUS: process exit value = " + proc.exitValue());
 			System.out.println("OCULUS: bocking run time = " + (System.currentTimeMillis()-start) + " ms");

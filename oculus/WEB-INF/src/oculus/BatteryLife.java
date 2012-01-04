@@ -43,7 +43,7 @@ public class BatteryLife {
 	 */
 	public void init(Application parent){
 		
-		//System.out.println("battery init...");
+		System.out.println("battery init...");
 			
 		if(app == null){
 			
@@ -51,9 +51,7 @@ public class BatteryLife {
 			app = parent;	
 			
 			if(os.startsWith("windows")){
-				
-				//brad@ubuntu:~$ cat /proc/acpi/battery/BAT0/state
-			
+						
 				// Technically you should be able to connect to other hosts, but it takes setup
 				host = "localhost"; 
 				connectStr = String.format("winmgmts:\\\\%s\\root\\CIMV2", host);
@@ -65,14 +63,10 @@ public class BatteryLife {
 				System.out.println("linux battery... ");
 				
 				// cat /proc/acpi/battery/BAT0/state 
-				String[] result = Util.systemCallBlocking("cat /proc/acpi/battery/BAT0/state").split(":");
-				
-				for(int i = 0 ; i < result.length ; i++){
-					if(result[i].equals("present")){
-						// if()
-					}
-				}
-				
+				String result[] = Util.systemCallBlocking(
+						"cat /proc/acpi/battery/BAT0/state | grep \"present\"").split(":");
+			
+				if(result[1].equals("yes")) batterypresent = true;			
 				
 			}
 		} 

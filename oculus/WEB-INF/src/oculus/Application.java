@@ -1155,6 +1155,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void restart() {
+		// TODO: LINUX needs password 
 		// if (admin) {
 		messageplayer("restarting server application", null, null);
 		messageGrabber("restarting server application", null);

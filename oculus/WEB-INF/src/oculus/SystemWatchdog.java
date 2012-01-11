@@ -21,9 +21,11 @@ public class SystemWatchdog {
 	
 	// shared state variables
 	private State state = State.getReference();
+	private Application app;
 	
     /** Constructor */
-	public SystemWatchdog(Application app) {
+	public SystemWatchdog(Application a) {
+		app = a;
 		settings = new Settings(app);
 		reboot = settings.getBoolean(State.reboot);		
 		if (reboot){
@@ -43,7 +45,12 @@ public class SystemWatchdog {
 				System.out.println("OCULUS: SystemWatchDog, user logged in for: " + state.getLoginSince() + " ms");
 				
 				// reboot  
-				Util.systemCall("shutdown -r -f -t 01");				
+				if (app.os.equals("windows")) {
+					Util.systemCall("shutdown -r -f -t 01");	
+				}
+				else {
+					Util.systemCall("shutdown -r now");
+				}
 			}
 		}
 	}

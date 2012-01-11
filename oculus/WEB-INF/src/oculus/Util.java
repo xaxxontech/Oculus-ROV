@@ -206,17 +206,13 @@ public class Util {
 	}
 	
 	/**
-	 * Run the given text string as a command on the windows host computer. 
+	 * Run the given text string as a command on the host computer. 
 	 * 
 	 * @param str is the command to run, like: "restart
 	 * 
 	 */
-	public static String systemCallBlocking(final String args) {
-		
-		System.out.println("sys blk call: " + argg);
-		
-		String result = null;
-		
+	public static void systemCallBlocking(final String args) {
+
 		try {	
 			
 			long start = System.currentTimeMillis();
@@ -228,16 +224,14 @@ public class Util {
 			System.out.println(proc.hashCode() + "OCULUS: exec():  " + args);
 			while ((line = procReader.readLine()) != null){
 				System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
-				result += line + "\n";
 			}
 			System.out.println("OCULUS: process exit value = " + proc.exitValue());
-			System.out.println("OCULUS: bocking run time = " + (System.currentTimeMillis()-start) + " ms");
+			System.out.println("OCULUS: blocking run time = " + (System.currentTimeMillis()-start) + " ms");
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return result;
 	}
 
 	/**
@@ -250,17 +244,17 @@ public class Util {
 		new Thread(new Runnable() { 
 			public void run() {
 				try {
-			
-					Process proc = Runtime.getRuntime().exec(str);
-					BufferedReader procReader = new BufferedReader(
-							new InputStreamReader(proc.getInputStream()));
-
-					String line = null;
-					System.out.println("OCULUS: process exit value = " + str);
-					while ((line = procReader.readLine()) != null)
-						System.out.println("OCULUS: systemCall(), " + line);
-					
-					System.out.println("OCULUS: process exit value = " + proc.exitValue());
+					Runtime.getRuntime().exec(str);
+//					Process proc = Runtime.getRuntime().exec(str);
+//					BufferedReader procReader = new BufferedReader(
+//							new InputStreamReader(proc.getInputStream()));
+//
+//					String line = null;
+//					System.out.println("OCULUS: process exit value = " + str);
+//					while ((line = procReader.readLine()) != null)
+//						System.out.println("OCULUS: systemCall(), " + line);
+//					
+//					System.out.println("OCULUS: process exit value = " + proc.exitValue());
 				
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -354,16 +348,14 @@ public class Util {
 	 * @param percent
 	 */
 	public static void setSystemVolume(int percent, Application app){
+		if (app.os.equals("linux")) {
+			return; // TODO: linux set system volume
+		}
 		new Settings(app).writeSettings(Settings.volume, percent);
 		float vol = (float) percent / 100 * 65535;
 		String str;
-		if (app.os.equals("linux")) {
-			str = ""; // TODO: linux set system volume
-		}
-		else {
-			str = "nircmdc.exe setsysvolume "+ (int) vol; //w in
-			Util.systemCall(str);					
-		}
+		str = "nircmdc.exe setsysvolume "+ (int) vol; //w in
+		Util.systemCall(str);					
 		//app.message("ROV volume set to "+Integer.toString(percent)+"%", null, null);
 	}
 

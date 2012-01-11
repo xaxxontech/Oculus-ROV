@@ -629,7 +629,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		case setsystemvolume:
 			Util.setSystemVolume(Integer.parseInt(str), this);
-			messageplayer("ROV volume set to "+str+"%", null, null);
+			if (os.equals("linux")) { messageplayer("unsupported in linux",null,null); }
+			else { messageplayer("ROV volume set to "+str+"%", null, null); }
 			break;
 		case muterovmiconmovetoggle:
 			muteROVMicOnMoveToggle();
@@ -932,6 +933,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void saySpeech(String str) {
+		if (os.equals("linux")) {
+			messageplayer("unsupported in linux",null,null);
+			return;
+		}
 		messageplayer("synth voice: " + str, null, null);
 		messageGrabber("synth voice: " + str, null);
 		//Speech speech = new Speech();   // DONT initialize each time here, takes too long
@@ -1155,8 +1160,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void restart() {
-		// TODO: LINUX needs password 
-		// if (admin) {
+		if (os.equals("linux")) { 
+			messageplayer("unsupported in linux",null,null);
+			messageGrabber("unsupported in linux", null);
+			return;
+		}
+
 		messageplayer("restarting server application", null, null);
 		messageGrabber("restarting server application", null);
 		File f;
@@ -1174,6 +1183,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	public void monitor(String str) {
 		// uses nircmd.exe from http://www.nirsoft.net/utils/nircmd.html
+		if (os.equals("linux")) {
+			messageplayer("unsupported in linux",null,null);
+			return;
+		}
 		messageplayer("monitor " + str, null, null);
 		str = str.trim();
 		if (str.equals("on")) {
@@ -1837,6 +1850,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void softwareUpdate(String str) {
+		if (os.equals("linux")) {
+			messageplayer("unsupported in linux",null,null);
+			return;
+		}
 
 		if (str.equals("check")) {
 			messageplayer("checking for new software...", null, null);

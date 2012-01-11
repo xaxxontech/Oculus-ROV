@@ -28,7 +28,7 @@ public class Discovery {
 	public static final String OCULUS_SONAR = "id:oculusSonar";
 	public static final String OCULUS_DC = "id:oculusDC";
 	public static final String LIGHTS = "id:oculusLights";
-	public static final long RESPONCE_DELAY = 300;
+	public static final long RESPONSE_DELAY = 300;
 
 	/* reference to the underlying serial port */
 	private SerialPort serialPort = null;
@@ -113,7 +113,7 @@ public class Discovery {
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (connect(ports.get(i))) {
 				
-				Util.delay(TIMEOUT);				
+				Util.delay(TIMEOUT);
 				String id = getProduct();
 				System.out.println("OCULUS: Discovery, product :"+id);
 				
@@ -172,7 +172,6 @@ public class Discovery {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-				
 		// send command to arduino
 		try {
 			outputStream.write(new byte[]{'x', 13});
@@ -181,12 +180,12 @@ public class Discovery {
 		}
 		
 		// wait for reply 
-		Util.delay(RESPONCE_DELAY);
+		Util.delay(RESPONSE_DELAY);
 
 		// read it 
 		int read = 0;
 		try {
-			read = inputStream.read(buffer);
+			read = inputStream.read(buffer); //TODO: hangs here on Linux desktop w/ physical serial port
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

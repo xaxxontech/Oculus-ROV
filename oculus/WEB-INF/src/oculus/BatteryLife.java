@@ -192,14 +192,14 @@ public class BatteryLife {
 		}
 		else { // linux
 			try {
-				Thread.sleep(1500);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			result = linuxBattStatus();
 		}		
-		Util.log(Integer.toString(result), this);		
+//		Util.log(Integer.toString(result), this);		
 		return result;
 	}
 	
@@ -258,7 +258,8 @@ public class BatteryLife {
 							r = 1;
 							break;
 						}
-						if (word.toLowerCase().trim().equals("charging")) {
+						if (word.toLowerCase().trim().equals("charging") || 
+								word.toLowerCase().trim().equals("charged")) {
 							r = 2;
 							break;
 						}

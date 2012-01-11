@@ -604,6 +604,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			disconnectOtherConnections();
 			break;
 		case monitor:
+			if (os.equals("linux")) {
+				messageplayer("unsupported in linux",null,null);
+			}
 			monitor(str);
 			break;
 		case showlog:
@@ -1184,7 +1187,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void monitor(String str) {
 		// uses nircmd.exe from http://www.nirsoft.net/utils/nircmd.html
 		if (os.equals("linux")) {
-			messageplayer("unsupported in linux",null,null);
+			// messageplayer("unsupported in linux",null,null);
 			return;
 		}
 		messageplayer("monitor " + str, null, null);

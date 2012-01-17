@@ -22,7 +22,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private static final int STREAM_CONNECT_DELAY = 2000;
 	private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
-	private developer.LogManager moves = new developer.LogManager();
+
 	private static String salt;
 	private IConnection grabber = null;
 	private IConnection player = null;
@@ -38,16 +38,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private State state = State.getReference();
 	private boolean initialstatuscalled = false;
 	private boolean pendingplayerisnull = true;
-//	private boolean emailgrab = false;
 	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
-	private developer.CommandServer commandServer = null;
 
+	//dev stuff
+	private developer.CommandServer commandServer = null;
+	private developer.LogManager moves = new developer.LogManager();
+	public developer.OpenNIRead openNIRead = null;
+	
 	// try to make private
 	public boolean muteROVonMove = false;
 	public String stream = null;
 	public Speech speech = new Speech();
 	public String os;  //  "linux" or "windows"
+	
+
 
 	/** */
 	public Application() {
@@ -236,8 +241,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		new SystemWatchdog(this);
 
 		if (settings.getBoolean(State.developer)) {
-			moves.open(Settings.movesfile);
-			new developer.EmailAlerts(this);
+			// moves.open(Settings.movesfile);
+			// new developer.EmailAlerts(this);
+			openNIRead = new developer.OpenNIRead();
+			openNIRead.startDepthCam(this);
 		}
 
 		// open socket last

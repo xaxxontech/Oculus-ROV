@@ -1,8 +1,11 @@
 package oculus;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.imageio.ImageIO;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -26,6 +29,12 @@ public class FrameGrabHTTP extends HttpServlet {
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse res)
 			throws ServletException, IOException {
+		//frameGrab(req,res);
+		radarGrab(req,res);
+	}
+	
+	private void frameGrab(HttpServletRequest req, HttpServletResponse res) 
+		throws ServletException, IOException {
 		
 		res.setContentType("image/jpeg");
 		OutputStream out = res.getOutputStream();
@@ -58,7 +67,48 @@ public class FrameGrabHTTP extends HttpServlet {
 				}
 			    out.close();
 			}
+	}
+	
+	private void radarGrab(HttpServletRequest req, HttpServletResponse res) 
+		throws ServletException, IOException {
+		
+		//Util.log("getting frame depth info", this);
+		int[] horizDepthDistances = app.openNIRead.readHorizDepth();
+		//Util.log("depth map width = "+Integer.toString(horizDepthDistances.length));
+		int maxDepthInMM = 3500;
+		
+		int w = horizDepthDistances.length;
+		int h = horizDepthDistances.length*3/2;
+		BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		WritableRaster raster = image.getRaster();
+/*		
+		int hdx = 0;
+		int[] rgb = {0,0,0};
+		for (int x =0; x<w; x++) {
+			for (int y=0; y<h; y++) {
+				if (horizDepthDistances[hdx]/maxDepthInMM*h == y) { // map depth to y
+					rgb[1]=255;
+				}
+				else { rgb[1]= 0; }
+				raster.setPixel(x,y,rgb);
+			}
+			Util.log(Integer.toString(hdx)+" "+ Integer.toString(horizDepthDistances[hdx]));
+			hdx ++;
+		}
+*/
 
+		int hd = 0;
+		int y;
+		int[] rgb = {0,255,0};
+		for (int x=0; x<horizDepthDistances.length; x++) {
+			y = horizDepthDistances[hd]/maxDepthInMM*h;
+			raster.setPixel(x,y,rgb);
+			hd++;
+		}
+
+		res.setContentType("image/gif");
+		OutputStream out = res.getOutputStream();
+		ImageIO.write(image, "GIF", out);
 	}
 	
 }

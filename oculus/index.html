@@ -406,17 +406,6 @@ self cam/mic OFF</div>
 </td>
 
 </tr></table>
-
-<!-- 
-<div id="framegrabbox" style="display: none; padding-top: 10px">
-<table><tr><td>
-<img id ="framegrabpic" alt="">
-</td><td style="padding-left: 5px;">
-<a href= "javascript: document.getElementById('framegrabbox').style.display = 'none';">
-<span class="cancelbox">X</span> CLOSE</a>
-</td></tr></table>
-</div> 
- -->
  
 </td></tr></table>
 
@@ -878,10 +867,8 @@ onKeyPress="if (keypress(event)==13) { systemcall('',''); }">
 Developer menu:<br>
 <table><tr><td style="height: 7px"></td></tr></table>
 
-sonar enabled <a class="blackbg" href="javascript: writesetting('sonarenabled true');">on</a> / 
-<a class="blackbg" href="javascript: writesetting('sonarenabled false');">off</a><br> 
-
-<a class="blackbg" href="javascript: callServer('emailgrab',''); ">email frame grab</a><br>
+radar <a class="blackbg" href="javascript: radar('on');">on</a> / 
+<a class="blackbg" href="javascript: radar('off');">off</a><br> 
 
 </div>
 

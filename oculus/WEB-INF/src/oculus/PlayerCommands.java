@@ -8,7 +8,7 @@ public enum PlayerCommands {
 	tilttest, speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
 	streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
-	disconnectotherconnections, showlog, monitor, emailgrab, assumecontrol, softwareupdate, 
+	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate, 
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
 	floodlight, writesetting, holdservo;
 

@@ -71,39 +71,32 @@ public class FrameGrabHTTP extends HttpServlet {
 	
 	private void radarGrab(HttpServletRequest req, HttpServletResponse res) 
 		throws ServletException, IOException {
-		
 		//Util.log("getting frame depth info", this);
-		int[] horizDepthDistances = app.openNIRead.readHorizDepth();
+		int[] xdepth = app.openNIRead.readHorizDepth();
 		//Util.log("depth map width = "+Integer.toString(horizDepthDistances.length));
 		int maxDepthInMM = 3500;
 		
-		int w = horizDepthDistances.length;
-		int h = horizDepthDistances.length*3/2;
+		int w = 240;
+		int h = 320;
 		BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		WritableRaster raster = image.getRaster();
-/*		
-		int hdx = 0;
-		int[] rgb = {0,0,0};
-		for (int x =0; x<w; x++) {
-			for (int y=0; y<h; y++) {
-				if (horizDepthDistances[hdx]/maxDepthInMM*h == y) { // map depth to y
-					rgb[1]=255;
-				}
-				else { rgb[1]= 0; }
+		int[] rgb = {0,255,0};
+
+		int x;
+		int y;
+		int xdctr = xdepth.length/2;
+		double xdratio;
+		double angle = 0.392699082; // 22.5 deg in radians from ctr, or half included view angle
+		for (int xd=0; xd < xdepth.length; xd++) {
+			y = (int) ((float)xdepth[xd]/(float)maxDepthInMM*(float)h);
+			// x(opposite) = tan(angle)*y(adjacent)
+			xdratio = (double)(xd - xdctr)/ (double) xdctr;
+//			Util.log(Double.toString(xdratio),this);
+			x = (w/2) - ((int) (Math.tan(angle)*(double) y * xdratio));
+			if (y<h && y>=0 && x>=0 && x<w) {
+				y = h-y-1; //flip vertically
 				raster.setPixel(x,y,rgb);
 			}
-			Util.log(Integer.toString(hdx)+" "+ Integer.toString(horizDepthDistances[hdx]));
-			hdx ++;
-		}
-*/
-
-		int hd = 0;
-		int y;
-		int[] rgb = {0,255,0};
-		for (int x=0; x<horizDepthDistances.length; x++) {
-			y = horizDepthDistances[hd]/maxDepthInMM*h;
-			raster.setPixel(x,y,rgb);
-			hd++;
 		}
 
 		res.setContentType("image/gif");

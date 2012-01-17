@@ -2127,51 +2127,10 @@ function streamset(str) {
 	}
 }
 
-//function facegrab() {
-//	var str;
-//	if (facegrabon) { 
-//		str="off"; 
-//		facegrabon=false; }
-//	else {
-//		facegrabon = true;
-//		str="on"; }
-//	callServer("facegrab",str);
-//	overlay("off");
-//}
-
-
 function emailgrab() {
 	callServer("emailgrab", null);
 	overlay("off");
 }
-
-
-//function facefound(str) {
-//	if (clicksteeron) {
-//		clearTimeout(faceboxtimer);
-//		videooverlayposition();
-//		var scale =2;
-//		var video = document.getElementById("video");
-//		var box = document.getElementById("facebox");
-//		splitstr = str.split(" "); // left top width height
-//		box.style.width = (splitstr[2]*scale)+"px";
-//		box.style.height = (splitstr[3]*scale)+"px";
-//		box.style.left = (video.offsetLeft + (splitstr[0]*scale)) + "px";
-//		box.style.top = (video.offsetTop + (splitstr[1]*scale)) + "px";
-//		box.style.display = "";
-//		faceboxtimer = setTimeout("document.getElementById('facebox').style.display='none';",1000);
-//	}
-//}
-
-//function framegrab() {
-////	document.getElementById("framegrabbox").style.display = "";
-////	document.getElementById('framegrabpic').src = 'images/framegrab.jpg'+ '?' + (new Date()).getTime();
-//	var str = "image<br><img id='framgegrabimg' src='' alt=''>";
-//    var xy = findpos(document.getElementById('video'));
-//    popupmenu("context", "show", xy[0] + 250, xy[1] + 100, str, null, 1, 0);
-//    document.getElementById('framgegrabimg').src = "frameGrabHTTP"; 
-//    popupmenu("context","resize");
-//}
 
 
 /* message recording utils 
@@ -2197,6 +2156,30 @@ function displaymessages() {
 	}
 	document.write(str);
 }
+
+var radartimer = null;
+
+function radar(mode) {
+	if (mode=="on") {
+		var v = document.getElementById("video");
+		var xy = findpos(v);
+		var x = xy[0]+v.offsetWidth;
+		var y=xy[1];
+		var str ="<img id='radarimg' src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'>"
+		popupmenu("context", "show", x, y, str, null, 1, 0);
+	}
+	if (mode=="off") {
+		clearTimeout(radartimer);
+		document.getElementById("radarimg").src="";
+		popupmenu("context", "close");
+	}
+}
+
+function radarrepeat() {
+	clearTimeout(radartimer);
+	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP'; radarrepeat();", 100);
+}
+
 
 /* end of message recording utils */
 

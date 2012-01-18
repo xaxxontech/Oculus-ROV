@@ -1,5 +1,9 @@
 package oculus;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
@@ -78,27 +82,56 @@ public class FrameGrabHTTP extends HttpServlet {
 		
 		int w = 240;
 		int h = 320;
+		int voff = 0;
+		double angle = 0.392699082; // 22.5 deg in radians from ctr, or half included view angle
 		BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		WritableRaster raster = image.getRaster();
-		int[] rgb = {0,255,0};
+		Graphics2D g2d = image.createGraphics();
+		
+		//render background
+		g2d.setColor(new Color(10,10,10));
+		g2d.fill(new Rectangle2D.Double(0, 0, w, h));
 
-		int x;
-		int y;
+		// render pixel data and shadows
+		int[] dataRGB = {0,255,0}; // sensor data pixel colour
+		g2d.setColor(new Color(0,70,0)); // shadow colour
 		int xdctr = xdepth.length/2;
-		double xdratio;
-		double angle = 0.392699082; // 22.5 deg in radians from ctr, or half included view angle
 		for (int xd=0; xd < xdepth.length; xd++) {
-			y = (int) ((float)xdepth[xd]/(float)maxDepthInMM*(float)h);
+			int y = (int) ((float)xdepth[xd]/(float)maxDepthInMM*(float)h);
 			// x(opposite) = tan(angle)*y(adjacent)
-			xdratio = (double)(xd - xdctr)/ (double) xdctr;
+			double xdratio = (double)(xd - xdctr)/ (double) xdctr;
 //			Util.log(Double.toString(xdratio),this);
-			x = (w/2) - ((int) (Math.tan(angle)*(double) y * xdratio));
-			if (y<h && y>=0 && x>=0 && x<w) {
-				y = h-y-1; //flip vertically
-				raster.setPixel(x,y,rgb);
+			int x = (w/2) - ((int) (Math.tan(angle)*(double) y * xdratio));
+			int xend = (w/2) - ((int) (Math.tan(angle)*(double) (h-1) * xdratio)); // for shadow fill past point
+			if (y<h-voff && y>0+voff && x>=0 && x<w) {
+				y = h-y-1+voff; //flip vertically
+				g2d.drawLine(x, y, xend, 0);  //fill area behind with line
+				raster.setPixel(x,y,dataRGB);
+				raster.setPixel(x,y+1,dataRGB);
 			}
 		}
-
+		
+		// dist scale arcs
+		g2d.setColor(new Color(100,100,100));
+		int r = 100;
+		g2d.draw(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));
+		r = 200;
+		g2d.draw(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));
+		r = 300;
+		g2d.draw(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));
+		
+		// outside cone colour fill
+		g2d.setColor(new Color(23,25,0)); 
+		for (int y= 0-voff; y<h+voff; y++) {
+			int x = (int) (Math.tan(angle)*(double)(h-y-1));
+			if (x>=0) {
+				g2d.drawLine(0, y, (w/2)-x, y);  
+				g2d.drawLine(w-1, y, (w/2)+x,y);
+			}
+  
+		}
+		
+		// send image
 		res.setContentType("image/gif");
 		OutputStream out = res.getOutputStream();
 		ImageIO.write(image, "GIF", out);

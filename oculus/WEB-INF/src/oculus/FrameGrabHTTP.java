@@ -75,6 +75,9 @@ public class FrameGrabHTTP extends HttpServlet {
 	
 	private void radarGrab(HttpServletRequest req, HttpServletResponse res) 
 		throws ServletException, IOException {
+		
+		if (app.openNIRead.depthCamInit == false) { return; }
+		
 		//Util.log("getting frame depth info", this);
 		int[] xdepth = app.openNIRead.readHorizDepth();
 		//Util.log("depth map width = "+Integer.toString(horizDepthDistances.length));

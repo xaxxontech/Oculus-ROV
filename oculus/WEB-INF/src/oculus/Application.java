@@ -244,7 +244,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			// moves.open(Settings.movesfile);
 			// new developer.EmailAlerts(this);
 			openNIRead = new developer.OpenNIRead();
-			openNIRead.startDepthCam(this);
 		}
 
 		// open socket last
@@ -662,6 +661,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 						str);
 			}
 			messageplayer("holdservo " + str, null, null);
+			break;
+		case opennisensor:
+			if(str.equals("on")) { openNIRead.startDepthCam(this); }
+			else { openNIRead.stopDepthCam(); }			
+			messageplayer("openNI camera "+str, null, null);
 			break;
 		}
 	}

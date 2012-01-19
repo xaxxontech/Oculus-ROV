@@ -9,6 +9,7 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 	private static Context context;
 	private static DepthGenerator depth;
 	private static DepthMetaData depthMD;
+	public boolean depthCamInit = false;
 	
 	@Override
 	public void update(IObservable<ErrorStateEventArgs> arg0,
@@ -24,14 +25,27 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 
 		try 
 		{
-			OutArg<ScriptNode> scriptNodeArg = new OutArg<ScriptNode>();
-			context = Context.createFromXmlFile(SAMPLES_XML, scriptNodeArg);
-			OpenNIRead pThis = new OpenNIRead();
-			context.getErrorStateChangedEvent().addObserver(pThis);
-			depth = (DepthGenerator)context.findExistingNode(NodeType.DEPTH);
-			depthMD = new DepthMetaData();
+			if (depthCamInit == false) {
+				OutArg<ScriptNode> scriptNodeArg = new OutArg<ScriptNode>();
+				context = Context.createFromXmlFile(SAMPLES_XML, scriptNodeArg);
+				OpenNIRead pThis = new OpenNIRead();
+				context.getErrorStateChangedEvent().addObserver(pThis);
+				depth = (DepthGenerator)context.findExistingNode(NodeType.DEPTH);
+				depthMD = new DepthMetaData();
+				depthCamInit =true;
+			}
+			else { depth.startGenerating(); }
 		}
 		catch (Throwable e) { e.printStackTrace(); }
+	}
+	
+	public void stopDepthCam()  {
+		try {
+			depth.stopGenerating();
+		} catch (StatusException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public int[] readHorizDepth() {

@@ -2160,24 +2160,36 @@ function displaymessages() {
 var radartimer = null;
 
 function radar(mode) {
-	if (mode=="on") {
+	if (mode=="init") {		
+		callServer("opennisensor", "on"); 
+		message("sending opennisensor on " + str, sentcmdcolor);
+		lagtimer = new Date().getTime(); // has to be *after* message()
+	}
+	if (mode=="on") {	
 		var v = document.getElementById("video");
 		var xy = findpos(v);
 		var x = xy[0]+v.offsetWidth;
 		var y=xy[1];
-		var str ="<img id='radarimg' src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'>"
-		popupmenu("context", "show", x, y, str, null, 1, 0);
+//		var str ="<img id='radarimg' src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'>"
+		var str ="<img id='radarimg' src='frameGrabHTTP?"+new Date().getTime()+"' alt='' onload='radarrepeat();' width='240' height='320'>"
+
+		popupmenu('context', 'show', x, y, str, null, 1, 0);
 	}
 	if (mode=="off") {
-		clearTimeout(radartimer);
+		lagtimer = new Date().getTime(); // has to be *after* message()
 		document.getElementById("radarimg").src="";
 		popupmenu("context", "close");
+	}
+	if (mode=="shutdown") { // unused
+		clearTimeout(radartimer);
+		callServer("opennisensor", "off");
+		message("sending opennisensor off " + str, sentcmdcolor);
 	}
 }
 
 function radarrepeat() {
 	clearTimeout(radartimer);
-	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP'; radarrepeat();", 100);
+	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP?"+new Date().getTime()+"'; radarrepeat();", 250);
 }
 
 

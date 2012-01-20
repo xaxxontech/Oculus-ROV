@@ -2170,9 +2170,18 @@ function radar(mode) {
 		var xy = findpos(v);
 		var x = xy[0]+v.offsetWidth;
 		var y=xy[1];
-//		var str ="<img id='radarimg' src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'>"
-		var str ="<img id='radarimg' src='frameGrabHTTP?"+new Date().getTime()+"' alt='' onload='radarrepeat();' width='240' height='320'>"
-
+		var str ="<div style='height: 320px; line-height: 10px;'>";
+		str +="<img id='radarimg' src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'>"
+//		var str ="<img id='radarimg' src='frameGrabHTTP?"+new Date().getTime()+"' alt='' onload='radarrepeat();' width='240' height='320'>"
+		str += "<div style='position: relative; top: -184px; left: 17px;'>2.0</div>";
+		str += "<div style='position: relative; top: -194px; left: 200px;'>2.0</div>";
+		str += "<div style='position: relative; top: -114px; left: 55px;'>1.0</div>";
+		str += "<div style='position: relative; top: -124px; left: 165px;'>1.0</div>";
+		str += "<div style='position: relative; top: -300px; left: 2px;'>3</div>";
+		str += "<div style='position: relative; top: -310px; left: 230px;'>3</div>";
+		str += "<div style='position: relative; top: -70px; left: 107px;'>";
+		str +="<span style='background-color: #666666; color: #000000;'>ROV</span></div>";
+		str += "</div>"
 		popupmenu('context', 'show', x, y, str, null, 1, 0);
 	}
 	if (mode=="off") {
@@ -2189,7 +2198,8 @@ function radar(mode) {
 
 function radarrepeat() {
 	clearTimeout(radartimer);
-	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP?"+new Date().getTime()+"'; radarrepeat();", 250);
+//	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP?"+new Date().getTime()+"'; radarrepeat();", 100);
+	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP'; radarrepeat();", 100);
 }
 
 

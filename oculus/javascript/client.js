@@ -2171,8 +2171,8 @@ function radar(mode) {
 		var x = xy[0]+v.offsetWidth;
 		var y=xy[1];
 		var str ="<div style='height: 320px; line-height: 10px;'>";
-		str +="<img id='radarimg' src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'>"
-//		var str ="<img id='radarimg' src='frameGrabHTTP?"+new Date().getTime()+"' alt='' onload='radarrepeat();' width='240' height='320'>"
+		str +="<img id='radarimg' src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'>";
+//		str +="<div id='radarimgbox'><img src='frameGrabHTTP?"+new Date().getTime()+"' alt='' onload='radarrepeat();' width='240' height='320'></div>";
 		str += "<div style='position: relative; top: -184px; left: 17px;'>2.0</div>";
 		str += "<div style='position: relative; top: -194px; left: 200px;'>2.0</div>";
 		str += "<div style='position: relative; top: -114px; left: 55px;'>1.0</div>";
@@ -2198,8 +2198,18 @@ function radar(mode) {
 
 function radarrepeat() {
 	clearTimeout(radartimer);
-//	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP?"+new Date().getTime()+"'; radarrepeat();", 100);
-	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP'; radarrepeat();", 250);
+//	var str ="<div id='radarimgbox'><img src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'></div>";
+//	var str ="<img src=&quot;frameGrabHTTP?"+new Date().getTime()+"&quot; alt=&quot;&quot; onload=&quot;radarrepeat();&quot; width=&quot;240&quot; height=&quot;320&quot;>";
+//	radartimer = setTimeout("document.getElementById('radarimgbox').innerHTML='"+str+"';", 250);
+	radartimer = setTimeout("radarimagereload();", 250);
+}
+
+function radarimagereload() {
+//	var i = document.getElementById('radarimgbox');
+//	i.innerHTML = "<img src='frameGrabHTTP?"+new Date().getTime()+"' alt='' onload='radarrepeat();' width='240' height='320'>";
+	var img = document.getElementById('radarimg');
+	img.src = "frameGrabHTTP?"+new Date().getTime();
+	img.onload = function() { radarrepeat(); }
 }
 
 

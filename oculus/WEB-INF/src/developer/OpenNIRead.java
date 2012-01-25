@@ -34,7 +34,7 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 				depthMD = new DepthMetaData();
 				depthCamInit =true;
 			}
-			else { depth.startGenerating(); }
+			// else { depth.startGenerating(); }
 		}
 		catch (Throwable e) { e.printStackTrace(); }
 	}
@@ -43,6 +43,7 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 		try {
 			depth.stopGenerating();
 			context.release();
+			context = null;
 			depthCamInit = false;
 		} catch (StatusException e) {
 			e.printStackTrace();

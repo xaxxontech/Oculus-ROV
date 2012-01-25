@@ -10,7 +10,6 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 	private static DepthGenerator depth;
 	private static DepthMetaData depthMD;
 	public boolean depthCamInit = false;
-	public boolean depthCamReading = false;
 	
 	@Override
 	public void update(IObservable<ErrorStateEventArgs> arg0,
@@ -38,16 +37,16 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 			else { depth.startGenerating(); }
 		}
 		catch (Throwable e) { e.printStackTrace(); }
-		depthCamReading = true;
 	}
 	
 	public void stopDepthCam()  {
 		try {
 			depth.stopGenerating();
+			context.release();
+			depthCamInit = false;
 		} catch (StatusException e) {
 			e.printStackTrace();
 		}
-		depthCamReading = false;
 	}
 	
 	public int[] readHorizDepth(int y) {

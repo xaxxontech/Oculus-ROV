@@ -88,10 +88,15 @@ public class FrameGrabHTTP extends HttpServlet {
 		//render background
 		g2d.setColor(new Color(10,10,10)); // was 10 10 10 
 		g2d.fill(new Rectangle2D.Double(0, 0, w, h));
+		
+		// too close out of range background fill
+		g2d.setColor(new Color(23,25,0)); 
+		int r = 40;
+		g2d.fill(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));
 
 		// retrieve & render pixel data and shadows
 		int maxDepthInMM = 3500;
-		if (app.openNIRead.depthCamReading == true) { 		
+		if (app.openNIRead.depthCamInit == true) { 		
 			int[] xdepth = app.openNIRead.readHorizDepth(120);
 			int[] dataRGB = {0,255,0}; // sensor data pixel colour
 			g2d.setColor(new Color(0,70,0)); // shadow colour
@@ -114,7 +119,7 @@ public class FrameGrabHTTP extends HttpServlet {
 		
 		// dist scale arcs
 		g2d.setColor(new Color(100,100,100));
-		int r = 100;
+		r = 100;
 		g2d.draw(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));
 		r = 200;
 		g2d.draw(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));
@@ -142,7 +147,8 @@ public class FrameGrabHTTP extends HttpServlet {
 		res.setContentType("image/gif");
 		OutputStream out = res.getOutputStream();
 		ImageIO.write(image, "GIF", out);
-		
+		out.close();
+		image.flush();
 	}
 	
 }

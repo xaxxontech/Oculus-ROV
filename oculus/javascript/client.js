@@ -2185,12 +2185,12 @@ function radar(mode) {
 		popupmenu('context', 'show', x, y, str, null, 1, 0);
 	}
 	if (mode=="off") {
+		clearTimeout(radartimer);
 		lagtimer = new Date().getTime(); // has to be *after* message()
-		document.getElementById("radarimg").src="";
+		// document.getElementById("radarimg").src="";
 		popupmenu("context", "close");
 	}
 	if (mode=="shutdown") { // unused
-		clearTimeout(radartimer);
 		callServer("opennisensor", "off");
 		message("sending opennisensor off " + str, sentcmdcolor);
 	}
@@ -2199,7 +2199,7 @@ function radar(mode) {
 function radarrepeat() {
 	clearTimeout(radartimer);
 //	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP?"+new Date().getTime()+"'; radarrepeat();", 100);
-	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP'; radarrepeat();", 100);
+	radartimer = setTimeout("document.getElementById('radarimg').src='frameGrabHTTP'; radarrepeat();", 250);
 }
 
 

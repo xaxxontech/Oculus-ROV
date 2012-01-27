@@ -2201,7 +2201,7 @@ function radarrepeat() {
 //	var str ="<div id='radarimgbox'><img src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'></div>";
 //	var str ="<img src=&quot;frameGrabHTTP?"+new Date().getTime()+"&quot; alt=&quot;&quot; onload=&quot;radarrepeat();&quot; width=&quot;240&quot; height=&quot;320&quot;>";
 //	radartimer = setTimeout("document.getElementById('radarimgbox').innerHTML='"+str+"';", 250);
-	radartimer = setTimeout("radarimagereload();", 250);
+	radartimer = setTimeout("radarimagereload();", 5);
 }
 
 function radarimagereload() {

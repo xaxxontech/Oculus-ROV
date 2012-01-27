@@ -20,6 +20,7 @@ public class FrameGrabHTTP extends HttpServlet {
 	private static Application app = null;
 	public static byte[] img  = null;
 	private State state = State.getReference();
+	private static int var = 0;
 	
 	public static void setApp(Application a) {
 		if(app != null) return;
@@ -82,24 +83,31 @@ public class FrameGrabHTTP extends HttpServlet {
 				
 		int voff = 0;
 		double angle = 0.392699082; // 22.5 deg in radians from ctr, or half included view angle
-		WritableRaster raster = image.getRaster();
 		Graphics2D g2d = image.createGraphics();
 		
 		//render background
 		g2d.setColor(new Color(10,10,10)); // was 10 10 10 
+//		g2d.setColor(new Color(10,10,10,0)); // was 10 10 10 
 		g2d.fill(new Rectangle2D.Double(0, 0, w, h));
 		
 		// too close out of range background fill
 		g2d.setColor(new Color(23,25,0)); 
+//		g2d.setColor(new Color(23,25,0,0)); 
 		int r = 40;
 		g2d.fill(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));
-
+		
 		// retrieve & render pixel data and shadows
+//		var += 5;
+//		if (var > 119) { var = 0; }
+		var = 120;
 		int maxDepthInMM = 3500;
-		if (app.openNIRead.depthCamInit == true) { 		
-			int[] xdepth = app.openNIRead.readHorizDepth(120);
+		if (app.openNIRead.depthCamInit == true) { 	
+			WritableRaster raster = image.getRaster();
+			int[] xdepth = app.openNIRead.readHorizDepth(var);
 			int[] dataRGB = {0,255,0}; // sensor data pixel colour
+//			int[] dataRGB = {0,255,0,255}; // sensor data pixel colour
 			g2d.setColor(new Color(0,70,0)); // shadow colour
+//			g2d.setColor(new Color(0,70,0,255)); // shadow colour
 			int xdctr = xdepth.length/2;
 			for (int xd=0; xd < xdepth.length; xd++) {
 				int y = (int) ((float)xdepth[xd]/(float)maxDepthInMM*(float)h);
@@ -117,8 +125,10 @@ public class FrameGrabHTTP extends HttpServlet {
 			}
 		}
 		
+		
 		// dist scale arcs
 		g2d.setColor(new Color(100,100,100));
+//		g2d.setColor(new Color(100,100,100,255));
 		r = 100;
 		g2d.draw(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));
 		r = 200;
@@ -126,8 +136,18 @@ public class FrameGrabHTTP extends HttpServlet {
 		r = 300;
 		g2d.draw(new Ellipse2D.Double( w/2-r, h-1-r*0.95+voff, r*2, r*2*0.95));	
 		
+		/*
+		// pulsator
+		g2d.setColor(new Color(0,0,155));
+//		g2d.setColor(new Color(0,0,155,255));
+		var += 10;
+		if (var > h + 50) { var = 0; }
+		g2d.draw(new Ellipse2D.Double( w/2-var, h-1-var*0.95+voff, var*2, var*2*0.95));		
+		*/
+		
 		// outside cone colour fill
 		g2d.setColor(new Color(23,25,0)); 
+//		g2d.setColor(new Color(23,25,0,0)); 
 		for (int y= 0-voff; y<h+voff; y++) {
 			int x = (int) (Math.tan(angle)*(double)(h-y-1));
 			if (x>=0) {
@@ -139,6 +159,7 @@ public class FrameGrabHTTP extends HttpServlet {
 		
 		// cone perim lines
 		g2d.setColor(new Color(100,100,100));
+//		g2d.setColor(new Color(100,100,100,255));
 		int x = (int) (Math.tan(angle)*(double)(319));
 		g2d.drawLine(w/2, 319, (w/2)-x, 0);
 		g2d.drawLine(w/2, 319, (w/2)+x, 0);

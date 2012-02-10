@@ -243,7 +243,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getBoolean(State.developer)) {
 			// moves.open(Settings.movesfile);
 			// new developer.EmailAlerts(this);
-			openNIRead = new developer.OpenNIRead();
+			openNIRead = new developer.OpenNIRead(this);
 		}
 
 		// open socket last
@@ -663,7 +663,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("holdservo " + str, null, null);
 			break;
 		case opennisensor:
-			if(str.equals("on")) { openNIRead.startDepthCam(this); }
+			if(str.equals("on")) { openNIRead.startDepthCam(); }
 			else { openNIRead.stopDepthCam(); }			
 			messageplayer("openNI camera "+str, null, null);
 			break;

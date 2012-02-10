@@ -9,7 +9,13 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 	private static Context context;
 	private static DepthGenerator depth;
 	private static DepthMetaData depthMD;
-	public boolean depthCamInit = false;
+	private boolean depthCamInit = false;
+	public  boolean depthCamGenerating = false;
+	private static Application app;
+	
+	public OpenNIRead(Application a) {
+		app = a;
+	}
 	
 	@Override
 	public void update(IObservable<ErrorStateEventArgs> arg0,
@@ -18,7 +24,7 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 		System.exit(1);		
 	}
 	
-	public void startDepthCam(Application app) {
+	public void startDepthCam() {
 		String sep = "\\"; // windows
 		if (app.os.equals("linux")) { sep = "/"; }
 		String SAMPLES_XML = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"openNIconfig.xml";
@@ -28,34 +34,42 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 			if (depthCamInit == false) {
 				OutArg<ScriptNode> scriptNodeArg = new OutArg<ScriptNode>();
 				context = Context.createFromXmlFile(SAMPLES_XML, scriptNodeArg);
-				OpenNIRead pThis = new OpenNIRead();
-				context.getErrorStateChangedEvent().addObserver(pThis);
+//				OpenNIRead pThis = new OpenNIRead();
+//				context.getErrorStateChangedEvent().addObserver(pThis);
+				context.getErrorStateChangedEvent().addObserver(this);
 				depth = (DepthGenerator)context.findExistingNode(NodeType.DEPTH);
 				depthMD = new DepthMetaData();
 				depthCamInit =true;
+				depthCamGenerating = true;
+				app.message("depth Cam initialize complete",null,null);
 			}
-			// else { depth.startGenerating(); }
+			else { depth.startGenerating(); depthCamGenerating=true; }
 		}
 		catch (Throwable e) { e.printStackTrace(); }
 	}
 	
 	public void stopDepthCam()  {
 		try {
+//			depthCamInit = false;
 			depth.stopGenerating();
-			context.release();
-			context = null;
-			depthCamInit = false;
+//			context.release();
+//			context = null;
+//			app.message("depth Cam shutdown complete",null,null);
+			depthCamGenerating= false;
 		} catch (StatusException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public int[] readHorizDepth(int y) {
+		/*
 		try {
 			context.waitAnyUpdateAll();
+				// sometimes throws: org.OpenNI.StatusException: Xiron OS got an event timeout!
 		} catch (StatusException e) {
 			e.printStackTrace();
 		}
+		*/
 		depth.getMetaData(depthMD);
 		int[] result = new int[depthMD.getXRes()];
 		int p=0;

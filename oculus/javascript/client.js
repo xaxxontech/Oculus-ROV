@@ -1058,6 +1058,8 @@ function popupmenu(pre_id, command, x, y, str, sizewidth, x_offsetmult, y_offset
 		over.style.display = "";
 		over.style.width = null; //ie fix
 		over.style.height = null; //ie fix
+		under.style.width = null; //ie fix
+		under.style.height = null; //ie fix
 		if (sizewidth != null) { contents.style.width = sizewidth + "px"; }
 		
 		if (x != null && y !==null) {
@@ -2156,9 +2158,12 @@ function displaymessages() {
 	}
 	document.write(str);
 }
+/* end of message recording utils */
 
-var radartimer = null;
-
+/* 
+ * radar functions
+ * TODO: put radar functions into separate js file, load only if needed
+ */
 function radar(mode) {
 	if (mode=="init") {		
 		callServer("opennisensor", "on"); 
@@ -2171,21 +2176,21 @@ function radar(mode) {
 		var x = xy[0]+v.offsetWidth;
 		var y=xy[1];
 		var str ="<div style='height: 320px; line-height: 10px;'>";
-		str +="<img id='radarimg' src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'>";
-//		str +="<div id='radarimgbox'><img src='frameGrabHTTP?"+new Date().getTime()+"' alt='' onload='radarrepeat();' width='240' height='320'></div>";
-		str += "<div style='position: relative; top: -184px; left: 17px;'>2.0</div>";
-		str += "<div style='position: relative; top: -194px; left: 200px;'>2.0</div>";
-		str += "<div style='position: relative; top: -114px; left: 55px;'>1.0</div>";
-		str += "<div style='position: relative; top: -124px; left: 165px;'>1.0</div>";
-		str += "<div style='position: relative; top: -300px; left: 2px;'>3</div>";
-		str += "<div style='position: relative; top: -310px; left: 230px;'>3</div>";
-		str += "<div style='position: relative; top: -70px; left: 107px;'>";
+		str +="<img id='radarimg' src='frameGrabHTTP?mode=radar' alt='' onload='radarrepeat();' width='240' height='320'>";
+//		str +="<img id='radarimg' alt='' width='240' height='320'>";
+		str += "<div style='position: relative; top: -184px; left: 17px; width: 50px;'>2.0</div>";
+		str += "<div style='position: relative; top: -194px; left: 200px; width: 50px;'>2.0</div>";
+		str += "<div style='position: relative; top: -114px; left: 55px; width: 50px;'>1.0</div>";
+		str += "<div style='position: relative; top: -124px; left: 165px; width: 50px;'>1.0</div>";
+		str += "<div style='position: relative; top: -300px; left: 2px; width: 50px;'>3</div>";
+		str += "<div style='position: relative; top: -310px; left: 230px; width: 50px;'>3</div>";
+		str += "<div style='position: relative; top: -70px; left: 107px; width: 75px;'>";
 		str +="<span style='background-color: #666666; color: #000000;'>ROV</span></div>";
 		str += "</div>"
 		popupmenu('context', 'show', x, y, str, null, 1, 0);
+//		radarimagereload();
 	}
 	if (mode=="off") {
-		clearTimeout(radartimer);
 		lagtimer = new Date().getTime(); // has to be *after* message()
 		// document.getElementById("radarimg").src="";
 		popupmenu("context", "close");
@@ -2196,24 +2201,77 @@ function radar(mode) {
 	}
 }
 
+/*
+var radartimer;
+var radarimage;
+//var radartimeout = null;
+
 function radarrepeat() {
-	clearTimeout(radartimer);
-//	var str ="<div id='radarimgbox'><img src='frameGrabHTTP' alt='' onload='radarrepeat();' width='240' height='320'></div>";
-//	var str ="<img src=&quot;frameGrabHTTP?"+new Date().getTime()+"&quot; alt=&quot;&quot; onload=&quot;radarrepeat();&quot; width=&quot;240&quot; height=&quot;320&quot;>";
-//	radartimer = setTimeout("document.getElementById('radarimgbox').innerHTML='"+str+"';", 250);
-	radartimer = setTimeout("radarimagereload();", 5);
+//	clearTimeout(radartimeout);
+	document.getElementById("radarimg").src = radarimage.src;
+	radartimer = setTimeout("radarimagereload();", 250);
 }
 
 function radarimagereload() {
-//	var i = document.getElementById('radarimgbox');
-//	i.innerHTML = "<img src='frameGrabHTTP?"+new Date().getTime()+"' alt='' onload='radarrepeat();' width='240' height='320'>";
-	var img = document.getElementById('radarimg');
-	img.src = "frameGrabHTTP?"+new Date().getTime();
-	img.onload = function() { radarrepeat(); }
+	clearTimeout(radartimer);
+//	clearTimeout(radartimeout);
+	radarimage = new Image(); 
+	radarimage.src = "frameGrabHTTP?mode=radar&date="+new Date().getTime();
+	radarimage.onload = function() { radarrepeat(); }
+//	radartimeout = setTimeout("radartimedout();", 3000);
+//	radartimer = null;
 }
 
+//function radartimedout() {
+//	if (radartimer == null && document.getElementById("radarimg")) {
+//		radarimagereload();  
+//		debug(Math.random());
+//	}
+//}
+*/
 
-/* end of message recording utils */
 
+var radartimer = null;
+//var radartimeout = null;
+
+function radarrepeat() {
+	clearTimeout(radartimer);
+//	clearTimeout(radartimeout);
+	radartimer = setTimeout("radarimagereload();", 250);
+}
+
+function radarimagereload() {
+	radartimer = null;
+	var img = document.getElementById('radarimg');
+//	img.src= "";
+	img.src = "frameGrabHTTP?mode=radar&date="+new Date().getTime();
+//	img.addEventListener("load", radarrepeat, false);
+	img.onload = function() { radarrepeat(); }
+	// radartimeout = setTimeout("radartimedout();", 500);
+}
+
+//function radartimedout() {
+//	if (radartimer == null) {
+//		radarimagereload();  
+//		debug(Math.random());
+//	}
+//}
+
+
+/* troubleshooting:
+ * tried fixing FrameGrabHTTP.java so serves up last image if new one can't be produced in 75ms
+ * tried putting image generator in separate thread in FrameGrabHTTP.java, with above fix
+ * in js, tried re-initializing Image() for every img loaded
+ * works OK in FF, IE, but hangs after X frames in Chrome -- seems onload() isn't called
+ * works OK when server in Windows...? Haven't tried latest iteration, actually
+ * could be bandwidth safeguard in Chrome? (once page reloaded, works)
+ * works fine when primesense not running....?????
+ * tried having servelt kill itself on timeout, never timed out though
+ * if change domain, it works. After reloading once, works.
+ * tried res.resetBuffer() every call, didn't help
+ * do servlet tutorial? Maybe is better way -- this is Chrome/Tomcat/Servlet handshake issue or something
+ * wait... res.reset() works? NO, FUCKKK!!!
+ * tried explicitly setting res.setContentLength, no dice
+ */
 
 

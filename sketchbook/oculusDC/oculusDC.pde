@@ -15,6 +15,7 @@ ECHO_OFF = 'e', '0' (echo command back FALSE)
 STOP = 's' (DC motors stop)
 GET_VERSION = 'y'
 CAMRELEASE = 'w'
+DIRECT DIFFERENTIAL STEERING = 'm', [0-255][0-255] (speed motor L&R, <128 is back, 128 is stop, >128 is fwd)
 */
 
 // pins

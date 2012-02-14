@@ -201,6 +201,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		}
+		
+		// set video, audio quality mode in grabber flash, depending on server/client OS
+		String videosoundmode="high"; // windows, default
+		if (os.equals("linux")) {
+			videosoundmode="low";
+		}
+		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+		sc.invoke("videoSoundMode", new Object[] { videosoundmode });
 
 		// do it differently if sonar on board
 		// if( different firmware ??) docker = new BradzAutoDock();

@@ -16,11 +16,12 @@
 //width="400" height="300" verticalAlign="middle"
 // 	<mx:Button id="fullscreenbutton" x="10" y="10" label="exit full screen" visible="false" click="fullScreenToggle()"/>
 
+	import flash.media.VideoStreamSettings;
+	
 	import mx.controls.Alert;
 	import mx.graphics.codec.JPEGEncoder;
 	
 	import oculus.OculusImage;
-	import flash.media.VideoStreamSettings;
 
 	private var nc:NetConnection;	
 	private var ns1:NetStream;
@@ -38,8 +39,9 @@
 	private var ocls:OculusImage = new OculusImage();
 	private var rtmpPort:String;
 	private var playing:Boolean = false;
-	private var h264Settings:H264VideoStreamSettings = new H264VideoStreamSettings();
+	private var h264Settings:H264VideoStreamSettings;
 //	private var file:FileReference = new FileReference();
+	private var videosoundmode:String;
 		
 	private function init():void
 	{
@@ -54,28 +56,7 @@
 		ExternalInterface.addCallback("sizeChanged", sizeChanged); //called from Javascript
 	    ExternalInterface.call("flashloaded");
 		
-		// stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
-
-	    if (mic) {
-				mic.codec = SoundCodec.SPEEX;
-				mic.encodeQuality = 5;
-				mic.setUseEchoSuppression(true);
-				
-//				var options:MicrophoneEnhancedOptions = new MicrophoneEnhancedOptions();
-//				options.echoPath = 128;
-//				options.mode = MicrophoneEnhancedMode.FULL_DUPLEX;
-//				options.nonLinearProcessing = true;
-//				mic.enhancedOptions = options;
-				
-				mic.setSilenceLevel(0);
-//				mic.rate = 16;
-				
-			}
-	    else { Alert.show("Microphone not found"); }
-		
 		sizeChanged(videoDisplay.width, videoDisplay.height);
-		
-		h264Settings.setProfileLevel(H264Profile.BASELINE, H264Level.LEVEL_2);
 
 	}
 		
@@ -102,6 +83,7 @@
 	    nc.addEventListener("dockgrab",dockgrab);
 	    nc.addEventListener("muteROVMic",muteROVMic);
 	    nc.addEventListener("unmuteROVMic",unmuteROVMic);
+		nc.addEventListener("videoSoundMode",videoSoundMode); // called by java after successful grabbersignin--set mode (depending on server/client OS)
 	    nc.call("grabbersignin",null,mode);
 			// ns1 = new NetStream(nc); // doesn't work here... too soon or something?
 	}
@@ -117,6 +99,32 @@
 			message("shutdown","");
 		}
 	} 
+		
+	public function videoSoundMode(mode:String):void
+	{
+		if (mode=="low") {
+			videosoundmode = "low"  // nelly moser audio(?), h263 video compression
+			if (mic) {
+				mic.setUseEchoSuppression(true);
+				mic.setSilenceLevel(10);
+				mic.rate = 8;
+			}
+			else { Alert.show("Microphone not found"); }
+		}
+		else { 
+			videosoundmode = "high" // SPEEX audio, h264 video compression
+			h264Settings = new H264VideoStreamSettings();
+			if (mic) {
+				mic.codec = SoundCodec.SPEEX;
+				mic.encodeQuality = 5;
+				mic.setUseEchoSuppression(true);
+				mic.setSilenceLevel(0); // default is 10 out of 100
+				h264Settings.setProfileLevel(H264Profile.BASELINE, H264Level.LEVEL_2); 
+			}
+			else { Alert.show("Microphone not found"); }
+		}
+
+	}
 
 	public function publish(mode:String,width:int, height:int, fps:int, quality:int):void 
 	{
@@ -136,7 +144,9 @@
   	    	camera.setMode(width,height,fps);
     			camera.setQuality(0,quality);
  				ns1 = new NetStream(nc);  
-				ns1.videoStreamSettings = h264Settings;
+				if (videosoundmode=="high") {
+					ns1.videoStreamSettings = h264Settings;
+				}
 
 		    	//var n:int = 1;
 			    if (mode == "camera" || mode == "camandmic") { ns1.attachCamera(camera); }
@@ -194,13 +204,23 @@
 	
 	public function muteROVMic():void {
 		if (mic && ns1) {
-			ns1.attachAudio(null); // trying this instead
+			if (videosoundmode=="high") {
+				ns1.attachAudio(null);  // repeating this causes crapout in linux
+			}
+			else {
+				mic.gain = 0;
+			}
 		}
 	}
 	
 	public function unmuteROVMic():void {
 		if (mic && ns1) {
-			ns1.attachAudio(mic);
+			if (videosoundmode=="high") {
+				ns1.attachAudio(mic);	
+			}
+			else {
+				mic.gain = 50;
+			}
 		}
 	}
 	

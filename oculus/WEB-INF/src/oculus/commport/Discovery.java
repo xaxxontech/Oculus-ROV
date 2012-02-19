@@ -117,10 +117,10 @@ public class Discovery {
 				String id = getProduct();
 				System.out.println("OCULUS: Discovery, product :"+id);
 				
-				if (id.length() > 0) {
+				if (id.length() > 1) {
 				
 					// trim delimiters "<xxxxx>" first
-					id = id.substring(1, id.length()-1).trim();
+					id = id.substring(1, id.length()-1).trim(); 
 					
 					if (id.equalsIgnoreCase(LIGHTS)) {
 	

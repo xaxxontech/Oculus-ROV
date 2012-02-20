@@ -46,7 +46,7 @@ package oculus
 		}
 		
 		private function floodFill(ablob:Array, start:int):Array {  
-		// from http://en.wikipedia.org/wiki/Flood_fill
+			// from http://en.wikipedia.org/wiki/Flood_fill
 			var q:Array = [start];
 			var blob:Array = [];
 			var n:int;
@@ -161,7 +161,7 @@ package oculus
 			var miny:int = r[2];
 			var maxy:int = r[3];
 			var blobSize:int = r[4];
-
+			
 			var xx:int = minx+((maxx-minx)/2);
 			var yy:int = miny+((maxy-miny)/2);
 			i = xx + yy*width;  // dead center of winner blob
@@ -182,7 +182,7 @@ package oculus
 			var n:int = inc;
 			var deleteddir:int = 0;
 			var result:Array;
- 			//lastThreshhold = 999;
+			//lastThreshhold = 999;
 			while (attemptnum < 15) { // was 20 before auto threshhold guessing 
 				result = findBlobsSub(bar, w, h);
 				if (result[2]==0) {
@@ -264,7 +264,7 @@ package oculus
 			var blobBox:int;
 			var blobstarts:Array = [];
 			for (pixel=0; pixel<=width*height; pixel++) { // zero to end, find all blobs
-			if (parr[pixel]) { // finds a white one >> production uses parr[pixel]
+				if (parr[pixel]) { // finds a white one >> production uses parr[pixel]
 					blobs[blobnum] = floodFill(parr, pixel);
 					blobstarts[blobnum]=pixel;
 					blobnum++;
@@ -283,12 +283,12 @@ package oculus
 							maxy = r[3];  
 							blobBox = (maxx-minx)*(maxy-miny);
 							topRatio = getPixelEqTrueCount(blobs[blobnum], minx, minx+(maxx-minx)*0.333, miny, maxy) / blobBox; // left
-              midRatio = getPixelEqTrueCount(blobs[blobnum],minx+(maxx-minx)*0.333,minx+(maxx-minx)*0.666, miny, maxy) / blobBox;
-              bottomRatio = getPixelEqTrueCount(blobs[blobnum], minx+(maxx-minx)*0.666, maxx, miny, maxy) / blobBox; // left
+							midRatio = getPixelEqTrueCount(blobs[blobnum],minx+(maxx-minx)*0.333,minx+(maxx-minx)*0.666, miny, maxy) / blobBox;
+							bottomRatio = getPixelEqTrueCount(blobs[blobnum], minx+(maxx-minx)*0.666, maxx, miny, maxy) / blobBox; // left
 							blobRatio = (maxx-minx)/(maxy-miny);
 							diff = Math.abs(topRatio - lastTopRatio) + Math.abs(bottomRatio- lastBottomRatio) + Math.abs(midRatio- lastMidRatio);
 							if (diff < maxdiff) { // && diff < 1.1 && blobRatio < lastBlobRatio * 1.2 && blobRatio > lastBlobRatio * 0.5) {
-							//if (diff < maxdiff && blobRatio < lastBlobRatio * 1.1) {
+								//if (diff < maxdiff && blobRatio < lastBlobRatio * 1.1) {
 								winner=blobnum;
 								// winnerBlobSize = r[4];
 								maxdiff = diff;
@@ -333,7 +333,7 @@ package oculus
 				*/  
 				var slope:Number =  getBottomSlope(blobs[winner],minx,maxx,miny,maxy);
 				result = [minx,miny,maxx-minx,maxy-miny,slope]; //x,y,width,height,slope
-
+				
 				blobSize = winRect[4];		
 				var runningttl:int = 0;
 				for (pixel=0; pixel<=width*height; pixel++) { // zero to end
@@ -383,7 +383,7 @@ package oculus
 			}
 			return result;
 		}
-
+		
 		private function getBottomSlope(blob:Array, minx:int, maxx:int, miny:int, maxy:int):Number {
 			var start:int = -1;
 			for (var i:int = maxx+maxy*width; i>=minx+miny*width; i-=1) {
@@ -424,7 +424,7 @@ package oculus
 				var closesteight:Array = [n-width, n-1, n+1, n+width]; 
 				for each (var i:int in closesteight) {
 					if (( i >=0 && i <= lastparr.length ) && !((n as Number)/(width as Number) == n/width && i == n+1)
-					&&  !(((n-1) as Number)/(width as Number) == n/width && i == n-1)) {
+						&&  !(((n-1) as Number)/(width as Number) == n/width && i == n-1)) {
 						if (lastparr[i] < darkest) {
 							darkest = lastparr[i];
 						}
@@ -440,7 +440,7 @@ package oculus
 				n ++;
 			}
 		}
-
+		
 		public function processedImage():ByteArray {
 			var newPixels:ByteArray = new ByteArray();
 			var n:int = 0;
@@ -456,6 +456,6 @@ package oculus
 			}
 			return newPixels;		
 		}
-
+		
 	}
 }
